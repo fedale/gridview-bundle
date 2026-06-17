@@ -1,0 +1,28 @@
+{#
+    DetailView — single record as a vertical key/value table.
+    Cell rendering mirrors gridview/sections/tbody.html.twig (twigFilter + raw),
+    minus the list-only concerns (rows, inline-edit, sort headers).
+#}
+<table {{ detailview.attributes|options }}>
+    <tbody>
+    {% for column in columns %}
+        <tr>
+            <th scope="row">{{ column.label }}</th>
+            <td data-col-key="{{ column.attribute }}" {{ column.options|options }}>
+                {% set cellContent %}
+                    {% if column.twigFilter %}
+                        {{ include(template_from_string('{{ column.render(model, 0)|' ~ column.twigFilter ~ ' }}')) }}
+                    {% else %}
+                        {{ column.render(model, 0) }}
+                    {% endif %}
+                {% endset %}
+                {{ cellContent|raw }}
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td>{{ detailview.options.emptyText }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

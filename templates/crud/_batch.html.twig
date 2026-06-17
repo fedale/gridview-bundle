@@ -1,0 +1,28 @@
+{#
+  Batch-update form shown in the CRUD modal. Each batchUpdate column renders an
+  "apply" checkbox + its value field; only checked fields are applied to the
+  selected rows. The selected ids are appended to $action by the
+  gridview-selection controller. CSRF is the form's own token (rendered by form_end).
+#}
+<div class="gv-batch">
+    <p class="mb-3 text-muted">
+        {{ 'bulk.batch_intro'|trans({'%count%': '<strong>' ~ count ~ '</strong>'}, 'GridviewBundle')|raw }}
+    </p>
+
+    {{ form_start(form, {'action': action, 'attr': {'data-action': 'submit->gridview-crud#submit'}}) }}
+        {% for child in form %}
+            {% if child.vars.name starts with 'enable_' %}
+                {% set valueName = child.vars.name|replace({'enable_': ''}) %}
+                <div class="gv-batch-row d-flex align-items-center gap-2 mb-2">
+                    <div class="form-check mb-0">{{ form_widget(child) }}</div>
+                    <label class="me-2 mb-0">{{ child.vars.label }}</label>
+                    <div class="flex-grow-1">{{ form_widget(attribute(form, valueName)) }}</div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="gv-btn" data-bs-dismiss="modal">{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
+            {{ form_widget(form.apply) }}
+        </div>
+    {{ form_end(form) }}
+</div>

@@ -1,0 +1,25 @@
+{#
+  Bulk action bar — shown by the gridview-selection controller when ≥1 row is
+  selected. Buttons carry the bulk endpoint URL; gridview-selection appends the
+  selected ids (or all-mode + current filters) and opens the CRUD modal.
+#}
+{% set crud = gridview.options.crud|default({}) %}
+{% if crud.bulkDeleteUrl is defined or crud.bulkUpdateUrl is defined %}
+<div class="gv-bulk-bar" data-gridview-selection-target="bulkBar" hidden>
+    <span class="gv-bulk-count">
+        <strong data-gridview-selection-target="count">0</strong> {{ 'bulk.selected'|trans({}, 'GridviewBundle') }}
+    </span>
+    <span class="gv-bulk-actions">
+        {% if crud.bulkUpdateUrl is defined %}
+        <button type="button" class="gv-btn"
+                data-action="gridview-selection#bulk"
+                data-gridview-selection-url-param="{{ crud.bulkUpdateUrl }}">{{ 'bulk.update'|trans({}, 'GridviewBundle') }}</button>
+        {% endif %}
+        {% if crud.bulkDeleteUrl is defined %}
+        <button type="button" class="gv-btn gv-btn-danger"
+                data-action="gridview-selection#bulk"
+                data-gridview-selection-url-param="{{ crud.bulkDeleteUrl }}">{{ 'bulk.delete'|trans({}, 'GridviewBundle') }}</button>
+        {% endif %}
+    </span>
+</div>
+{% endif %}

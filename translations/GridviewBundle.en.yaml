@@ -1,0 +1,38 @@
+label.true: "Yes"
+label.false: "No"
+
+pagination.aria: "Pagination"
+pagination.first: "First page"
+pagination.previous: "Previous page"
+pagination.next: "Next page"
+pagination.last: "Last page"
+pagination.jump: "Go to page"
+
+bulk.selected: "selected"
+bulk.update: "Bulk edit"
+bulk.delete: "Delete selected"
+bulk.batch_intro: "Bulk edit of %count% records. Tick the fields to apply."
+
+export.label: "Export"
+
+saved.title: "Saved searches"
+saved.button: "Searches"
+saved.save: "Save current search"
+
+crud.cancel: "Cancel"
+crud.confirm: "Confirm"
+crud.delete: "Delete"
+crud.delete_count: "Delete %count%"
+crud.close: "Close"
+crud.delete_confirm: "Delete this record?"
+crud.bulk_delete_confirm: "Delete %count% selected records?"
+
+filter.reset: "Reset filters"
+search.placeholder: "Search…"
+
+grid.index_title: "Index"
+
+# Config-default strings (source-as-key): localize the bundle defaults while
+# letting a custom emptyText/addLabel value pass through untranslated.
+"No records found": "No records found"
+"Add": "Add"

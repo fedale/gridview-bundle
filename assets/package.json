@@ -1,0 +1,8 @@
+{
+  "name": "@fedale/gridview-bundle",
+  "version": "1.0.0",
+  "symfony": {
+    "controllers": {},
+    "importmap": []
+  }
+}

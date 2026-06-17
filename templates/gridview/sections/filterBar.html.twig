@@ -1,0 +1,23 @@
+{% if form is defined and form is not null and gridview.hasFilterBar() %}
+<div class="gv-filter-bar">
+    {% for column in gridview.filterBarColumns %}
+        {% set attr = column.attribute|replace({'.': '_'}) %}
+        {% if form[attr] is defined %}
+        <div class="gv-filter-bar__item">
+            <label class="gv-filter-bar__label" for="{{ form[attr].vars.id }}">
+                {{ column.label }}
+            </label>
+            <div class="gv-filter-bar__control">
+                {{ form_widget(form[attr], {
+                    'attr': {
+                        'form':            'gv-form-' ~ gridview.key,
+                        'data-action':     'input->gridview-filter#filterBarInput',
+                        'data-gv-fb-attr': attr
+                    }
+                }) }}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}

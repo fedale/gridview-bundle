@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'grid.index_title'|trans({}, 'GridviewBundle') }}{% endblock %}
+
+{% block body %}
+<h1>{{ 'grid.index_title'|trans({}, 'GridviewBundle') }}</h1>
+{% include '@FedaleGridview/gridview/_grid.html.twig'
+   with {'gridview': gridview, 'columns': columns, 'models': models,
+         'pagination': pagination, 'form': form is defined ? form : null} %}
+{% endblock %}

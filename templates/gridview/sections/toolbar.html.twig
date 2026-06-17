@@ -1,0 +1,8 @@
+{% set toolbar_tokens = gridview.parseLayout('toolbar') %}
+{% if toolbar_tokens is not empty %}
+<div class="gridview-toolbar">
+    {% for token in toolbar_tokens %}
+        {{ gridview_include(gridview, token) }}
+    {% endfor %}
+</div>
+{% endif %}

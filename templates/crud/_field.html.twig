@@ -1,0 +1,7 @@
+{#
+  Renders a single form field's row. Used by GridCrudHandler to build the
+  per-attribute widget map for `{ attribute }` token substitution. Rendering
+  through form_row here marks the field as rendered on the shared FormView, so
+  form_end() in _form_layout.html.twig won't render it twice.
+#}
+{{ form_row(field) }}

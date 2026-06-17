@@ -1,0 +1,19 @@
+{#
+  Saved searches widget: a dropdown to save the current filters/sort (querystring)
+  under a name and re-apply them later. Persisted client-side via the pluggable
+  preference provider. Place the {savedSearch} token in the layout (e.g. toolbar).
+#}
+<div class="gv-saved-search dropdown" data-controller="gridview-saved-search">
+    <button type="button" class="gv-btn" data-bs-toggle="dropdown" title="{{ 'saved.title'|trans({}, 'GridviewBundle') }}" aria-expanded="false">
+        ★ {{ 'saved.button'|trans({}, 'GridviewBundle') }}
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <button type="button" class="dropdown-item" data-action="gridview-saved-search#save">
+                💾 {{ 'saved.save'|trans({}, 'GridviewBundle') }}
+            </button>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <span data-gridview-saved-search-target="list"></span>
+    </ul>
+</div>

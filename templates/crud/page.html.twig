@@ -1,0 +1,16 @@
+{#
+  Default full-page wrapper for CRUD forms (crud.mode = 'page'). Extends the app
+  base (override with `pageBase`), and prints the already-rendered form HTML.
+  For crud.mode = 'custom' the host app supplies its own template via
+  crud.pageTemplate instead of this one.
+#}
+{% extends pageBase|default('base.html.twig') %}
+
+{% block title %}{{ pageTitle|default('') }}{% endblock %}
+
+{% block body %}
+    <div class="gv-crud-page">
+        {% if pageTitle is defined and pageTitle %}<h1 class="mb-3">{{ pageTitle }}</h1>{% endif %}
+        {{ formHtml|raw }}
+    </div>
+{% endblock %}

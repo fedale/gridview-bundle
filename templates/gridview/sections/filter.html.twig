@@ -1,0 +1,38 @@
+{% if form is defined and form is not null %}
+<thead {{ gridview.filterAttr|options }}>
+    <tr>
+        {% for column in columns %}
+        <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}>
+            {% set attr = column.attribute|replace({'.': '_'}) %}
+            {% if form[attr] is defined %}
+                {% set inFilterBar = column.isInFilterBar() %}
+                {% set filterType  = column.filter.type ?? 'text' %}
+                {% if inFilterBar and column.hasHeaderMirror() and filterType in ['text', 'number'] %}
+                <div class="gv-filter-cell">
+                    <input type="{{ filterType }}"
+                           id="gv-mirror-{{ attr }}"
+                           class="gv-mirror-input"
+                           data-gv-mirror-attr="{{ attr }}"
+                           data-action="input->gridview-filter#mirrorInput"
+                           value="{{ form[attr].vars.value ?? '' }}"
+                           autocomplete="off">
+                </div>
+                {% elseif not inFilterBar %}
+                <div class="gv-filter-cell">
+                    {{ form_widget(form[attr], {
+                        'attr': {'data-action': 'input->gridview-filter#input'}
+                    }) }}
+                    {% if gridview.options.filterControls.inlineClear %}
+                    <button type="button"
+                            class="gv-filter-clear"
+                            data-action="click->gridview-filter#clearFilter"
+                            data-gridview-filter-field-param="{{ attr }}">&#x2715;</button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endif %}
+        </th>
+        {% endfor %}
+    </tr>
+</thead>
+{% endif %}

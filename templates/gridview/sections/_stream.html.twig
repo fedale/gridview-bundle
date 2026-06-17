@@ -1,0 +1,10 @@
+{#
+  Turbo Stream returned by CRUD endpoints on success: replaces the grid frame
+  with a freshly rendered grid. Serve with Content-Type: text/vnd.turbo-stream.html.
+#}
+<turbo-stream action="replace" target="gridview-{{ gridview.key }}">
+    <template>
+        {# Inherit the full renderGrid() context (gridview, columns, models, pagination, form). #}
+        {% include '@FedaleGridview/gridview/_grid.html.twig' %}
+    </template>
+</turbo-stream>

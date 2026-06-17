@@ -1,0 +1,16 @@
+{#
+  Bulk-delete confirmation shown in the CRUD modal. POSTs to $action with the
+  CSRF token; the selected ids are appended to the action URL by the
+  gridview-selection controller before the modal is opened.
+#}
+<div class="gv-bulk-delete">
+    <p class="mb-3">{{ 'crud.bulk_delete_confirm'|trans({'%count%': '<strong>' ~ count ~ '</strong>'}, 'GridviewBundle')|raw }}</p>
+
+    <form method="post" action="{{ action }}" data-action="submit->gridview-crud#submit">
+        <input type="hidden" name="_token" value="{{ token }}">
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="gv-btn" data-bs-dismiss="modal">{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
+            <button type="submit" class="gv-btn gv-btn-danger">{{ 'crud.delete_count'|trans({'%count%': count}, 'GridviewBundle') }}</button>
+        </div>
+    </form>
+</div>

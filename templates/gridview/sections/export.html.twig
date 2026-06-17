@@ -1,0 +1,24 @@
+{#
+  Export menu: lists the available formats (from the exporter registry) as links
+  to the export endpoint, carrying the current filters/sort (querystring). Place
+  the {export} token in the layout (e.g. toolbar).
+  Requires options.export = { url, formats: [{key, label}, ...] }.
+#}
+{% set ex = gridview.options.export|default({}) %}
+{% if ex.url is defined and ex.formats is defined and ex.formats is not empty %}
+<div class="gv-export dropdown">
+    <button type="button" class="gv-btn" data-bs-toggle="dropdown" aria-expanded="false">⤓ {{ 'export.label'|trans({}, 'GridviewBundle') }}</button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        {% for f in ex.formats %}
+        <li>
+            {# data-turbo="false": let the browser download the file instead of
+               Turbo fetching it into the frame. #}
+            <a class="dropdown-item" data-turbo="false" rel="nofollow"
+               href="{{ ex.url }}?format={{ f.key }}{% if app.request.queryString %}&{{ app.request.queryString }}{% endif %}">
+                {{ f.label }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

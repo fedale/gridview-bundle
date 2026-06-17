@@ -1,0 +1,8 @@
+<table {{ gridview.attr|options }} data-gv="{{ gridview.key }}">
+    {% if gridview.options.caption %}
+        <caption>{{ gridview.options.caption }}</caption>
+    {% endif %}
+    {% for section in gridview.parseLayout('table') %}
+        {{ gridview_include(gridview, section) }}
+    {% endfor %}
+</table>

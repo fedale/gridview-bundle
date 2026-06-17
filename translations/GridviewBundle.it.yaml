@@ -1,0 +1,38 @@
+label.true: "Sì"
+label.false: "No"
+
+pagination.aria: "Paginazione"
+pagination.first: "Prima pagina"
+pagination.previous: "Pagina precedente"
+pagination.next: "Pagina successiva"
+pagination.last: "Ultima pagina"
+pagination.jump: "Vai a pagina"
+
+bulk.selected: "selezionati"
+bulk.update: "Modifica in blocco"
+bulk.delete: "Elimina selezionati"
+bulk.batch_intro: "Modifica in blocco di %count% record. Spunta i campi da applicare."
+
+export.label: "Export"
+
+saved.title: "Ricerche salvate"
+saved.button: "Ricerche"
+saved.save: "Salva ricerca corrente"
+
+crud.cancel: "Annulla"
+crud.confirm: "Conferma"
+crud.delete: "Elimina"
+crud.delete_count: "Elimina %count%"
+crud.close: "Chiudi"
+crud.delete_confirm: "Confermi l'eliminazione di questo record?"
+crud.bulk_delete_confirm: "Confermi l'eliminazione di %count% record selezionati?"
+
+filter.reset: "Reset filtri"
+search.placeholder: "Cerca…"
+
+grid.index_title: "Elenco"
+
+# Config-default strings (source-as-key): localize the bundle defaults while
+# letting a custom emptyText/addLabel value pass through untranslated.
+"No records found": "Nessun record trovato"
+"Add": "Aggiungi"

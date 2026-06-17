@@ -1,0 +1,18 @@
+<tfoot>
+    {% set tfoot_tokens = gridview.parseLayout('tfoot') %}
+    {% if tfoot_tokens is empty %}
+        <tr>
+            {% for column in columns %}
+            <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}></th>
+            {% endfor %}
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="{{ columns|length }}">
+                {% for token in tfoot_tokens %}
+                    {{ gridview_include(gridview, token) }}
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+</tfoot>

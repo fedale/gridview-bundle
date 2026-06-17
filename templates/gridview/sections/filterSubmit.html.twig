@@ -1,0 +1,3 @@
+{% if form is defined and form is not null and not gridview.options.useTurbo %}
+{{ form_widget(form.save) }}
+{% endif %}

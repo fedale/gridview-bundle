@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd"
+>
+    <services>
+        <service id="fedale_gridview.gridview_service" class="Fedale\GridviewBundle\Service\GridviewService">
+            <argument type="service" id="twig"/>
+            <call method="setSearchForm">
+                <argument type="service" id="fedale_gridview.search_form"/>
+            </call>
+            <call method="setRequest">
+                <argument type="service" id="request_stack"/>
+            </call>
+            <call method="setDataProvider">
+                <argument type="service" id="fedale_gridview.entity_data_provider"/>
+            </call>
+        </service>
+        <service id="Fedale\GridviewBundle\Service\GridviewService" alias="fedale_gridview.gridview_service"/>
+
+
+        <service id="fedale_gridview.search_model" class="Fedale\GridviewBundle\Form\SearchModel">
+            <call method="setRequest">
+                <argument type="service" id="request_stack"/>
+            </call>
+            <call method="setDataProvider">
+                <argument type="service" id="fedale_gridview.entity_data_provider"/>
+            </call>
+        </service>
+        <service id="Fedale\GridviewBundle\Contract\SearchModelInterface" alias="fedale_gridview.search_model"/>
+
+        <service id="fedale_gridview.filter_applier_registry" class="Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry"/>
+        <service id="Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry" alias="fedale_gridview.filter_applier_registry"/>
+
+        <service id="fedale_gridview.control_type_registry" class="Fedale\GridviewBundle\Form\Control\ControlTypeRegistry"/>
+        <service id="Fedale\GridviewBundle\Form\Control\ControlTypeRegistry" alias="fedale_gridview.control_type_registry"/>
+
+        <service id="fedale_gridview.control_resolver" class="Fedale\GridviewBundle\Form\Control\ControlResolver"/>
+        <service id="Fedale\GridviewBundle\Form\Control\ControlResolver" alias="fedale_gridview.control_resolver"/>
+
+        <service id="fedale_gridview.column_type_registry" class="Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry">
+            <factory class="Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry" method="create"/>
+            <argument type="tagged_iterator" tag="fedale_gridview.column_type"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry" alias="fedale_gridview.column_type_registry"/>
+
+        <service id="fedale_gridview.exporter.csv" class="Fedale\GridviewBundle\Export\CsvExporter">
+            <tag name="fedale_gridview.exporter"/>
+        </service>
+
+        <service id="fedale_gridview.exporter_registry" class="Fedale\GridviewBundle\Export\GridExporterRegistry">
+            <argument type="tagged_iterator" tag="fedale_gridview.exporter"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Export\GridExporterRegistry" alias="fedale_gridview.exporter_registry"/>
+
+        <service id="fedale_gridview.search_form" class="Fedale\GridviewBundle\Form\SearchForm">
+            <argument type="service" id="form.factory"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="fedale_gridview.filter_applier_registry"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Form\SearchForm" alias="fedale_gridview.search_form"/>
+        <service id="Fedale\GridviewBundle\Contract\SearchFormInterface" alias="fedale_gridview.search_form"/>
+
+        <service id="fedale_gridview.grid_form_builder" class="Fedale\GridviewBundle\Form\GridFormBuilder">
+            <argument type="service" id="form.factory"/>
+            <argument type="service" id="fedale_gridview.control_type_registry"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Form\GridFormBuilder" alias="fedale_gridview.grid_form_builder"/>
+        <service id="Fedale\GridviewBundle\Contract\GridFormBuilderInterface" alias="fedale_gridview.grid_form_builder"/>
+
+        <service id="fedale_gridview.crud_handler" class="Fedale\GridviewBundle\Crud\GridCrudHandler">
+            <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <argument type="service" id="fedale_gridview.grid_form_builder"/>
+            <argument type="service" id="security.csrf.token_manager"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="doctrine"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Crud\GridCrudHandler" alias="fedale_gridview.crud_handler"/>
+        <service id="Fedale\GridviewBundle\Contract\GridCrudHandlerInterface" alias="fedale_gridview.crud_handler"/>
+
+        <service id="fedale_gridview.gridview" class="Fedale\GridviewBundle\Grid\Gridview">
+            <argument type="service" id="twig"/>
+            <argument type="service" id="fedale_gridview.gridview_service"/>
+
+        </service>
+        <service id="Fedale\GridviewBundle\Contract\GridviewInterface" alias="fedale_gridview.gridview"/>
+
+        <service id="fedale_gridview.config_registry" class="Fedale\GridviewBundle\Grid\GridviewConfigRegistry">
+            <argument>%fedale_gridview.config%</argument>
+        </service>
+        <service id="Fedale\GridviewBundle\Grid\GridviewConfigRegistry" alias="fedale_gridview.config_registry"/>
+
+        <!-- Real-time signal publisher. Hub is optional (on-invalid=null): without
+             symfony/mercure the publisher is a no-op and the bundle still boots. -->
+        <service id="fedale_gridview.mercure_publisher" class="Fedale\GridviewBundle\Mercure\GridviewMercurePublisher">
+            <argument type="service" id="Symfony\Component\Mercure\HubInterface" on-invalid="null"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Mercure\GridviewMercurePublisher" alias="fedale_gridview.mercure_publisher"/>
+
+        <service id="fedale_gridview.column_factory" class="Fedale\GridviewBundle\Column\ColumnFactory">
+            <argument type="service" id="security.authorization_checker" on-invalid="null"/>
+            <argument type="service" id="fedale_gridview.control_resolver"/>
+            <argument type="service" id="fedale_gridview.column_type_registry"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Column\ColumnFactory" alias="fedale_gridview.column_factory"/>
+
+        <service id="fedale_gridview.gridview_builder" class="Fedale\GridviewBundle\Grid\GridviewBuilder">
+            <argument type="service" id="fedale_gridview.gridview_service"/>
+            <argument type="service" id="fedale_gridview.config_registry"/>
+            <argument type="service" id="fedale_gridview.column_factory"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Grid\GridviewBuilder" alias="fedale_gridview.gridview_builder"/>
+        <service id="Fedale\GridviewBundle\Contract\GridviewBuilderInterface" alias="fedale_gridview.gridview_builder"/>
+
+        <!--
+        <service id="fedale_gridview.filter_model_type" class="Fedale\GridviewBundle\Form\FilterModelType">
+            <argument type="service" id="fedale_gridview.gridview_service"/>
+            <tag name="form.type"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Form\FilterModelType" alias="fedale_gridview.filter_model_type"/>
+        -->
+
+        <service id="twig.extension.stringloader" class="Twig\Extension\StringLoaderExtension">
+            <tag name="twig.extension"/>
+        </service>
+        <service id="fedale.options_extension" class="Fedale\GridviewBundle\Twig\OptionsExtension">
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="fedale_gridview.builder_factory" class="Fedale\GridviewBundle\Grid\GridviewBuilderFactory">
+            <argument type="service" id="fedale_gridview.gridview_service"/>
+            <argument type="service" id="fedale_gridview.config_registry"/>
+            <argument type="service" id="fedale_gridview.column_factory"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Grid\GridviewBuilderFactory" alias="fedale_gridview.builder_factory"/>
+
+        <service id="fedale_gridview.entity_data_provider" class="Fedale\GridviewBundle\DataProvider\EntityDataProvider">
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="doctrine.orm.default_entity_manager"/>
+            <argument type="service" id="request_stack"/>
+            <call method="setSort">
+                <argument type="service" id="fedale_gridview.sort"/>
+            </call>
+            <call method="setPagination">
+                <argument type="service" id="fedale_gridview.pagination"/>
+            </call>
+            <call method="setSearchModel">
+                <argument type="service" id="fedale_gridview.search_model"/>
+            </call>
+        </service>
+        <service id="Fedale\GridviewBundle\Contract\DataProviderInterface" alias="fedale_gridview.entity_data_provider"/>
+
+        <service id="fedale_gridview.sort" class="Fedale\GridviewBundle\Sort\Sort">
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="router.default"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Contract\SortInterface" alias="fedale_gridview.sort"/>
+
+        <service id="fedale_gridview.pagination" class="Fedale\GridviewBundle\Pagination\Pagination">
+            <argument type="service" id="request_stack"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Contract\PaginationInterface" alias="fedale_gridview.pagination"/>
+
+        <service id="fedale_gridview.row_subscriber" class="Fedale\GridviewBundle\EventSubscriber\RowSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="fedale_gridview.pagination_view" class="Fedale\GridviewBundle\Pagination\PaginationView">
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="router"/>
+        </service>
+    </services>
+</container>

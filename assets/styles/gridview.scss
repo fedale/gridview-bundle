@@ -1,0 +1,1013 @@
+@use 'flatpickr/dist/flatpickr';
+
+// ═══════════════════════════════════════════════════════════════════
+// FedaleGridviewBundle — default stylesheet (CSS-framework agnostic)
+//
+// Tokens are CSS custom properties — override in your own CSS:
+//   Bootstrap 5 → import gridview.bootstrap5.scss
+//   Tailwind    → set vars in @layer base
+//   Custom      → [data-gridview] { --gv-*: ... }
+//
+// Dark mode: automatic via prefers-color-scheme OR manual via
+//   html[data-bs-theme="dark"]   (Bootstrap / this app)
+//   html[data-gv-theme="dark"]   (generic override)
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Design tokens — neutral gray palette ──────────────────────────
+
+[data-gridview] {
+  position: relative; // required for loading overlay positioning
+  // Accent (muted slate-blue — override to match your brand)
+  --gv-color-primary:       #4b6cb7;
+
+  // Surfaces
+  --gv-color-bg:            #ffffff;
+  --gv-color-bg-subtle:     #f7f8f9;
+  --gv-color-bg-hover:      #eaecef;
+
+  // Borders & shadows
+  --gv-color-border:        #d0d5dd;
+  --gv-color-shadow:        rgba(0, 0, 0, .07);
+
+  // Text
+  --gv-color-text:          #1a1f2e;
+  --gv-color-text-muted:    #6b7280;
+  --gv-color-link:          #4b6cb7;
+  --gv-color-link-hover:    #3a58a0;
+
+  // Highlight (full-text search)
+  --gv-color-highlight-bg:  #fef3c7;
+  --gv-color-highlight-txt: #92400e;
+
+  // Inputs
+  --gv-input-bg:            #ffffff;
+  --gv-input-border:        #d0d5dd;
+  --gv-input-border-focus:  #4b6cb7;
+  --gv-input-shadow-focus:  0 0 0 3px rgba(75, 108, 183, .2);
+  --gv-input-radius:        5px;
+  --gv-input-padding:       .25rem .5rem;
+  --gv-input-font-size:     .875rem;
+  --gv-input-color:         #1a1f2e;
+
+  // Buttons — neutral gray
+  --gv-btn-radius:          5px;
+  --gv-btn-padding:         .25rem .65rem;
+  --gv-btn-font-size:       .8125rem;
+  --gv-btn-border:          #c4cad4;
+  --gv-btn-bg:              #f0f2f5;
+  --gv-btn-bg-hover:        #d8dce3;
+  --gv-btn-color:           #374151;
+  --gv-btn-primary-bg:      #4b6cb7;
+  --gv-btn-primary-hover:   #3a58a0;
+  --gv-btn-primary-color:   #ffffff;
+
+  // Table
+  --gv-table-border:        #d0d5dd;
+  --gv-th-bg:               #f0f2f5;
+  --gv-th-color:            #374151;
+  --gv-tr-hover-bg:         #eaecef;
+  --gv-sort-color:          #6b7280;
+  --gv-sort-active-color:   #4b6cb7;
+
+  // Toolbar
+  --gv-toolbar-gap:         .5rem;
+  --gv-toolbar-padding:     .5rem 0;
+
+  // Pagination
+  --gv-page-radius:         5px;
+  --gv-page-padding:        .25rem .6rem;
+  --gv-page-bg:             #ffffff;
+  --gv-page-bg-active:      #4b6cb7;
+  --gv-page-color:          #4b6cb7;
+  --gv-page-color-active:   #ffffff;
+  --gv-page-border:         #c4cad4;
+
+  // Dropdown (column visibility / multi-select panel)
+  --gv-dropdown-bg:         #ffffff;
+  --gv-dropdown-border:     #d0d5dd;
+  --gv-dropdown-shadow:     0 4px 18px rgba(0, 0, 0, .1);
+  --gv-dropdown-radius:     7px;
+  --gv-dropdown-item-hover: #eaecef;
+
+  // Misc
+  --gv-radius:              5px;
+  --gv-transition:          .14s ease;
+
+  // Loading overlay
+  --gv-overlay-bg:          rgba(255, 255, 255, .7);
+  --gv-spinner-size:        2rem;
+  --gv-spinner-border:      #d0d5dd;
+  --gv-spinner-color:       #4b6cb7;
+
+  // Error banner
+  --gv-error-bg:            #fee2e2;
+  --gv-error-color:         #991b1b;
+  --gv-error-border:        #fca5a5;
+
+  // ── Column types (Fase 7) ───────────────────────────────────────
+  // Image
+  --gv-img-max-h:           40px;
+  --gv-img-radius:          3px;
+  // Rating
+  --gv-rating-color:        #f59e0b;   // stars
+  // Badge (status chip)
+  --gv-badge-bg:            #eaecef;
+  --gv-badge-color:         #374151;
+  --gv-badge-radius:        999px;
+  --gv-badge-padding:       .1rem .55rem;
+  --gv-badge-font-size:     .75rem;
+  // JSON / code
+  --gv-json-bg:             #f7f8f9;
+  --gv-json-color:          #374151;
+  --gv-json-border:         #d0d5dd;
+}
+
+// ── Dark mode — system preference ─────────────────────────────────
+
+@mixin gv-dark-vars {
+  --gv-overlay-bg:        rgba(20, 24, 33, .75);
+  --gv-spinner-border:    #2e3548;
+  --gv-spinner-color:     #7b9dd6;
+  --gv-error-bg:          rgba(127, 29, 29, .25);
+  --gv-error-color:       #fca5a5;
+  --gv-error-border:      rgba(127, 29, 29, .5);
+  --gv-color-bg:          #141821;
+  --gv-color-bg-subtle:   #1e2330;
+  --gv-color-bg-hover:    #2a3040;
+  --gv-color-border:      #2e3548;
+  --gv-color-text:        #e4e7ed;
+  --gv-color-text-muted:  #8b95a8;
+  --gv-color-link:        #7b9dd6;
+  --gv-color-link-hover:  #9ab5e4;
+  --gv-input-bg:          #1e2330;
+  --gv-input-border:      #2e3548;
+  --gv-input-color:       #e4e7ed;
+  --gv-input-border-focus: #7b9dd6;
+  --gv-btn-bg:            #1e2330;
+  --gv-btn-bg-hover:      #2a3040;
+  --gv-btn-color:         #c9d0de;
+  --gv-btn-border:        #2e3548;
+  --gv-btn-primary-bg:    #3a58a0;
+  --gv-btn-primary-hover: #4b6cb7;
+  --gv-th-bg:             #1e2330;
+  --gv-th-color:          #c9d0de;
+  --gv-table-border:      #2e3548;
+  --gv-tr-hover-bg:       #242b3c;
+  --gv-sort-color:        #8b95a8;
+  --gv-sort-active-color: #7b9dd6;
+  --gv-dropdown-bg:       #1e2330;
+  --gv-dropdown-border:   #2e3548;
+  --gv-dropdown-shadow:   0 4px 18px rgba(0, 0, 0, .4);
+  --gv-dropdown-item-hover: #2a3040;
+  --gv-page-bg:           #1e2330;
+  --gv-page-border:       #2e3548;
+  --gv-page-color:        #7b9dd6;
+  --gv-page-bg-active:    #3a58a0;
+  --gv-color-highlight-bg: #78350f;
+  --gv-color-highlight-txt: #fde68a;
+  // Column types (Fase 7)
+  --gv-badge-bg:          #2a3040;
+  --gv-badge-color:       #c9d0de;
+  --gv-json-bg:           #1e2330;
+  --gv-json-color:        #c9d0de;
+  --gv-json-border:       #2e3548;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-gridview] { @include gv-dark-vars; }
+}
+
+// Bootstrap theme-toggle (data-bs-theme) and generic override
+:is(html[data-bs-theme="dark"], html[data-gv-theme="dark"]) [data-gridview] {
+  @include gv-dark-vars;
+}
+
+// Explicit light override (so Bootstrap light-toggle undoes dark)
+:is(html[data-bs-theme="light"], html[data-gv-theme="light"]) [data-gridview] {
+  --gv-color-bg:          #ffffff;
+  --gv-color-bg-subtle:   #f7f8f9;
+  --gv-color-bg-hover:    #eaecef;
+  --gv-color-border:      #d0d5dd;
+  --gv-color-text:        #1a1f2e;
+  --gv-color-text-muted:  #6b7280;
+  --gv-color-link:        #4b6cb7;
+  --gv-color-link-hover:  #3a58a0;
+  --gv-input-bg:          #ffffff;
+  --gv-input-border:      #d0d5dd;
+  --gv-input-color:       #1a1f2e;
+  --gv-input-border-focus: #4b6cb7;
+  --gv-btn-bg:            #f0f2f5;
+  --gv-btn-bg-hover:      #d8dce3;
+  --gv-btn-color:         #374151;
+  --gv-btn-border:        #c4cad4;
+  --gv-btn-primary-bg:    #4b6cb7;
+  --gv-btn-primary-hover: #3a58a0;
+  --gv-th-bg:             #f0f2f5;
+  --gv-th-color:          #374151;
+  --gv-table-border:      #d0d5dd;
+  --gv-tr-hover-bg:       #eaecef;
+  --gv-sort-color:        #6b7280;
+  --gv-sort-active-color: #4b6cb7;
+  --gv-dropdown-bg:       #ffffff;
+  --gv-dropdown-border:   #d0d5dd;
+  --gv-dropdown-item-hover: #eaecef;
+  --gv-page-bg:           #ffffff;
+  --gv-page-border:       #c4cad4;
+  --gv-page-color:        #4b6cb7;
+  --gv-page-bg-active:    #4b6cb7;
+  --gv-color-highlight-bg: #fef3c7;
+  --gv-color-highlight-txt: #92400e;
+}
+
+// ── Base inputs ────────────────────────────────────────────────────
+
+[data-gridview] input[type="text"],
+[data-gridview] input[type="search"],
+[data-gridview] input[type="number"],
+[data-gridview] select,
+[data-gridview] textarea {
+  background: var(--gv-input-bg);
+  border: 1px solid var(--gv-input-border);
+  border-radius: var(--gv-input-radius);
+  color: var(--gv-input-color);
+  font-size: var(--gv-input-font-size);
+  padding: var(--gv-input-padding);
+  transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: var(--gv-input-border-focus);
+    box-shadow: var(--gv-input-shadow-focus);
+    outline: none;
+  }
+}
+
+// ── gv-btn ────────────────────────────────────────────────────────
+
+[data-gridview] .gv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: var(--gv-btn-padding);
+  font-size: var(--gv-btn-font-size);
+  border: 1px solid var(--gv-btn-border);
+  border-radius: var(--gv-btn-radius);
+  background: var(--gv-btn-bg);
+  color: var(--gv-btn-color);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--gv-transition), border-color var(--gv-transition);
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--gv-btn-bg-hover);
+    text-decoration: none;
+  }
+
+  &.gv-btn-primary {
+    background: var(--gv-btn-primary-bg);
+    border-color: var(--gv-btn-primary-bg);
+    color: var(--gv-btn-primary-color);
+    &:hover { background: var(--gv-btn-primary-hover); border-color: var(--gv-btn-primary-hover); }
+  }
+}
+
+// ── Table ──────────────────────────────────────────────────────────
+
+[data-gridview] table[data-gv] {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead th {
+    background: var(--gv-th-bg);
+    color: var(--gv-th-color);
+    border-bottom: 2px solid var(--gv-table-border);
+    padding: .4rem .6rem;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+
+    a {
+      color: var(--gv-sort-color);
+      text-decoration: none;
+      font-weight: 600;
+      &:hover { color: var(--gv-sort-active-color); }
+    }
+  }
+
+  thead th.asc a,
+  thead th.desc a { color: var(--gv-sort-active-color); }
+
+  tbody td {
+    padding: .35rem .6rem;
+    border-bottom: 1px solid var(--gv-table-border);
+    font-size: var(--gv-input-font-size);
+    color: var(--gv-color-text);
+  }
+
+  tbody tr:hover > td { background: var(--gv-tr-hover-bg); }
+}
+
+// ── Filter header icon ─────────────────────────────────────────────
+
+[data-gridview] .gv-filter-icon {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 2px;
+  vertical-align: middle;
+  opacity: .25;
+  color: inherit;
+  transition: opacity var(--gv-transition);
+
+  &:hover { opacity: .6; }
+
+  &.gv-filter-icon--active {
+    opacity: 1;
+    color: var(--gv-sort-active-color);
+  }
+}
+
+// ── Filter cell (inline clear) ────────────────────────────────────
+
+[data-gridview] .gv-filter-cell {
+  position: relative;
+
+  .gv-filter-clear {
+    position: absolute;
+    inset-inline-end: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: .4;
+    font-size: .8em;
+    line-height: 1;
+    color: var(--gv-color-text);
+    &:hover { opacity: 1; }
+  }
+}
+
+// ── Number filter ────────────────────────────────────────────────
+
+[data-gridview] .gv-number-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  > div { flex: 1; min-width: 0; }
+
+  input { width: 100%; min-width: 0; }
+
+  > div + div {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+      content: '–';
+      flex-shrink: 0;
+      font-size: .8em;
+      color: var(--gv-color-text-muted);
+    }
+  }
+}
+
+// ── Date filter (Flatpickr) ────────────────────────────────────────
+//
+// The compound form renders two hidden inputs (from/to) inside .gv-date-filter.
+// The Stimulus controller mounts Flatpickr on the first input and hides the second.
+// We show a single full-width input; Flatpickr handles the popup itself.
+
+[data-gridview] .gv-date-filter {
+  // The two Symfony inputs are hidden by the JS controller; show nothing until JS runs
+  // (native <input type="date"> fallback is still functional without JS)
+  > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Flatpickr's managed input (the from-input, repurposed as the display input)
+  .flatpickr-input {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+// ── Toolbar ──────────────────────────────────────────────────────
+
+[data-gridview] .gv-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--gv-toolbar-gap);
+  padding: var(--gv-toolbar-padding);
+}
+
+// ── Global search ─────────────────────────────────────────────────
+
+[data-gridview] .gv-global-search {
+  flex: 1 1 auto;
+  max-width: 300px;
+}
+
+// ── Filter bar ────────────────────────────────────────────────────
+
+[data-gridview] .gv-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: .75rem;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--gv-color-border);
+  margin-bottom: .5rem;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    flex: 1 1 160px;
+    max-width: 320px;
+  }
+
+  &__label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--gv-color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Highlight (full-text search) ──────────────────────────────────
+
+[data-gridview] mark.gv-highlight {
+  background: var(--gv-color-highlight-bg);
+  color: var(--gv-color-highlight-txt);
+  font-weight: bold;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+// ── Empty state ───────────────────────────────────────────────────
+
+[data-gridview] .gv-empty {
+  text-align: center;
+  color: var(--gv-color-text-muted);
+  padding: 2rem;
+  font-style: italic;
+}
+
+// ── Pagination ────────────────────────────────────────────────────
+
+[data-gridview] .gv-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  list-style: none;
+  margin: .75rem 0 0;
+  padding: 0;
+
+  .gv-page-item {
+    &.gv-disabled .gv-page-link {
+      opacity: .4;
+      pointer-events: none;
+    }
+    &.gv-active .gv-page-link {
+      background: var(--gv-page-bg-active);
+      color: var(--gv-page-color-active);
+      border-color: var(--gv-page-bg-active);
+    }
+    // L'ellissi è solo un separatore visivo: niente bordo né hover.
+    &.gv-page-ellipsis .gv-page-link {
+      border-color: transparent;
+      background: transparent;
+      &:hover { background: transparent; }
+    }
+  }
+
+  .gv-page-link {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--gv-page-padding);
+    border: 1px solid var(--gv-page-border);
+    border-radius: var(--gv-page-radius);
+    background: var(--gv-page-bg);
+    color: var(--gv-page-color);
+    text-decoration: none;
+    font-size: var(--gv-input-font-size);
+    transition: background var(--gv-transition);
+
+    &:hover { background: var(--gv-color-bg-hover); }
+  }
+
+  // Select "vai a pagina": staccata dai bottoni numerici.
+  .gv-page-jump {
+    margin-left: .5rem;
+  }
+  .gv-page-select {
+    cursor: pointer;
+  }
+}
+
+// ── Column visibility dropdown ────────────────────────────────────
+
+[data-gridview] .gv-dropdown {
+  position: relative;
+  display: inline-block;
+
+  .gv-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 180px;
+    background: var(--gv-dropdown-bg);
+    border: 1px solid var(--gv-dropdown-border);
+    border-radius: var(--gv-dropdown-radius);
+    box-shadow: var(--gv-dropdown-shadow);
+    padding: .3rem 0;
+    z-index: 1050;
+    display: none;
+
+    &.gv-open { display: block; }
+  }
+
+  .gv-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .3rem .75rem;
+    cursor: pointer;
+    font-size: var(--gv-input-font-size);
+    color: var(--gv-color-text);
+    user-select: none;
+    &:hover { background: var(--gv-dropdown-item-hover); }
+  }
+}
+
+// ── Multi-select (relation filter) ────────────────────────────────
+
+[data-gridview] .gv-multi-select {
+  position: relative;
+
+  .gv-multi-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gv-input-padding);
+    background: var(--gv-input-bg);
+    border: 1px solid var(--gv-input-border);
+    border-radius: var(--gv-input-radius);
+    color: var(--gv-input-color);
+    font-size: var(--gv-input-font-size);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
+
+    &:focus,
+    &.gv-multi-trigger--open {
+      border-color: var(--gv-input-border-focus);
+      box-shadow: var(--gv-input-shadow-focus);
+      outline: none;
+    }
+  }
+
+  .gv-multi-caret {
+    font-size: .6em;
+    opacity: .5;
+    flex-shrink: 0;
+    margin-inline-start: .4rem;
+  }
+
+  .gv-multi-panel {
+    position: absolute;
+    top: calc(100% + 3px);
+    left: 0;
+    min-width: max(100%, 240px);
+    width: max-content;
+    max-width: 420px;
+    background: var(--gv-dropdown-bg);
+    border: 1px solid var(--gv-dropdown-border);
+    border-radius: var(--gv-dropdown-radius);
+    box-shadow: var(--gv-dropdown-shadow);
+    z-index: 1050;
+  }
+
+  .gv-multi-search-wrap {
+    padding: .35rem .45rem;
+    border-bottom: 1px solid var(--gv-color-border);
+
+    input { margin: 0; }
+  }
+
+  // "Seleziona tutto · Deseleziona · Inverti" toolbar
+  .gv-multi-actions {
+    display: flex;
+    gap: .75rem;
+    padding: .2rem .5rem .25rem;
+    border-bottom: 1px solid var(--gv-color-border);
+
+    button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: .7rem;
+      color: var(--gv-color-text-muted);
+      padding: 0;
+      &:hover { color: var(--gv-color-link); text-decoration: underline; }
+    }
+  }
+
+  .gv-multi-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: .2rem 0;
+  }
+
+  .gv-multi-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .28rem .6rem;
+    cursor: pointer;
+    font-size: var(--gv-input-font-size);
+    color: var(--gv-color-text);
+    user-select: none;
+    &:hover { background: var(--gv-dropdown-item-hover); }
+
+    .gv-multi-checkbox { cursor: pointer; flex-shrink: 0; }
+  }
+}
+
+// ── Loading overlay ───────────────────────────────────────────────
+
+@keyframes gv-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+// CSS-based loader: Turbo sets [busy] on the <turbo-frame> during loading.
+// This is more reliable than a JS overlay since Turbo replaces the frame
+// content (including any JS-created overlay) when the response arrives.
+turbo-frame[busy] > [data-gridview] {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.1s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gv-overlay-bg);
+    border-radius: var(--gv-radius);
+  }
+}
+
+// Spinner inside the after-pseudo is not possible; keep the JS overlay
+// for non-Turbo (useTurbo: false) mode and as a fallback.
+.gv-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gv-overlay-bg);
+  border-radius: var(--gv-radius);
+  pointer-events: none;
+}
+
+.gv-spinner {
+  width: var(--gv-spinner-size);
+  height: var(--gv-spinner-size);
+  border: 3px solid var(--gv-spinner-border);
+  border-top-color: var(--gv-spinner-color);
+  border-radius: 50%;
+  animation: gv-spin .65s linear infinite;
+}
+
+// ── Error banner ──────────────────────────────────────────────────
+
+[data-gridview] .gv-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  background: var(--gv-error-bg);
+  color: var(--gv-error-color);
+  border: 1px solid var(--gv-error-border);
+  border-radius: var(--gv-radius);
+  padding: .45rem .65rem;
+  font-size: var(--gv-input-font-size);
+  margin-bottom: .5rem;
+
+  &[hidden] { display: none; }
+
+  &__close {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+    opacity: .7;
+    font-size: .9em;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+    &:hover { opacity: 1; }
+  }
+}
+
+// ── Real-time update notice ───────────────────────────────────────
+
+[data-gridview] .gv-info-banner {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--gv-radius);
+  padding: .45rem .65rem;
+  font-size: var(--gv-input-font-size);
+  margin-bottom: .5rem;
+  transition: opacity .2s ease;
+
+  &[hidden] { display: none; }
+}
+
+// ── Relation filter — single-select search ────────────────────────
+
+[data-gridview] .gv-relation-search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+// ── CRUD form — mark required fields with an asterisk after the label ──
+
+.gv-crud-form label.required::after {
+  content: " *";
+  color: #dc3545;
+  font-weight: 700;
+}
+
+// ── CRUD form — live validation inline message ──
+
+.gv-crud-form .gv-validate-msg {
+  color: #dc3545;
+  font-size: 0.85em;
+  margin-top: 0.25rem;
+}
+
+// ── Bulk action bar ──
+
+.gv-bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #eef4ff;
+  border: 1px solid #cdddff;
+  border-radius: 0.375rem;
+
+  .gv-bulk-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+// ── Inline cell editing ──
+
+.gv-editable {
+  cursor: pointer;
+
+  // Pencil edit affordance (replaces the dashed underline). Pseudo-element so it
+  // survives innerHTML swaps and disappears while editing.
+  &::after {
+    content: '✎';
+    margin-left: 0.35rem;
+    font-size: 0.85em;
+    color: #3b71ca;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+
+  &:hover::after {
+    opacity: 0.7;
+  }
+}
+
+.gv-editing {
+  display: block;
+
+  &::after {
+    content: none; // hide the pencil while the editor is open
+  }
+
+  .gv-inline-form {
+    margin: 0;
+  }
+
+  .gv-inline-field {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .form-control,
+    .form-select {
+      min-width: 6rem;
+    }
+  }
+
+  .gv-btn {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.85em;
+    line-height: 1.2;
+  }
+}
+
+.gv-inline-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #cdddff;
+  border-top-color: #3b71ca;
+  border-radius: 50%;
+  animation: gv-inline-spin 0.6s linear infinite;
+}
+
+@keyframes gv-inline-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Inline edit — success flash after save ──
+
+.gv-editable.gv-saved {
+  animation: gv-saved-flash 1.5s ease-out;
+}
+
+@keyframes gv-saved-flash {
+  0%   { background-color: #d1e7dd; }
+  100% { background-color: transparent; }
+}
+
+.gv-editable.gv-save-error {
+  animation: gv-save-error-flash 2s ease-out;
+}
+
+@keyframes gv-save-error-flash {
+  0%   { background-color: #f8d7da; }
+  100% { background-color: transparent; }
+}
+
+.gv-saved-badge {
+  margin-left: 0.35rem;
+  color: #198754;
+  font-weight: 700;
+}
+
+// ── Saved searches / selections dropdown rows ──
+
+.gv-saved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .dropdown-item {
+    flex: 1 1 auto;
+  }
+
+  .gv-saved-del {
+    border: 0;
+    background: none;
+    color: #dc3545;
+    padding: 0 0.6rem;
+    cursor: pointer;
+  }
+}
+
+// ── Prompt modal (saved searches/selections naming) ──
+
+.gv-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.gv-prompt {
+  width: min(92vw, 360px);
+  padding: 1rem 1.25rem;
+  background: var(--gv-color-bg, #fff);
+  color: var(--gv-color-text, #1a1f2e);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.gv-prompt-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.gv-prompt-label {
+  display: block;
+  font-size: 0.85em;
+  color: var(--gv-color-text-muted, #6b7280);
+  margin-bottom: 0.25rem;
+}
+
+.gv-prompt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+// ── Column reorder (drag-and-drop) ──
+
+[data-gridview] th[draggable="true"] {
+  cursor: grab;
+}
+
+[data-gridview] th.gv-col-dragging {
+  opacity: 0.5;
+}
+
+[data-gridview] th.gv-col-drop-target {
+  box-shadow: inset 3px 0 0 0 var(--gv-color-primary, #4b6cb7);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Column types (Fase 7) — emitted by the type render pipeline
+// ═══════════════════════════════════════════════════════════════════
+
+// Number / currency / percent — right-aligned, tabular figures.
+[data-gridview] .gv-num {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// Image
+[data-gridview] .gv-img {
+  max-height: var(--gv-img-max-h, 40px);
+  width: auto;
+  border-radius: var(--gv-img-radius, 3px);
+  vertical-align: middle;
+  object-fit: cover;
+}
+
+// List / array
+[data-gridview] .gv-list {
+  margin: 0;
+  padding-left: 1.1em;
+}
+[data-gridview] .gv-list li {
+  line-height: 1.4;
+}
+
+// Rating — filled/empty stars
+[data-gridview] .gv-rating {
+  color: var(--gv-rating-color, #f59e0b);
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+// Badge / status chip
+[data-gridview] .gv-badge {
+  display: inline-block;
+  padding: var(--gv-badge-padding, .1rem .55rem);
+  border-radius: var(--gv-badge-radius, 999px);
+  background: var(--gv-badge-bg, #eaecef);
+  color: var(--gv-badge-color, #374151);
+  font-size: var(--gv-badge-font-size, .75rem);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+// JSON — preformatted block
+[data-gridview] .gv-json {
+  margin: 0;
+  padding: .35rem .5rem;
+  max-height: 12rem;
+  overflow: auto;
+  background: var(--gv-json-bg, #f7f8f9);
+  color: var(--gv-json-color, #374151);
+  border: 1px solid var(--gv-json-border, #d0d5dd);
+  border-radius: var(--gv-radius, 5px);
+  font-size: .8125rem;
+  white-space: pre;
+}

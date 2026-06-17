@@ -1,0 +1,47 @@
+{
+    "name": "fedale/gridview-bundle",
+    "description": "Gridview in Yii2 style inside your Symfony projects",
+    "type": "symfony-bundle",
+    "keywords": ["symfony", "bundle", "gridview", "datagrid", "grid", "crud"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Danilo Di Moia",
+            "email": "zitter@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "symfony/framework-bundle": "^6.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "doctrine/orm": "^2.12",
+        "symfony/form": "^6.4",
+        "symfony/serializer": "^6.4",
+        "symfony/property-access": "^6.4",
+        "symfony/translation": "^6.4",
+        "symfony/twig-bundle": "^6.4",
+        "twig/twig": "^3.0"
+    },
+    "suggest": {
+        "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure"
+    },
+    "autoload": {
+        "psr-4": {
+            "Fedale\\GridviewBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Fedale\\GridviewBundle\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0-x-dev"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

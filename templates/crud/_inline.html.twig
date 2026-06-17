@@ -1,0 +1,23 @@
+{#
+  Inline cell editor. NB: editable cells live inside the grid's filter <form>, and
+  HTML forbids nested forms — so this editor uses NO <form> tag. The
+  gridview-inline-edit controller collects the inputs in the cell and POSTs them
+  itself (to {base}/{id}/{field}). Save with OK / Enter, cancel with ✕ / Escape.
+
+  Single-field form built from the column's control (reuses validation:
+  NotBlank/UniqueEntity). `_token` is rendered explicitly since there's no form_end.
+#}
+<div class="gv-inline-form">
+    <div class="gv-inline-field">
+        {{ form_widget(attribute(form, field), {'attr': {
+            'data-gridview-inline-edit-target': 'input',
+            'data-action': 'keydown->gridview-inline-edit#key',
+        }}) }}
+        <button type="button" class="gv-btn gv-btn-primary gv-inline-ok" title="{{ 'crud.confirm'|trans({}, 'GridviewBundle') }}"
+                data-action="gridview-inline-edit#save">OK</button>
+        <button type="button" class="gv-btn gv-inline-cancel" title="{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}"
+                data-action="gridview-inline-edit#cancel">✕</button>
+    </div>
+    {{ form_widget(attribute(form, '_token')) }}
+    {{ form_errors(attribute(form, field)) }}
+</div>

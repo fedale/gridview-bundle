@@ -1,0 +1,26 @@
+{% set toggleable = columns|filter(c => c.isToggleable() and c.label) %}
+{% if toggleable is not empty %}
+<div class="gv-dropdown"
+     data-controller="gridview-visibility"
+     data-gridview-visibility-grid-id-value="{{ gridview.key }}">
+    <button type="button"
+            class="gv-btn"
+            data-action="click->gridview-visibility#toggleMenu"
+            aria-expanded="false">
+        Columns &#9660;
+    </button>
+    <ul class="gv-dropdown-menu">
+        {% for colIndex, column in toggleable %}
+        <li>
+            <label class="gv-dropdown-item">
+                <input type="checkbox"
+                       data-col="{{ colIndex }}"
+                       data-action="change->gridview-visibility#toggle"
+                       {{ column.isVisible() ? 'checked' : '' }}>
+                {{ column.label }}
+            </label>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

@@ -1,0 +1,7 @@
+{% if gridview.options.globalSearch is not empty and form is defined and form is not null %}
+<div class="gridview-global-search">
+    {{ form_widget(form._q, {
+        'attr': {'data-action': 'input->gridview-filter#input', 'placeholder': 'search.placeholder'|trans({}, 'GridviewBundle')}
+    }) }}
+</div>
+{% endif %}
