@@ -240,8 +240,51 @@ concept used for the grid layout system.
 
 ```php
 ['type' => 'action']
-// renders: {view} {edit} {delete}  — three placeholder <a> links
 ```
+
+What it renders depends on the controller:
+
+- **Under `AbstractCrudGridController`** the column is **auto-wired**: a bare
+  `['type' => 'action']` (no explicit `buttons`) gets working `{view} {edit} {delete}`
+  triggers pointing at the convention CRUD routes — no hand-written closures. Each
+  token is only emitted if its route actually exists (`view`→`show`, `edit`→`update`,
+  `clone`→`clone`, `delete`→`delete`), so missing routes render nothing instead of dead
+  links. See [Default action buttons (auto-wired)](#default-action-buttons-auto-wired).
+- **Under the read-only `AbstractGridController`** (or a standalone `ActionColumn` with
+  no `buttons`) the cell renders **empty** — declare `buttons` to populate it.
+
+> Out of the box `{view}` needs a `show` route with the same prefix (e.g. an
+> `AbstractDetailController`); a plain `AbstractCrudGridController` has no such route, so
+> `{view}` stays empty until you add one. Set `actionLayout => '{edit} {delete}'` if you
+> don't use a detail view.
+
+#### Default action buttons (auto-wired)
+
+A CRUD controller fills a bare `action` column's `buttons` for you, using the same
+`CrudButton` helpers you'd write by hand (the auto-wiring is skipped entirely the moment
+you declare your own `buttons`). The token layout comes from `actionLayout`:
+
+```php
+// configure() — PHP override (wins over YAML)
+protected function configure(): array
+{
+    return ['actionLayout' => '{edit} {delete}'];   // drop {view} if there's no show route
+}
+```
+
+```yaml
+# config/packages/gridview.yaml — per-grid override
+fedale_gridview:
+    gridviews:
+        customer:
+            options:
+                actionLayout: '{edit} {clone} {delete}'
+```
+
+Resolution order: `configure()['actionLayout']` → YAML `gridviews.<id>.options.actionLayout`
+→ built-in `'{view} {edit} {delete}'`. You can also keep the auto buttons but reorder/limit
+them per column with a `layout` on the spec (`['type' => 'action', 'layout' => '{edit}']`) —
+the spec `layout` wins over `actionLayout`.
 
 #### Controlling which buttons appear
 
@@ -1379,12 +1422,22 @@ for the Security contract), pass Symfony's field `getter`/`setter` through `cont
 ['attribute' => 'roles', 'type' => 'relation', 'control' => ['options' => [
     'class' => UserRole::class, 'choice_label' => 'name', 'multiple' => true,
     'getter' => fn(User $u) => $u->getRoleEntities(),
-    'setter' => function (User $u, $roles) {
+    'setter' => function (User $u, iterable $roles) {
+        // Snapshot BEFORE clear(): with a multiple EntityType the $roles passed
+        // here is the *same* Collection instance returned by the getter (Doctrine's
+        // MergeDoctrineCollectionListener mutates it in place), so clearing the
+        // entity's collection would also empty $roles and the loop would add nothing.
+        $new = $roles instanceof \Doctrine\Common\Collections\Collection
+            ? $roles->toArray() : iterator_to_array($roles);
         $u->getRoleEntities()->clear();
-        foreach ($roles as $r) { $u->addRole($r); }
+        foreach ($new as $r) { $u->addRole($r); }
     },
 ]]],
 ```
+
+> ⚠️ **Footgun.** Never iterate `$roles` after clearing the entity's own collection
+> without snapshotting first — for a `multiple` relation they are the same object.
+> The symptom is subtle: the edit appears to work but the relation is saved empty.
 
 ### Wiring the routes (host app owns them)
 
@@ -1660,6 +1713,17 @@ They live in `Fedale\GridviewBundle\Controller`:
   that reuses the same `buildColumns()` to render a key/value table. See
   [DetailView](#detailview-single-record).
 
+> **Extending `AbstractCrudGridController` is necessary but not sufficient.** It
+> registers the CRUD *routes/actions*, but the modal opens from a button you still
+> have to emit. To make a grid editable you need **three** things:
+> 1. extend `AbstractCrudGridController` (not `AbstractGridController`);
+> 2. add `buttons` + `layout` (e.g. `{edit} {delete}`) to the `action` column — a bare
+>    `['type' => 'action']` renders an empty cell with nothing to click;
+> 3. add a `control` to every column you want to edit in the form.
+>
+> No client-side work is required: the Stimulus controllers ship with the bundle and
+> are registered once in `assets/bootstrap.js`. See the [Full-CRUD example](#full-crud-example).
+
 ### How the routes work
 
 The `#[Route]` attributes sit on the base methods and are **inherited** by every
@@ -1705,6 +1769,7 @@ config needed.
 | `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
 | `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
 | `filterFormName` | `'myform'` | CRUD | Query key of the filter form (for "all" bulk ids) |
+| `actionLayout` | `null` → `'{view} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](#default-action-buttons-auto-wired)) |
 
 ### Read-only example
 

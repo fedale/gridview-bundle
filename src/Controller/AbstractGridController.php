@@ -140,6 +140,18 @@ abstract class AbstractGridController extends AbstractController
 
     // ---- internals -----------------------------------------------------
 
+    /**
+     * Column specs fed to the grid. Seam over {@see buildColumns()} so a CRUD
+     * controller can decorate them (e.g. auto-wire default action buttons). The
+     * read-only base passes them through unchanged.
+     *
+     * @return array<int, mixed>
+     */
+    protected function gridColumns(): array
+    {
+        return $this->buildColumns();
+    }
+
     protected function buildGridview(): Gridview
     {
         $exporters = $this->exporters();
@@ -168,7 +180,7 @@ abstract class AbstractGridController extends AbstractController
             ->setId($this->config('id'))
             ->setSearchModel($this->searchModel())
             ->setDataProvider($this->getDataProviderConfig())
-            ->setColumns($this->buildColumns())
+            ->setColumns($this->gridColumns())
             ->setOptions($options)
             ->setAttributes($this->config('attributes'))
             ->renderGridview();
@@ -195,6 +207,12 @@ abstract class AbstractGridController extends AbstractController
         }
 
         return $this->routePrefix . $action;
+    }
+
+    /** Whether a route with this name is registered (guards optional convention routes). */
+    protected function routeExists(string $name): bool
+    {
+        return $this->container->get('router')->getRouteCollection()->get($name) !== null;
     }
 
     /**

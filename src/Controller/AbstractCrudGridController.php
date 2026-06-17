@@ -3,6 +3,8 @@
 namespace Fedale\GridviewBundle\Controller;
 
 use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
+use Fedale\GridviewBundle\Crud\CrudButton;
+use Fedale\GridviewBundle\Grid\GridviewConfigRegistry;
 use Fedale\GridviewBundle\Mercure\GridviewMercurePublisher;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -40,6 +42,11 @@ abstract class AbstractCrudGridController extends AbstractGridController
             'pageTemplate'   => null,
             'addLabel'       => 'New',
             'filterFormName' => 'myform',
+            // Default token layout auto-wired into a bare `['type' => 'action']`
+            // column (no explicit `buttons`). null = fall back to YAML
+            // (gridviews.<id>.options.actionLayout) then the built-in default.
+            // Tokens whose convention route doesn't exist render nothing.
+            'actionLayout'   => null,
         ]);
     }
 
@@ -199,6 +206,88 @@ abstract class AbstractCrudGridController extends AbstractGridController
     }
 
     // ---- internals -----------------------------------------------------
+
+    /**
+     * Auto-wires a bare `['type' => 'action']` column to the CRUD routes so it
+     * works out of the box: no hand-written `CrudButton` closures needed. A
+     * column that already declares its own `buttons` is left untouched. The token
+     * layout defaults to `actionLayout` (config or YAML) and only tokens whose
+     * convention route exists get a button — so read-only/missing routes render
+     * nothing instead of dead links.
+     *
+     * @return array<int, mixed>
+     */
+    protected function gridColumns(): array
+    {
+        $columns = $this->buildColumns();
+        $buttons = null;
+
+        foreach ($columns as &$spec) {
+            if (!\is_array($spec) || ($spec['type'] ?? null) !== 'action' || \array_key_exists('buttons', $spec)) {
+                continue;
+            }
+            $buttons ??= $this->defaultActionButtons();
+            if ($buttons === []) {
+                continue;
+            }
+            $spec['layout'] ??= $this->actionLayout();
+            $spec['buttons'] = $buttons;
+        }
+        unset($spec);
+
+        return $columns;
+    }
+
+    /**
+     * Default action-button closures keyed by token, one per convention CRUD route
+     * that actually exists. Mirrors the manual pattern (`CrudButton::edit(...)`).
+     *
+     * @return array<string, \Closure>
+     */
+    protected function defaultActionButtons(): array
+    {
+        $mode = $this->config('mode');
+        $buttons = [];
+
+        if ($this->routeExists($this->routeName('show'))) {
+            $buttons['view'] = fn(array $row) => CrudButton::view(
+                $this->generateUrl($this->routeName('show'), ['id' => $row['id']])
+            );
+        }
+        if ($this->routeExists($this->routeName('update'))) {
+            $buttons['edit'] = fn(array $row) => CrudButton::edit(
+                $this->generateUrl($this->routeName('update'), ['id' => $row['id']]),
+                $mode
+            );
+        }
+        if ($this->routeExists($this->routeName('clone'))) {
+            $buttons['clone'] = fn(array $row) => CrudButton::clone(
+                $this->generateUrl($this->routeName('clone'), ['id' => $row['id']]),
+                $mode
+            );
+        }
+        if ($this->routeExists($this->routeName('delete'))) {
+            $buttons['delete'] = fn(array $row) => CrudButton::delete(
+                $this->generateUrl($this->routeName('delete'), ['id' => $row['id']])
+            );
+        }
+
+        return $buttons;
+    }
+
+    /** Resolved default action-token layout: PHP config wins, else YAML, else the built-in default. */
+    private function actionLayout(): string
+    {
+        $configured = $this->config('actionLayout');
+        if (\is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        $yaml = $this->container->get(GridviewConfigRegistry::class)
+            ->resolveOptions($this->config('id'))['actionLayout'] ?? null;
+
+        return \is_string($yaml) && $yaml !== '' ? $yaml : '{view} {edit} {delete}';
+    }
 
     /**
      * Shared add/edit/clone handler. XHR (modal) → partial/Turbo Stream; direct
