@@ -51,6 +51,13 @@ export default class extends Controller {
         }
         event.preventDefault();
 
+        // Loading feedback: the save round-trip can take a second or two, during
+        // which the modal would otherwise look frozen. Disable the submit button
+        // and prefix a spinner. No restore needed: every outcome either hides the
+        // modal or replaces the form HTML in modalBody.
+        const submitter = event.submitter || form.querySelector('[type="submit"]');
+        this._setLoading(submitter);
+
         fetch(form.action, {
             method: (form.getAttribute('method') || 'post').toUpperCase(),
             body: new FormData(form),
@@ -76,6 +83,17 @@ export default class extends Controller {
 
     _modal() {
         return Modal.getOrCreateInstance(this.modalTarget);
+    }
+
+    // Disables the submit button and shows a spinner to its left while the
+    // request is in flight.
+    _setLoading(button) {
+        if (!button) return;
+        button.disabled = true;
+        button.insertAdjacentHTML(
+            'afterbegin',
+            '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+        );
     }
 
     _spinner() {
