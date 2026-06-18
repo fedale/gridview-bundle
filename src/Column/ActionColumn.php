@@ -103,9 +103,11 @@ class ActionColumn extends AbstractColumn
         return implode(' ', $parts);
     }
 
-    public function renderHeader(mixed $_label): string
+    public function renderHeader(mixed $label): string
     {
-        return $this->label ?? '';
+        // Honor the (already translated / i18n-tagged) label computed by the
+        // template; fall back to the column's own label.
+        return ($label !== null && $label !== '') ? (string) $label : ($this->label ?? '');
     }
 
     private function normalizeButton(mixed $spec): ActionButtonInterface

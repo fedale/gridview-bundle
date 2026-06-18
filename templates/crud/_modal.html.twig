@@ -7,7 +7,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ gridview.options.crud.title|default('') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" {{ gv_i18n_attr('crud.close', 'aria-label') }} aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}"></button>
             </div>
             <div class="modal-body" data-gridview-crud-target="modalBody"></div>
         </div>

@@ -1,10 +1,11 @@
+{{ gv_i18n_catalog() }}
 {% if gridview.options.useTurbo %}
 <turbo-frame id="gridview-{{ gridview.key }}">
 {% endif %}
     {% set gvCrud = gridview.options.crud|default(false) %}
     {% set gvInline = gridview.options.crud.inlineUrl is defined and gridview.options.crud.inlineUrl is not empty %}
     {% set gvRealtime = gridview.options.realtime.enabled|default(false) and gridview.options.realtime.hubUrl|default(false) %}
-    {% set gvControllers = [] %}
+    {% set gvControllers = ['gridview-i18n'] %}
     {% if gridview.hasCheckboxColumn %}{% set gvControllers = gvControllers|merge(['gridview-selection']) %}{% endif %}
     {% if gvCrud %}{% set gvControllers = gvControllers|merge(['gridview-crud']) %}{% endif %}
     {% if gvInline %}{% set gvControllers = gvControllers|merge(['gridview-inline-edit']) %}{% endif %}

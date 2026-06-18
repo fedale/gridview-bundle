@@ -4,11 +4,11 @@
         {% for column in columns %}
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
         <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}"{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
-            {{ column.renderHeader(column.label)|raw }}
+            {{ column.renderHeader(gv_header_label(column.label))|raw }}
             {% if gridview.options.filterControls.headerIcon and column.isFilterable() and column.filter is not null %}
             <button type="button"
                     class="gv-filter-icon"
-                    title="{{ column.label }}"
+                    title="{{ gv_client_text(column.label) }}"{% if gv_client_label(column.label) %} {{ gv_i18n_attr(column.label, 'title') }}{% endif %}
                     data-action="click->gridview-filter#toggleFilter"
                     data-gridview-filter-field-param="{{ column.attribute|replace({'.': '_'}) }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>

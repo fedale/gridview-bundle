@@ -128,6 +128,18 @@
             <tag name="twig.extension"/>
         </service>
 
+        <!-- Instant i18n: catalog builder (PHP) + Twig glue (catalog blob + key tags). -->
+        <service id="fedale_gridview.i18n_catalog" class="Fedale\GridviewBundle\I18n\GridviewI18nCatalog">
+            <argument type="service" id="translator"/>
+            <argument>%fedale_gridview.config%</argument>
+        </service>
+        <service id="Fedale\GridviewBundle\I18n\GridviewI18nCatalog" alias="fedale_gridview.i18n_catalog"/>
+
+        <service id="fedale_gridview.i18n_extension" class="Fedale\GridviewBundle\Twig\GridviewI18nExtension">
+            <argument type="service" id="fedale_gridview.i18n_catalog"/>
+            <tag name="twig.extension"/>
+        </service>
+
         <service id="fedale_gridview.builder_factory" class="Fedale\GridviewBundle\Grid\GridviewBuilderFactory">
             <argument type="service" id="fedale_gridview.gridview_service"/>
             <argument type="service" id="fedale_gridview.config_registry"/>

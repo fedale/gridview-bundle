@@ -1,18 +1,19 @@
 {% set crud = gridview.options.crud|default({}) %}
 {% if crud.addUrl is defined and crud.addUrl is not empty %}
+    {% set _addLabel = gridview.options.addLabel|default('Add') %}
     {% if (crud.mode|default('modal')) == 'modal' %}
-<a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary"
+<a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary" {{ gv_i18n(_addLabel) }}
    data-action="gridview-crud#open"
    data-gridview-crud-url-param="{{ crud.addUrl }}">
-    {{ gridview.options.addLabel|default('Add')|trans({}, 'GridviewBundle') }}
+    {{ _addLabel|trans({}, 'GridviewBundle') }}
 </a>
     {% else %}
-<a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary">
-    {{ gridview.options.addLabel|default('Add')|trans({}, 'GridviewBundle') }}
+<a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary" {{ gv_i18n(_addLabel) }}>
+    {{ _addLabel|trans({}, 'GridviewBundle') }}
 </a>
     {% endif %}
 {% elseif gridview.options.addRoute is not empty %}
-<a href="{{ path(gridview.options.addRoute) }}" class="gv-btn gv-btn-primary">
+<a href="{{ path(gridview.options.addRoute) }}" class="gv-btn gv-btn-primary" {{ gv_i18n(gridview.options.addLabel) }}>
     {{ gridview.options.addLabel|trans({}, 'GridviewBundle') }}
 </a>
 {% endif %}

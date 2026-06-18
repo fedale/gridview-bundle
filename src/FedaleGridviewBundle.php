@@ -40,6 +40,35 @@ class FedaleGridviewBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
                 ->scalarNode('template')->defaultValue('fedale')->end()
+                // Instant client-side i18n. The full catalog (all locales) is
+                // shipped to the browser; a headless JS runtime swaps text with
+                // zero server roundtrip. Any external language switcher can drive
+                // it (DOM event / global API / <html lang> observation).
+                ->arrayNode('i18n')
+                    ->addDefaultsIfNotSet()
+                    ->info('Instant client-side translation of the grid chrome and column labels.')
+                    ->children()
+                        // Locales to ship to the browser (full catalog each).
+                        ->arrayNode('locales')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['en'])
+                        ->end()
+                        ->scalarNode('default')->defaultValue('en')->end()
+                        // Translation domain for app/tenant column labels & captions.
+                        ->scalarNode('client_domain')->defaultValue('Gridview')->end()
+                        // DOM event an external switcher dispatches to set the locale
+                        // (null disables the listener). detail[external_event_key] = locale.
+                        ->scalarNode('external_event')->defaultValue('gridview:set-locale')->end()
+                        ->scalarNode('external_event_key')->defaultValue('locale')->end()
+                        // Mirror the grid locale onto <html lang> changes (zero host code).
+                        ->booleanNode('observe_html_lang')->defaultTrue()->end()
+                        // Render the bundle's own switcher only when the page has none.
+                        ->booleanNode('lang_switcher')->defaultFalse()->end()
+                        // Persist (localStorage + cookie) on external-switcher changes too.
+                        ->booleanNode('persist_external')->defaultTrue()->end()
+                        ->scalarNode('cookie_name')->defaultValue('gv_locale')->end()
+                    ->end()
+                ->end()
                 ->arrayNode('defaults')
                     ->addDefaultsIfNotSet()
                     ->children()

@@ -132,3 +132,31 @@ filter: filter to use, like 'text' or 'select'
 twigFilter: one of twig filter 
 visible: boolean
 label: 
+## Internationalization (i18n)
+
+The grid supports **instant, client-side language switching** — changing language
+rewrites every label in place with no server roundtrip and no page reload.
+
+Translations stay in Symfony YAML (the single source of truth); the bundle ships
+the full catalog of every enabled locale to the browser and a small headless
+runtime (`window.GridviewI18n`) swaps the text. Two domains are used:
+`GridviewBundle` for the built-in chrome and a configurable `Gridview` domain for
+your column labels.
+
+Any existing language switcher can drive the grid — via a DOM event
+(`gridview:set-locale`), the `window.GridviewI18n.setLocale()` API, or by
+observing `<html lang>` — so you never need two switchers. A built-in switcher is
+available too (opt-in).
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    i18n:
+        locales: [en, it]
+        default: en
+        client_domain: Gridview
+```
+
+See [docs/index.md → Internationalization (i18n)](docs/index.md#internationalization-i18n)
+for the full guide (external switchers, server-side persistence, tagging your own
+templates, dynamic JS strings).

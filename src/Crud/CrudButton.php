@@ -19,12 +19,12 @@ final class CrudButton
      * Edit trigger. In 'modal' mode opens the CRUD modal (with a real href as a
      * no-JS fallback); in 'page'/'custom' mode it's a plain link to the form page.
      */
-    public static function edit(string $url, string $mode = 'modal', string $title = 'Modifica'): string
+    public static function edit(string $url, string $mode = 'modal', string $title = 'crud.edit'): string
     {
         return self::action($url, $mode, $title, self::ICON_EDIT);
     }
 
-    public static function clone(string $url, string $mode = 'modal', string $title = 'Duplica'): string
+    public static function clone(string $url, string $mode = 'modal', string $title = 'crud.clone'): string
     {
         return self::action($url, $mode, $title, self::ICON_CLONE);
     }
@@ -33,20 +33,20 @@ final class CrudButton
      * Plain navigation link to a record's detail/show page (no modal). The host
      * app owns the `show` route; auto-wired only when such a route exists.
      */
-    public static function view(string $url, string $title = 'Visualizza'): string
+    public static function view(string $url, string $title = 'crud.view'): string
     {
-        return sprintf('<a href="%s" title="%s">%s</a>', self::esc($url), self::esc($title), self::ICON_VIEW);
+        return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), self::ICON_VIEW);
     }
 
     /**
      * Opens the delete-confirmation recap modal. $url is the confirm endpoint
      * (GET) that returns the recap + CSRF form; no token is needed here.
      */
-    public static function delete(string $url, string $title = 'Elimina'): string
+    public static function delete(string $url, string $title = 'crud.delete'): string
     {
         return sprintf(
-            '<a href="#" title="%s" data-action="gridview-crud#open" data-gridview-crud-url-param="%s">%s</a>',
-            self::esc($title),
+            '<a href="#" %s data-action="gridview-crud#open" data-gridview-crud-url-param="%s">%s</a>',
+            self::titleAttrs($title),
             self::esc($url),
             self::ICON_DELETE
         );
@@ -60,15 +60,30 @@ final class CrudButton
     {
         if ($mode === 'modal') {
             return sprintf(
-                '<a href="%s" title="%s" data-action="gridview-crud#open" data-gridview-crud-url-param="%s">%s</a>',
+                '<a href="%s" %s data-action="gridview-crud#open" data-gridview-crud-url-param="%s">%s</a>',
                 self::esc($url),
-                self::esc($title),
+                self::titleAttrs($title),
                 self::esc($url),
                 $icon
             );
         }
 
-        return sprintf('<a href="%s" title="%s">%s</a>', self::esc($url), self::esc($title), $icon);
+        return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), $icon);
+    }
+
+    /**
+     * Tooltip attributes. The default titles are translation keys (crud.*) of
+     * the GridviewBundle domain, so the i18n runtime swaps them instantly; the
+     * raw value is also set on `title` as a no-JS fallback. A free-form string
+     * passed by the host simply stays as-is (no catalog entry → JS leaves it).
+     */
+    private static function titleAttrs(string $title): string
+    {
+        return sprintf(
+            'title="%s" data-gv-i18n-attr-title="%s"',
+            self::esc($title),
+            self::esc($title)
+        );
     }
 
     private static function esc(string $value): string

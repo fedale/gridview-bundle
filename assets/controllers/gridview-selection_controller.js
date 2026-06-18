@@ -1,6 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import { preferenceProvider } from '../preferences.js';
 import { promptModal } from '../prompt-modal.js';
+import i18n from '../i18n.js';
 
 export default class extends Controller {
     static targets = ['checkbox', 'headerCheckbox', 'bulkBar', 'count', 'savedList'];
@@ -108,7 +109,7 @@ export default class extends Controller {
 
         this.bulkBarTarget.hidden = !active;
         if (this.hasCountTarget) {
-            this.countTarget.textContent = allMode ? 'Tutti i record' : String(count);
+            this.countTarget.textContent = allMode ? i18n.t('selection.all_records') : String(count);
         }
     }
 
@@ -117,18 +118,18 @@ export default class extends Controller {
     async saveSelection() {
         const ids = [...this._load()];
         if (ids.length === 0) {
-            window.alert('Nessuna riga selezionata da salvare.');
+            window.alert(i18n.t('selection.none_to_save'));
             return;
         }
         if (ids.length > 5000) {
-            window.alert('Selezione troppo grande da salvare (max 5000).');
+            window.alert(i18n.t('selection.too_large'));
             return;
         }
 
         const items = preferenceProvider().load(this._scope, 'selections');
         // N = numero di righe selezionate.
-        const proposed = `selezione ${new Date().toLocaleDateString('it-IT')} (${ids.length})`;
-        const name = await promptModal({ title: 'Salva selezione', label: 'Nome', value: proposed });
+        const proposed = `${i18n.t('selection.label')} ${new Date().toLocaleDateString(i18n.getLocale())} (${ids.length})`;
+        const name = await promptModal({ title: i18n.t('selection.save_title'), label: i18n.t('field.name'), value: proposed });
         if (!name) return;
 
         const existing = items.findIndex((i) => i.name === name);
@@ -161,7 +162,7 @@ export default class extends Controller {
         const items = preferenceProvider().load(this._scope, 'selections');
 
         if (items.length === 0) {
-            this.savedListTarget.innerHTML = '<li><span class="dropdown-item-text text-muted">Nessuna selezione salvata</span></li>';
+            this.savedListTarget.innerHTML = `<li><span class="dropdown-item-text text-muted">${i18n.t('selection.empty')}</span></li>`;
             return;
         }
 
@@ -170,7 +171,7 @@ export default class extends Controller {
                 <button type="button" class="dropdown-item"
                         data-action="gridview-selection#loadSelection"
                         data-gridview-selection-index-param="${index}">${this._esc(item.name)} (${item.ids.length})</button>
-                <button type="button" class="gv-saved-del" title="Elimina"
+                <button type="button" class="gv-saved-del" title="${this._esc(i18n.t('crud.delete'))}"
                         data-action="gridview-selection#removeSelection"
                         data-gridview-selection-index-param="${index}">✕</button>
             </li>

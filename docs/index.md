@@ -23,7 +23,8 @@ The grid is not automagic: you configure a data source and a column list, the bu
 14. [YAML Configuration](#yaml-configuration)
 15. [JavaScript Controllers](#javascript-controllers)
 16. [Real-time updates (Mercure)](#real-time-updates-mercure)
-17. [Extending the Bundle](#extending-the-bundle)
+17. [Internationalization (i18n)](#internationalization-i18n)
+18. [Extending the Bundle](#extending-the-bundle)
 
 ---
 
@@ -2824,29 +2825,189 @@ emit a `gv-badge--<value>` modifier class for finer CSS targeting.
 
 ## Internationalization (i18n)
 
-All built-in UI chrome (pagination, bulk bar, export, saved searches, CRUD
-dialogs, empty text, filter reset, search placeholder) is translated through the
-**`GridviewBundle`** translation domain. The bundle ships `it` and `en`
-catalogs in `translations/GridviewBundle.<locale>.yaml`; the grid follows the
-request locale automatically.
+The grid supports **instant, client-side language switching**: changing language
+rewrites every label in place with **no server roundtrip and no page reload**.
 
-Override or add a language from the host app by creating
-`translations/GridviewBundle.<locale>.yaml` (app translations win over the
-bundle's). Keys are dotted (`pagination.next`, `bulk.delete`, `crud.cancel`, …);
-count-bearing messages take a `%count%` parameter.
+### How it works
 
-Two config defaults use the **source string as key** so they localize out of the
-box while letting custom values pass through untranslated:
+The single source of truth stays in **Symfony YAML** — you never author
+translations in JavaScript. At render time the bundle exports the *full* catalog
+(every enabled locale) into the page as a JSON blob, and a small headless JS
+runtime swaps text on demand:
 
-- `options.emptyText` (default `No records found`)
-- `options.addLabel` (default `Add`)
+```
+Symfony YAML  ──►  GridviewI18nCatalog (PHP)  ──►  <script id="gridview-i18n-catalog">{ it:{…}, en:{…} }
+   (one source)                                          │
+                                                         ▼
+Twig: text + data-gv-i18n="key"  ◄───────────  assets/i18n.js (window.GridviewI18n)
+                                                t(key) · apply(root) · setLocale(loc)
+```
 
-Set either to one of your own translation keys (or any literal) to override.
+- The **server** renders the first paint in the current locale (from the
+  `gv_locale` cookie) — so there is no flash and dates/numbers are formatted
+  correctly.
+- Every translatable node carries a stable key:
+  `data-gv-i18n="key"` (text) or `data-gv-i18n-attr-<attr>="key"`
+  (`title` / `placeholder` / `aria-label`).
+- On a language change the runtime reads the catalog already in the page and
+  rewrites the tagged nodes — instant, offline.
 
-**Booleans** render as language-neutral glyphs (`✓` / `✗`) by default — no
+### Two translation domains
+
+| Layer | Domain | What | Where authored |
+|-------|--------|------|----------------|
+| **System** | `GridviewBundle` | chrome: pagination, bulk bar, CRUD dialogs, search, saved searches, empty text | bundle `translations/GridviewBundle.<locale>.yaml` (host app may override) |
+| **Client** | `Gridview` (configurable) | app/tenant **column labels**, captions | host app `translations/Gridview.<locale>.yaml` |
+
+Client column labels become **translation keys** instead of literals:
+
+```php
+// in a grid controller's buildColumns()
+['attribute' => 'createdAt', 'label' => 'col.customer.createdAt', 'filter' => ['type' => 'date']],
+```
+
+```yaml
+# translations/Gridview.it.yaml          # translations/Gridview.en.yaml
+col.customer.createdAt: "Creato il"      col.customer.createdAt: "Created at"
+```
+
+A label that is **not** a key of the client domain is rendered verbatim (and not
+made switchable), so existing literal labels keep working.
+
+### Configuration
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    i18n:
+        locales: [en, it]          # locales shipped to the browser (full catalog each)
+        default: en
+        client_domain: Gridview    # translation domain for column labels / captions
+        # --- external switcher contract (see below) ---
+        external_event: 'gridview:set-locale'  # DOM event the grid listens to (null disables)
+        external_event_key: locale             # field read from event.detail
+        observe_html_lang: true                # follow <html lang> changes
+        lang_switcher: false                   # render the bundle's own switcher token
+        # --- persistence ---
+        persist_external: true                 # external changes also write localStorage + cookie
+        cookie_name: gv_locale
+```
+
+Remember to enable the locales in the framework too:
+
+```yaml
+# config/packages/translation.yaml
+framework:
+    default_locale: en
+    enabled_locales: [en, it]
+```
+
+### Driving the grid from ANY language switcher
+
+The grid does **not** force its own switcher. If your app/site already has one,
+let it drive the grid — there is no need for a second switcher. Three options,
+all optional and configurable:
+
+1. **DOM event** (recommended). Your switcher dispatches:
+   ```js
+   document.dispatchEvent(new CustomEvent('gridview:set-locale', { detail: { locale: 'en' } }));
+   ```
+2. **Global API**:
+   ```js
+   window.GridviewI18n.setLocale('en');
+   ```
+3. **`<html lang>` observation**. If your app updates `document.documentElement.lang`,
+   the grid follows automatically — zero host code (`observe_html_lang: true`).
+
+Locale codes are normalized (`it-IT` → `it`); an unknown locale is a no-op
+(keeps the current language). When your host already persists the locale
+server-side, call `setLocale(loc, { persist: false })` (or set
+`persist_external: false`) to avoid fighting over the cookie.
+
+### Built-in switcher (optional)
+
+When the page has *no* switcher of its own, enable the bundle's:
+
+```yaml
+fedale_gridview:
+    i18n:
+        lang_switcher: true
+```
+
+Then place the `{localeSwitcher}` token in a layout slot (e.g. the toolbar), or
+mount the controller directly anywhere in your chrome:
+
+```twig
+<button data-controller="gridview-locale-switcher"
+        data-action="gridview-locale-switcher#toggle">
+    🌐 <span data-gridview-locale-switcher-target="label"></span>
+</button>
+```
+
+### Server-side persistence (no flash on reload)
+
+The switcher writes the chosen locale to `localStorage` **and** the `gv_locale`
+cookie. Add a tiny kernel listener so a full reload renders server-side in the
+same language (and formats dates/numbers accordingly):
+
+```php
+// src/EventListener/LocaleSubscriber.php (host app)
+public function onKernelRequest(RequestEvent $event): void
+{
+    if (!$event->isMainRequest()) return;
+    $request = $event->getRequest();
+    $locale = $request->cookies->get('gv_locale');
+    if (\is_string($locale) && \in_array($locale, $this->enabledLocales, true)) {
+        $request->setLocale($locale);
+    }
+}
+// getSubscribedEvents: [KernelEvents::REQUEST => [['onKernelRequest', 20]]]  // before LocaleListener
+```
+
+### Tagging your own templates / slots
+
+The catalog is emitted once by `gv_i18n_catalog()` (already called inside the
+grid wrapper). To make custom markup switch instantly, tag it with the Twig
+helpers and keep the `|trans` value for the first paint:
+
+```twig
+{# text node #}
+<span {{ gv_i18n('bulk.update') }}>{{ 'bulk.update'|trans({}, 'GridviewBundle') }}</span>
+
+{# attribute (title / placeholder / aria-label) #}
+<button {{ gv_i18n_attr('saved.title', 'title') }}
+        title="{{ 'saved.title'|trans({}, 'GridviewBundle') }}">★</button>
+
+{# a client column label → marked <span> only when it's a real key #}
+{{ column.renderHeader(gv_header_label(column.label))|raw }}
+```
+
+| Helper | Returns |
+|--------|---------|
+| `gv_i18n_catalog()` | the `<script>` catalog blob (emitted once per request) |
+| `gv_i18n(key)` | `data-gv-i18n="key"` |
+| `gv_i18n_attr(key, attr)` | `data-gv-i18n-attr-<attr>="key"` |
+| `gv_header_label(label)` | translated, i18n-tagged `<span>` for a client label key (or the literal) |
+| `gv_client_text(key)` / `gv_client_label(key)` | client-domain translation / whether a key is translatable |
+| `gv_lang_switcher()` | whether the built-in switcher is enabled |
+
+### Dynamic strings in JavaScript
+
+JS-generated strings (saved-selection prompts, the inline "Saved" badge, error
+messages) use the same catalog via `i18n.t(key, params)`:
+
+```js
+import i18n from '../i18n.js';
+window.alert(i18n.t('selection.none_to_save'));
+const label = i18n.t('crud.delete_count', { count: 3 }); // "%count%" interpolation
+```
+
+After editing any tagged template or controller, rebuild assets:
+`cd app && yarn encore dev`.
+
+### Booleans
+
+Booleans render as language-neutral glyphs (`✓` / `✗`) by default — no
 translation needed. For textual booleans, set the column's `format` options:
-`{'true': 'Yes', 'false': 'No'}` (pass already-translated strings from your
-controller if you need them localized).
-
-> Column **labels** and **select option labels** are passed through your app's
-> templates/config as-is; use translation keys there if you want them localized.
+`{'true': 'Yes', 'false': 'No'}` (pass already-translated strings, or client-domain
+keys, from your controller if you need them localized).

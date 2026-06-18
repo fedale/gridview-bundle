@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import i18n from '../i18n.js';
 
 /**
  * Inline cell editing. An editable cell (.gv-editable with data-gv-field/data-gv-id)
@@ -65,7 +66,7 @@ export default class extends Controller {
 
                 if (response.ok) {
                     // New display value + explicit success feedback (✓ + green flash).
-                    cell.innerHTML = text + '<span class="gv-saved-badge" title="Salvato">✓</span>';
+                    cell.innerHTML = text + `<span class="gv-saved-badge" title="${i18n.t('inline.saved')}">✓</span>`;
                     cell.classList.remove('gv-editing');
                     cell.classList.add('gv-saved');
                     setTimeout(() => {

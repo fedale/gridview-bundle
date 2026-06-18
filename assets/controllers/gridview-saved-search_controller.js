@@ -2,6 +2,7 @@ import { Controller } from '@hotwired/stimulus';
 import * as Turbo from '@hotwired/turbo';
 import { preferenceProvider } from '../preferences.js';
 import { promptModal } from '../prompt-modal.js';
+import i18n from '../i18n.js';
 
 /**
  * Saved searches: stores the current querystring (filters + sort) under a name
@@ -22,8 +23,8 @@ export default class extends Controller {
 
     async save() {
         const items = preferenceProvider().load(this._scope, 'searches');
-        const proposed = `ricerca ${new Date().toLocaleDateString('it-IT')} (${items.length + 1})`;
-        const name = await promptModal({ title: 'Salva ricerca', label: 'Nome', value: proposed });
+        const proposed = `${i18n.t('saved.label')} ${new Date().toLocaleDateString(i18n.getLocale())} (${items.length + 1})`;
+        const name = await promptModal({ title: i18n.t('saved.save_title'), label: i18n.t('field.name'), value: proposed });
         if (!name) return;
 
         const query = window.location.search;
@@ -53,7 +54,7 @@ export default class extends Controller {
         const items = preferenceProvider().load(this._scope, 'searches');
 
         if (items.length === 0) {
-            this.listTarget.innerHTML = '<li><span class="dropdown-item-text text-muted">Nessuna ricerca salvata</span></li>';
+            this.listTarget.innerHTML = `<li><span class="dropdown-item-text text-muted">${i18n.t('saved.empty')}</span></li>`;
             return;
         }
 
@@ -62,7 +63,7 @@ export default class extends Controller {
                 <button type="button" class="dropdown-item"
                         data-action="gridview-saved-search#apply"
                         data-gridview-saved-search-query-param="${this._esc(item.query)}">${this._esc(item.name)}</button>
-                <button type="button" class="gv-saved-del" title="Elimina"
+                <button type="button" class="gv-saved-del" title="${this._esc(i18n.t('crud.delete'))}"
                         data-action="gridview-saved-search#remove"
                         data-gridview-saved-search-index-param="${index}">✕</button>
             </li>

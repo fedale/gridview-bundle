@@ -7,16 +7,16 @@
 {% if crud.bulkDeleteUrl is defined or crud.bulkUpdateUrl is defined %}
 <div class="gv-bulk-bar" data-gridview-selection-target="bulkBar" hidden>
     <span class="gv-bulk-count">
-        <strong data-gridview-selection-target="count">0</strong> {{ 'bulk.selected'|trans({}, 'GridviewBundle') }}
+        <strong data-gridview-selection-target="count">0</strong> <span {{ gv_i18n('bulk.selected') }}>{{ 'bulk.selected'|trans({}, 'GridviewBundle') }}</span>
     </span>
     <span class="gv-bulk-actions">
         {% if crud.bulkUpdateUrl is defined %}
-        <button type="button" class="gv-btn"
+        <button type="button" class="gv-btn" {{ gv_i18n('bulk.update') }}
                 data-action="gridview-selection#bulk"
                 data-gridview-selection-url-param="{{ crud.bulkUpdateUrl }}">{{ 'bulk.update'|trans({}, 'GridviewBundle') }}</button>
         {% endif %}
         {% if crud.bulkDeleteUrl is defined %}
-        <button type="button" class="gv-btn gv-btn-danger"
+        <button type="button" class="gv-btn gv-btn-danger" {{ gv_i18n('bulk.delete') }}
                 data-action="gridview-selection#bulk"
                 data-gridview-selection-url-param="{{ crud.bulkDeleteUrl }}">{{ 'bulk.delete'|trans({}, 'GridviewBundle') }}</button>
         {% endif %}

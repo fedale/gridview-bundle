@@ -1,6 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 import { Modal } from 'bootstrap';
 import * as Turbo from '@hotwired/turbo';
+import i18n from '../i18n.js';
 
 /**
  * Drives the generated CRUD forms: opens a Bootstrap modal, fetches the form
@@ -35,7 +36,7 @@ export default class extends Controller {
 
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then((r) => r.text())
-            .then((html) => { this.modalBodyTarget.innerHTML = html; })
+            .then((html) => { this.modalBodyTarget.innerHTML = html; i18n.apply(this.modalBodyTarget); })
             .catch(() => { this.modalBodyTarget.innerHTML = this._error(); });
     }
 
@@ -76,6 +77,7 @@ export default class extends Controller {
                 } else {
                     // Validation errors: re-render the form inside the modal.
                     this.modalBodyTarget.innerHTML = text;
+                    i18n.apply(this.modalBodyTarget);
                 }
             })
             .catch(() => { this.modalBodyTarget.innerHTML = this._error(); });
@@ -102,6 +104,6 @@ export default class extends Controller {
     }
 
     _error() {
-        return '<div class="alert alert-danger m-3">Errore durante l\'operazione. Riprova.</div>';
+        return `<div class="alert alert-danger m-3">${i18n.t('crud.error')}</div>`;
     }
 }

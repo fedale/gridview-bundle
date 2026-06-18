@@ -21,7 +21,7 @@
             {% endif %}
         {% endfor %}
         <div class="d-flex justify-content-end gap-2 mt-3">
-            <button type="button" class="gv-btn" data-bs-dismiss="modal">{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
+            <button type="button" class="gv-btn" data-bs-dismiss="modal" {{ gv_i18n('crud.cancel') }}>{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
             {{ form_widget(form.apply) }}
         </div>
     {{ form_end(form) }}
