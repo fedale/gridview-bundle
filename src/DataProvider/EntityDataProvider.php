@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Serializer;
 use Fedale\GridviewBundle\Serializer\LazyAwareObjectNormalizer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Event\RowEvent;
 
@@ -26,6 +27,8 @@ class EntityDataProvider extends AbstractDataProvider
 
     private array $params;
 
+    private ?SearchFormInterface $searchForm = null;
+
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private EntityManagerInterface $entityManager,
@@ -33,6 +36,12 @@ class EntityDataProvider extends AbstractDataProvider
     ) {
         $this->models = new ArrayCollection();
         $this->populateParams();
+    }
+
+    /** Used to apply the declarative `searchFields` map when the repository has no search(). */
+    public function setSearchForm(SearchFormInterface $searchForm): void
+    {
+        $this->searchForm = $searchForm;
     }
 
     private function populateParams(): void
@@ -66,7 +75,26 @@ class EntityDataProvider extends AbstractDataProvider
 
     public function prepareModels(string|array $models): void
     {
-        $this->queryBuilder = $this->entityManager->getRepository($models)->search($this->params);
+        $repository = $this->entityManager->getRepository($models);
+
+        // Repositories may implement the grid's search() contract, applying the
+        // filters themselves. Entities from third-party bundles often don't:
+        // fall back to a plain QueryBuilder and apply the optional declarative
+        // `searchFields` map here, so sorting, pagination and filtering keep
+        // working either way.
+        if (method_exists($repository, 'search')) {
+            $this->queryBuilder = $repository->search($this->params);
+
+            return;
+        }
+
+        $qb = $repository->createQueryBuilder($this->alias);
+
+        if ($this->searchFields !== [] && $this->searchForm !== null) {
+            $this->searchForm->applyFilters($qb, $this->params, $this->searchFields);
+        }
+
+        $this->queryBuilder = $qb;
     }
 
     public function applyGlobalSearch(array $fields, string $term): void
