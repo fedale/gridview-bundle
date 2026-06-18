@@ -1,0 +1,120 @@
+// ═══════════════════════════════════════════════════════════════════
+// FedaleGridviewBundle — design tokens (light / default)
+//
+// All component styles reference these CSS custom properties, so a host
+// app can re-skin the grid by overriding any --gv-* var:
+//   Bootstrap 5 → import gridview.bootstrap5.scss
+//   Tailwind    → set vars in @layer base
+//   Custom      → [data-gridview] { --gv-*: ... }
+//
+// Dark-mode token overrides live in `_dark.scss`.
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Design tokens — neutral gray palette ──────────────────────────
+
+[data-gridview] {
+  position: relative; // required for loading overlay positioning
+  // Accent (muted slate-blue — override to match your brand)
+  --gv-color-primary:       #4b6cb7;
+
+  // Surfaces
+  --gv-color-bg:            #ffffff;
+  --gv-color-bg-subtle:     #f7f8f9;
+  --gv-color-bg-hover:      #eaecef;
+
+  // Borders & shadows
+  --gv-color-border:        #d0d5dd;
+  --gv-color-shadow:        rgba(0, 0, 0, .07);
+
+  // Text
+  --gv-color-text:          #1a1f2e;
+  --gv-color-text-muted:    #6b7280;
+  --gv-color-link:          #4b6cb7;
+  --gv-color-link-hover:    #3a58a0;
+
+  // Highlight (full-text search)
+  --gv-color-highlight-bg:  #fef3c7;
+  --gv-color-highlight-txt: #92400e;
+
+  // Inputs
+  --gv-input-bg:            #ffffff;
+  --gv-input-border:        #d0d5dd;
+  --gv-input-border-focus:  #4b6cb7;
+  --gv-input-shadow-focus:  0 0 0 3px rgba(75, 108, 183, .2);
+  --gv-input-radius:        5px;
+  --gv-input-padding:       .25rem .5rem;
+  --gv-input-font-size:     .875rem;
+  --gv-input-color:         #1a1f2e;
+
+  // Buttons — neutral gray
+  --gv-btn-radius:          5px;
+  --gv-btn-padding:         .25rem .65rem;
+  --gv-btn-font-size:       .8125rem;
+  --gv-btn-border:          #c4cad4;
+  --gv-btn-bg:              #f0f2f5;
+  --gv-btn-bg-hover:        #d8dce3;
+  --gv-btn-color:           #374151;
+  --gv-btn-primary-bg:      #4b6cb7;
+  --gv-btn-primary-hover:   #3a58a0;
+  --gv-btn-primary-color:   #ffffff;
+
+  // Table
+  --gv-table-border:        #d0d5dd;
+  --gv-th-bg:               #f0f2f5;
+  --gv-th-color:            #374151;
+  --gv-tr-hover-bg:         #eaecef;
+  --gv-sort-color:          #6b7280;
+  --gv-sort-active-color:   #4b6cb7;
+
+  // Toolbar
+  --gv-toolbar-gap:         .5rem;
+  --gv-toolbar-padding:     .5rem 0;
+
+  // Pagination
+  --gv-page-radius:         5px;
+  --gv-page-padding:        .25rem .6rem;
+  --gv-page-bg:             #ffffff;
+  --gv-page-bg-active:      #4b6cb7;
+  --gv-page-color:          #4b6cb7;
+  --gv-page-color-active:   #ffffff;
+  --gv-page-border:         #c4cad4;
+
+  // Dropdown (column visibility / multi-select panel)
+  --gv-dropdown-bg:         #ffffff;
+  --gv-dropdown-border:     #d0d5dd;
+  --gv-dropdown-shadow:     0 4px 18px rgba(0, 0, 0, .1);
+  --gv-dropdown-radius:     7px;
+  --gv-dropdown-item-hover: #eaecef;
+
+  // Misc
+  --gv-radius:              5px;
+  --gv-transition:          .14s ease;
+
+  // Loading overlay
+  --gv-overlay-bg:          rgba(255, 255, 255, .7);
+  --gv-spinner-size:        2rem;
+  --gv-spinner-border:      #d0d5dd;
+  --gv-spinner-color:       #4b6cb7;
+
+  // Error banner
+  --gv-error-bg:            #fee2e2;
+  --gv-error-color:         #991b1b;
+  --gv-error-border:        #fca5a5;
+
+  // ── Column types (Fase 7) ───────────────────────────────────────
+  // Image
+  --gv-img-max-h:           40px;
+  --gv-img-radius:          3px;
+  // Rating
+  --gv-rating-color:        #f59e0b;   // stars
+  // Badge (status chip)
+  --gv-badge-bg:            #eaecef;
+  --gv-badge-color:         #374151;
+  --gv-badge-radius:        999px;
+  --gv-badge-padding:       .1rem .55rem;
+  --gv-badge-font-size:     .75rem;
+  // JSON / code
+  --gv-json-bg:             #f7f8f9;
+  --gv-json-color:          #374151;
+  --gv-json-border:         #d0d5dd;
+}

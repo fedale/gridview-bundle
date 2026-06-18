@@ -1,0 +1,115 @@
+// ═══════════════════════════════════════════════════════════════════
+// FedaleGridviewBundle — dark-mode token overrides
+//
+// The grid follows the HOST application's theme whenever the host declares
+// one, and falls back to the OS preference when it doesn't:
+//
+//   OS fallback  → @media (prefers-color-scheme: dark)   (stand-alone use)
+//   Host-driven  → [data-bs-theme="dark"]   (Bootstrap 5.3, on <html> or <body>)
+//                  [data-gv-theme="dark"]   (generic, framework-agnostic)
+//                  .ea-dark-scheme          (EasyAdmin — applied to <body>)
+//
+// The host selectors carry higher specificity than the bare-`[data-gridview]`
+// media rule, so an explicit host theme ALWAYS wins over the OS preference —
+// this prevents the "grid is dark but the page around it is light" mismatch
+// when the host forces a light theme while the OS is set to dark.
+// ═══════════════════════════════════════════════════════════════════
+
+@mixin gv-dark-vars {
+  --gv-overlay-bg:        rgba(20, 24, 33, .75);
+  --gv-spinner-border:    #2e3548;
+  --gv-spinner-color:     #7b9dd6;
+  --gv-error-bg:          rgba(127, 29, 29, .25);
+  --gv-error-color:       #fca5a5;
+  --gv-error-border:      rgba(127, 29, 29, .5);
+  --gv-color-bg:          #141821;
+  --gv-color-bg-subtle:   #1e2330;
+  --gv-color-bg-hover:    #2a3040;
+  --gv-color-border:      #2e3548;
+  --gv-color-text:        #e4e7ed;
+  --gv-color-text-muted:  #8b95a8;
+  --gv-color-link:        #7b9dd6;
+  --gv-color-link-hover:  #9ab5e4;
+  --gv-input-bg:          #1e2330;
+  --gv-input-border:      #2e3548;
+  --gv-input-color:       #e4e7ed;
+  --gv-input-border-focus: #7b9dd6;
+  --gv-btn-bg:            #1e2330;
+  --gv-btn-bg-hover:      #2a3040;
+  --gv-btn-color:         #c9d0de;
+  --gv-btn-border:        #2e3548;
+  --gv-btn-primary-bg:    #3a58a0;
+  --gv-btn-primary-hover: #4b6cb7;
+  --gv-th-bg:             #1e2330;
+  --gv-th-color:          #c9d0de;
+  --gv-table-border:      #2e3548;
+  --gv-tr-hover-bg:       #242b3c;
+  --gv-sort-color:        #8b95a8;
+  --gv-sort-active-color: #7b9dd6;
+  --gv-dropdown-bg:       #1e2330;
+  --gv-dropdown-border:   #2e3548;
+  --gv-dropdown-shadow:   0 4px 18px rgba(0, 0, 0, .4);
+  --gv-dropdown-item-hover: #2a3040;
+  --gv-page-bg:           #1e2330;
+  --gv-page-border:       #2e3548;
+  --gv-page-color:        #7b9dd6;
+  --gv-page-bg-active:    #3a58a0;
+  --gv-color-highlight-bg: #78350f;
+  --gv-color-highlight-txt: #fde68a;
+  // Column types (Fase 7)
+  --gv-badge-bg:          #2a3040;
+  --gv-badge-color:       #c9d0de;
+  --gv-json-bg:           #1e2330;
+  --gv-json-color:        #c9d0de;
+  --gv-json-border:       #2e3548;
+}
+
+// ── OS preference (stand-alone fallback) ──────────────────────────
+@media (prefers-color-scheme: dark) {
+  [data-gridview] { @include gv-dark-vars; }
+}
+
+// ── Host-driven dark theme (wins over the OS rule via specificity) ─
+// Attribute selectors are intentionally element-agnostic so they match
+// whether the host sets the flag on <html> (Bootstrap) or <body> (EasyAdmin).
+:is([data-bs-theme="dark"], [data-gv-theme="dark"], .ea-dark-scheme) [data-gridview] {
+  @include gv-dark-vars;
+}
+
+// ── Explicit light host override ──────────────────────────────────
+// Undoes the OS-dark media rule when the host forces a light theme.
+:is([data-bs-theme="light"], [data-gv-theme="light"], .ea-light-scheme) [data-gridview] {
+  --gv-color-bg:          #ffffff;
+  --gv-color-bg-subtle:   #f7f8f9;
+  --gv-color-bg-hover:    #eaecef;
+  --gv-color-border:      #d0d5dd;
+  --gv-color-text:        #1a1f2e;
+  --gv-color-text-muted:  #6b7280;
+  --gv-color-link:        #4b6cb7;
+  --gv-color-link-hover:  #3a58a0;
+  --gv-input-bg:          #ffffff;
+  --gv-input-border:      #d0d5dd;
+  --gv-input-color:       #1a1f2e;
+  --gv-input-border-focus: #4b6cb7;
+  --gv-btn-bg:            #f0f2f5;
+  --gv-btn-bg-hover:      #d8dce3;
+  --gv-btn-color:         #374151;
+  --gv-btn-border:        #c4cad4;
+  --gv-btn-primary-bg:    #4b6cb7;
+  --gv-btn-primary-hover: #3a58a0;
+  --gv-th-bg:             #f0f2f5;
+  --gv-th-color:          #374151;
+  --gv-table-border:      #d0d5dd;
+  --gv-tr-hover-bg:       #eaecef;
+  --gv-sort-color:        #6b7280;
+  --gv-sort-active-color: #4b6cb7;
+  --gv-dropdown-bg:       #ffffff;
+  --gv-dropdown-border:   #d0d5dd;
+  --gv-dropdown-item-hover: #eaecef;
+  --gv-page-bg:           #ffffff;
+  --gv-page-border:       #c4cad4;
+  --gv-page-color:        #4b6cb7;
+  --gv-page-bg-active:    #4b6cb7;
+  --gv-color-highlight-bg: #fef3c7;
+  --gv-color-highlight-txt: #92400e;
+}
