@@ -160,6 +160,9 @@
             <call method="setSearchModel">
                 <argument type="service" id="fedale_gridview.search_model"/>
             </call>
+            <call method="setSearchForm">
+                <argument type="service" id="fedale_gridview.search_form"/>
+            </call>
         </service>
         <service id="Fedale\GridviewBundle\Contract\DataProviderInterface" alias="fedale_gridview.entity_data_provider"/>
 

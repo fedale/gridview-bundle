@@ -41,9 +41,29 @@ abstract class AbstractDataProvider implements DataProviderInterface
      */
     protected array $ignoredAttributes = [];
 
+    /** Root alias for the fallback QueryBuilder (repositories without search()). */
+    protected string $alias = 'e';
+
+    /**
+     * Declarative filter map for the fallback QueryBuilder.
+     *
+     * @var array<string, array>
+     */
+    protected array $searchFields = [];
+
     public function setDefaultParams(array $defaults): void
     {
         $this->defaultParams = $defaults;
+    }
+
+    public function setAlias(string $alias): void
+    {
+        $this->alias = $alias;
+    }
+
+    public function setSearchFields(array $searchFields): void
+    {
+        $this->searchFields = $searchFields;
     }
 
     /**

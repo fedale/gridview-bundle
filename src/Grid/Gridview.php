@@ -187,6 +187,16 @@ class Gridview implements GridviewInterface
             return;
         }
 
+        // Forwarded before prepareModels() so the fallback QueryBuilder (used for
+        // entities whose repository has no search()) is built with the right
+        // alias and declarative filters.
+        if (!empty($this->dataProviderOptions['alias'])) {
+            $this->dataProvider->setAlias($this->dataProviderOptions['alias']);
+        }
+        if (!empty($this->dataProviderOptions['searchFields'])) {
+            $this->dataProvider->setSearchFields($this->dataProviderOptions['searchFields']);
+        }
+
         $this->dataProvider->prepareModels($this->dataProviderOptions['models']);
 
         if (!empty($this->dataProviderOptions['sort'])) {
