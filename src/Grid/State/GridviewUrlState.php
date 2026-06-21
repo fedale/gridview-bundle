@@ -11,6 +11,9 @@ class GridviewUrlState
     private ?string $sort         = null;
     private int     $page         = 1;
 
+    /** Parametri della rotta corrente (es. {id}), necessari per rigenerarne l'URL. */
+    private array   $routeParams  = [];
+
     private string $formName  = 'myform';
     private string $sortParam = 'sort';
     private string $pageParam = 'page';
@@ -34,13 +37,17 @@ class GridviewUrlState
         $state->sort = $request->query->get($sortParam) ?: null;
         $state->page = max(1, (int) $request->query->get($pageParam, 1));
 
+        // Parametri di rotta (es. {id}) necessari a path() per rigenerare l'URL corrente.
+        $routeParams = $request->attributes->get('_route_params', []);
+        $state->routeParams = is_array($routeParams) ? $routeParams : [];
+
         return $state;
     }
 
     /** Tutti i parametri correnti come array (per Symfony path()) */
     public function toArray(): array
     {
-        $params = [];
+        $params = $this->routeParams;
 
         $form = $this->filters;
         if ($this->globalSearch !== null && $this->globalSearch !== '') {

@@ -5,15 +5,15 @@
 <a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary" {{ gv_i18n(_addLabel) }}
    data-action="gridview-crud#open"
    data-gridview-crud-url-param="{{ crud.addUrl }}">
-    {{ _addLabel|trans({}, 'GridviewBundle') }}
+    <span class="gv-btn-icon" aria-hidden="true">+</span>{{ _addLabel|trans({}, 'GridviewBundle') }}
 </a>
     {% else %}
 <a href="{{ crud.addUrl }}" class="gv-btn gv-btn-primary" {{ gv_i18n(_addLabel) }}>
-    {{ _addLabel|trans({}, 'GridviewBundle') }}
+    <span class="gv-btn-icon" aria-hidden="true">+</span>{{ _addLabel|trans({}, 'GridviewBundle') }}
 </a>
     {% endif %}
 {% elseif gridview.options.addRoute is not empty %}
 <a href="{{ path(gridview.options.addRoute) }}" class="gv-btn gv-btn-primary" {{ gv_i18n(gridview.options.addLabel) }}>
-    {{ gridview.options.addLabel|trans({}, 'GridviewBundle') }}
+    <span class="gv-btn-icon" aria-hidden="true">+</span>{{ gridview.options.addLabel|trans({}, 'GridviewBundle') }}
 </a>
 {% endif %}

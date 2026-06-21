@@ -28,6 +28,11 @@ interface GridviewInterface
 
     public function parseLayout(string $section): array;
 
+    /**
+     * @return array<int, array{token: string, width: ?string}>
+     */
+    public function layoutTokens(string $section): array;
+
     public function layoutTemplate(string $token): string;
 
     public function isSlot(string $token): bool;

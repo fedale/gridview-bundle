@@ -7,6 +7,10 @@ export function promptModal({ title = '', label = '', value = '', okLabel = 'OK'
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.className = 'gv-prompt-overlay';
+        // The modal lives on <body>, outside the grid container. The data-gridview
+        // marker lets it inherit the --gv-* theme variables (light/dark, host- or
+        // OS-driven) and the scoped [data-gridview] .gv-btn styles for its buttons.
+        overlay.setAttribute('data-gridview', '');
         overlay.innerHTML = `
             <div class="gv-prompt" role="dialog" aria-modal="true">
                 ${title ? `<div class="gv-prompt-title">${esc(title)}</div>` : ''}

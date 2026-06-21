@@ -218,6 +218,7 @@ $columns = [
 | `number` | Raw value | `number` |
 | `relation` | Raw value (use `value` to render the related label) | `relation` |
 | `choice` | Raw value | `choice` |
+| `media` | Inline `<img>` for images, otherwise a download link (see [The `media` type](#the-media-type--file-uploads)) | — (none) |
 | `data` | Raw value (legacy alias of `text`) | `text` |
 
 **Structural types** (dedicated classes):
@@ -230,6 +231,65 @@ $columns = [
 
 > A `value` closure always wins over the data type's built-in rendering — set
 > `type: 'boolean'` for the ✓/✗ default, or supply your own `value` to override it.
+
+### The `media` type — file uploads
+
+The `media` type handles **binary files** (images, PDFs, SVGs, …). It has two sides:
+
+- **Read (grid):** the column value is a **URL/path** to the file. When the value looks
+  like an image it renders an inline `<img class="gv-img">`, otherwise an `<a class="gv-file" download>`
+  link. The decision is by extension/mime in `display: 'auto'` mode and can be forced.
+- **Write (create/update form):** a `media` **control** renders a file-upload button
+  (a Symfony `FileType`). The control is **unmapped** — it is *not* tied to an entity
+  property. The bundle handles *phase 1* (receiving and validating the upload); your
+  app handles *phase 2* (storing the bytes and populating the entity) through an
+  **`upload` callable** in the control spec. This keeps the bundle storage-agnostic:
+  use the local filesystem, S3/Flysystem, or anything else.
+
+```php
+[
+    'attribute' => 'filename',          // also the upload field name (unmapped)
+    'label'     => 'File',
+    'type'      => 'media',
+    // Read side: build the public URL the grid links to / shows.
+    'value'     => fn (array $d) => $d['filename'] ? '/uploads/'.$d['path'].'/'.$d['filename'] : null,
+    // Write side: the upload button + your phase-2 storage callback.
+    'control' => [
+        'type'     => 'media',
+        'required' => true,
+        'modes'    => ['create'],       // optional: only show the upload on create
+        'upload'   => function (UploadedFile $file, object $entity): void {
+            // Read size/mime BEFORE move(): the temp file is gone afterwards.
+            $size = (int) $file->getSize();
+            $name = uniqid('', true).'-'.$file->getClientOriginalName();
+            $file->move($projectDir.'/public/uploads/asset', $name);
+
+            $entity->setPath('uploads/asset');
+            $entity->setFilename($name);
+            $entity->setSize($size);
+            $entity->setType($file->getClientMimeType());
+        },
+    ],
+]
+```
+
+The `upload` callable receives `(UploadedFile $file, object $entity, FormInterface $form)`
+and runs on `POST_SUBMIT` only when a file was actually uploaded (so editing other fields
+without re-uploading leaves the file untouched). Add a `File`/`Image` constraint via
+`control.constraints` to validate size/mime in phase 1.
+
+**Display options** (passed via the column's `format`):
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `display` | `'auto'` | `'auto'` decides by extension/mime; `'image'` always `<img>`; `'download'` always a link |
+| `mimeType` | `null` | Explicit mime used by `'auto'` when the URL has no telling extension |
+| `imageExtensions` | `jpg,jpeg,png,gif,svg,webp,avif` | Extensions treated as images in `'auto'` mode |
+| `alt`, `width`, `height`, `fallback` | — | Image rendering (`fallback` shown when the value is empty) |
+| `downloadLabel` | basename of the URL | Link text for non-image files |
+
+> The `media` type has **no filter** (`inferFilterType()` returns `null`). It supersedes
+> the former `image` type.
 
 ### ActionColumn — token-based actions
 
@@ -1207,7 +1267,8 @@ placeholders that resolve to a Twig template file.
 
 ```
 gridview: "{header} {table} {footer}"
-header:   "{globalSearch} {filterSubmit}"
+header:   "{globalSearch} {filterSubmit}"       ← CRUD controllers default to
+                                                  "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
 table:    "{thead} {filter} {tbody} {tfoot}"    ← computed from showThead/showTfoot
 footer:   "{pagination}"
 toolbar:  ""                                    ← opt-in, empty by default
@@ -1230,9 +1291,39 @@ tfoot:    ""
 | `{globalSearch}` | `sections/globalSearch.html.twig` | Global search input |
 | `{filterSubmit}` | `sections/filterSubmit.html.twig` | Filter submit button — visible only when `useTurbo: false` |
 | `{pagination}` | `sections/pagination.html.twig` | Page navigation |
-| `{addButton}` | `sections/addButton.html.twig` | "Add" link (requires `addRoute`) |
+| `{addButton}` | `sections/addButton.html.twig` | "Add" link (requires `addRoute`, or `crud.addUrl` in a CRUD controller) |
 | `{columnVisibility}` | `sections/columnVisibility.html.twig` | Column show/hide dropdown |
+| `{export}` | `sections/export.html.twig` | Export menu (requires `options.export = { url, formats }`; auto-wired in CRUD controllers) |
+| `{spacer}` | `sections/spacer.html.twig` | Elastic gap — see [Spacing tokens](#spacing-tokens) |
 | `{empty}` | `sections/empty.html.twig` | "No records found" row |
+
+### Spacing tokens
+
+Two mechanisms control how the controls in a layout section share the horizontal space.
+
+**`{spacer}` — elastic gap.** Insert it between two groups of tokens: everything
+before it stays left, everything after it is pushed to the right edge. The gap grows
+and shrinks with the available width, so the layout adapts on its own.
+
+```php
+// add + search on the left, column-visibility + export pushed right
+'header' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
+```
+
+This is the **default header for CRUD controllers** (`AbstractCrudGridController`), so a
+CRUD grid gets it without configuring `layout.header`. Override `layout.header` to change it.
+
+**`{token NN%}` — fixed-width slot.** Append a width inside the braces to give a token
+a fixed share of the row. The width sizes the *slot* (the track), while the control
+inside keeps its natural size and stays left-aligned — it is **not** stretched to fill
+the slot. Accepted units: `%` (a bare number is treated as `%`), `px`, `rem`, `em`.
+
+```php
+'header' => '{addButton 20%} {globalSearch 40%} {columnVisibility 20%} {export 20%}',
+```
+
+Slots and `{spacer}` solve opposite problems: use slots when you want rigid proportional
+columns, use `{spacer}` when you want left/right grouping with elastic space between.
 
 ### Customising the layout at runtime
 
@@ -1324,13 +1415,62 @@ $columns = [
 ];
 ```
 
-Control types map to Symfony FormTypes via `ControlTypeRegistry`:
-`text→TextType`, `number→NumberType`, `date→DateType`, `boolean→CheckboxType`,
-`relation→EntityType`, `choice→ChoiceType`, `hidden→HiddenType`, `html→TextareaType`.
+Control types map to Symfony FormTypes via `ControlTypeRegistry`. Each entry is a thin alias, so
+the control inherits that FormType's rendering **and** its data transformer for free — the submitted
+value round-trips back into the entity as the right PHP type (a `\DateTime`, an enum case, a managed
+entity, a normalised URL…) with no custom code.
+
+| Control type | Symfony FormType | Notes |
+|---|---|---|
+| `text` | `TextType` | |
+| `html` | `TextareaType` | |
+| `email` | `EmailType` | `<input type="email">` + validation |
+| `url` | `UrlType` | normalises the URL on submit |
+| `password` | `PasswordType` | |
+| `color` | `ColorType` | native colour picker |
+| `number` | `NumberType` | |
+| `integer` | `IntegerType` | |
+| `money` | `MoneyType` | an **amount**; pass `options.currency` (defaults to `EUR`) |
+| `percent` | `PercentType` | handles the ×100 transform |
+| `range` | `RangeType` | slider |
+| `date` | `DateType` | |
+| `datetime` | `DateTimeType` | binds a `\DateTime` with time |
+| `time` | `TimeType` | |
+| `boolean` | `CheckboxType` | |
+| `choice` | `ChoiceType` | inline values via `options.choices` |
+| `enum` | `EnumType` | **requires** `options.class` (the PHP enum FQCN); binds the enum case |
+| `relation` | `EntityType` | **requires** `options.class`; binds managed entities |
+| `country` / `language` / `locale` / `timezone` | `CountryType` / `LanguageType` / `LocaleType` / `TimezoneType` | localised ISO lists, bind the code |
+| `currency` | `CurrencyType` | the ISO currency-**code** picker (≠ `money`) |
+| `hidden` | `HiddenType` | |
+| `media` | `FileType` | file upload (unmapped, see below) |
+
+```php
+$columns = [
+    ['attribute' => 'email',    'type' => 'email'],   // display + control both EmailType (inherited)
+    ['attribute' => 'website',  'control' => 'url'],
+    ['attribute' => 'price',    'type' => 'currency',  // display formats the amount…
+     'control' => ['type' => 'money', 'options' => ['currency' => 'EUR']]], // …write side is MoneyType
+    ['attribute' => 'priority', 'control' => ['type' => 'enum', 'options' => ['class' => Priority::class]]],
+];
+```
+
+When a column declares a `control` *without* an explicit `type`, it inherits the column's display data
+type if that name doubles as a control type (`text`, `number`, `date`, `boolean`, `relation`, `choice`,
+`email`, `url`, `percent`, `datetime`) — otherwise it falls back to `text`.
+
+> **`money` ≠ `currency`.** `money` (MoneyType) edits an **amount**; `currency` (CurrencyType) is a
+> picker of ISO currency **codes** (EUR/USD/…). Kept as separate entries on purpose — mirroring
+> Symfony's own naming — so the display type `currency` (a formatted amount) does **not** auto-inherit
+> a `currency` control; pair it with an explicit `money` control instead.
 
 > **Filter ≠ control.** A `relation` *filter* uses scalar ids (ChoiceType); a `relation` *control*
 > uses `EntityType` and binds managed entities. They are separate registry entries on purpose.
 > A column's `value` closure is display-only and never used to populate the form.
+
+> **`media` control = file upload.** It is *unmapped*: the bundle receives the upload, your
+> app stores it and populates the entity through an `upload` callable in the control spec.
+> See [The `media` type — file uploads](#the-media-type--file-uploads).
 
 ### Validation: required & unique
 

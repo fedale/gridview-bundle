@@ -13,11 +13,20 @@ namespace Fedale\GridviewBundle\Form\Control;
  */
 class ControlResolver
 {
-    /** Data types whose name doubles as a control type. */
-    private const INHERITABLE = ['text', 'number', 'date', 'boolean', 'relation', 'choice'];
+    /**
+     * Data types whose name doubles as a control type, so a column declaring a
+     * `control` without an explicit `type` inherits its display data type
+     * (e.g. `type => 'email'` → EmailType control). `currency` is deliberately
+     * absent: as a display type it formats an amount, whose write-side twin is
+     * the `money` control (MoneyType), not the `currency` code picker.
+     */
+    private const INHERITABLE = [
+        'text', 'number', 'date', 'boolean', 'relation', 'choice',
+        'email', 'url', 'percent', 'datetime',
+    ];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -41,6 +50,13 @@ class ControlResolver
             );
         }
 
+        if ($type === 'enum' && !isset($options['class'])) {
+            throw new \InvalidArgumentException(
+                'An "enum" control requires options.class (the PHP enum FQCN). '
+                . 'Symfony derives the choices from the enum cases and binds the enum instance.'
+            );
+        }
+
         // modes: list of CRUD modes where the control is active (null = all).
         $modes = $control['modes'] ?? null;
         if ($modes !== null && !\is_array($modes)) {
@@ -55,6 +71,9 @@ class ControlResolver
             'modes'           => $modes,
             'unique'          => $this->normalizeUnique($control),
             'constraints'     => $control['constraints'] ?? [],
+            // Phase-2 hand-off for `media` controls: the host app's callable that
+            // stores the uploaded file and populates the entity (see buildControl()).
+            'upload'          => $control['upload'] ?? null,
         ];
     }
 

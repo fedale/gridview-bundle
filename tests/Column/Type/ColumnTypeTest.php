@@ -6,6 +6,7 @@ use Fedale\GridviewBundle\Column\Type\BadgeType;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry;
 use Fedale\GridviewBundle\Column\Type\CurrencyType;
+use Fedale\GridviewBundle\Column\Type\MediaType;
 use Fedale\GridviewBundle\Column\Type\NumberType;
 use Fedale\GridviewBundle\Column\Type\SelectType;
 use Fedale\GridviewBundle\Column\Type\TextType;
@@ -96,6 +97,76 @@ class ColumnTypeTest extends TestCase
         $this->assertStringContainsString('gv-badge--open', $out);
         $this->assertStringContainsString('background-color:#0a0', $out);
         $this->assertStringContainsString('Aperto', $out);
+    }
+
+    public function testMediaIsRegisteredAndReplacesImage(): void
+    {
+        $registry = ColumnTypeRegistry::withBuiltins();
+
+        $this->assertTrue($registry->has('media'));
+        $this->assertInstanceOf(MediaType::class, $registry->get('media'));
+        // ImageType was removed: `image` is no longer a known type (beta, no alias).
+        $this->assertFalse($registry->has('image'));
+    }
+
+    public function testMediaInfersNoFilterAndMediaControl(): void
+    {
+        $media = new MediaType();
+
+        $this->assertNull($media->inferFilterType());
+        $this->assertSame('media', $media->inferControlType());
+    }
+
+    public function testMediaRendersImageInlineByExtension(): void
+    {
+        $type = new MediaType();
+        $out  = $this->pipeline($type, ['x' => '/uploads/asset/photo.png']);
+
+        $this->assertInstanceOf(Markup::class, $out);
+        $this->assertStringContainsString('<img', (string) $out);
+        $this->assertStringContainsString('gv-img', (string) $out);
+        $this->assertStringContainsString('/uploads/asset/photo.png', (string) $out);
+    }
+
+    public function testMediaRendersDownloadLinkForNonImage(): void
+    {
+        $type = new MediaType();
+        $out  = (string) $this->pipeline($type, ['x' => '/uploads/asset/manual.pdf']);
+
+        $this->assertStringContainsString('<a', $out);
+        $this->assertStringContainsString('gv-file', $out);
+        $this->assertStringContainsString('download', $out);
+        $this->assertStringContainsString('manual.pdf', $out);
+    }
+
+    public function testMediaDisplayOptionForcesMode(): void
+    {
+        $type = new MediaType();
+
+        // Force image even without a telling extension.
+        $asImage = (string) $this->pipeline($type, ['x' => '/files/123'], ['display' => 'image']);
+        $this->assertStringContainsString('<img', $asImage);
+
+        // Force download even for an image extension.
+        $asLink = (string) $this->pipeline($type, ['x' => '/uploads/photo.png'], ['display' => 'download']);
+        $this->assertStringContainsString('<a', $asLink);
+        $this->assertStringContainsString('gv-file', $asLink);
+    }
+
+    public function testMediaMimeOptionDrivesAutoHeuristic(): void
+    {
+        $type = new MediaType();
+        $out  = (string) $this->pipeline($type, ['x' => '/files/123'], ['mimeType' => 'image/png']);
+
+        $this->assertStringContainsString('<img', $out);
+    }
+
+    public function testMediaEmptyValueRendersEmpty(): void
+    {
+        $type = new MediaType();
+
+        $this->assertSame('', $this->pipeline($type, ['x' => null]));
+        $this->assertSame('', $this->pipeline($type, ['x' => '']));
     }
 
     public function testDotPathRawValue(): void

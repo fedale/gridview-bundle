@@ -59,7 +59,7 @@ class ColumnTypeRegistry
             new LinkType(),
             new UrlType(),
             new EmailType(),
-            new ImageType(),
+            new MediaType(),
             new NumberType(),
             new CurrencyType(),
             new PercentType(),

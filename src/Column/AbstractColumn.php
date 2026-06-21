@@ -8,6 +8,8 @@ use Fedale\GridviewBundle\Grid\Gridview;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Twig\Environment;
 
@@ -274,6 +276,32 @@ abstract class AbstractColumn implements ColumnInterface
         }
         if ($constraints !== []) {
             $options['constraints'] = $constraints;
+        }
+
+        // `media` controls (FileType) are virtual: the attribute is not a property
+        // of the entity. The bundle owns phase 1 (receiving and validating the
+        // upload); the host app's `upload` callable owns phase 2 (storing the bytes
+        // and populating the real entity fields), invoked once the form is bound.
+        if ($this->control['type'] === 'media') {
+            $options['mapped'] = false;
+            $form->add($attribute, $registry->get('media'), $options);
+
+            $upload = $this->control['upload'] ?? null;
+            if (\is_callable($upload)) {
+                $form->addEventListener(FormEvents::POST_SUBMIT, static function (FormEvent $event) use ($attribute, $upload): void {
+                    $form = $event->getForm();
+                    if (!$form->has($attribute)) {
+                        return;
+                    }
+                    $file = $form->get($attribute)->getData();
+                    if ($file === null) {
+                        return;
+                    }
+                    $upload($file, $event->getData(), $form);
+                });
+            }
+
+            return;
         }
 
         $form->add($attribute, $registry->get($this->control['type']), $options);

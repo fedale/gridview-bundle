@@ -28,48 +28,48 @@ class Gridview implements GridviewInterface
     private bool $dataProviderInitialized = false;
 
     protected ?string $key = null;
-    protected ?string $id  = null;
+    protected ?string $id = null;
     protected string $prefix = 'grid_';
     protected static int $counter = 0;
 
     public string $emptyCell = '&nbsp;';
 
-    public array $attr         = [];
+    public array $attr = [];
     public array $containerAttr = [];
-    public array $headerAttr   = [];
-    public array $filterAttr   = [];
-    public array $rowAttr      = [];
-    public $rowOptions         = [];
+    public array $headerAttr = [];
+    public array $filterAttr = [];
+    public array $rowAttr = [];
+    public $rowOptions = [];
 
     public ?SearchModelInterface $searchModel = null;
 
     protected array $options = [
-        'caption'      => null,
-        'emptyText'    => 'No records found',
-        'showThead'    => true,
-        'showTfoot'    => true,
-        'useTurbo'     => true,
+        'caption' => null,
+        'emptyText' => 'No records found',
+        'showThead' => true,
+        'showTfoot' => true,
+        'useTurbo' => true,
         'globalSearch' => [],
-        'routeName'    => null,
-        'addRoute'     => null,
-        'addLabel'     => 'Add',
-        'formName'     => 'myform',
-        'layout'       => [
-            'gridview'  => '{header} {table} {footer}',
-            'header'    => '{globalSearch} {filterSubmit}',
-            'toolbar'   => '',
-            'table'     => null,
-            'footer'    => '{pagination}',
-            'tfoot'     => '',
+        'routeName' => null,
+        'addRoute' => null,
+        'addLabel' => 'Add',
+        'formName' => 'myform',
+        'layout' => [
+            'gridview' => '{header} {table} {footer}',
+            'header' => '{globalSearch} {filterSubmit} {filterBar} {addButton} {columnVisibility}',
+            'toolbar' => '',
+            'table' => null,
+            'footer' => '{pagination}',
+            'tfoot' => '',
             'templates' => [],
-            'slots'     => [],
+            'slots' => [],
         ],
         'filterControls' => [
-            'headerIcon'  => true,
+            'headerIcon' => true,
             'inlineClear' => false,
         ],
         'pagination' => [
-            'pageSelect'          => true,
+            'pageSelect' => true,
             'pageSelectThreshold' => 10,
         ],
         'maxQueryLength' => 4000,
@@ -79,9 +79,9 @@ class Gridview implements GridviewInterface
         private GridviewService $gridviewService,
         private ColumnFactory $columnFactory
     ) {
-        $this->columns      = new ArrayCollection();
-        $this->twig         = $this->gridviewService->getEnvironment();
-        $this->searchForm   = $this->gridviewService->getSearchForm();
+        $this->columns = new ArrayCollection();
+        $this->twig = $this->gridviewService->getEnvironment();
+        $this->searchForm = $this->gridviewService->getSearchForm();
         $this->dataProvider = $this->gridviewService->getDataProvider();
     }
 
@@ -161,14 +161,14 @@ class Gridview implements GridviewInterface
     {
         $columns = $this->columns->toArray();
 
-        $flagged = array_values(array_filter($columns, static fn ($c) => $c->isExportable()));
+        $flagged = array_values(array_filter($columns, static fn($c) => $c->isExportable()));
         if ($flagged !== []) {
             return $flagged;
         }
 
         return array_values(array_filter(
             $columns,
-            static fn ($c) => $c->isToggleable() && $c->getAttribute() !== null && $c->isVisible()
+            static fn($c) => $c->isToggleable() && $c->getAttribute() !== null && $c->isVisible()
         ));
     }
 
@@ -279,10 +279,10 @@ class Gridview implements GridviewInterface
 
     public function setAttributes(array $attributes): void
     {
-        $this->rowAttr       = $attributes['row']       ?? [];
+        $this->rowAttr = $attributes['row'] ?? [];
         $this->containerAttr = $attributes['container'] ?? [];
-        $this->headerAttr    = $attributes['header']    ?? [];
-        $this->filterAttr    = $attributes['filter']    ?? [];
+        $this->headerAttr = $attributes['header'] ?? [];
+        $this->filterAttr = $attributes['filter'] ?? [];
 
         unset($attributes['row'], $attributes['container'], $attributes['header'], $attributes['filter']);
 
@@ -307,7 +307,8 @@ class Gridview implements GridviewInterface
     public function getFilterBarColumns(): array
     {
         return $this->columns
-            ->filter(fn($col) =>
+            ->filter(
+                fn($col) =>
                 $col instanceof \Fedale\GridviewBundle\Column\DataColumn
                 && $col->isInFilterBar()
             )
@@ -320,6 +321,36 @@ class Gridview implements GridviewInterface
     }
 
     public function parseLayout(string $section): array
+    {
+        preg_match_all('/\{(\w+)(?:\s+[^}]+)?\}/', $this->resolveLayout($section), $matches);
+
+        return $matches[1];
+    }
+
+    /**
+     * Like parseLayout(), but also extracts an optional per-token width given
+     * inline in the layout string, e.g. "{globalSearch 40%} {export 20%}".
+     * The width sizes the layout slot; the rendered control keeps its natural
+     * size inside it. Returns a list of ['token' => string, 'width' => ?string].
+     *
+     * @return array<int, array{token: string, width: ?string}>
+     */
+    public function layoutTokens(string $section): array
+    {
+        preg_match_all('/\{(\w+)(?:\s+([^}]+?))?\s*\}/', $this->resolveLayout($section), $matches, PREG_SET_ORDER);
+
+        $tokens = [];
+        foreach ($matches as $match) {
+            $tokens[] = [
+                'token' => $match[1],
+                'width' => isset($match[2]) ? $this->normalizeWidth($match[2]) : null,
+            ];
+        }
+
+        return $tokens;
+    }
+
+    private function resolveLayout(string $section): string
     {
         $layout = $this->options['layout'][$section] ?? null;
 
@@ -336,9 +367,19 @@ class Gridview implements GridviewInterface
             $layout = implode(' ', $tokens);
         }
 
-        preg_match_all('/\{(\w+)\}/', (string) $layout, $matches);
+        return (string) $layout;
+    }
 
-        return $matches[1];
+    /** Validates an inline width spec, returning a safe CSS length or null. */
+    private function normalizeWidth(string $raw): ?string
+    {
+        $raw = trim($raw);
+
+        if (preg_match('/^\d+(?:\.\d+)?$/', $raw)) {
+            return $raw . '%';
+        }
+
+        return preg_match('/^\d+(?:\.\d+)?(?:%|px|rem|em)$/', $raw) ? $raw : null;
     }
 
     public function layoutTemplate(string $token): string
@@ -361,7 +402,7 @@ class Gridview implements GridviewInterface
     {
         $this->initializeDataProvider();
 
-        $request  = $this->gridviewService->getRequest();
+        $request = $this->gridviewService->getRequest();
         $formName = $this->options['formName'];
 
         $this->urlState = GridviewUrlState::fromRequest(
@@ -389,9 +430,9 @@ class Gridview implements GridviewInterface
         }
 
         $parameters = array_merge($parameters, [
-            'gridview'   => $this,
-            'columns'    => $this->columns,
-            'models'     => $this->dataProvider->getData(),
+            'gridview' => $this,
+            'columns' => $this->columns,
+            'models' => $this->dataProvider->getData(),
             'pagination' => $this->dataProvider->getPagination(),
         ]);
 

@@ -1,3 +1,11 @@
-{% for token in gridview.parseLayout('header') %}
-    {{ gridview_include(gridview, token) }}
+<div class="gv-header">
+{% for item in gridview.layoutTokens('header') %}
+    {% if item.width %}
+    <div class="gv-header__slot" style="flex: 0 0 {{ item.width }}; max-width: {{ item.width }};">
+        {{ gridview_include(gridview, item.token) }}
+    </div>
+    {% else %}
+    {{ gridview_include(gridview, item.token) }}
+    {% endif %}
 {% endfor %}
+</div>
