@@ -8,6 +8,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 interface ColumnInterface
 {
+    public function isActive(): bool;
+
     public function isVisible(): bool;
 
     public function isFilterable(): bool;

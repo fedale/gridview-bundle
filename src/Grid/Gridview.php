@@ -240,6 +240,14 @@ class Gridview implements GridviewInterface
             $column = $this->columnFactory->create($spec, $this, $key);
             $column->setGridview($this);
 
+            // Inactive columns are dropped here, before any wiring: they never
+            // reach the grid, its filters, the export or the CRUD form. This is
+            // the access-control switch (who may see a column), distinct from
+            // `visible` which only hides a registered column with CSS.
+            if (!$column->isActive()) {
+                continue;
+            }
+
             if (isset($this->searchModel) && $column->isFilterable() && isset($column->filter)) {
                 $options = $column->filter['options'] ?? [];
                 if (isset($column->filter['clientOptions'])) {

@@ -180,12 +180,43 @@ $columns = [
 | `label` | `string` | Same as `attribute` | Column header text |
 | `value` | `Closure\|string\|null` | `null` | Custom cell value; closure receives `($data, $key, $column)` |
 | `twigFilter` | `string\|null` | `null` | Any Twig filter applied to the rendered value (e.g. `raw`, `upper`, `date('d/m/Y')`) |
-| `visible` | `bool` | `true` | Whether the column is rendered; `false` columns are hidden but toggleable via the UI |
+| `active` | `bool\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
+| `visible` | `bool\|Closure` | `true` | Whether a (registered) column is shown; `false` columns are still rendered in the DOM and data — just hidden with CSS and toggleable via the UI. To remove a column entirely, use `active` instead |
 | `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it |
 | `sortable` | `bool` | `true` | Whether clicking the header sorts the grid |
 | `filterable` | `bool` | `true` | Whether the column shows a filter input |
 | `filterBar` | `bool` | `false` | Render this column's filter in the `{filterBar}` section instead of inline in the header row |
 | `headerMirror` | `bool` | `false` | Only with `filterBar: true` (text/number filters): also render a synced "mirror" input in the column header. Off by default → the filter lives **only** in the filterBar |
+
+#### `active` vs `visible` — access control
+
+`visible: false` still ships the column (DOM + data); it is only hidden with CSS
+and can be re-enabled from the UI. `active: false` removes it entirely — it is
+never registered, so it has no header, no cell, no filter, no export column and
+no field in the generated CRUD form. That makes `active` the right switch for
+**per-user / per-role column access**:
+
+```php
+protected function buildColumns(): array
+{
+    $canSeeSalary = $this->isGranted('ROLE_HR');
+
+    return [
+        ['attribute' => 'name'],
+        [
+            'attribute' => 'salary',
+            'type'      => 'money',
+            'active'    => $canSeeSalary,        // absent for everyone else
+            'control'   => ['type' => 'money'],
+        ],
+        // a closure is also accepted (evaluated once at build time):
+        ['attribute' => 'ssn', 'active' => fn() => $this->isGranted('ROLE_ADMIN')],
+    ];
+}
+```
+
+Because inactive columns never reach the CRUD form, a user who cannot see a
+column also cannot edit its value through the grid's add/update form.
 
 ### Column types
 
