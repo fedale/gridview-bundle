@@ -18,6 +18,14 @@ abstract class AbstractColumn implements ColumnInterface
     /** @var callable|null */
     public $content;
 
+    /**
+     * Whether the column is registered on the grid at all. Unlike `visible`
+     * (which only hides the column with CSS, keeping it in the DOM and data),
+     * an inactive column is never added to the grid: no header, body cell,
+     * filter, export entry or CRUD form field. Use it for access control —
+     * deciding *who* may see a column, not just whether it is shown.
+     */
+    protected bool $active     = true;
     protected bool $visible    = true;
     protected bool $sortable   = true;
     protected bool $filterable = true;
@@ -97,6 +105,21 @@ abstract class AbstractColumn implements ColumnInterface
     public function setTwigFilter(string $twigFilter): void
     {
         $this->twigFilter = $twigFilter;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool|\Closure $active
+     */
+    public function setActive($active): static
+    {
+        $this->active = $active instanceof \Closure ? (bool) $active() : (bool) $active;
+
+        return $this;
     }
 
     public function isVisible(): bool

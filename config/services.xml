@@ -65,6 +65,7 @@
         <service id="fedale_gridview.grid_form_builder" class="Fedale\GridviewBundle\Form\GridFormBuilder">
             <argument type="service" id="form.factory"/>
             <argument type="service" id="fedale_gridview.control_type_registry"/>
+            <argument type="service" id="fedale_gridview.i18n_catalog"/>
         </service>
         <service id="Fedale\GridviewBundle\Form\GridFormBuilder" alias="fedale_gridview.grid_form_builder"/>
         <service id="Fedale\GridviewBundle\Contract\GridFormBuilderInterface" alias="fedale_gridview.grid_form_builder"/>

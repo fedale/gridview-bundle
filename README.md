@@ -130,7 +130,8 @@ attribute: the name of columnn
 value: is the value to display, you can use a closure 
 filter: filter to use, like 'text' or 'select'
 twigFilter: one of twig filter 
-visible: boolean
+active: boolean (or closure) — register the column at all; `false` removes it entirely (access control). See docs for `active` vs `visible`
+visible: boolean — show/hide a registered column (CSS only; stays in DOM/data)
 label: 
 ## Internationalization (i18n)
 
