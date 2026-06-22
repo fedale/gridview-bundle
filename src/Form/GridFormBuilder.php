@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Form;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\GridFormBuilderInterface;
 use Fedale\GridviewBundle\Form\Control\ControlTypeRegistry;
+use Fedale\GridviewBundle\I18n\GridviewI18nCatalog;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -22,6 +23,7 @@ class GridFormBuilder implements GridFormBuilderInterface
     public function __construct(
         private FormFactoryInterface $formFactory,
         private ControlTypeRegistry $controlTypeRegistry,
+        private GridviewI18nCatalog $i18nCatalog,
     ) {
     }
 
@@ -64,9 +66,14 @@ class GridFormBuilder implements GridFormBuilderInterface
             $rootConstraints[] = new UniqueEntity($entityOptions);
         }
 
+        // Resolve labels against the client i18n domain (same as the grid headers),
+        // so column labels expressed as translation keys (e.g. `col.customer.code`)
+        // are translated in the form too. Plain-text labels pass through unchanged.
+        // Caller-provided form_options can still override the domain.
         $formOptions = array_merge([
-            'data_class' => $dataClass,
-            'method'     => 'POST',
+            'data_class'         => $dataClass,
+            'method'             => 'POST',
+            'translation_domain' => $this->i18nCatalog->getClientDomain(),
         ], $options['form_options'] ?? []);
         if ($rootConstraints !== []) {
             $formOptions['constraints'] = $rootConstraints;
@@ -108,7 +115,7 @@ class GridFormBuilder implements GridFormBuilderInterface
             $options['name'] ?? 'batch',
             FormType::class,
             null,
-            ['method' => 'POST']
+            ['method' => 'POST', 'translation_domain' => $this->i18nCatalog->getClientDomain()]
         );
 
         foreach ($columns as $column) {

@@ -9,7 +9,7 @@
     {% if rows is not empty %}
     <dl class="row mb-3">
         {% for row in rows %}
-        <dt class="col-sm-4 text-muted">{{ row.label }}</dt>
+        <dt class="col-sm-4 text-muted">{{ gv_client_text(row.label) }}</dt>
         <dd class="col-sm-8">{{ row.value }}</dd>
         {% endfor %}
     </dl>
