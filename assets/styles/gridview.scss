@@ -451,6 +451,38 @@
   }
 }
 
+// ── Bootstrap dropdowns inside the grid ───────────────────────────
+//
+// The checkbox-header menu, {savedSearch} and {export} use the host app's
+// Bootstrap dropdown classes (.dropdown-menu/.dropdown-item). Left alone they
+// inherit Bootstrap's ~1rem sizing and read oversized next to the grid. Scope
+// them to the grid's own input scale so all menus look consistent with the
+// native .gv-dropdown above.
+
+[data-gridview] {
+  .dropdown-menu {
+    font-size: var(--gv-input-font-size);
+    padding: .3rem 0;
+    min-width: 180px;
+  }
+
+  .dropdown-item,
+  .dropdown-item-text {
+    font-size: var(--gv-input-font-size);
+    padding: .3rem .75rem;
+  }
+
+  .dropdown-divider {
+    margin: .3rem 0;
+  }
+
+  // Caret toggle of the checkbox-header menu: match the .gv-caret look
+  // (small, dimmed) so it reads the same as the {Columns} / filter carets.
+  .gv-caret {
+    line-height: 1;
+  }
+}
+
 // ── Multi-select (relation filter) ────────────────────────────────
 
 [data-gridview] .gv-multi-select {

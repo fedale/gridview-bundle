@@ -34,8 +34,8 @@ class CheckboxColumn extends AbstractColumn
          data-gridview-selection-target="headerCheckbox"
          data-action="change->gridview-selection#togglePage">
   <div class="dropdown">
-    <button class="btn btn-sm btn-link p-0 text-reset"
-            data-bs-toggle="dropdown" type="button">&#x25BE;</button>
+    <button class="btn btn-sm btn-link p-0 text-reset gv-caret"
+            data-bs-toggle="dropdown" type="button" aria-label="Menu selezione">&#x25BE;</button>
     <ul class="dropdown-menu">
       <li><button class="dropdown-item" type="button"
                   data-action="click->gridview-selection#selectAll">Seleziona tutti</button></li>
@@ -46,7 +46,7 @@ class CheckboxColumn extends AbstractColumn
                   data-action="click->gridview-selection#deselectAll">Deseleziona</button></li>
       <li><hr class="dropdown-divider"></li>
       <li><button class="dropdown-item" type="button"
-                  data-action="click->gridview-selection#saveSelection">💾 Salva selezione…</button></li>
+                  data-action="click->gridview-selection#saveSelection"><span class="gv-icon-sm" aria-hidden="true">💾</span> Salva selezione…</button></li>
       <span data-gridview-selection-target="savedList"></span>
     </ul>
   </div>
