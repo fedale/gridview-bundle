@@ -156,7 +156,7 @@ class DataColumn extends AbstractColumn
     }
 
     public function renderHeader($label): string
-    {        
+    {
         if ($this->sortable) {
             $sort = $this->gridview->getDataProvider()->getSort();
 
@@ -167,8 +167,44 @@ class DataColumn extends AbstractColumn
                 return $sort->createLink($sortAttribute, $this->gridview, ['label' => $label]);
             }
         }
-        
+
         return $label;
+    }
+
+    public function sortState(): ?string
+    {
+        $attribute = $this->resolveSortAttribute();
+
+        if ($attribute === null) {
+            return null;
+        }
+
+        return $this->gridview->getDataProvider()->getSort()->getAttributeOrder($attribute) ?? 'none';
+    }
+
+    /** Toggle-sort URL for this column, or null when not managed by Sort. */
+    public function sortUrl(): ?string
+    {
+        $attribute = $this->resolveSortAttribute();
+
+        if ($attribute === null) {
+            return null;
+        }
+
+        return $this->gridview->getDataProvider()->getSort()->createUrl($attribute, $this->gridview);
+    }
+
+    /** The Sort attribute key driving this column, or null if not sortable. */
+    private function resolveSortAttribute(): ?string
+    {
+        if (!$this->sortable) {
+            return null;
+        }
+
+        $sort = $this->gridview->getDataProvider()->getSort();
+
+        return $sort->hasAttribute($this->label) ? $this->label
+            : ($sort->hasAttribute($this->attribute) ? $this->attribute : null);
     }
 
     // https://stackoverflow.com/questions/14704984/access-a-multidimensional-array-with-dot-notation

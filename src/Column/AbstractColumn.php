@@ -169,6 +169,17 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
+     * Current sort state of this column, for rendering the header indicator:
+     *   null   → not managed by the Sort object (no indicator)
+     *   'none' → sortable but not the active sort
+     *   'asc' / 'desc' → active sort direction
+     */
+    public function sortState(): ?string
+    {
+        return null;
+    }
+
+    /**
      * @param bool|\Closure $sortable
      */
     public function setSortable($sortable): static

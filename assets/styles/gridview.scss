@@ -96,8 +96,8 @@
     }
   }
 
-  thead th.asc a,
-  thead th.desc a { color: var(--gv-sort-active-color); }
+  thead th a.gv-sort.asc,
+  thead th a.gv-sort.desc { color: var(--gv-sort-active-color); }
 
   tbody td {
     padding: .35rem .6rem;
@@ -109,24 +109,64 @@
   tbody tr:hover > td { background: var(--gv-tr-hover-bg); }
 }
 
+// ── Header cell layout (label left, icons pinned far right) ────────
+
+[data-gridview] .gv-th {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+[data-gridview] .gv-th__label { min-width: 0; }
+
+// Icon group pinned to the far right of the cell. DOM order is clear-filter
+// then sort, so they read left→right as: [clear] [sort], sort being rightmost.
+[data-gridview] .gv-th__icons {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+// ── Sort indicator (↕ none · ↑ asc · ↓ desc) ───────────────────────
+
+[data-gridview] .gv-sort-ind {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--gv-sort-color);
+
+  &:hover { color: var(--gv-sort-active-color); }
+  &::after { font-size: 1.1em; }
+}
+[data-gridview] .gv-sort-ind--none::after { content: '\2195'; opacity: .5; }                          // ↕
+[data-gridview] .gv-sort-ind--asc::after  { content: '\2191'; color: var(--gv-sort-active-color); }   // ↑
+[data-gridview] .gv-sort-ind--desc::after { content: '\2193'; color: var(--gv-sort-active-color); }   // ↓
+
 // ── Filter header icon ─────────────────────────────────────────────
 
 [data-gridview] .gv-filter-icon {
+  // Hidden until a filter is active on this column: it's a "clear filter"
+  // affordance, so it only appears when there's something to clear.
+  display: none;
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 0 2px;
   vertical-align: middle;
-  opacity: .25;
-  color: inherit;
+  color: var(--gv-sort-active-color);
   transition: opacity var(--gv-transition);
 
-  &:hover { opacity: .6; }
-
   &.gv-filter-icon--active {
+    display: inline-flex;
+    align-items: center;
     opacity: 1;
-    color: var(--gv-sort-active-color);
   }
+
+  &:hover { opacity: .7; }
 }
 
 // ── Filter cell (inline clear) ────────────────────────────────────

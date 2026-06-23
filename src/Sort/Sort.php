@@ -312,16 +312,15 @@ class Sort implements SortInterface
     {
         $sortType = $this->getAttributeOrder($attribute);
 
-        if ($sortType) {
-            $options['class'] = implode(" ", [$options['class'] ?? null, $sortType]);
-            if (isset($options['class'])) {
-                $options['class'] .= ' '.$sortType;
-            } else {
-                $options['class'] = $sortType;
-            }
+        // Base class `gv-sort` marks the link as sortable (drives the neutral
+        // ▲▼ glyph in CSS); `asc`/`desc` light up the active direction.
+        $classes = ['gv-sort'];
+        if (!empty($options['class'])) {
+            $classes[] = $options['class'];
         }
-
-        $options['data-sort'] = $this->createSortParam($attribute);
+        if ($sortType) {
+            $classes[] = $sortType;
+        }
 
         if (isset($options['label'])) {
             $label = $options['label'];
@@ -331,8 +330,11 @@ class Sort implements SortInterface
         }
 
         $url        = $this->createUrl($attribute, $gridview);
+        $dataSort   = htmlspecialchars($this->createSortParam($attribute), ENT_QUOTES);
         $turboAttr  = $gridview->getOptions()['useTurbo'] ? ' data-turbo-action="advance"' : '';
-        return '<a href="' . $url . '"' . $turboAttr . '>' . $label . '</a>';
+
+        return '<a href="' . $url . '" class="' . implode(' ', $classes) . '"'
+            . ' data-sort="' . $dataSort . '"' . $turboAttr . '>' . $label . '</a>';
     }
 
     /**

@@ -328,7 +328,19 @@ export default class extends Controller {
 
     _hasValue(el) {
         if (el.tagName === 'SELECT') {
-            return [...el.options].some(o => o.selected && o.value !== '');
+            // A hydrated <select> is the source of truth.
+            if (el.options.length > 0) {
+                return [...el.options].some(o => o.selected && o.value !== '');
+            }
+            // Relation filters strip their <option>s server-side (they're moved
+            // into data attributes and rebuilt lazily by the relation-filter
+            // controller). Until that happens the <select> is empty, so fall
+            // back to the server-rendered selection.
+            const raw = el.dataset.gridviewRelationFilterSelectedValue;
+            if (raw) {
+                try { return JSON.parse(raw).length > 0; } catch (_) { /* ignore */ }
+            }
+            return false;
         }
         return el.value !== '' && el.value !== null;
     }
