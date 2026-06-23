@@ -17,7 +17,7 @@
                        data-col="{{ colIndex }}"
                        data-action="change->gridview-visibility#toggle"
                        {{ column.isVisible() ? 'checked' : '' }}>
-                {{ column.label }}
+                {{ gv_header_label(column.label) }}
             </label>
         </li>
         {% endfor %}

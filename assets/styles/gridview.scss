@@ -428,10 +428,14 @@
     border-radius: var(--gv-dropdown-radius);
     box-shadow: var(--gv-dropdown-shadow);
     padding: .3rem 0;
+    margin: 0;
+    list-style: none;
     z-index: 1050;
     display: none;
 
     &.gv-open { display: block; }
+
+    li { list-style: none; }
   }
 
   .gv-dropdown-item {
