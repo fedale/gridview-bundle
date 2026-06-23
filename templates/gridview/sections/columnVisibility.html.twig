@@ -1,4 +1,4 @@
-{% set toggleable = columns|filter(c => c.isToggleable() and c.label) %}
+{% set toggleable = gridview.indexColumns|filter(c => c.isToggleable() and c.label) %}
 {% if toggleable is not empty %}
 <div class="gv-dropdown"
      data-controller="gridview-visibility"

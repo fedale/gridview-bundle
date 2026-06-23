@@ -130,7 +130,7 @@ attribute: the name of columnn
 value: is the value to display, you can use a closure 
 filter: filter to use, like 'text' or 'select'
 twigFilter: one of twig filter 
-active: boolean (or closure) — register the column at all; `false` removes it entirely (access control). See docs for `active` vs `visible`
+active: boolean | array | closure — where the column is rendered. `true` (default) everywhere; `false` nowhere (access-control kill-switch: no cell, filter, export or form field); an array gives per-context control with `{inIndex, inView, inCreate, inUpdate}` (omitted keys default to `true`). A column inactive in `index` only is still registered — filterable, exportable and editable in Create/Update forms — but produces no table cell and no "Columns" toggle entry. A closure may return any of these. See docs for `active` vs `visible`
 visible: boolean — show/hide a registered column (CSS only; stays in DOM/data)
 label: 
 ## Internationalization (i18n)

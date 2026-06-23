@@ -2,7 +2,7 @@
 <tbody>
 {% for row in models %}
     <tr {{ gridview.rowAttr|merge(row.attr ?? {})|options }}>
-        {% for column in columns %}
+        {% for column in gridview.indexColumns %}
             <td data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}"{% if not column.isVisible() %} style="display:none"{% endif %} {{ column.options|options }}>
             {% set index = loop.parent.loop.index0 %}
                 {% set cellContent %}

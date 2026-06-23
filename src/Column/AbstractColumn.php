@@ -19,13 +19,20 @@ abstract class AbstractColumn implements ColumnInterface
     public $content;
 
     /**
-     * Whether the column is registered on the grid at all. Unlike `visible`
-     * (which only hides the column with CSS, keeping it in the DOM and data),
-     * an inactive column is never added to the grid: no header, body cell,
-     * filter, export entry or CRUD form field. Use it for access control —
-     * deciding *who* may see a column, not just whether it is shown.
+     * Per-context rendering switch. Unlike `visible` (which only hides the
+     * column with CSS, keeping it in the DOM and data), an inactive context
+     * suppresses rendering there entirely. Set via `active => bool|array`:
+     *   - true  (default): rendered everywhere;
+     *   - false: rendered nowhere — the access-control kill-switch (no header,
+     *     body cell, filter, export entry or CRUD form field);
+     *   - array: granular `{inIndex, inView, inCreate, inUpdate}` (omitted keys
+     *     default to true), mapped to the contexts below. A column inactive in
+     *     `index` only is still registered (filterable, exportable, editable in
+     *     forms) but produces no table cell and no "Columns" toggle entry.
+     *
+     * @var array{index: bool, view: bool, create: bool, update: bool}
      */
-    protected bool $active     = true;
+    protected array $active = ['index' => true, 'view' => true, 'create' => true, 'update' => true];
     protected bool $visible    = true;
     protected bool $sortable   = true;
     protected bool $filterable = true;
@@ -109,15 +116,34 @@ abstract class AbstractColumn implements ColumnInterface
 
     public function isActive(): bool
     {
-        return $this->active;
+        return \in_array(true, $this->active, true);
+    }
+
+    public function isActiveIn(string $context): bool
+    {
+        return $this->active[$context] ?? true;
     }
 
     /**
-     * @param bool|\Closure $active
+     * @param bool|array|\Closure $active
      */
     public function setActive($active): static
     {
-        $this->active = $active instanceof \Closure ? (bool) $active() : (bool) $active;
+        if ($active instanceof \Closure) {
+            $active = $active();
+        }
+
+        if (\is_array($active)) {
+            $this->active = [
+                'index'  => (bool) ($active['inIndex']  ?? true),
+                'view'   => (bool) ($active['inView']   ?? true),
+                'create' => (bool) ($active['inCreate'] ?? true),
+                'update' => (bool) ($active['inUpdate'] ?? true),
+            ];
+        } else {
+            $flag = (bool) $active;
+            $this->active = ['index' => $flag, 'view' => $flag, 'create' => $flag, 'update' => $flag];
+        }
 
         return $this;
     }

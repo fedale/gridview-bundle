@@ -109,6 +109,22 @@ class Gridview implements GridviewInterface
         return $this->columns;
     }
 
+    /**
+     * Columns to render in the grid table (header, body, footer, filter row and
+     * the "Columns" toggle): registered columns active in the `index` context.
+     * Columns inactive in `index` only stay in {@see getColumns()} (filterable,
+     * exportable, editable in forms) but produce no table cell.
+     */
+    public function getIndexColumns(): ArrayCollection
+    {
+        // Re-index to contiguous 0..n keys so the per-column `data-col` used by
+        // the visibility/reorder JS (derived from the preserved keys here and
+        // from loop.index0 in thead/tbody) stays aligned across sections.
+        return new ArrayCollection(array_values(
+            $this->columns->filter(static fn(ColumnInterface $c) => $c->isActiveIn('index'))->toArray()
+        ));
+    }
+
     public function addColumn(ColumnInterface $column): void
     {
         $this->columns->add($column);

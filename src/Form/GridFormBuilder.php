@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Form;
 
 use Fedale\GridviewBundle\Contract\ColumnInterface;
+use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
 use Fedale\GridviewBundle\Contract\GridFormBuilderInterface;
 use Fedale\GridviewBundle\Form\Control\ControlTypeRegistry;
 use Fedale\GridviewBundle\I18n\GridviewI18nCatalog;
@@ -44,6 +45,14 @@ class GridFormBuilder implements GridFormBuilderInterface
             $modes = $column->getControl()['modes'] ?? null;
             if ($mode !== null && $modes !== null && !\in_array($mode, $modes, true)) {
                 continue;
+            }
+            // Honour the column's per-context `active` switch: add/clone map to the
+            // `create` context, edit to `update`.
+            if ($mode !== null) {
+                $context = $mode === GridCrudHandlerInterface::MODE_EDIT ? 'update' : 'create';
+                if (!$column->isActiveIn($context)) {
+                    continue;
+                }
             }
             $active[] = $column;
         }

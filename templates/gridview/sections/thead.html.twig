@@ -1,7 +1,7 @@
 <thead {{ gridview.headerAttr|options }}>
     <tr>
         {% set gvReorder = gridview.options.reorderColumns|default(false) %}
-        {% for column in columns %}
+        {% for column in gridview.indexColumns %}
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
         <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}"{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
             {{ column.renderHeader(gv_header_label(column.label))|raw }}

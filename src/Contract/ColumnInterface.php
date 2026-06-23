@@ -10,6 +10,8 @@ interface ColumnInterface
 {
     public function isActive(): bool;
 
+    public function isActiveIn(string $context): bool;
+
     public function isVisible(): bool;
 
     public function isFilterable(): bool;

@@ -26,6 +26,8 @@ class FakeDetailColumn implements ColumnInterface
         $this->renderer = $renderer ?? static fn ($model, $index) => $model->data[$attribute] ?? null;
     }
 
+    public function isActive(): bool { return true; }
+    public function isActiveIn(string $context): bool { return true; }
     public function isVisible(): bool { return $this->visible; }
     public function isFilterable(): bool { return false; }
     public function isSortable(): bool { return false; }
