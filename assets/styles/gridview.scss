@@ -1048,3 +1048,45 @@ turbo-frame[busy] > [data-gridview] {
   color: var(--gv-color-text-muted);
 }
 [data-gridview] .gv-resp-detail-value { min-width: 0; }
+
+// ── Infinite scroll ───────────────────────────────────────────────
+
+[data-gridview] .gv-infinite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 0;
+}
+
+// Invisible bottom marker observed by the IntersectionObserver.
+[data-gridview] .gv-infinite-sentinel {
+  width: 100%;
+  height: 1px;
+  pointer-events: none;
+}
+
+[data-gridview] .gv-infinite-more {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .9rem;
+  cursor: pointer;
+  color: var(--gv-color-text);
+  background: var(--gv-color-bg);
+  border: 1px solid var(--gv-table-border);
+  border-radius: var(--gv-radius);
+  font: inherit;
+
+  &:hover { background: var(--gv-color-bg-subtle); }
+}
+
+// Spinner shows only while a page is being fetched.
+[data-gridview] .gv-infinite-spinner { display: none; }
+[data-gridview] .gv-infinite-loading .gv-infinite-spinner { display: inline-block; }
+[data-gridview] .gv-infinite-loading .gv-infinite-more { opacity: .7; pointer-events: none; }
+
+[data-gridview] .gv-infinite-status {
+  font-size: var(--gv-input-font-size);
+  color: var(--gv-color-text-muted);
+}

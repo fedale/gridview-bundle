@@ -482,6 +482,17 @@ class Gridview implements GridviewInterface
             'pagination' => $this->dataProvider->getPagination(),
         ]);
 
+        // Infinite scroll: rows-only Turbo Stream for ?_rows=1 (append rows + replace
+        // the infinite section). The requested page already drives getData(), so the
+        // models in $parameters are the next page's rows.
+        if ($this->options['useTurbo'] && $request->query->getBoolean('_rows')) {
+            return new Response(
+                $this->twig->render('@FedaleGridview/gridview/sections/_rows_stream.html.twig', $parameters),
+                Response::HTTP_OK,
+                ['Content-Type' => 'text/vnd.turbo-stream.html'],
+            );
+        }
+
         $template = ($this->options['useTurbo'] && $request->headers->has('Turbo-Frame'))
             ? '@FedaleGridview/gridview/_grid.html.twig'
             : $view;

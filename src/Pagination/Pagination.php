@@ -268,6 +268,14 @@ class Pagination implements PaginationInterface
     }
 
     /**
+     * Get total number of items.
+     */
+    public function getTotalCount(): int
+    {
+        return $this->totalCount;
+    }
+
+    /**
      * Set total number of items.
      *
      * @param int|float $totalCount

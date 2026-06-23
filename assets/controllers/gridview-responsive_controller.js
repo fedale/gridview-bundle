@@ -24,6 +24,11 @@ export default class extends Controller {
         this._frame = null;
         this._ro = new ResizeObserver(() => this._schedule());
         if (this.hasWrapTarget) this._ro.observe(this.element);
+        // Rows appended by infinite scroll aren't collapsed yet — re-run after append.
+        this._onRowsAppended = (e) => {
+            if (!e.detail || e.detail.element === this.element) this._schedule();
+        };
+        window.addEventListener('gridview:rows-appended', this._onRowsAppended);
         // Defer the first pass one frame so sibling controllers (visibility
         // restore, etc.) have applied their inline state before we measure.
         this._schedule();
@@ -32,6 +37,7 @@ export default class extends Controller {
     disconnect() {
         this._ro?.disconnect();
         if (this._frame) cancelAnimationFrame(this._frame);
+        window.removeEventListener('gridview:rows-appended', this._onRowsAppended);
     }
 
     _schedule() {

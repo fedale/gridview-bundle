@@ -7,6 +7,8 @@ pagination.previous: "Pagina precedente"
 pagination.next: "Pagina successiva"
 pagination.last: "Ultima pagina"
 pagination.jump: "Vai a pagina"
+pagination.loadMore: "Carica altri"
+pagination.results: "%total% risultati"
 
 bulk.selected: "selezionati"
 bulk.update: "Modifica in blocco"

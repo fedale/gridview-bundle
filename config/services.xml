@@ -204,6 +204,10 @@
             <tag name="fedale_gridview.paginator_strategy" priority="256"/>
         </service>
 
+        <service id="fedale_gridview.paginator_strategy.infinite" class="Fedale\GridviewBundle\Pagination\Strategy\InfiniteScrollStrategy">
+            <tag name="fedale_gridview.paginator_strategy" priority="256"/>
+        </service>
+
         <service id="fedale_gridview.paginator_strategy_registry" class="Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry">
             <argument type="tagged_iterator" tag="fedale_gridview.paginator_strategy"/>
         </service>

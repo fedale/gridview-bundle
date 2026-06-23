@@ -1,30 +1,8 @@
 
-<tbody>
-{% for row in models %}
-    <tr {{ gridview.rowAttr|merge(row.attr ?? {})|options }}>
-        {% if gridview.options.responsive|default(false) %}<td class="gv-resp-ctrl"><button type="button" class="gv-resp-toggle" data-action="click->gridview-responsive#toggle" aria-expanded="false" aria-label="Mostra dettagli"></button></td>{% endif %}
-        {% for column in gridview.indexColumns %}
-            <td data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}" data-priority="{{ column.priority }}"{% if not column.isVisible() %} style="display:none"{% endif %} {{ column.options|options }}>
-            {% set index = loop.parent.loop.index0 %}
-                {% set cellContent %}
-                    {% if column.twigFilter %}
-                        {{ include(template_from_string('{{ column.render(row, index)|' ~ column.twigFilter ~ ' }}')) }}
-                    {% else %}
-                        {{ column.render(row, index) }}
-                    {% endif %}
-                {% endset %}
-                {% if column.isEditable() %}
-                    <span class="gv-editable"
-                          data-action="{{ column.editableTrigger }}->gridview-inline-edit#edit"
-                          data-gv-field="{{ column.attribute }}"
-                          data-gv-id="{{ row.data.id }}">{{ cellContent|raw }}</span>
-                {% else %}
-                    {{ cellContent|raw }}
-                {% endif %}
-            </td>
-        {% endfor %}
-    </tr>
-{% else %}
+<tbody id="gv-tbody-{{ gridview.key }}">
+{% if models is empty %}
     {% include gridview.layoutTemplate('empty') %}
-{% endfor %}
+{% else %}
+    {% include '@FedaleGridview/gridview/sections/_rows.html.twig' %}
+{% endif %}
 </tbody>

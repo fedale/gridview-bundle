@@ -163,7 +163,7 @@ class EntityDataProvider extends AbstractDataProvider
 
         $event = new RowEvent();
         foreach ($this->paginator as $key => $model) {
-            $row       = new Row($key, $this->pagination->getPageSize());
+            $row       = new Row($key, $this->pagination->getPageSize(), $this->pagination->getOffset());
             $row->data = $serializer->normalize($model);
             $event->row = $row;
             $this->eventDispatcher->dispatch($event, RowEvent::BEFORE_ROW);

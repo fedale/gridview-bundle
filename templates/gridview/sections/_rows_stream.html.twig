@@ -1,0 +1,16 @@
+{#
+  Risposta "solo righe" dell'infinite scroll. Serve con
+  Content-Type: text/vnd.turbo-stream.html (vedi Gridview::renderGrid).
+  Appende le righe della pagina richiesta al <tbody> e rimpiazza la sezione
+  infinite, che riporta la nuova pagina corrente e l'URL della successiva.
+#}
+<turbo-stream action="append" target="gv-tbody-{{ gridview.key }}">
+    <template>
+        {% include '@FedaleGridview/gridview/sections/_rows.html.twig' %}
+    </template>
+</turbo-stream>
+<turbo-stream action="replace" target="gv-infinite-{{ gridview.key }}">
+    <template>
+        {% include '@FedaleGridview/gridview/sections/paginators/infinite.html.twig' %}
+    </template>
+</turbo-stream>

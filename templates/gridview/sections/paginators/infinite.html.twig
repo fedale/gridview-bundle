@@ -1,0 +1,36 @@
+{# Sezione infinite scroll: rimpiazza il token {pagination} quando
+   options.pagination.mode == 'infinite'. Stato (pagina/ultima/URL prossima) sui
+   data-*; il controller Stimulus li rilegge dal DOM ad ogni loadMore, così segue
+   il nodo ricreato dal turbo-stream replace. Funziona anche senza JS grazie al
+   bottone "Carica altri". #}
+{% set _currentRoute = app.request.attributes.get('_route') %}
+{% set _lastPage     = pagination.pageCount %}
+{% set _page         = max(1, min(gridview.urlState.page, _lastPage > 0 ? _lastPage : 1)) %}
+{% set _hasMore      = _page < _lastPage %}
+{% set _nextUrl      = path(_currentRoute, gridview.urlState.withPage(_page + 1)|merge({'_rows': 1})) %}
+{% set _rootMargin   = gridview.options.pagination.options.infiniteRootMargin|default('300px') %}
+
+<div id="gv-infinite-{{ gridview.key }}"
+     class="gv-infinite"
+     data-gridview-infinite-scroll-target="section"
+     data-gv-page="{{ _page }}"
+     data-gv-last-page="{{ _lastPage }}"
+     data-gv-next-url="{{ _nextUrl }}"
+     data-gv-root-margin="{{ _rootMargin }}">
+
+    {% if _hasMore %}
+        <div class="gv-infinite-sentinel"
+             data-gridview-infinite-scroll-target="sentinel"
+             aria-hidden="true"></div>
+        <button type="button"
+                class="gv-infinite-more"
+                data-action="gridview-infinite-scroll#loadMore">
+            <span class="gv-infinite-spinner gv-spinner" aria-hidden="true"></span>
+            <span class="gv-infinite-more-label">{{ 'pagination.loadMore'|trans({}, 'GridviewBundle') }}</span>
+        </button>
+    {% endif %}
+
+    <div class="gv-infinite-status" aria-live="polite">
+        {{ 'pagination.results'|trans({'%total%': pagination.totalCount}, 'GridviewBundle') }}
+    </div>
+</div>
