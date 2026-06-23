@@ -971,3 +971,80 @@ turbo-frame[busy] > [data-gridview] {
   font-size: .8125rem;
   white-space: pre;
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Responsive — priority-based column collapse (gridview-responsive)
+// ═══════════════════════════════════════════════════════════════════
+
+// Overflow wrapper: lets the table size to its content so the JS can detect
+// when columns no longer fit. Doubles as a horizontal-scroll fallback when no
+// column is collapsible (all priority 0) but the table is still too wide.
+[data-gridview] .gv-resp-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  > table[data-gv] {
+    width: auto;
+    min-width: 100%;
+  }
+}
+
+// Cells collapsed by the controller. A class (not inline display) so this never
+// collides with the column-visibility controller's inline style.display.
+[data-gridview] th.gv-resp-collapsed,
+[data-gridview] td.gv-resp-collapsed { display: none; }
+
+// Control column: hidden until at least one column collapses.
+[data-gridview] th.gv-resp-ctrl,
+[data-gridview] td.gv-resp-ctrl {
+  display: none;
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+  padding-inline: .35rem;
+}
+[data-gridview] .gv-resp-wrap.gv-has-collapsed th.gv-resp-ctrl,
+[data-gridview] .gv-resp-wrap.gv-has-collapsed td.gv-resp-ctrl { display: table-cell; }
+
+// Expand/collapse toggle (+ / −).
+[data-gridview] .gv-resp-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  line-height: 1;
+  font-weight: 700;
+  border: 1px solid var(--gv-btn-primary-bg);
+  border-radius: 50%;
+  background: var(--gv-btn-primary-bg);
+  color: var(--gv-btn-primary-color);
+  cursor: pointer;
+  transition: background var(--gv-transition);
+
+  &::before { content: '+'; }
+  &[aria-expanded="true"]::before { content: '\2212'; } // −
+  &:hover { background: var(--gv-btn-primary-hover); }
+}
+
+// Detail row: label/value pairs of the hidden cells for that row.
+[data-gridview] tr.gv-resp-detail > td {
+  background: var(--gv-tr-hover-bg);
+  padding: .5rem .75rem;
+}
+[data-gridview] .gv-resp-detail-item {
+  display: flex;
+  gap: .75rem;
+  padding: .15rem 0;
+  font-size: var(--gv-input-font-size);
+
+  & + .gv-resp-detail-item { border-top: 1px dashed var(--gv-table-border); }
+}
+[data-gridview] .gv-resp-detail-label {
+  flex: 0 0 30%;
+  max-width: 12rem;
+  font-weight: 600;
+  color: var(--gv-color-text-muted);
+}
+[data-gridview] .gv-resp-detail-value { min-width: 0; }

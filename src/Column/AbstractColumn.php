@@ -40,6 +40,18 @@ abstract class AbstractColumn implements ColumnInterface
     protected bool $exportable = false;
 
     /**
+     * Responsive-collapse priority, consumed only by the `gridview-responsive`
+     * controller (active when the grid's `responsive` option is on). Semantics:
+     *   - 0 (default): pinned — the column is never collapsed on narrow screens;
+     *   - N > 0: collapsible. When the table overflows its container, columns are
+     *     hidden into an expandable detail row in DESCENDING priority order, so a
+     *     HIGHER number drops FIRST (least important). Ties drop right-to-left.
+     * Structural columns (action/checkbox/serial) keep the default 0, so they
+     * always stay visible.
+     */
+    protected int $priority = 0;
+
+    /**
      * Normalized write-side control spec, or null when the column has no
      * editable control: ['type' => string, 'required' => bool, 'options' => array].
      */
@@ -273,6 +285,18 @@ abstract class AbstractColumn implements ColumnInterface
     public function setExportable(bool $exportable): void
     {
         $this->exportable = $exportable;
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(int $priority): static
+    {
+        $this->priority = $priority;
+
+        return $this;
     }
 
     /** Inline-editable when `editable` is truthy AND the column has a control. */

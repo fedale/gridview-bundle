@@ -10,6 +10,7 @@
     {% if gvCrud %}{% set gvControllers = gvControllers|merge(['gridview-crud']) %}{% endif %}
     {% if gvInline %}{% set gvControllers = gvControllers|merge(['gridview-inline-edit']) %}{% endif %}
     {% if gridview.options.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
+    {% if gridview.options.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
     {% if gvRealtime %}{% set gvControllers = gvControllers|merge(['gridview-mercure']) %}{% endif %}
     <div data-gridview
          data-gv-max-query-length="{{ gridview.options.maxQueryLength }}"
