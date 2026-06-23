@@ -2175,7 +2175,19 @@ pagination) and the **export columns** (those flagged `exportable`, else the vis
 Built-in formats (all native PHP, no extra dependency): **CSV** (`csv`), **Excel** (`xlsx`, a real
 Office Open XML file), **PDF** (`pdf`, a paginated Helvetica table) and **JSON** (`json`). The set is
 **extensible** — implement `ExporterInterface` and the service is auto-registered (no config),
-appearing in the export menu and selectable via `?format=<key>`:
+appearing in the export menu and selectable via `?format=<key>`.
+
+| Format | `?format=` | Estensione | Note |
+| --- | --- | --- | --- |
+| CSV | `csv` | `.csv` | UTF-8 con BOM (Excel apre l'UTF-8 correttamente); valori HTML appiattiti a testo |
+| Excel | `xlsx` | `.xlsx` | File Office Open XML reale (via `ZipArchive`), riga di intestazione in grassetto, celle numeriche dove il valore è numerico. Senza l'estensione `zip` ripiega su CSV |
+| PDF | `pdf` | `.pdf` | PDF minimale scritto a mano (A4 orizzontale, font core Helvetica), tabella paginata con troncamento delle colonne. Per report complessi usa un exporter host-app (dompdf, wkhtmltopdf, …) |
+| JSON | `json` | `.json` | Array di oggetti, una chiave per attributo di colonna (fallback alla label) |
+
+Tutti i valori delle celle vengono **appiattiti a testo semplice** (HTML rimosso), coerentemente
+fra i formati: una colonna currency viene esportata con la sua stringa renderizzata.
+
+Per aggiungere un formato basta una classe che implementa `ExporterInterface`:
 
 ```php
 // app/src/Export/XmlExporter.php
