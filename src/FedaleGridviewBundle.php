@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle;
 
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
+use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Export\ExporterInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -30,6 +31,12 @@ class FedaleGridviewBundle extends AbstractBundle
         // collected by the column type registry (custom data types, zero config).
         $containerBuilder->registerForAutoconfiguration(ColumnTypeInterface::class)
             ->addTag('fedale_gridview.column_type');
+
+        // Any PaginatorStrategyInterface service (incl. host-app ones) is auto-tagged
+        // and collected by the paginator strategy registry, selectable via
+        // `options.pagination.mode`. Reusing a built-in name overrides it.
+        $containerBuilder->registerForAutoconfiguration(PaginatorStrategyInterface::class)
+            ->addTag('fedale_gridview.paginator_strategy');
 
         $containerConfigurator->parameters()
             ->set('fedale_gridview.config', $config);
@@ -98,8 +105,13 @@ class FedaleGridviewBundle extends AbstractBundle
                                 ->arrayNode('pagination')
                                     ->addDefaultsIfNotSet()
                                     ->children()
+                                        // Paginator strategy key (registry name). 'numeric' is the
+                                        // built-in; host apps can register/override others.
+                                        ->scalarNode('mode')->defaultValue('numeric')->end()
                                         ->booleanNode('pageSelect')->defaultTrue()->end()
                                         ->integerNode('pageSelectThreshold')->defaultValue(10)->end()
+                                        // Strategy-specific extras (e.g. infiniteRootMargin).
+                                        ->variableNode('options')->end()
                                     ->end()
                                 ->end()
                                 ->arrayNode('realtime')
@@ -179,8 +191,10 @@ class FedaleGridviewBundle extends AbstractBundle
                                     ->end()
                                     ->arrayNode('pagination')
                                         ->children()
+                                            ->scalarNode('mode')->end()
                                             ->booleanNode('pageSelect')->end()
                                             ->integerNode('pageSelectThreshold')->end()
+                                            ->variableNode('options')->end()
                                         ->end()
                                     ->end()
                                     ->arrayNode('realtime')

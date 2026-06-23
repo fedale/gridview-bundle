@@ -8,6 +8,7 @@ use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
+use Fedale\GridviewBundle\Contract\PaginationConfiguringInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Filter\FilterDefaultNormalizer;
@@ -301,6 +302,9 @@ class Gridview implements GridviewInterface
         if (isset($options['filterControls'])) {
             $options['filterControls'] = array_replace($this->options['filterControls'] ?? [], $options['filterControls']);
         }
+        if (isset($options['pagination'])) {
+            $options['pagination'] = array_replace($this->options['pagination'] ?? [], $options['pagination']);
+        }
         $this->options = array_merge($this->options, $options);
     }
 
@@ -459,6 +463,16 @@ class Gridview implements GridviewInterface
             if ($q !== '') {
                 $this->dataProvider->applyGlobalSearch($globalFields, $q);
             }
+        }
+
+        // Let the active paginator strategy influence data fetching before getData()
+        // (e.g. virtual scroll disabling paging). Pure-presentation strategies
+        // (numeric, infinite) don't implement the capability and are left untouched.
+        $paginationOptions = $this->options['pagination'] ?? [];
+        $strategy = $this->gridviewService->getPaginatorStrategyRegistry()
+            ->get($paginationOptions['mode'] ?? 'numeric');
+        if ($strategy instanceof PaginationConfiguringInterface) {
+            $strategy->configurePagination($this->dataProvider->getPagination(), $paginationOptions);
         }
 
         $parameters = array_merge($parameters, [

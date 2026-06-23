@@ -2,78 +2,39 @@
 
 namespace Fedale\GridviewBundle\Twig;
 
-use Exception;
-use Fedale\GridviewBundle\Contract\PaginationInterface;
-use Fedale\GridviewBundle\Pagination\PaginationView;
+use Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+/**
+ * Twig glue for paginator strategies: resolves the active `mode` to the strategy's
+ * template (for the `{pagination}` dispatcher) and its Stimulus controllers (merged
+ * into the grid container in `_grid.html.twig`).
+ */
 class PaginationExtension extends AbstractExtension
 {
-    /**
-     * @var PaginationView
-     */
-    private PaginationView $paginationView;
-
-    /**
-     * PaginationExtension constructor.
-     *
-     * @param PaginationView $paginationView
-     */
-    public function __construct(PaginationView $paginationView)
+    public function __construct(private PaginatorStrategyRegistry $registry)
     {
-        $this->paginationView = $paginationView;
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('gridPagination', [$this, 'init'], ['is_safe' => ['html']])
+            new TwigFunction('gridview_paginator_template', [$this, 'template']),
+            new TwigFunction('gridview_paginator_controllers', [$this, 'controllers']),
         ];
     }
 
-    /**
-     * Render pagination block.
-     *
-     * @param Pagination $pagination instance of Pagination class
-     * @param array $paginationOptions list of PaginationView class options
-     *
-     * @return string
-     * @throws Exception
-     */
-    public function init(PaginationInterface $pagination, array $paginationOptions = []): string
+    public function template(string $mode): string
     {
-        $this->paginationView->setPagination($pagination);
-
-        foreach ($paginationOptions as $optionName => $value) {
-
-            $paginationView = new \ReflectionObject($this->paginationView);
-
-            try {
-                if ($paginationView->getProperty($optionName)->isPublic()) {
-                    $this->paginationView->$optionName = $value;
-
-                    continue;
-                }
-            } catch (Exception $a) {
-                // throw new GridTwigException(
-                throw new \Exception(
-                    $a->getMessage() . ' in ' . PaginationView::class
-                );
-            }
-
-            $setterMethodName = 'set' . ucfirst($optionName);
-
-            if ($paginationView->hasMethod($setterMethodName)) {
-                $this->paginationView->$setterMethodName($value);
-            }
-        }
-
-        return $this->paginationView->renderPageButtons();
+        return $this->registry->get($mode)->getTemplate();
     }
 
-    public function getName(): string
+    /**
+     * @return list<string>
+     */
+    public function controllers(string $mode): array
     {
-        return get_class($this);
+        return $this->registry->get($mode)->getControllers();
     }
 }

@@ -16,6 +16,9 @@
             <call method="setDataProvider">
                 <argument type="service" id="fedale_gridview.entity_data_provider"/>
             </call>
+            <call method="setPaginatorStrategyRegistry">
+                <argument type="service" id="fedale_gridview.paginator_strategy_registry"/>
+            </call>
         </service>
         <service id="Fedale\GridviewBundle\Service\GridviewService" alias="fedale_gridview.gridview_service"/>
 
@@ -194,9 +197,21 @@
             <tag name="kernel.event_subscriber"/>
         </service>
 
-        <service id="fedale_gridview.pagination_view" class="Fedale\GridviewBundle\Pagination\PaginationView">
-            <argument type="service" id="request_stack"/>
-            <argument type="service" id="router"/>
+        <!-- Paginator strategies (presentation/UX of the {pagination} token). Built-ins
+             carry a high priority so a host-app strategy reusing the same name (e.g.
+             'numeric') is processed later and overrides them in the registry. -->
+        <service id="fedale_gridview.paginator_strategy.numeric" class="Fedale\GridviewBundle\Pagination\Strategy\NumericStrategy">
+            <tag name="fedale_gridview.paginator_strategy" priority="256"/>
+        </service>
+
+        <service id="fedale_gridview.paginator_strategy_registry" class="Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry">
+            <argument type="tagged_iterator" tag="fedale_gridview.paginator_strategy"/>
+        </service>
+        <service id="Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry" alias="fedale_gridview.paginator_strategy_registry"/>
+
+        <service id="fedale_gridview.pagination_extension" class="Fedale\GridviewBundle\Twig\PaginationExtension">
+            <argument type="service" id="fedale_gridview.paginator_strategy_registry"/>
+            <tag name="twig.extension"/>
         </service>
     </services>
 </container>

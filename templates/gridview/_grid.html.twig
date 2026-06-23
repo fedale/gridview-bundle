@@ -12,6 +12,7 @@
     {% if gridview.options.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
     {% if gridview.options.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
     {% if gvRealtime %}{% set gvControllers = gvControllers|merge(['gridview-mercure']) %}{% endif %}
+    {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.pagination.mode|default('numeric'))) %}
     <div data-gridview
          data-gv-max-query-length="{{ gridview.options.maxQueryLength }}"
          {{ gridview.containerAttr|options }}

@@ -3,6 +3,7 @@ namespace Fedale\GridviewBundle\Service;
 
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Form\SearchForm;
+use Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
@@ -16,6 +17,8 @@ class GridviewService
     private Request $request;
 
     private DataProviderInterface $dataProvider;
+
+    private PaginatorStrategyRegistry $paginatorStrategyRegistry;
 
     public function __construct(private Environment $twig)
     {}
@@ -53,6 +56,16 @@ class GridviewService
     public function getDataProvider(): DataProviderInterface
     {
         return $this->dataProvider;
+    }
+
+    public function setPaginatorStrategyRegistry(PaginatorStrategyRegistry $registry): void
+    {
+        $this->paginatorStrategyRegistry = $registry;
+    }
+
+    public function getPaginatorStrategyRegistry(): PaginatorStrategyRegistry
+    {
+        return $this->paginatorStrategyRegistry;
     }
 
     public function setAttr(string $key, string $value, $replace = false)
