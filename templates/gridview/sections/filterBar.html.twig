@@ -8,13 +8,18 @@
                 {{ column.label }}
             </label>
             <div class="gv-filter-bar__control">
-                {{ form_widget(form[attr], {
-                    'attr': {
-                        'form':            'gv-form-' ~ gridview.key,
-                        'data-action':     'input->gridview-filter#filterBarInput',
-                        'data-gv-fb-attr': attr
-                    }
-                }) }}
+                {% set widgetAttr = {
+                    'form':            'gv-form-' ~ gridview.key,
+                    'data-action':     'input->gridview-filter#filterBarInput',
+                    'data-gv-fb-attr': attr
+                } %}
+                {% if (column.filter.type ?? 'text') == 'relation' %}
+                    {% set widgetAttr = widgetAttr|merge({
+                        'data-gridview-relation-filter-controls-threshold-value':
+                            column.filter.options.controls_threshold ?? gridview.options.filterControls.choiceControlsThreshold ?? 20
+                    }) %}
+                {% endif %}
+                {{ form_widget(form[attr], {'attr': widgetAttr}) }}
             </div>
         </div>
         {% endif %}

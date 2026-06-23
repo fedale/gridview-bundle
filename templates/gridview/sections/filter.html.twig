@@ -19,9 +19,14 @@
                 </div>
                 {% elseif not inFilterBar %}
                 <div class="gv-filter-cell">
-                    {{ form_widget(form[attr], {
-                        'attr': {'data-action': 'input->gridview-filter#input'}
-                    }) }}
+                    {% set widgetAttr = {'data-action': 'input->gridview-filter#input'} %}
+                    {% if filterType == 'relation' %}
+                        {% set widgetAttr = widgetAttr|merge({
+                            'data-gridview-relation-filter-controls-threshold-value':
+                                column.filter.options.controls_threshold ?? gridview.options.filterControls.choiceControlsThreshold ?? 20
+                        }) %}
+                    {% endif %}
+                    {{ form_widget(form[attr], {'attr': widgetAttr}) }}
                     {% if gridview.options.filterControls.inlineClear %}
                     <button type="button"
                             class="gv-filter-clear"

@@ -1030,6 +1030,20 @@ search input and optional AJAX loading.
 | `ajax_url` | `string\|null` | `null` | URL that returns `[{"id":1,"name":"…"},…]` |
 | `option_label` | `string` | `'name'` | JSON key used as option label (AJAX mode) |
 | `option_value` | `string` | `'id'` | JSON key used as option value (AJAX mode) |
+| `controls_threshold` | `int` | *(grid `filterControls.choiceControlsThreshold`, 20)* | Hide the search box and the select/deselect/invert toolbar when the column has fewer than this many options. Per-column override of the grid-level default. AJAX lists always keep their controls. |
+
+The grid-level default lives in `options.filterControls.choiceControlsThreshold` (default `20`),
+alongside the other filter-UI knobs:
+
+```php
+// Raise the threshold for the whole grid (controls appear only from 30 options up)
+->setOptions(['filterControls' => ['choiceControlsThreshold' => 30]])
+
+// …or per column, overriding the grid default
+'filter' => ['type' => 'relation', 'options' => [
+    'choices' => $typeChoices, 'multiple' => true, 'controls_threshold' => 5,
+]]
+```
 
 **Repository filter example** — the `relation` applier handles both single values (`=`)
 and multi-select arrays (`IN`):

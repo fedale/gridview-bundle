@@ -8,6 +8,9 @@ export default class extends Controller {
         optionValue: { type: String,  default: 'id' },
         choices:     { type: Array,   default: [] },
         selected:    { type: Array,   default: [] },
+        // Below this many options the search box and the
+        // select/deselect/invert toolbar are pointless, so they are hidden.
+        controlsThreshold: { type: Number, default: 20 },
     };
 
     connect() {
@@ -52,9 +55,19 @@ export default class extends Controller {
     _enhance() {
         if (this.element.multiple) {
             this._buildMultiSelect();
-        } else if (this.searchableValue || this.ajaxUrlValue) {
+        } else if ((this.searchableValue || this.ajaxUrlValue) && this._showControls()) {
             this._buildSearchableSelect();
         }
+    }
+
+    // Few options → the search box / select-deselect-invert toolbar add nothing.
+    // AJAX lists are unbounded, so their controls always stay.
+    _showControls() {
+        return !!this.ajaxUrlValue || this._optionCount() >= this.controlsThresholdValue;
+    }
+
+    _optionCount() {
+        return [...this.element.options].filter(o => o.value).length;
     }
 
     // ── Static choices from data attribute ────────────────────────────
@@ -119,35 +132,41 @@ export default class extends Controller {
         panel.className = 'gv-multi-panel';
         panel.style.display = 'none';
 
-        // Search inside panel
-        const searchInput = document.createElement('input');
-        searchInput.type        = 'text';
-        searchInput.placeholder = 'Cerca...';
-        searchInput.className   = 'gv-multi-search';
-        searchInput.autocomplete = 'off';
-        searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
-        searchInput.addEventListener('input', () => this._filterItems(searchInput.value));
+        // With few options the search box and the action toolbar are noise:
+        // a short, fully-visible checkbox list is faster to scan than to search.
+        const showControls = this._showControls();
 
-        const searchWrap = document.createElement('div');
-        searchWrap.className = 'gv-multi-search-wrap';
-        searchWrap.appendChild(searchInput);
-        panel.appendChild(searchWrap);
+        if (showControls) {
+            // Search inside panel
+            const searchInput = document.createElement('input');
+            searchInput.type        = 'text';
+            searchInput.placeholder = 'Cerca...';
+            searchInput.className   = 'gv-multi-search';
+            searchInput.autocomplete = 'off';
+            searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+            searchInput.addEventListener('input', () => this._filterItems(searchInput.value));
 
-        // Utility actions: select all / deselect / invert
-        const actions = document.createElement('div');
-        actions.className = 'gv-multi-actions';
-        [
-            ['Seleziona visibili', () => this._selectVisible(select, trigger)],
-            ['Deseleziona',        () => this._setAll(false, select, trigger)],
-            ['Inverti',            () => this._invertAll(select, trigger)],
-        ].forEach(([label, handler]) => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = label;
-            btn.addEventListener('click', e => { e.stopPropagation(); handler(); });
-            actions.appendChild(btn);
-        });
-        panel.appendChild(actions);
+            const searchWrap = document.createElement('div');
+            searchWrap.className = 'gv-multi-search-wrap';
+            searchWrap.appendChild(searchInput);
+            panel.appendChild(searchWrap);
+
+            // Utility actions: select all / deselect / invert
+            const actions = document.createElement('div');
+            actions.className = 'gv-multi-actions';
+            [
+                ['Seleziona visibili', () => this._selectVisible(select, trigger)],
+                ['Deseleziona',        () => this._setAll(false, select, trigger)],
+                ['Inverti',            () => this._invertAll(select, trigger)],
+            ].forEach(([label, handler]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = label;
+                btn.addEventListener('click', e => { e.stopPropagation(); handler(); });
+                actions.appendChild(btn);
+            });
+            panel.appendChild(actions);
+        }
 
         // Checkbox list
         const list = document.createElement('div');

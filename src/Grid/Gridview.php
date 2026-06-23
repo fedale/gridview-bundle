@@ -67,6 +67,10 @@ class Gridview implements GridviewInterface
         'filterControls' => [
             'headerIcon' => true,
             'inlineClear' => false,
+            // Multi/relation filters: hide the search box and the
+            // select/deselect/invert toolbar when a column has fewer than this
+            // many options. Overridable per column via filter.options.controls_threshold.
+            'choiceControlsThreshold' => 20,
         ],
         'pagination' => [
             'pageSelect' => true,
@@ -266,6 +270,10 @@ class Gridview implements GridviewInterface
 
             if (isset($this->searchModel) && $column->isFilterable() && isset($column->filter)) {
                 $options = $column->filter['options'] ?? [];
+                // Consumed at render time by the filter template (emitted as a
+                // Stimulus value), not a Symfony form option — drop it so the
+                // filter type's OptionsResolver doesn't reject it.
+                unset($options['controls_threshold']);
                 if (isset($column->filter['clientOptions'])) {
                     $options['client_options'] = $column->filter['clientOptions'];
                 }
