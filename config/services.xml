@@ -49,6 +49,18 @@
             <tag name="fedale_gridview.exporter"/>
         </service>
 
+        <service id="fedale_gridview.exporter.xlsx" class="Fedale\GridviewBundle\Export\ExcelExporter">
+            <tag name="fedale_gridview.exporter"/>
+        </service>
+
+        <service id="fedale_gridview.exporter.pdf" class="Fedale\GridviewBundle\Export\PdfExporter">
+            <tag name="fedale_gridview.exporter"/>
+        </service>
+
+        <service id="fedale_gridview.exporter.json" class="Fedale\GridviewBundle\Export\JsonExporter">
+            <tag name="fedale_gridview.exporter"/>
+        </service>
+
         <service id="fedale_gridview.exporter_registry" class="Fedale\GridviewBundle\Export\GridExporterRegistry">
             <argument type="tagged_iterator" tag="fedale_gridview.exporter"/>
         </service>

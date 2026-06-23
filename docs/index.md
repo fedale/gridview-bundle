@@ -2172,15 +2172,17 @@ fedale_gridview:
 
 Exports respect the **current filters/sort** (the data provider is re-run without
 pagination) and the **export columns** (those flagged `exportable`, else the visible data columns).
-Built-in **CSV**; the format set is **extensible** — implement `ExporterInterface` and the service is
-auto-registered (no config), appearing in the export menu and selectable via `?format=<key>`:
+Built-in formats (all native PHP, no extra dependency): **CSV** (`csv`), **Excel** (`xlsx`, a real
+Office Open XML file), **PDF** (`pdf`, a paginated Helvetica table) and **JSON** (`json`). The set is
+**extensible** — implement `ExporterInterface` and the service is auto-registered (no config),
+appearing in the export menu and selectable via `?format=<key>`:
 
 ```php
-// app/src/Export/JsonExporter.php
-class JsonExporter implements \Fedale\GridviewBundle\Export\ExporterInterface
+// app/src/Export/XmlExporter.php
+class XmlExporter implements \Fedale\GridviewBundle\Export\ExporterInterface
 {
-    public function getKey(): string   { return 'json'; }
-    public function getLabel(): string { return 'JSON'; }
+    public function getKey(): string   { return 'xml'; }
+    public function getLabel(): string { return 'XML'; }
     public function export(iterable $rows, iterable $columns, array $context = []): Response { /* … */ }
 }
 ```
