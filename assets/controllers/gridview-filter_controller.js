@@ -11,16 +11,36 @@ export default class extends Controller {
         if (frame?.dataset.lastFocusedId) {
             const el = document.getElementById(frame.dataset.lastFocusedId);
             if (el) {
+                // Fast typing can land keystrokes in the window between the
+                // debounced auto-submit firing and Turbo swapping the frame.
+                // _snapshotTyping() stashes the live value + caret on the frame
+                // just before the swap; re-apply them here so the server's
+                // (older) value doesn't clobber characters the user just typed.
+                let resubmit = false;
+                if (frame.dataset.gvTypedValue !== undefined
+                    && el.value !== frame.dataset.gvTypedValue) {
+                    el.value = frame.dataset.gvTypedValue;
+                    resubmit = true;
+                }
+
                 el.focus();
-                // Caret to end — only for inputs that support text selection
+                // Restore the caret — only for inputs that support text selection
                 // (<select>, checkbox, number/date inputs don't and would throw).
                 if (typeof el.setSelectionRange === 'function') {
                     try {
-                        const len = el.value.length;
-                        el.setSelectionRange(len, len);
+                        const caret = frame.dataset.gvCaret !== undefined
+                            ? Number(frame.dataset.gvCaret)
+                            : el.value.length;
+                        el.setSelectionRange(caret, caret);
                     } catch (_) { /* input type doesn't support selection */ }
                 }
+
+                // The displayed value is now ahead of what the server filtered
+                // on — re-run the filter so the results catch up.
+                if (resubmit) this._scheduleSubmit(el);
             }
+            delete frame.dataset.gvTypedValue;
+            delete frame.dataset.gvCaret;
         }
 
         // Intercept every form submission: URL-size guard + loading state
@@ -47,6 +67,13 @@ export default class extends Controller {
         document.addEventListener('turbo:submit-end', this._onSubmitEnd);
         document.addEventListener('turbo:fetch-request-error', this._onFetchError);
 
+        // Just before Turbo swaps the frame, snapshot the value + caret of the
+        // field being typed in. Without this, characters typed while the request
+        // is in flight (fast typing) are lost when the frame is replaced. The
+        // focus-restore block in connect() re-applies the snapshot afterwards.
+        this._onBeforeFrameRender = e => this._snapshotTyping(e);
+        document.addEventListener('turbo:before-frame-render', this._onBeforeFrameRender);
+
         // Filter widgets associated to this form via HTML `form="<id>"` but rendered
         // OUTSIDE the controller's DOM (e.g. a filterBar placed in a page sidebar)
         // can't reach the Stimulus `data-action`. Delegate from the document so the
@@ -72,6 +99,7 @@ export default class extends Controller {
         this.element.removeEventListener('submit', this._onSubmit);
         document.removeEventListener('turbo:submit-end', this._onSubmitEnd);
         document.removeEventListener('turbo:fetch-request-error', this._onFetchError);
+        document.removeEventListener('turbo:before-frame-render', this._onBeforeFrameRender);
         document.removeEventListener('input',  this._onDetachedInput);
         document.removeEventListener('change', this._onDetachedInput);
     }
@@ -153,6 +181,29 @@ export default class extends Controller {
         this.element.requestSubmit();
     }
 
+    // Capture the live value + caret of the focused filter input right before
+    // Turbo replaces the frame, so fast-typed characters aren't dropped.
+    _snapshotTyping(event) {
+        const frame = this.element.closest('turbo-frame');
+        if (!frame || event.target !== frame) return;
+
+        const el = document.activeElement;
+        if (!el || !el.id || el.form !== this.element
+            || !this._isFilterField(el) || !this._isTextEntry(el)) return;
+
+        frame.dataset.gvTypedValue = el.value;
+        if (typeof el.selectionStart === 'number') {
+            frame.dataset.gvCaret = String(el.selectionStart);
+        }
+    }
+
+    _isTextEntry(el) {
+        if (el.tagName === 'TEXTAREA') return true;
+        if (el.tagName !== 'INPUT') return false;
+        return ['text', 'search', 'number', 'email', 'url', 'tel', 'password', '']
+            .includes(el.type);
+    }
+
     // ── Submit guard ───────────────────────────────────────────────────
 
     _beforeSubmit(event) {
@@ -191,6 +242,11 @@ export default class extends Controller {
     _gv() { return this.element.closest('[data-gridview]'); }
 
     _showLoading() {
+        // In Turbo mode the CSS `turbo-frame[busy]` overlay handles the loading
+        // state (and survives the frame swap). Stacking a JS overlay on top just
+        // double-dims and flickers, so only use it as the non-Turbo fallback.
+        if (this.element.closest('turbo-frame')) return;
+
         const gv = this._gv();
         if (!gv || gv.querySelector('.gv-loading-overlay')) return;
         const overlay = document.createElement('div');

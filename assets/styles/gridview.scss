@@ -512,10 +512,14 @@
 // CSS-based loader: Turbo sets [busy] on the <turbo-frame> during loading.
 // This is more reliable than a JS overlay since Turbo replaces the frame
 // content (including any JS-created overlay) when the response arrives.
+// Reveal the loading dim only if the request runs longer than the animation
+// delay (~150ms). Fast filter responses finish within that window, so the
+// frame is swapped before anything becomes visible — no flicker. The animation
+// holds at its initial frame (full opacity / transparent overlay) during the
+// delay, then fades in; if [busy] is removed first, nothing ever showed.
 turbo-frame[busy] > [data-gridview] {
-  opacity: 0.55;
   pointer-events: none;
-  transition: opacity 0.1s;
+  animation: gv-busy-dim 0.1s linear 0.15s forwards;
 
   &::after {
     content: '';
@@ -527,8 +531,13 @@ turbo-frame[busy] > [data-gridview] {
     justify-content: center;
     background: var(--gv-overlay-bg);
     border-radius: var(--gv-radius);
+    opacity: 0;
+    animation: gv-busy-fade 0.1s linear 0.15s forwards;
   }
 }
+
+@keyframes gv-busy-dim  { to { opacity: 0.55; } }
+@keyframes gv-busy-fade { to { opacity: 1; } }
 
 // Spinner inside the after-pseudo is not possible; keep the JS overlay
 // for non-Turbo (useTurbo: false) mode and as a fallback.
