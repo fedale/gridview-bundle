@@ -34,7 +34,7 @@ export default class extends Controller {
         this._spinner();
         this._modal().show();
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(this._withGridQuery(url), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then((r) => r.text())
             .then((html) => { this.modalBodyTarget.innerHTML = html; i18n.apply(this.modalBodyTarget); })
             .catch(() => { this.modalBodyTarget.innerHTML = this._error(); });
@@ -81,6 +81,26 @@ export default class extends Controller {
                 }
             })
             .catch(() => { this.modalBodyTarget.innerHTML = this._error(); });
+    }
+
+    // Carry the grid's current filter/sort/page query into the CRUD request.
+    // The server rebuilds the grid from the request when emitting the post-save
+    // Turbo Stream refresh; without the query it has no filter params and the
+    // filter is lost — even though the browser URL still shows it (the stream
+    // replaces content without touching the address bar). The form rendered in
+    // the modal echoes this URL as its action, so the eventual POST carries it
+    // too. Existing params on `url` win over the forwarded grid ones.
+    _withGridQuery(url) {
+        const grid = window.location.search.replace(/^\?/, '');
+        if (!grid) return url;
+
+        const [path, own = ''] = url.split('?');
+        const merged = new URLSearchParams(own);
+        for (const [k, v] of new URLSearchParams(grid)) {
+            if (!merged.has(k)) merged.append(k, v);
+        }
+        const qs = merged.toString();
+        return qs ? `${path}?${qs}` : path;
     }
 
     _modal() {

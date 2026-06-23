@@ -114,10 +114,13 @@ abstract class AbstractCrudGridController extends AbstractGridController
 
         // GET → render the confirmation recap into the modal.
         if ($request->isMethod('GET')) {
+            // Post back to the current URI (same route handles GET+POST) so the
+            // grid's filter/sort/page query — forwarded by the JS on open — is
+            // preserved and re-applied when the post-delete stream rebuilds the grid.
             return new Response($crud->renderDeleteConfirm(
                 $entity,
                 $this->buildGridview()->getColumns(),
-                $this->generateUrl($this->routeName('delete'), ['id' => $id]),
+                $request->getRequestUri(),
                 $this->csrf()->getToken($crud->deleteTokenId($entity))->getValue(),
             ));
         }
