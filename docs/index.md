@@ -1947,6 +1947,7 @@ config needed.
 | `id` | entity short name (`User`→`user`) | both | Grid id + YAML config lookup |
 | `indexTemplate` | `gridview/with_sidebar.html.twig` | both | Template rendered by `index` |
 | `exportFilename` | `null` → falls back to `id` | both | Export file name (no extension) |
+| `exportFormats` | `null` → all registered | both | Allow-list di key exporter (es. `['csv','pdf']`); fissa anche l'ordine del menu |
 | `attributes` | `['class' => 'table']` | both | Table-level HTML attributes |
 | `options` | `[]` | both | Extra builder options (layout, `reorderColumns`, …) |
 | `title` | `''` | CRUD | Modal / page title |
@@ -2224,6 +2225,44 @@ public function export(Request $request, GridExporterRegistry $exporters): Respo
 
 The `{export}` link carries the current querystring, so the download reflects the active filters.
 Mark columns with `exportable => true` to restrict the export to a subset.
+
+### Limitare i formati per-griglia
+
+Di default ogni griglia offre **tutti** gli exporter registrati. Per limitarli a una griglia
+specifica (e fissarne anche l'ordine nel menu) imposta la config `exportFormats` nel controller con
+una allow-list di key — le chiavi sconosciute vengono ignorate, `null` significa "tutti":
+
+```php
+final class CustomerController extends AbstractGridController
+{
+    protected function configure(): array
+    {
+        return [
+            'exportFormats' => ['csv', 'pdf'],  // solo CSV e PDF, in quest'ordine
+        ];
+    }
+}
+```
+
+L'allow-list vale sia per il **menu** sia per la **action** `export`: un formato escluso non è
+raggiungibile nemmeno forzando `?format=<key>` a mano (risponde 404).
+
+Per logiche più dinamiche (es. formati diversi per utente/ruolo) sovrascrivi direttamente
+`exportFormats()`, che ritorna la lista ordinata di `ExporterInterface`:
+
+```php
+protected function exportFormats(): array
+{
+    $all = $this->exporters()->all();              // ['csv' => …, 'xlsx' => …, 'pdf' => …, 'json' => …]
+
+    return $this->isGranted('ROLE_ADMIN')
+        ? array_values($all)                        // admin: tutti
+        : array_values(array_intersect_key($all, array_flip(['csv'])));  // altri: solo CSV
+}
+```
+
+Se invece monti il menu a mano (controller custom, fuori da `AbstractGridController`), filtra tu
+l'array `formats` passato nelle `options.export` con lo stesso criterio.
 
 ## Saved searches & selections
 

@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
+use Fedale\GridviewBundle\Export\ExporterInterface;
 use Fedale\GridviewBundle\Export\GridExporterRegistry;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
@@ -73,6 +74,7 @@ abstract class AbstractGridController extends AbstractController
             'id'             => $id,                              // grid id + YAML lookup
             'indexTemplate'  => 'gridview/with_sidebar.html.twig',
             'exportFilename' => null,                            // null → fallback su 'id'
+            'exportFormats'  => null,                            // null → tutti; [keys] → allow-list ordinata
             'attributes'     => ['class' => 'table'],            // table-level HTML attrs
             'options'        => [],                              // extra builder opts (layout, ...)
         ];
@@ -124,14 +126,23 @@ abstract class AbstractGridController extends AbstractController
     public function export(Request $request): Response
     {
         $format = (string) $request->query->get('format', 'csv');
-        $exporters = $this->exporters();
-        if (!$exporters->has($format)) {
+
+        // Honour the per-grid allow-list (`exportFormats`): a format hidden from
+        // the menu must not be reachable by hand-crafting ?format=<key> either.
+        $exporter = null;
+        foreach ($this->exportFormats() as $candidate) {
+            if ($candidate->getKey() === $format) {
+                $exporter = $candidate;
+                break;
+            }
+        }
+        if ($exporter === null) {
             throw $this->createNotFoundException();
         }
 
         $gridview = $this->buildGridview();
 
-        return $exporters->get($format)->export(
+        return $exporter->export(
             $gridview->getExportRows(),
             $gridview->getExportColumns(),
             ['filename' => $this->config('exportFilename') ?? $this->config('id')],
@@ -152,10 +163,35 @@ abstract class AbstractGridController extends AbstractController
         return $this->buildColumns();
     }
 
+    /**
+     * Exporters offered by this grid, in order. Defaults to every registered
+     * exporter; when the `exportFormats` config is a non-empty array of keys it
+     * becomes an allow-list that also fixes the menu order. Unknown keys are
+     * silently skipped. Override for fully dynamic (e.g. per-user) menus.
+     *
+     * @return list<ExporterInterface>
+     */
+    protected function exportFormats(): array
+    {
+        $all = $this->exporters()->all();
+        $allow = $this->config('exportFormats');
+
+        if (!\is_array($allow) || $allow === []) {
+            return array_values($all);
+        }
+
+        $picked = [];
+        foreach ($allow as $key) {
+            if (isset($all[$key])) {
+                $picked[] = $all[$key];
+            }
+        }
+
+        return $picked;
+    }
+
     protected function buildGridview(): Gridview
     {
-        $exporters = $this->exporters();
-
         $rt = $this->realtime();
 
         $options = array_replace([
@@ -164,7 +200,7 @@ abstract class AbstractGridController extends AbstractController
                 'url' => $this->generateUrl($this->routeName('export')),
                 'formats' => array_map(
                     static fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
-                    array_values($exporters->all()),
+                    $this->exportFormats(),
                 ),
             ],
             // Resolved real-time settings consumed by _grid.html.twig. `enabled`
