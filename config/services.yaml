@@ -1,0 +1,220 @@
+services:
+    fedale_gridview.gridview_service:
+        class: Fedale\GridviewBundle\Service\GridviewService
+        arguments:
+            - '@twig'
+        calls:
+            - [setSearchForm, ['@fedale_gridview.search_form']]
+            - [setRequest, ['@request_stack']]
+            - [setDataProvider, ['@fedale_gridview.entity_data_provider']]
+            - [setPaginatorStrategyRegistry, ['@fedale_gridview.paginator_strategy_registry']]
+    Fedale\GridviewBundle\Service\GridviewService: '@fedale_gridview.gridview_service'
+
+    fedale_gridview.search_model:
+        class: Fedale\GridviewBundle\Form\SearchModel
+        calls:
+            - [setRequest, ['@request_stack']]
+            - [setDataProvider, ['@fedale_gridview.entity_data_provider']]
+    Fedale\GridviewBundle\Contract\SearchModelInterface: '@fedale_gridview.search_model'
+
+    fedale_gridview.filter_applier_registry:
+        class: Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry
+    Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry: '@fedale_gridview.filter_applier_registry'
+
+    fedale_gridview.control_type_registry:
+        class: Fedale\GridviewBundle\Form\Control\ControlTypeRegistry
+    Fedale\GridviewBundle\Form\Control\ControlTypeRegistry: '@fedale_gridview.control_type_registry'
+
+    fedale_gridview.control_resolver:
+        class: Fedale\GridviewBundle\Form\Control\ControlResolver
+    Fedale\GridviewBundle\Form\Control\ControlResolver: '@fedale_gridview.control_resolver'
+
+    fedale_gridview.column_type_registry:
+        class: Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry
+        factory: ['Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry', create]
+        arguments:
+            - !tagged_iterator fedale_gridview.column_type
+    Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry: '@fedale_gridview.column_type_registry'
+
+    fedale_gridview.exporter.csv:
+        class: Fedale\GridviewBundle\Export\CsvExporter
+        tags:
+            - { name: fedale_gridview.exporter }
+
+    fedale_gridview.exporter.xlsx:
+        class: Fedale\GridviewBundle\Export\ExcelExporter
+        tags:
+            - { name: fedale_gridview.exporter }
+
+    fedale_gridview.exporter.pdf:
+        class: Fedale\GridviewBundle\Export\PdfExporter
+        tags:
+            - { name: fedale_gridview.exporter }
+
+    fedale_gridview.exporter.json:
+        class: Fedale\GridviewBundle\Export\JsonExporter
+        tags:
+            - { name: fedale_gridview.exporter }
+
+    fedale_gridview.exporter_registry:
+        class: Fedale\GridviewBundle\Export\GridExporterRegistry
+        arguments:
+            - !tagged_iterator fedale_gridview.exporter
+    Fedale\GridviewBundle\Export\GridExporterRegistry: '@fedale_gridview.exporter_registry'
+
+    fedale_gridview.search_form:
+        class: Fedale\GridviewBundle\Form\SearchForm
+        arguments:
+            - '@form.factory'
+            - '@request_stack'
+            - '@fedale_gridview.filter_applier_registry'
+    Fedale\GridviewBundle\Form\SearchForm: '@fedale_gridview.search_form'
+    Fedale\GridviewBundle\Contract\SearchFormInterface: '@fedale_gridview.search_form'
+
+    fedale_gridview.grid_form_builder:
+        class: Fedale\GridviewBundle\Form\GridFormBuilder
+        arguments:
+            - '@form.factory'
+            - '@fedale_gridview.control_type_registry'
+            - '@fedale_gridview.i18n_catalog'
+    Fedale\GridviewBundle\Form\GridFormBuilder: '@fedale_gridview.grid_form_builder'
+    Fedale\GridviewBundle\Contract\GridFormBuilderInterface: '@fedale_gridview.grid_form_builder'
+
+    fedale_gridview.crud_handler:
+        class: Fedale\GridviewBundle\Crud\GridCrudHandler
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
+            - '@fedale_gridview.grid_form_builder'
+            - '@security.csrf.token_manager'
+            - '@twig'
+            - '@doctrine'
+    Fedale\GridviewBundle\Crud\GridCrudHandler: '@fedale_gridview.crud_handler'
+    Fedale\GridviewBundle\Contract\GridCrudHandlerInterface: '@fedale_gridview.crud_handler'
+
+    fedale_gridview.gridview:
+        class: Fedale\GridviewBundle\Grid\Gridview
+        arguments:
+            - '@twig'
+            - '@fedale_gridview.gridview_service'
+    Fedale\GridviewBundle\Contract\GridviewInterface: '@fedale_gridview.gridview'
+
+    fedale_gridview.config_registry:
+        class: Fedale\GridviewBundle\Grid\GridviewConfigRegistry
+        arguments:
+            - '%fedale_gridview.config%'
+    Fedale\GridviewBundle\Grid\GridviewConfigRegistry: '@fedale_gridview.config_registry'
+
+    # Real-time signal publisher. Hub is optional (@?): without symfony/mercure
+    # the publisher is a no-op and the bundle still boots.
+    fedale_gridview.mercure_publisher:
+        class: Fedale\GridviewBundle\Mercure\GridviewMercurePublisher
+        arguments:
+            - '@?Symfony\Component\Mercure\HubInterface'
+    Fedale\GridviewBundle\Mercure\GridviewMercurePublisher: '@fedale_gridview.mercure_publisher'
+
+    fedale_gridview.column_factory:
+        class: Fedale\GridviewBundle\Column\ColumnFactory
+        arguments:
+            - '@?security.authorization_checker'
+            - '@fedale_gridview.control_resolver'
+            - '@fedale_gridview.column_type_registry'
+    Fedale\GridviewBundle\Column\ColumnFactory: '@fedale_gridview.column_factory'
+
+    fedale_gridview.gridview_builder:
+        class: Fedale\GridviewBundle\Grid\GridviewBuilder
+        arguments:
+            - '@fedale_gridview.gridview_service'
+            - '@fedale_gridview.config_registry'
+            - '@fedale_gridview.column_factory'
+    Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
+    Fedale\GridviewBundle\Contract\GridviewBuilderInterface: '@fedale_gridview.gridview_builder'
+
+    twig.extension.stringloader:
+        class: Twig\Extension\StringLoaderExtension
+        tags:
+            - { name: twig.extension }
+
+    fedale.options_extension:
+        class: Fedale\GridviewBundle\Twig\OptionsExtension
+        tags:
+            - { name: twig.extension }
+
+    # Instant i18n: catalog builder (PHP) + Twig glue (catalog blob + key tags).
+    fedale_gridview.i18n_catalog:
+        class: Fedale\GridviewBundle\I18n\GridviewI18nCatalog
+        arguments:
+            - '@translator'
+            - '%fedale_gridview.config%'
+    Fedale\GridviewBundle\I18n\GridviewI18nCatalog: '@fedale_gridview.i18n_catalog'
+
+    fedale_gridview.i18n_extension:
+        class: Fedale\GridviewBundle\Twig\GridviewI18nExtension
+        arguments:
+            - '@fedale_gridview.i18n_catalog'
+        tags:
+            - { name: twig.extension }
+
+    fedale_gridview.builder_factory:
+        class: Fedale\GridviewBundle\Grid\GridviewBuilderFactory
+        arguments:
+            - '@fedale_gridview.gridview_service'
+            - '@fedale_gridview.config_registry'
+            - '@fedale_gridview.column_factory'
+    Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
+
+    fedale_gridview.entity_data_provider:
+        class: Fedale\GridviewBundle\DataProvider\EntityDataProvider
+        arguments:
+            - '@event_dispatcher'
+            - '@doctrine.orm.default_entity_manager'
+            - '@request_stack'
+        calls:
+            - [setSort, ['@fedale_gridview.sort']]
+            - [setPagination, ['@fedale_gridview.pagination']]
+            - [setSearchModel, ['@fedale_gridview.search_model']]
+            - [setSearchForm, ['@fedale_gridview.search_form']]
+    Fedale\GridviewBundle\Contract\DataProviderInterface: '@fedale_gridview.entity_data_provider'
+
+    fedale_gridview.sort:
+        class: Fedale\GridviewBundle\Sort\Sort
+        arguments:
+            - '@request_stack'
+            - '@router.default'
+    Fedale\GridviewBundle\Contract\SortInterface: '@fedale_gridview.sort'
+
+    fedale_gridview.pagination:
+        class: Fedale\GridviewBundle\Pagination\Pagination
+        arguments:
+            - '@request_stack'
+    Fedale\GridviewBundle\Contract\PaginationInterface: '@fedale_gridview.pagination'
+
+    fedale_gridview.row_subscriber:
+        class: Fedale\GridviewBundle\EventSubscriber\RowSubscriber
+        tags:
+            - { name: kernel.event_subscriber }
+
+    # Paginator strategies (presentation/UX of the {pagination} token). Built-ins
+    # carry a high priority so a host-app strategy reusing the same name (e.g.
+    # 'numeric') is processed later and overrides them in the registry.
+    fedale_gridview.paginator_strategy.numeric:
+        class: Fedale\GridviewBundle\Pagination\Strategy\NumericStrategy
+        tags:
+            - { name: fedale_gridview.paginator_strategy, priority: 256 }
+
+    fedale_gridview.paginator_strategy.infinite:
+        class: Fedale\GridviewBundle\Pagination\Strategy\InfiniteScrollStrategy
+        tags:
+            - { name: fedale_gridview.paginator_strategy, priority: 256 }
+
+    fedale_gridview.paginator_strategy_registry:
+        class: Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry
+        arguments:
+            - !tagged_iterator fedale_gridview.paginator_strategy
+    Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry: '@fedale_gridview.paginator_strategy_registry'
+
+    fedale_gridview.pagination_extension:
+        class: Fedale\GridviewBundle\Twig\PaginationExtension
+        arguments:
+            - '@fedale_gridview.paginator_strategy_registry'
+        tags:
+            - { name: twig.extension }

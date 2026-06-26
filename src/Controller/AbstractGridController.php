@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\Authorization;
 use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Read-only grid controller base. Provides the `index` and `export` actions and
@@ -233,10 +233,10 @@ abstract class AbstractGridController extends AbstractController
             $this->routePrefix = '';
             foreach ((new \ReflectionClass($this))->getAttributes() as $attr) {
                 if (str_ends_with($attr->getName(), '\\Route')) {
-                    $instance = $attr->newInstance();
-                    if (method_exists($instance, 'getName')) {
-                        $this->routePrefix = $instance->getName() ?? '';
-                    }
+                    // Read the route-name prefix straight from the attribute's
+                    // arguments: Symfony 8 dropped Route::getName(), the name is
+                    // a constructor argument. getArguments() works on 6.4–8.x.
+                    $this->routePrefix = $attr->getArguments()['name'] ?? '';
                     break;
                 }
             }

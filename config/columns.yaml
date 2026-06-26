@@ -1,0 +1,6 @@
+services:
+    fedale_gridview.column_action:
+        class: Fedale\GridviewBundle\Column\ActionColumn
+        calls:
+            - [setRouter, ['@router.default']]
+    Fedale\GridviewBundle\Column\ActionColumn: '@fedale_gridview.column_action'

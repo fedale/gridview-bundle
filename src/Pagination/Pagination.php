@@ -120,7 +120,7 @@ class Pagination implements PaginationInterface
     public function getCurrentPage(): int
     {
         if (!isset($this->currentPage)) {
-            $currentPage = (int)$this->request->get($this->pageParam, 1) - 1;
+            $currentPage = (int)$this->request->query->get($this->pageParam, 1) - 1;
 
             $this->setCurrentPage($currentPage);
         }
@@ -170,7 +170,7 @@ class Pagination implements PaginationInterface
             return $this->pageSize;
         }
 
-        $pageSize = (int)$this->request->get(
+        $pageSize = (int)$this->request->query->get(
             $this->pageSizeParam,
             $this->defaultPageSize
         );
