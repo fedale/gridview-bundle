@@ -19,8 +19,11 @@ class FedaleGridviewBundle extends AbstractBundle
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
     {
-        $containerConfigurator->import('../config/services.xml');
-        $containerConfigurator->import('../config/columns.xml');
+        // Service definitions live in YAML: Symfony 8 dropped XML support from the
+        // DependencyInjection component (no XmlFileLoader), and the AbstractBundle
+        // configurator loader only handles PHP/YAML. YAML works on 6.4 through 8.x.
+        $containerConfigurator->import('../config/services.yaml');
+        $containerConfigurator->import('../config/columns.yaml');
 
         // Any service implementing ExporterInterface (incl. host-app ones) is
         // auto-tagged and collected by the export registry.
