@@ -11,7 +11,6 @@ use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Twig\Environment;
 
 abstract class AbstractColumn implements ColumnInterface
 {
@@ -67,8 +66,6 @@ abstract class AbstractColumn implements ColumnInterface
     protected bool|array $editable = false;
 
     protected $value;
-
-    protected Environment $twig;
 
     public function __construct(
         private Gridview $gridview,
@@ -219,6 +216,19 @@ abstract class AbstractColumn implements ColumnInterface
     public function setGridview(Gridview $gridview): void  // satisfies ColumnInterface
     {
         $this->gridview = $gridview;
+    }
+
+    /**
+     * Renders a Twig template with the grid's environment, for a `value`/`renderer`
+     * closure that wants a cell template instead of inline HTML. The closure gets
+     * the column as its last argument, so: `fn($data, $i, $col) => new Markup(
+     * $col->renderTemplate('cell.html.twig', [...]), 'UTF-8')`.
+     *
+     * @param array<string, mixed> $context
+     */
+    public function renderTemplate(string $name, array $context = []): string
+    {
+        return $this->gridview->getTwig()->render($name, $context);
     }
 
     public function renderHeader($label): string

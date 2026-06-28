@@ -133,6 +133,35 @@ twigFilter: one of twig filter
 active: boolean | array | closure — where the column is rendered. `true` (default) everywhere; `false` nowhere (access-control kill-switch: no cell, filter, export or form field); an array gives per-context control with `{inIndex, inView, inCreate, inUpdate}` (omitted keys default to `true`). A column inactive in `index` only is still registered — filterable, exportable and editable in Create/Update forms — but produces no table cell and no "Columns" toggle entry. A closure may return any of these. See docs for `active` vs `visible`
 visible: boolean — show/hide a registered column (CSS only; stays in DOM/data)
 label: 
+
+### Rendering a cell from a Twig template
+
+A `value` (or `renderer`) closure receives the column as its last argument, and
+the column exposes `renderTemplate(string $name, array $context = []): string` —
+the grid's own Twig environment, so a cell can be rendered from a template
+instead of building HTML inline. Wrap the result in a `Twig\Markup` so it is not
+re-escaped:
+
+```php
+use Fedale\GridviewBundle\Column\DataColumn;
+use Twig\Markup;
+
+[
+    'attribute' => 'postCount',
+    'label' => 'tag.posts',
+    'value' => fn(array $data, int $index, DataColumn $column): Markup => new Markup(
+        $column->renderTemplate('gridview/tag/_posts_popularity.html.twig', [
+            'count' => (int) ($data['postCount'] ?? 0),
+            'published' => (int) ($data['publishedCount'] ?? 0),
+        ]),
+        'UTF-8'
+    ),
+],
+```
+
+This keeps the cell markup in a template and avoids injecting Twig into the
+controller.
+
 ## Internationalization (i18n)
 
 The grid supports **instant, client-side language switching** — changing language

@@ -152,6 +152,12 @@ class Gridview implements GridviewInterface
         return $this->dataProvider;
     }
 
+    /** The Twig environment backing the grid, e.g. for columns rendering a cell template. */
+    public function getTwig(): Environment
+    {
+        return $this->twig;
+    }
+
     public function setDataProvider(DataProviderInterface $dataProvider): static
     {
         $this->dataProvider = $dataProvider;
