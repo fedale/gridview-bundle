@@ -1,19 +1,22 @@
 {% set crud = gridview.options.crud|default({}) %}
+{% set _addLabel = gridview.options.addLabel|default('Add') %}
+{# App-owned label: resolve via the client domain when it is a real key,
+   otherwise fall back to the system domain so the default 'Add'/'New' stays translatable. #}
+{% set _addText = gv_client_label(_addLabel) ? gv_client_text(_addLabel) : _addLabel|trans({}, 'GridviewBundle') %}
 {% if crud.addUrl is defined and crud.addUrl is not empty %}
-    {% set _addLabel = gridview.options.addLabel|default('Add') %}
     {% if (crud.mode|default('modal')) == 'modal' %}
 <a href="{{ crud.addUrl }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(_addLabel) }}
    data-action="gridview-crud#open"
    data-gridview-crud-url-param="{{ crud.addUrl }}">
-    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addLabel|trans({}, 'GridviewBundle') }}
+    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
     {% else %}
 <a href="{{ crud.addUrl }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(_addLabel) }}>
-    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addLabel|trans({}, 'GridviewBundle') }}
+    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
     {% endif %}
 {% elseif gridview.options.addRoute is not empty %}
-<a href="{{ path(gridview.options.addRoute) }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(gridview.options.addLabel) }}>
-    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ gridview.options.addLabel|trans({}, 'GridviewBundle') }}
+<a href="{{ path(gridview.options.addRoute) }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(_addLabel) }}>
+    <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
 {% endif %}

@@ -241,6 +241,12 @@ class Gridview implements GridviewInterface
         if (!empty($this->dataProviderOptions['sort'])) {
             $this->dataProvider->getSort()->setAttributes($this->dataProviderOptions['sort']);
         }
+        if (!empty($this->dataProviderOptions['defaultOrder'])) {
+            $this->dataProvider->getSort()->setDefaultOrder($this->dataProviderOptions['defaultOrder']);
+        }
+        if (!empty($this->dataProviderOptions['enableMultiSort'])) {
+            $this->dataProvider->getSort()->setEnableMultiSort(true);
+        }
         if (!empty($this->dataProviderOptions['pagination'])) {
             $this->dataProvider->getPagination()->setAttributes($this->dataProviderOptions['pagination']);
         }
