@@ -100,7 +100,13 @@ export default class extends Controller {
     }
 
     cancel(event) {
-        if (event) event.preventDefault();
+        if (event) {
+            event.preventDefault();
+            // The editor lives inside the .gv-editable cell whose own click opens
+            // the editor; without this the cancel click would bubble up and the
+            // (now cleared) edit handler would immediately re-open it.
+            event.stopPropagation();
+        }
         this._cancelActive();
     }
 
