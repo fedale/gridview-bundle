@@ -1,15 +1,17 @@
 {#
   Modal shell included once per grid (inside the gridview-crud controller's DOM).
-  GridCrudHandler::renderForm() output is fetched into [data-gridview-crud-target="modalBody"].
+  Self-contained (gv-modal): opened/closed by the gridview-crud controller, no
+  Bootstrap JS required. GridCrudHandler::renderForm() output is fetched into
+  [data-gridview-crud-target="modalBody"].
 #}
-<div class="modal fade" tabindex="-1" aria-hidden="true" data-gridview-crud-target="modal">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ gridview.options.crud.title|default('') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" {{ gv_i18n_attr('crud.close', 'aria-label') }} aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}"></button>
-            </div>
-            <div class="modal-body" data-gridview-crud-target="modalBody"></div>
+<div class="gv-modal" tabindex="-1" aria-hidden="true"
+     data-gridview-crud-target="modal"
+     data-action="click->gridview-crud#backdropClose">
+    <div class="gv-modal__dialog" role="dialog" aria-modal="true">
+        <div class="gv-modal__header">
+            <h2 class="gv-modal__title">{{ gridview.options.crud.title|default('') }}</h2>
+            <button type="button" class="gv-modal__close" data-action="gridview-crud#close" {{ gv_i18n_attr('crud.close', 'aria-label') }} aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}">&times;</button>
         </div>
+        <div class="gv-modal__body" data-gridview-crud-target="modalBody"></div>
     </div>
 </div>

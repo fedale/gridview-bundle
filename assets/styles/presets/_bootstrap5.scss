@@ -1,0 +1,69 @@
+// ═══════════════════════════════════════════════════════════════════
+// Framework preset — Bootstrap 5
+//
+// Activated when the grid carries data-gv-framework="bootstrap5" (emitted by
+// the bundle when `fedale_gridview.theme: bootstrap5`). It re-points the --gv-*
+// tokens to Bootstrap's own CSS variables, so the bundle-specific STRUCTURAL
+// elements (dropdown panel, loading overlay, responsive rows, inline-edit,
+// modal, info/error banners) blend with the host's Bootstrap palette.
+//
+// The themed leaf elements (buttons, …) already emit real Bootstrap classes
+// (btn, btn-primary, …) via the class map, so they are styled by Bootstrap CSS
+// directly and are not touched here.
+//
+// Dark mode comes for FREE: every --bs-* var below already flips under
+// [data-bs-theme="dark"], so the grid follows Bootstrap's theme with no extra
+// rule. This file is inert unless the data-gv-framework attribute is present.
+// ═══════════════════════════════════════════════════════════════════
+
+[data-gv-framework="bootstrap5"] {
+  // Palette / surfaces
+  --gv-color-primary:       var(--bs-primary);
+  --gv-color-bg:            var(--bs-body-bg);
+  --gv-color-bg-subtle:     var(--bs-tertiary-bg);
+  --gv-color-bg-hover:      var(--bs-secondary-bg);
+  --gv-color-border:        var(--bs-border-color);
+  --gv-color-text:          var(--bs-body-color);
+  --gv-color-text-muted:    var(--bs-secondary-color);
+  --gv-color-link:          var(--bs-link-color);
+  --gv-color-link-hover:    var(--bs-link-hover-color);
+  --gv-radius:              var(--bs-border-radius);
+
+  // Inputs
+  --gv-input-bg:            var(--bs-body-bg);
+  --gv-input-border:        var(--bs-border-color);
+  --gv-input-color:         var(--bs-body-color);
+  --gv-input-border-focus:  var(--bs-primary);
+  --gv-input-radius:        var(--bs-border-radius);
+
+  // Table
+  --gv-table-border:        var(--bs-border-color);
+  --gv-th-bg:               var(--bs-tertiary-bg);
+  --gv-th-color:            var(--bs-body-color);
+  --gv-tr-hover-bg:         var(--bs-secondary-bg);
+  --gv-sort-active-color:   var(--bs-primary);
+
+  // Dropdown menus
+  --gv-dropdown-bg:         var(--bs-body-bg);
+  --gv-dropdown-border:     var(--bs-border-color);
+  --gv-dropdown-item-hover: var(--bs-tertiary-bg);
+  --gv-dropdown-radius:     var(--bs-border-radius);
+
+  // Pagination (the bundle's structural gv-pagination still uses these tokens)
+  --gv-page-bg:             var(--bs-body-bg);
+  --gv-page-bg-active:      var(--bs-primary);
+  --gv-page-color:          var(--bs-link-color);
+  --gv-page-color-active:   #fff;
+  --gv-page-border:         var(--bs-border-color);
+
+  // Feedback / semantic
+  --gv-error-bg:            var(--bs-danger-bg-subtle);
+  --gv-error-color:         var(--bs-danger-text-emphasis);
+  --gv-error-border:        var(--bs-danger-border-subtle);
+  --gv-info-bg:             var(--bs-info-bg-subtle);
+  --gv-info-color:          var(--bs-info-text-emphasis);
+  --gv-info-border:         var(--bs-info-border-subtle);
+  --gv-success-color:       var(--bs-success);
+  --gv-danger-color:        var(--bs-danger);
+  --gv-accent-color:        var(--bs-primary);
+}

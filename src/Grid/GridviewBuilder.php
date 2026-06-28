@@ -5,6 +5,7 @@ use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Contract\GridviewBuilderInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Service\GridviewService;
+use Fedale\GridviewBundle\Theme\ThemeRegistry;
 
 class GridviewBuilder implements GridviewBuilderInterface
 {
@@ -20,6 +21,7 @@ class GridviewBuilder implements GridviewBuilderInterface
         private GridviewService $gridviewService,
         private GridviewConfigRegistry $configRegistry,
         private ColumnFactory $columnFactory,
+        private ThemeRegistry $themeRegistry,
     ) {
         $this->reset();
     }
@@ -81,6 +83,15 @@ class GridviewBuilder implements GridviewBuilderInterface
 
         $this->gridview->setOptions(array_replace($yamlOptions, $this->runtimeOptions));
         $this->gridview->setAttributes($this->mergeAttributes($yamlAttributes, $this->runtimeAttributes));
+
+        // Resolve the framework theme: pre-build its class map for cls() and
+        // expose the name on the container ([data-gv-framework]) for CSS presets.
+        $theme = $this->gridview->getOptions()['theme'] ?? 'default';
+        $this->gridview->theme = $theme;
+        $this->gridview->setClassMap($this->themeRegistry->classMap($theme));
+        if ($theme !== 'default') {
+            $this->gridview->containerAttr['data-gv-framework'] = $theme;
+        }
 
         return $this->gridview;
     }

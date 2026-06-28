@@ -3,17 +3,17 @@
   under a name and re-apply them later. Persisted client-side via the pluggable
   preference provider. Place the {savedSearch} token in the layout (e.g. toolbar).
 #}
-<div class="gv-saved-search dropdown" data-controller="gridview-saved-search">
-    <button type="button" class="gv-btn" data-bs-toggle="dropdown" {{ gv_i18n_attr('saved.title', 'title') }} title="{{ 'saved.title'|trans({}, 'GridviewBundle') }}" aria-expanded="false">
+<div class="gv-saved-search gv-dropdown" data-controller="gridview-saved-search gridview-dropdown">
+    <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-dropdown#toggle" {{ gv_i18n_attr('saved.title', 'title') }} title="{{ 'saved.title'|trans({}, 'GridviewBundle') }}" aria-expanded="false">
         ★ <span {{ gv_i18n('saved.button') }}>{{ 'saved.button'|trans({}, 'GridviewBundle') }}</span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end">
+    <ul class="gv-dropdown-menu gv-dropdown-menu--end">
         <li>
-            <button type="button" class="dropdown-item" data-action="gridview-saved-search#save">
+            <button type="button" class="gv-dropdown-item" data-action="gridview-saved-search#save">
                 <span class="gv-icon-sm" aria-hidden="true">💾</span> <span {{ gv_i18n('saved.save') }}>{{ 'saved.save'|trans({}, 'GridviewBundle') }}</span>
             </button>
         </li>
-        <li><hr class="dropdown-divider"></li>
+        <li><hr class="gv-dropdown-divider"></li>
         <span data-gridview-saved-search-target="list"></span>
     </ul>
 </div>

@@ -4,7 +4,7 @@
      data-controller="gridview-visibility"
      data-gridview-visibility-grid-id-value="{{ gridview.key }}">
     <button type="button"
-            class="gv-btn"
+            class="{{ gridview.cls('btn') }}"
             data-action="click->gridview-visibility#toggleMenu"
             aria-expanded="false">
         Columns <span class="gv-caret" aria-hidden="true">&#9662;</span>

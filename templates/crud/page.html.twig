@@ -10,7 +10,7 @@
 
 {% block body %}
     <div class="gv-crud-page">
-        {% if pageTitle is defined and pageTitle %}<h1 class="mb-3">{{ pageTitle }}</h1>{% endif %}
+        {% if pageTitle is defined and pageTitle %}<h1 class="gv-crud-page__title">{{ pageTitle }}</h1>{% endif %}
         {{ formHtml|raw }}
     </div>
 {% endblock %}

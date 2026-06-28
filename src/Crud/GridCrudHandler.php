@@ -323,11 +323,11 @@ class GridCrudHandler implements GridCrudHandlerInterface
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
 
-    public function renderInlineEditor(string $dataClass, ColumnInterface $column, object $entity, string $action): string
+    public function renderInlineEditor(string $dataClass, ColumnInterface $column, object $entity, string $action, array $context = []): string
     {
         $form = $this->formBuilder->build($dataClass, [$column], $entity, ['name' => 'inline', 'submit' => false]);
 
-        return $this->renderInlineForm($form, $column, $action);
+        return $this->renderInlineForm($form, $column, $action, $context);
     }
 
     /**
@@ -335,7 +335,7 @@ class GridCrudHandler implements GridCrudHandlerInterface
      * ['ok' => bool, 'body' => string] — on success the new cell display HTML,
      * otherwise the editor re-rendered with errors.
      */
-    public function saveInline(string $dataClass, ColumnInterface $column, object $entity, Request $request, string $action): array
+    public function saveInline(string $dataClass, ColumnInterface $column, object $entity, Request $request, string $action, array $context = []): array
     {
         $form = $this->formBuilder->build($dataClass, [$column], $entity, ['name' => 'inline', 'submit' => false]);
         $form->handleRequest($request);
@@ -346,7 +346,7 @@ class GridCrudHandler implements GridCrudHandlerInterface
             } catch (UniqueConstraintViolationException) {
                 $this->managerRegistry->resetManager();
 
-                return ['ok' => false, 'body' => $this->renderInlineForm($form, $column, $action)];
+                return ['ok' => false, 'body' => $this->renderInlineForm($form, $column, $action, $context)];
             }
 
             $value = PropertyAccess::createPropertyAccessor()->getValue($entity, $column->getAttribute());
@@ -354,16 +354,16 @@ class GridCrudHandler implements GridCrudHandlerInterface
             return ['ok' => true, 'body' => $this->stringifyValue($value)];
         }
 
-        return ['ok' => false, 'body' => $this->renderInlineForm($form, $column, $action)];
+        return ['ok' => false, 'body' => $this->renderInlineForm($form, $column, $action, $context)];
     }
 
-    private function renderInlineForm(FormInterface $form, ColumnInterface $column, string $action): string
+    private function renderInlineForm(FormInterface $form, ColumnInterface $column, string $action, array $context = []): string
     {
-        return $this->twig->render('@FedaleGridview/crud/_inline.html.twig', [
+        return $this->twig->render('@FedaleGridview/crud/_inline.html.twig', array_merge($context, [
             'form'   => $form->createView(),
             'field'  => $column->getAttribute(),
             'action' => $action,
-        ]);
+        ]));
     }
 
     public function deleteTokenId(object $entity): string

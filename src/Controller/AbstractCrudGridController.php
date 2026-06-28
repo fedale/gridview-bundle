@@ -117,11 +117,14 @@ abstract class AbstractCrudGridController extends AbstractGridController
             // Post back to the current URI (same route handles GET+POST) so the
             // grid's filter/sort/page query — forwarded by the JS on open — is
             // preserved and re-applied when the post-delete stream rebuilds the grid.
+            $gridview = $this->buildGridview();
+
             return new Response($crud->renderDeleteConfirm(
                 $entity,
-                $this->buildGridview()->getColumns(),
+                $gridview->getColumns(),
                 $request->getRequestUri(),
                 $this->csrf()->getToken($crud->deleteTokenId($entity))->getValue(),
+                ['gridview' => $gridview],
             ));
         }
 
@@ -143,6 +146,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
                 \count($ids),
                 $request->getRequestUri(),
                 $this->csrf()->getToken('gridcrud_bulk_delete')->getValue(),
+                ['gridview' => $this->buildGridview()],
             ));
         }
 
@@ -158,7 +162,8 @@ abstract class AbstractCrudGridController extends AbstractGridController
     public function bulkUpdate(Request $request): Response
     {
         $ids = $this->resolveBulkIds($request);
-        $columns = $this->buildGridview()->getColumns();
+        $gridview = $this->buildGridview();
+        $columns = $gridview->getColumns();
         $form = $this->crud()->createBatchForm($columns);
         $form->handleRequest($request);
 
@@ -170,7 +175,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
             return $this->bulkStream();
         }
 
-        return new Response($this->crud()->renderBatchForm($form, \count($ids), $request->getRequestUri()));
+        return new Response($this->crud()->renderBatchForm($form, \count($ids), $request->getRequestUri(), ['gridview' => $gridview]));
     }
 
     #[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'], requirements: ['id' => '\d+', 'field' => '[a-zA-Z_]+'])]
@@ -182,8 +187,9 @@ abstract class AbstractCrudGridController extends AbstractGridController
         }
 
         // Only columns explicitly marked editable may be edited inline.
+        $gridview = $this->buildGridview();
         $column = null;
-        foreach ($this->buildGridview()->getColumns() as $c) {
+        foreach ($gridview->getColumns() as $c) {
             if ($c->getAttribute() === $field && $c->isEditable()) {
                 $column = $c;
                 break;
@@ -196,10 +202,10 @@ abstract class AbstractCrudGridController extends AbstractGridController
         $action = $this->generateUrl($this->routeName('inline'), ['id' => $id, 'field' => $field]);
 
         if ($request->isMethod('GET')) {
-            return new Response($this->crud()->renderInlineEditor($this->getDataClass(), $column, $entity, $action));
+            return new Response($this->crud()->renderInlineEditor($this->getDataClass(), $column, $entity, $action, ['gridview' => $gridview]));
         }
 
-        $result = $this->crud()->saveInline($this->getDataClass(), $column, $entity, $request, $action);
+        $result = $this->crud()->saveInline($this->getDataClass(), $column, $entity, $request, $action, ['gridview' => $gridview]);
 
         if ($result['ok']) {
             $this->publishRealtime('update');

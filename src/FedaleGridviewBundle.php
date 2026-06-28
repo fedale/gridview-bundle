@@ -42,7 +42,8 @@ class FedaleGridviewBundle extends AbstractBundle
             ->addTag('fedale_gridview.paginator_strategy');
 
         $containerConfigurator->parameters()
-            ->set('fedale_gridview.config', $config);
+            ->set('fedale_gridview.config', $config)
+            ->set('fedale_gridview.themes', $config['themes'] ?? []);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -50,6 +51,28 @@ class FedaleGridviewBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
                 ->scalarNode('template')->defaultValue('fedale')->end()
+                // Global framework theme: maps the grid's presentational class
+                // keys to a framework's real classes. 'default' keeps the
+                // agnostic gv-* look. Built-ins: bootstrap5, tailwind. Custom
+                // themes are declared under `themes` below. Per-gridview override
+                // via `gridviews.<id>.options.theme`.
+                ->scalarNode('theme')->defaultValue('default')->end()
+                // Host-declared custom themes: map class keys (e.g. 'btn.primary')
+                // to concrete CSS classes. `extends` starts from a built-in theme
+                // and overrides only some keys; omitted keys fall back to default.
+                ->arrayNode('themes')
+                    ->info('Custom framework themes (class key => CSS classes), declared by the host app.')
+                    ->useAttributeAsKey('name')
+                    ->arrayPrototype()
+                        ->children()
+                            ->scalarNode('extends')->defaultNull()->end()
+                            ->arrayNode('classes')
+                                ->normalizeKeys(false)
+                                ->scalarPrototype()->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
                 // Instant client-side i18n. The full catalog (all locales) is
                 // shipped to the browser; a headless JS runtime swaps text with
                 // zero server roundtrip. Any external language switcher can drive
@@ -176,6 +199,7 @@ class FedaleGridviewBundle extends AbstractBundle
                             ->arrayNode('options')
                                 ->children()
                                     ->scalarNode('caption')->end()
+                                    ->scalarNode('theme')->end()
                                     ->scalarNode('emptyText')->end()
                                     ->booleanNode('showThead')->end()
                                     ->booleanNode('showTfoot')->end()

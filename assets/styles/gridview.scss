@@ -13,6 +13,10 @@
 @use 'flatpickr/dist/flatpickr';
 @use 'tokens';
 @use 'dark';
+// Framework presets — token bridges, inert unless [data-gv-framework] is set
+// (emitted by the bundle when a framework `theme` is configured).
+@use 'presets/bootstrap5';
+@use 'presets/tailwind';
 
 // ── Base inputs ────────────────────────────────────────────────────
 
@@ -412,7 +416,9 @@
   }
 }
 
-// ── Column visibility dropdown ────────────────────────────────────
+// ── Dropdown menus ({Columns}, {savedSearch}, {export}, selection) ─
+// Self-contained dropdown, driven by the gridview-dropdown / gridview-visibility
+// Stimulus controllers (no Bootstrap JS). Open state = .gv-open on the menu.
 
 [data-gridview] .gv-dropdown {
   position: relative;
@@ -435,52 +441,66 @@
 
     &.gv-open { display: block; }
 
+    // Right-aligned menu (was Bootstrap's .dropdown-menu-end).
+    &.gv-dropdown-menu--end { left: auto; right: 0; }
+
     li { list-style: none; }
   }
 
+  // Works for <label>, <button> and <a> items alike (native styles reset).
   .gv-dropdown-item {
     display: flex;
     align-items: center;
     gap: .5rem;
+    width: 100%;
     padding: .3rem .75rem;
     cursor: pointer;
     font-size: var(--gv-input-font-size);
     color: var(--gv-color-text);
+    text-align: left;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
     user-select: none;
+
     &:hover { background: var(--gv-dropdown-item-hover); }
+  }
+
+  // Non-interactive item (e.g. the "no saved searches" placeholder).
+  .gv-dropdown-item-text {
+    display: block;
+    padding: .3rem .75rem;
+    font-size: var(--gv-input-font-size);
+  }
+
+  .gv-dropdown-divider {
+    height: 0;
+    margin: .3rem 0;
+    border: 0;
+    border-top: 1px solid var(--gv-dropdown-border);
   }
 }
 
-// ── Bootstrap dropdowns inside the grid ───────────────────────────
-//
-// The checkbox-header menu, {savedSearch} and {export} use the host app's
-// Bootstrap dropdown classes (.dropdown-menu/.dropdown-item). Left alone they
-// inherit Bootstrap's ~1rem sizing and read oversized next to the grid. Scope
-// them to the grid's own input scale so all menus look consistent with the
-// native .gv-dropdown above.
+// Caret toggle button (selection-header menu): borderless, dimmed glyph that
+// matches the .gv-caret look used by the {Columns} / filter carets.
+[data-gridview] .gv-caret-toggle {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: .7em;
+  opacity: .65;
+  color: inherit;
 
-[data-gridview] {
-  .dropdown-menu {
-    font-size: var(--gv-input-font-size);
-    padding: .3rem 0;
-    min-width: 180px;
-  }
+  &:hover { opacity: 1; }
+}
 
-  .dropdown-item,
-  .dropdown-item-text {
-    font-size: var(--gv-input-font-size);
-    padding: .3rem .75rem;
-  }
-
-  .dropdown-divider {
-    margin: .3rem 0;
-  }
-
-  // Caret toggle of the checkbox-header menu: match the .gv-caret look
-  // (small, dimmed) so it reads the same as the {Columns} / filter carets.
-  .gv-caret {
-    line-height: 1;
-  }
+// Selection column header: checkbox + caret menu.
+[data-gridview] .gv-select-header {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
 }
 
 // ── Multi-select (relation filter) ────────────────────────────────
@@ -672,9 +692,9 @@ turbo-frame[busy] > [data-gridview] {
 // ── Real-time update notice ───────────────────────────────────────
 
 [data-gridview] .gv-info-banner {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border: 1px solid #bfdbfe;
+  background: var(--gv-info-bg);
+  color: var(--gv-info-color);
+  border: 1px solid var(--gv-info-border);
   border-radius: var(--gv-radius);
   padding: .45rem .65rem;
   font-size: var(--gv-input-font-size);
@@ -696,14 +716,14 @@ turbo-frame[busy] > [data-gridview] {
 
 .gv-crud-form label.required::after {
   content: " *";
-  color: #dc3545;
+  color: var(--gv-danger-color);
   font-weight: 700;
 }
 
 // ── CRUD form — live validation inline message ──
 
 .gv-crud-form .gv-validate-msg {
-  color: #dc3545;
+  color: var(--gv-danger-color);
   font-size: 0.85em;
   margin-top: 0.25rem;
 }
@@ -717,8 +737,8 @@ turbo-frame[busy] > [data-gridview] {
   gap: 1rem;
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.5rem;
-  background: #eef4ff;
-  border: 1px solid #cdddff;
+  background: var(--gv-accent-bg);
+  border: 1px solid var(--gv-accent-border);
   border-radius: 0.375rem;
 
   .gv-bulk-actions {
@@ -738,7 +758,7 @@ turbo-frame[busy] > [data-gridview] {
     content: '✎';
     margin-left: 0.35rem;
     font-size: 0.85em;
-    color: #3b71ca;
+    color: var(--gv-accent-color);
     opacity: 0;
     transition: opacity 0.12s;
   }
@@ -781,8 +801,8 @@ turbo-frame[busy] > [data-gridview] {
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid #cdddff;
-  border-top-color: #3b71ca;
+  border: 2px solid var(--gv-accent-border);
+  border-top-color: var(--gv-accent-color);
   border-radius: 50%;
   animation: gv-inline-spin 0.6s linear infinite;
 }
@@ -798,7 +818,7 @@ turbo-frame[busy] > [data-gridview] {
 }
 
 @keyframes gv-saved-flash {
-  0%   { background-color: #d1e7dd; }
+  0%   { background-color: var(--gv-success-flash-bg); }
   100% { background-color: transparent; }
 }
 
@@ -807,13 +827,13 @@ turbo-frame[busy] > [data-gridview] {
 }
 
 @keyframes gv-save-error-flash {
-  0%   { background-color: #f8d7da; }
+  0%   { background-color: var(--gv-danger-flash-bg); }
   100% { background-color: transparent; }
 }
 
 .gv-saved-badge {
   margin-left: 0.35rem;
-  color: #198754;
+  color: var(--gv-success-color);
   font-weight: 700;
 }
 
@@ -824,14 +844,14 @@ turbo-frame[busy] > [data-gridview] {
   align-items: center;
   justify-content: space-between;
 
-  .dropdown-item {
+  .gv-dropdown-item {
     flex: 1 1 auto;
   }
 
   .gv-saved-del {
     border: 0;
     background: none;
-    color: #dc3545;
+    color: var(--gv-danger-color);
     padding: 0 0.6rem;
     cursor: pointer;
   }
@@ -846,7 +866,7 @@ turbo-frame[busy] > [data-gridview] {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--gv-backdrop);
 }
 
 .gv-prompt {
@@ -1090,3 +1110,143 @@ turbo-frame[busy] > [data-gridview] {
   font-size: var(--gv-input-font-size);
   color: var(--gv-color-text-muted);
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// CRUD modal, alert & form helpers (CSS-framework agnostic)
+//
+// These used to borrow the host app's Bootstrap classes (.modal, .btn-close
+// and spacing utilities) plus Bootstrap's modal JS. They are now self-contained
+// under the gv-* namespace and driven by the bundle's own Stimulus controllers,
+// so the grid no longer needs Bootstrap's CSS or JS to render its CRUD UI.
+// ═══════════════════════════════════════════════════════════════════
+
+// ── CRUD modal ───────────────────────────────────────────────────
+// The overlay lives inside the gridview-crud controller element (which carries
+// [data-gridview], so it inherits the --gv-* theme). Toggled open with .gv-open.
+[data-gridview] .gv-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1070;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.75rem 1rem;
+  background: var(--gv-backdrop);
+  overflow-y: auto;
+
+  &.gv-open { display: flex; }
+}
+
+[data-gridview] .gv-modal__dialog {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  background: var(--gv-color-bg);
+  color: var(--gv-color-text);
+  border: 1px solid var(--gv-color-border);
+  border-radius: var(--gv-radius);
+  box-shadow: var(--gv-dropdown-shadow);
+}
+
+[data-gridview] .gv-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .85rem 1.1rem;
+  border-bottom: 1px solid var(--gv-color-border);
+}
+
+[data-gridview] .gv-modal__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+[data-gridview] .gv-modal__close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0 .25rem;
+  color: var(--gv-color-text-muted);
+
+  &:hover { color: var(--gv-color-text); }
+}
+
+[data-gridview] .gv-modal__body { padding: 1.1rem; }
+
+// Centred loading state while the form partial is fetched.
+[data-gridview] .gv-modal__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+// Inline spinner prefixed to a submit button while the request is in flight.
+// gv-btn is an inline-flex with a gap, so the spinner spaces itself.
+[data-gridview] .gv-spinner--inline {
+  width: 1em;
+  height: 1em;
+  border-width: 2px;
+}
+
+// ── Alert banner (CRUD fetch errors) ─────────────────────────────
+[data-gridview] .gv-alert {
+  margin: .75rem;
+  padding: .6rem .8rem;
+  border-radius: var(--gv-radius);
+  font-size: var(--gv-input-font-size);
+}
+
+[data-gridview] .gv-alert--danger {
+  background: var(--gv-error-bg);
+  color: var(--gv-error-color);
+  border: 1px solid var(--gv-error-border);
+}
+
+// ── Form helpers (CRUD partials) ─────────────────────────────────
+// Muted helper text (intro lines, recap labels).
+[data-gridview] .gv-muted { color: var(--gv-color-text-muted); }
+
+// Intro paragraph above a CRUD form / confirmation.
+[data-gridview] .gv-form-intro { margin: 0 0 1rem; }
+
+// Right-aligned action row at the bottom of a CRUD form.
+[data-gridview] .gv-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+
+// Two-column label/value recap (delete confirmation).
+[data-gridview] .gv-recap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: .35rem .75rem;
+  margin: 0 0 1rem;
+
+  dt { font-weight: 500; color: var(--gv-color-text-muted); }
+  dd { margin: 0; }
+}
+
+// Batch-update row: [apply checkbox] [label] [value field].
+[data-gridview] .gv-batch-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .5rem;
+
+  label { margin: 0; }
+
+  .gv-batch-field {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+// ── CRUD full page (crud.mode = 'page') ──────────────────────────
+// Not scoped to [data-gridview]: this template extends the app base layout.
+.gv-crud-page__title { margin: 0 0 1rem; }

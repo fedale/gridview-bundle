@@ -28,11 +28,18 @@
         {% endif %}
     {% endif %}
 
+    {# Pagination class keys (gridview.cls): component+state are themable
+       (default gv-*, bootstrap5 page-item/page-link/active/disabled); the
+       gv-page-* modifiers below stay as structural hooks. #}
+    {% set _pItem = gridview.cls('pagination.item') %}
+    {% set _pLink = gridview.cls('pagination.link') %}
+    {% set _pActive = gridview.cls('pagination.active') %}
+    {% set _pDisabled = gridview.cls('pagination.disabled') %}
     <nav aria-label="{{ 'pagination.aria'|trans({}, 'GridviewBundle') }}">
-        <ul class="gv-pagination">
+        <ul class="{{ gridview.cls('pagination') }}">
             {# Prima pagina #}
-            <li class="gv-page-item gv-page-first{{ _currentPage <= 1 ? ' gv-disabled' : '' }}">
-                <a class="gv-page-link"
+            <li class="{{ _pItem }} gv-page-first{{ _currentPage <= 1 ? ' ' ~ _pDisabled : '' }}">
+                <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(1)) }}"
                    {% if turboAction %}data-turbo-action="{{ turboAction }}"{% endif %}
                    {{ gv_i18n_attr('pagination.first', 'aria-label') }}
@@ -40,8 +47,8 @@
             </li>
 
             {# Pagina precedente #}
-            <li class="gv-page-item gv-page-prev{{ _currentPage <= 1 ? ' gv-disabled' : '' }}">
-                <a class="gv-page-link"
+            <li class="{{ _pItem }} gv-page-prev{{ _currentPage <= 1 ? ' ' ~ _pDisabled : '' }}">
+                <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_currentPage - 1)) }}"
                    {% if turboAction %}data-turbo-action="{{ turboAction }}"{% endif %}
                    {{ gv_i18n_attr('pagination.previous', 'aria-label') }}
@@ -50,15 +57,15 @@
 
             {# Ellissi iniziale #}
             {% if _start > 1 %}
-                <li class="gv-page-item gv-page-ellipsis gv-disabled">
-                    <span class="gv-page-link">&hellip;</span>
+                <li class="{{ _pItem }} gv-page-ellipsis {{ _pDisabled }}">
+                    <span class="{{ _pLink }}">&hellip;</span>
                 </li>
             {% endif %}
 
             {# Pagine numeriche #}
             {% for i in _start.._end %}
-                <li class="gv-page-item gv-page-number{{ i == _currentPage ? ' gv-active' : '' }}">
-                    <a class="gv-page-link"
+                <li class="{{ _pItem }} gv-page-number{{ i == _currentPage ? ' ' ~ _pActive : '' }}">
+                    <a class="{{ _pLink }}"
                        href="{{ path(_currentRoute, gridview.urlState.withPage(i)) }}"
                        {% if turboAction %}data-turbo-action="{{ turboAction }}"{% endif %}
                        {% if i == _currentPage %}aria-current="page"{% endif %}>{{ i }}</a>
@@ -67,14 +74,14 @@
 
             {# Ellissi finale #}
             {% if _end < _lastPage %}
-                <li class="gv-page-item gv-page-ellipsis gv-disabled">
-                    <span class="gv-page-link">&hellip;</span>
+                <li class="{{ _pItem }} gv-page-ellipsis {{ _pDisabled }}">
+                    <span class="{{ _pLink }}">&hellip;</span>
                 </li>
             {% endif %}
 
             {# Pagina successiva #}
-            <li class="gv-page-item gv-page-next{{ _currentPage >= _lastPage ? ' gv-disabled' : '' }}">
-                <a class="gv-page-link"
+            <li class="{{ _pItem }} gv-page-next{{ _currentPage >= _lastPage ? ' ' ~ _pDisabled : '' }}">
+                <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_currentPage + 1)) }}"
                    {% if turboAction %}data-turbo-action="{{ turboAction }}"{% endif %}
                    {{ gv_i18n_attr('pagination.next', 'aria-label') }}
@@ -82,8 +89,8 @@
             </li>
 
             {# Ultima pagina #}
-            <li class="gv-page-item gv-page-last{{ _currentPage >= _lastPage ? ' gv-disabled' : '' }}">
-                <a class="gv-page-link"
+            <li class="{{ _pItem }} gv-page-last{{ _currentPage >= _lastPage ? ' ' ~ _pDisabled : '' }}">
+                <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_lastPage)) }}"
                    {% if turboAction %}data-turbo-action="{{ turboAction }}"{% endif %}
                    {{ gv_i18n_attr('pagination.last', 'aria-label') }}
@@ -92,10 +99,10 @@
 
             {# Select "vai a pagina" per liste molto lunghe #}
             {% if _showSelect and _lastPage >= _selectAfter %}
-                <li class="gv-page-item gv-page-jump"
+                <li class="{{ _pItem }} gv-page-jump"
                     data-controller="gridview-page-jump"
                     data-gridview-page-jump-turbo-value="{{ turboAction ? 'true' : 'false' }}">
-                    <select class="gv-page-link gv-page-select"
+                    <select class="{{ _pLink }} gv-page-select"
                             {{ gv_i18n_attr('pagination.jump', 'aria-label') }}
                             aria-label="{{ 'pagination.jump'|trans({}, 'GridviewBundle') }}"
                             data-action="change->gridview-page-jump#jump">

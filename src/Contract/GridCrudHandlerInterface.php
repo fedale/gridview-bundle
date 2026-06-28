@@ -90,13 +90,13 @@ interface GridCrudHandlerInterface
     public function existsWithValue(string $dataClass, string $field, mixed $value, mixed $excludeId = null): bool;
 
     /** Renders the inline editor (single-field form) for a cell. */
-    public function renderInlineEditor(string $dataClass, ColumnInterface $column, object $entity, string $action): string;
+    public function renderInlineEditor(string $dataClass, ColumnInterface $column, object $entity, string $action, array $context = []): string;
 
     /**
      * Validates + saves one inline-edited field.
      * @return array{ok: bool, body: string} body = new cell HTML (ok) or editor with errors
      */
-    public function saveInline(string $dataClass, ColumnInterface $column, object $entity, Request $request, string $action): array;
+    public function saveInline(string $dataClass, ColumnInterface $column, object $entity, Request $request, string $action, array $context = []): array;
 
     /** CSRF token id for deleting a given entity (e.g. `gridcrud_delete_42`). */
     public function deleteTokenId(object $entity): string;

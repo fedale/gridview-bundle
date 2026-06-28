@@ -6,14 +6,14 @@
 #}
 {% set ex = gridview.options.export|default({}) %}
 {% if ex.url is defined and ex.formats is defined and ex.formats is not empty %}
-<div class="gv-export dropdown">
-    <button type="button" class="gv-btn" data-bs-toggle="dropdown" aria-expanded="false">{{ 'export.label'|trans({}, 'GridviewBundle') }} <span class="gv-btn-icon" aria-hidden="true">⤓</span></button>
-    <ul class="dropdown-menu dropdown-menu-end">
+<div class="gv-export gv-dropdown" data-controller="gridview-dropdown">
+    <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-dropdown#toggle" aria-expanded="false">{{ 'export.label'|trans({}, 'GridviewBundle') }} <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">⤓</span></button>
+    <ul class="gv-dropdown-menu gv-dropdown-menu--end">
         {% for f in ex.formats %}
         <li>
             {# data-turbo="false": let the browser download the file instead of
                Turbo fetching it into the frame. #}
-            <a class="dropdown-item" data-turbo="false" rel="nofollow"
+            <a class="gv-dropdown-item" data-turbo="false" rel="nofollow"
                href="{{ ex.url }}?format={{ f.key }}{% if app.request.queryString %}&{{ app.request.queryString }}{% endif %}">
                 {{ f.label }}
             </a>

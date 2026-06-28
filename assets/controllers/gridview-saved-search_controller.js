@@ -54,13 +54,13 @@ export default class extends Controller {
         const items = preferenceProvider().load(this._scope, 'searches');
 
         if (items.length === 0) {
-            this.listTarget.innerHTML = `<li><span class="dropdown-item-text text-muted">${i18n.t('saved.empty')}</span></li>`;
+            this.listTarget.innerHTML = `<li><span class="gv-dropdown-item-text gv-muted">${i18n.t('saved.empty')}</span></li>`;
             return;
         }
 
         this.listTarget.innerHTML = items.map((item, index) => `
             <li class="gv-saved-row">
-                <button type="button" class="dropdown-item"
+                <button type="button" class="gv-dropdown-item"
                         data-action="gridview-saved-search#apply"
                         data-gridview-saved-search-query-param="${this._esc(item.query)}">${this._esc(item.name)}</button>
                 <button type="button" class="gv-saved-del" title="${this._esc(i18n.t('crud.delete'))}"

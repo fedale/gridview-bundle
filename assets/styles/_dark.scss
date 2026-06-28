@@ -56,6 +56,18 @@
   --gv-page-bg-active:    #3a58a0;
   --gv-color-highlight-bg: #78350f;
   --gv-color-highlight-txt: #fde68a;
+  // Semantic / feedback
+  --gv-info-bg:           rgba(30, 58, 138, .25);
+  --gv-info-color:        #bfdbfe;
+  --gv-info-border:       rgba(30, 58, 138, .5);
+  --gv-success-color:     #4ade80;
+  --gv-success-flash-bg:  rgba(25, 135, 84, .3);
+  --gv-danger-color:      #f08a93;
+  --gv-danger-flash-bg:   rgba(127, 29, 29, .35);
+  --gv-accent-bg:         rgba(58, 88, 160, .2);
+  --gv-accent-border:     rgba(58, 88, 160, .45);
+  --gv-accent-color:      #7b9dd6;
+  --gv-backdrop:          rgba(0, 0, 0, .6);
   // Column types (Fase 7)
   --gv-badge-bg:          #2a3040;
   --gv-badge-color:       #c9d0de;
@@ -112,4 +124,15 @@
   --gv-page-bg-active:    #4b6cb7;
   --gv-color-highlight-bg: #fef3c7;
   --gv-color-highlight-txt: #92400e;
+  --gv-info-bg:           #dbeafe;
+  --gv-info-color:        #1e3a8a;
+  --gv-info-border:       #bfdbfe;
+  --gv-success-color:     #198754;
+  --gv-success-flash-bg:  #d1e7dd;
+  --gv-danger-color:      #dc3545;
+  --gv-danger-flash-bg:   #f8d7da;
+  --gv-accent-bg:         #eef4ff;
+  --gv-accent-border:     #cdddff;
+  --gv-accent-color:      #3b71ca;
+  --gv-backdrop:          rgba(0, 0, 0, .4);
 }

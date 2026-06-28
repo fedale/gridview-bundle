@@ -1,13 +1,13 @@
 import { Controller } from '@hotwired/stimulus';
-import { Modal } from 'bootstrap';
 import * as Turbo from '@hotwired/turbo';
 import i18n from '../i18n.js';
 
 /**
- * Drives the generated CRUD forms: opens a Bootstrap modal, fetches the form
- * partial into it, and submits add/edit/clone/delete via fetch. A
- * text/vnd.turbo-stream.html response refreshes the grid frame and closes the
- * modal; an HTML response (validation errors) is re-injected into the modal.
+ * Drives the generated CRUD forms: opens a self-contained modal (gv-modal, no
+ * Bootstrap JS), fetches the form partial into it, and submits add/edit/clone/
+ * delete via fetch. A text/vnd.turbo-stream.html response refreshes the grid
+ * frame and closes the modal; an HTML response (validation errors) is
+ * re-injected into the modal.
  *
  * Clean replacement of the app's modal-form_controller.js, shipped by the bundle.
  */
@@ -32,7 +32,7 @@ export default class extends Controller {
 
     _openUrl(url) {
         this._spinner();
-        this._modal().show();
+        this._show();
 
         fetch(this._withGridQuery(url), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then((r) => r.text())
@@ -73,7 +73,7 @@ export default class extends Controller {
 
                 if (contentType.includes('turbo-stream')) {
                     Turbo.renderStreamMessage(text);
-                    this._modal().hide();
+                    this._hide();
                 } else {
                     // Validation errors: re-render the form inside the modal.
                     this.modalBodyTarget.innerHTML = text;
@@ -103,8 +103,34 @@ export default class extends Controller {
         return qs ? `${path}?${qs}` : path;
     }
 
-    _modal() {
-        return Modal.getOrCreateInstance(this.modalTarget);
+    // Close action — bound to the header ✕, the Cancel buttons and (via
+    // backdropClose) a click on the overlay. Works for buttons inside fetched
+    // partials too: they live within this controller's element.
+    close(event) {
+        if (event) event.preventDefault();
+        this._hide();
+    }
+
+    // Backdrop click: close only when the click lands on the overlay itself,
+    // not on the dialog inside it.
+    backdropClose(event) {
+        if (event.target === this.modalTarget) this._hide();
+    }
+
+    _show() {
+        this.modalTarget.classList.add('gv-open');
+        this.modalTarget.removeAttribute('aria-hidden');
+        this._onKey = (e) => { if (e.key === 'Escape') this._hide(); };
+        document.addEventListener('keydown', this._onKey);
+    }
+
+    _hide() {
+        this.modalTarget.classList.remove('gv-open');
+        this.modalTarget.setAttribute('aria-hidden', 'true');
+        if (this._onKey) {
+            document.removeEventListener('keydown', this._onKey);
+            this._onKey = null;
+        }
     }
 
     // Disables the submit button and shows a spinner to its left while the
@@ -114,16 +140,16 @@ export default class extends Controller {
         button.disabled = true;
         button.insertAdjacentHTML(
             'afterbegin',
-            '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+            '<span class="gv-spinner gv-spinner--inline" role="status" aria-hidden="true"></span>'
         );
     }
 
     _spinner() {
         this.modalBodyTarget.innerHTML =
-            '<div class="text-center py-4 text-muted"><span class="spinner-border" role="status" aria-hidden="true"></span></div>';
+            '<div class="gv-modal__loading"><span class="gv-spinner" role="status" aria-hidden="true"></span></div>';
     }
 
     _error() {
-        return `<div class="alert alert-danger m-3">${i18n.t('crud.error')}</div>`;
+        return `<div class="gv-alert gv-alert--danger">${i18n.t('crud.error')}</div>`;
     }
 }

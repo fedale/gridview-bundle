@@ -1439,7 +1439,7 @@ is computed automatically (i.e. when `table` is `null`):
 The grid can generate **add / edit / clone / delete** forms directly from the columns'
 configuration — no hand-written `FormType`. The form is built from a per-column `control` spec
 (the write-side twin of `filter`), bound to the data provider's entity (`models`), persisted by a
-bundle service, and shown in a Bootstrap modal that refreshes the grid via Turbo Stream.
+bundle service, and shown in a self-contained modal (no Bootstrap) that refreshes the grid via Turbo Stream.
 
 ### Declaring a control on a column
 
@@ -2615,7 +2615,7 @@ value is the target page URL, so the controller just visits it on `change` — u
 
 ### `gridview-crud`
 
-Drives the CRUD modal: fetches add/edit/clone/delete forms into a Bootstrap modal and submits them
+Drives the CRUD modal: fetches add/edit/clone/delete forms into a self-contained modal (no Bootstrap) and submits them
 via `fetch`. A `text/vnd.turbo-stream.html` response refreshes the grid frame and closes the modal;
 an HTML response (validation errors) is re-injected into the modal.
 
@@ -2988,6 +2988,68 @@ The bundle ships a **framework-agnostic** stylesheet
 CDN dependency). All visuals are driven by **CSS custom properties** scoped under
 `[data-gridview]`, so you restyle the grid without touching the bundle.
 
+### Framework themes (real framework classes)
+
+Beyond token overriding, the grid can **emit a CSS framework's real classes** so
+its leaf elements (buttons, …) are styled by the host's framework CSS directly.
+Pick a theme from YAML — `default` keeps the agnostic `gv-*` look:
+
+```yaml
+fedale_gridview:
+    theme: bootstrap5          # default | bootstrap5 | tailwind | <custom>
+    gridviews:
+        users: { options: { theme: tailwind } }   # per-grid override
+```
+
+A `<button class="gv-btn gv-btn-primary">` then renders as `btn btn-primary`
+(Bootstrap) or Tailwind utilities — same markup, resolved at runtime via
+`{{ gridview.cls('btn.primary') }}` in the templates.
+
+**Class keys** (the closed, themable set): `btn`, `btn.primary`, `btn.danger`,
+`btn.icon`, `pagination`, `pagination.item`, `pagination.link`,
+`pagination.active`, `pagination.disabled`. Any key a theme omits falls back to
+the `default` (`gv-*`) class — e.g. Tailwind has no pagination component, so the
+pagination keys fall back to the structural `gv-pagination` (tinted by tokens).
+
+**Inputs** are not class-keyed: the bundle styles them by element selector
+(`[data-gridview] input/select`), so they follow the theme automatically through
+the `--gv-input-*` tokens (the presets remap these to the framework's palette).
+Hosts using a framework form theme (e.g. Bootstrap's `form-control`) can override
+per their form theme; the grid does not force input classes.
+
+**Custom themes** are declared entirely from YAML — no PHP. Map class keys to
+your own classes; `extends` starts from a built-in and overrides only some keys:
+
+```yaml
+fedale_gridview:
+    theme: mycss
+    themes:
+        mycss:
+            extends: bootstrap5        # optional base
+            classes:
+                'btn.primary': 'c-button c-button--primary'
+                'btn':         'c-button'
+```
+
+What the theme is — and isn't:
+
+- **Presentation only.** `class=` carries style; JS hooks live on `data-*`
+  (Stimulus actions/targets). Switching theme never changes behaviour.
+- **The framework's CSS is the host's job.** The bundle emits class *names*; load
+  Bootstrap/Tailwind yourself. The bundle never bundles a framework's CSS.
+- **No framework JS is ever required.** Dropdown/modal/inline-edit stay on the
+  bundle's own Stimulus controllers (it does *not* emit `data-bs-toggle`).
+- **Structural elements stay `gv-*`** (dropdown panel, overlay, responsive rows,
+  modal). They're tinted to the framework via optional token presets, activated
+  by the `data-gv-framework="<theme>"` attribute the bundle puts on the grid:
+  `assets/styles/presets/_bootstrap5.scss` (maps `--gv-*` → `var(--bs-*)`, so
+  dark mode follows Bootstrap for free) and `_tailwind.scss`. Both ship in
+  `gridview.scss` and are inert until a framework theme is active.
+
+> Buttons inside the CRUD modal partials (delete/bulk-delete/batch/inline) are
+> themed too: the CRUD controller forwards the already-built grid into the
+> partial, so they use the same `gridview.cls()` and follow the per-grid theme.
+
 ### Light / dark mode
 
 Dark mode is automatic and also togglable, in this order of precedence:
@@ -3042,6 +3104,12 @@ Table/toolbar/pagination/dropdown: `--gv-th-bg`, `--gv-th-color`,
 `--gv-sort-active-color`, `--gv-page-bg`, `--gv-page-bg-active`,
 `--gv-page-border`, `--gv-dropdown-bg`, `--gv-dropdown-border`,
 `--gv-dropdown-shadow`.
+
+Feedback / semantic (info banner, inline-edit, bulk bar, validation, modal
+backdrop): `--gv-info-bg`, `--gv-info-color`, `--gv-info-border`,
+`--gv-success-color`, `--gv-success-flash-bg`, `--gv-danger-color`,
+`--gv-danger-flash-bg`, `--gv-accent-bg`, `--gv-accent-border`,
+`--gv-accent-color`, `--gv-backdrop`.
 
 **Column types** (Fase 7 — emitted by the render pipeline):
 

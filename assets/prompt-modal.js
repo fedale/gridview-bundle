@@ -1,9 +1,11 @@
+import i18n from './i18n.js';
+
 /**
  * Tiny dependency-free prompt modal (replaces window.prompt for naming saved
  * searches/selections). Returns a Promise that resolves to the trimmed value, or
  * null on cancel. Enter confirms, Escape / backdrop cancels.
  */
-export function promptModal({ title = '', label = '', value = '', okLabel = 'OK', cancelLabel = 'Annulla' } = {}) {
+export function promptModal({ title = '', label = '', value = '', okLabel = i18n.t('crud.confirm'), cancelLabel = i18n.t('crud.cancel') } = {}) {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.className = 'gv-prompt-overlay';

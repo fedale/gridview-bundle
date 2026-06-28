@@ -5,7 +5,7 @@
   gridview-selection controller. CSRF is the form's own token (rendered by form_end).
 #}
 <div class="gv-batch">
-    <p class="mb-3 text-muted">
+    <p class="gv-form-intro gv-muted">
         {{ 'bulk.batch_intro'|trans({'%count%': '<strong>' ~ count ~ '</strong>'}, 'GridviewBundle')|raw }}
     </p>
 
@@ -13,15 +13,15 @@
         {% for child in form %}
             {% if child.vars.name starts with 'enable_' %}
                 {% set valueName = child.vars.name|replace({'enable_': ''}) %}
-                <div class="gv-batch-row d-flex align-items-center gap-2 mb-2">
-                    <div class="form-check mb-0">{{ form_widget(child) }}</div>
-                    <label class="me-2 mb-0">{{ child.vars.label }}</label>
-                    <div class="flex-grow-1">{{ form_widget(attribute(form, valueName)) }}</div>
+                <div class="gv-batch-row">
+                    <div class="gv-batch-apply">{{ form_widget(child) }}</div>
+                    <label>{{ child.vars.label }}</label>
+                    <div class="gv-batch-field">{{ form_widget(attribute(form, valueName)) }}</div>
                 </div>
             {% endif %}
         {% endfor %}
-        <div class="d-flex justify-content-end gap-2 mt-3">
-            <button type="button" class="gv-btn" data-bs-dismiss="modal" {{ gv_i18n('crud.cancel') }}>{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
+        <div class="gv-form-actions">
+            <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-crud#close" {{ gv_i18n('crud.cancel') }}>{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
             {{ form_widget(form.apply) }}
         </div>
     {{ form_end(form) }}

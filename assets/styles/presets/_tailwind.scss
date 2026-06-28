@@ -1,0 +1,97 @@
+// ═══════════════════════════════════════════════════════════════════
+// Framework preset — Tailwind CSS
+//
+// Activated when the grid carries data-gv-framework="tailwind" (emitted by the
+// bundle when `fedale_gridview.theme: tailwind`). It tints the bundle-specific
+// STRUCTURAL elements (dropdown panel, loading overlay, responsive rows,
+// inline-edit, modal, banners) with Tailwind's default palette (slate neutrals
+// + indigo accent), so they blend with a Tailwind-styled page.
+//
+// The themed leaf elements (buttons, …) already emit Tailwind utility classes
+// via the class map, so they are not touched here.
+//
+// Unlike Bootstrap, Tailwind exposes no runtime CSS variables, so concrete
+// palette values are used. Dark mode is scoped per-theme under Tailwind's
+// `.dark` class strategy. Hosts running Tailwind's pipeline can replace the
+// literals with `theme()` lookups. This file is inert without the attribute.
+// ═══════════════════════════════════════════════════════════════════
+
+[data-gv-framework="tailwind"] {
+  // Palette / surfaces — slate neutrals + indigo accent
+  --gv-color-primary:       #4f46e5;  // indigo-600
+  --gv-color-bg:            #ffffff;
+  --gv-color-bg-subtle:     #f8fafc;  // slate-50
+  --gv-color-bg-hover:      #f1f5f9;  // slate-100
+  --gv-color-border:        #e2e8f0;  // slate-200
+  --gv-color-text:          #0f172a;  // slate-900
+  --gv-color-text-muted:    #64748b;  // slate-500
+  --gv-color-link:          #4f46e5;
+  --gv-color-link-hover:    #4338ca;  // indigo-700
+  --gv-radius:              0.375rem; // rounded-md
+
+  // Inputs
+  --gv-input-bg:            #ffffff;
+  --gv-input-border:        #e2e8f0;
+  --gv-input-color:         #0f172a;
+  --gv-input-border-focus:  #4f46e5;
+  --gv-input-radius:        0.375rem;
+
+  // Table
+  --gv-table-border:        #e2e8f0;
+  --gv-th-bg:               #f8fafc;
+  --gv-th-color:            #0f172a;
+  --gv-tr-hover-bg:         #f1f5f9;
+  --gv-sort-active-color:   #4f46e5;
+
+  // Dropdown menus
+  --gv-dropdown-bg:         #ffffff;
+  --gv-dropdown-border:     #e2e8f0;
+  --gv-dropdown-item-hover: #f1f5f9;
+  --gv-dropdown-radius:     0.5rem;
+
+  // Pagination (structural gv-pagination)
+  --gv-page-bg:             #ffffff;
+  --gv-page-bg-active:      #4f46e5;
+  --gv-page-color:          #4f46e5;
+  --gv-page-color-active:   #ffffff;
+  --gv-page-border:         #e2e8f0;
+
+  // Feedback / semantic
+  --gv-accent-color:        #4f46e5;
+  --gv-success-color:       #16a34a;  // green-600
+  --gv-danger-color:        #dc2626;  // red-600
+}
+
+// ── Dark mode (Tailwind `.dark` class strategy, scoped to this theme) ──
+.dark [data-gv-framework="tailwind"] {
+  --gv-color-primary:       #818cf8;  // indigo-400
+  --gv-color-bg:            #0f172a;  // slate-900
+  --gv-color-bg-subtle:     #1e293b;  // slate-800
+  --gv-color-bg-hover:      #334155;  // slate-700
+  --gv-color-border:        #334155;
+  --gv-color-text:          #e2e8f0;  // slate-200
+  --gv-color-text-muted:    #94a3b8;  // slate-400
+  --gv-color-link:          #818cf8;
+  --gv-color-link-hover:    #a5b4fc;  // indigo-300
+
+  --gv-input-bg:            #1e293b;
+  --gv-input-border:        #334155;
+  --gv-input-color:         #e2e8f0;
+  --gv-input-border-focus:  #818cf8;
+
+  --gv-table-border:        #334155;
+  --gv-th-bg:               #1e293b;
+  --gv-th-color:            #e2e8f0;
+  --gv-tr-hover-bg:         #1e293b;
+
+  --gv-dropdown-bg:         #1e293b;
+  --gv-dropdown-border:     #334155;
+  --gv-dropdown-item-hover: #334155;
+
+  --gv-page-bg:             #1e293b;
+  --gv-page-border:         #334155;
+  --gv-page-color:          #818cf8;
+  --gv-page-bg-active:      #4f46e5;
+
+  --gv-overlay-bg:          rgba(15, 23, 42, .75);
+}

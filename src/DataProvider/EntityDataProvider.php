@@ -163,8 +163,22 @@ class EntityDataProvider extends AbstractDataProvider
 
         $event = new RowEvent();
         foreach ($this->paginator as $key => $model) {
-            $row       = new Row($key, $this->pagination->getPageSize(), $this->pagination->getOffset());
-            $row->data = $serializer->normalize($model);
+            $row = new Row($key, $this->pagination->getPageSize(), $this->pagination->getOffset());
+
+            // A scalar addSelect (e.g. "COUNT(...) AS postCount") makes Doctrine
+            // hydrate the row as [0 => entity, 'alias' => value, ...]. Unwrap it so
+            // the entity is normalized as usual and the computed scalars are merged
+            // onto the row data, letting a plain DataColumn read them by attribute.
+            $extra = [];
+            if (is_array($model)) {
+                $entity = $model[0] ?? null;
+                unset($model[0]);
+                $extra  = $model;
+                $model  = $entity;
+            }
+
+            $data       = $model !== null ? $serializer->normalize($model) : [];
+            $row->data  = $extra === [] ? $data : array_merge($data, $extra);
             $event->row = $row;
             $this->eventDispatcher->dispatch($event, RowEvent::BEFORE_ROW);
             $this->models->add($row);

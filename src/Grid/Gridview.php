@@ -42,6 +42,18 @@ class Gridview implements GridviewInterface
     public array $rowAttr = [];
     public $rowOptions = [];
 
+    /** Active framework theme name (e.g. 'default', 'bootstrap5'). */
+    public string $theme = 'default';
+
+    /**
+     * Pre-resolved class map (class key => concrete classes) for the active
+     * theme, injected by the builder from the ThemeRegistry. Templates read it
+     * via {@see cls()}.
+     *
+     * @var array<string, string>
+     */
+    private array $classMap = [];
+
     public ?SearchModelInterface $searchModel = null;
 
     protected array $options = [
@@ -311,6 +323,29 @@ class Gridview implements GridviewInterface
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    /**
+     * Inject the pre-resolved class map for the active theme (called by the
+     * builder from the ThemeRegistry).
+     *
+     * @param array<string, string> $classMap
+     */
+    public function setClassMap(array $classMap): void
+    {
+        $this->classMap = $classMap;
+    }
+
+    /**
+     * Resolve a presentational class key (e.g. 'btn.primary') to the active
+     * theme's CSS classes, optionally appending extra literal classes/hooks.
+     * Used in templates as `{{ gridview.cls('btn.primary') }}`.
+     */
+    public function cls(string $key, string $extra = ''): string
+    {
+        $classes = $this->classMap[$key] ?? '';
+
+        return $extra !== '' ? trim($classes . ' ' . $extra) : $classes;
     }
 
     public function setAttributes(array $attributes): void

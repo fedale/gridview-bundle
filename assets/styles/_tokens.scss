@@ -3,11 +3,14 @@
 //
 // All component styles reference these CSS custom properties, so a host
 // app can re-skin the grid by overriding any --gv-* var:
-//   Bootstrap 5 → import gridview.bootstrap5.scss
-//   Tailwind    → set vars in @layer base
+//   Bootstrap 5 → [data-gridview] { --gv-*: var(--bs-*); }  (or set
+//                 `fedale_gridview.theme: bootstrap5`, which also emits real
+//                 Bootstrap classes and ships the token bridge — see presets/)
+//   Tailwind    → set vars in @layer base  (or `theme: tailwind`)
 //   Custom      → [data-gridview] { --gv-*: ... }
 //
-// Dark-mode token overrides live in `_dark.scss`.
+// Dark-mode token overrides live in `_dark.scss`; per-framework token bridges
+// in `presets/` (activated by the data-gv-framework attribute).
 // ═══════════════════════════════════════════════════════════════════
 
 // ── Design tokens — neutral gray palette ──────────────────────────
@@ -100,6 +103,19 @@
   --gv-error-bg:            #fee2e2;
   --gv-error-color:         #991b1b;
   --gv-error-border:        #fca5a5;
+
+  // Semantic / feedback (info banner, inline-edit, bulk bar, validation)
+  --gv-info-bg:             #dbeafe;
+  --gv-info-color:          #1e3a8a;
+  --gv-info-border:         #bfdbfe;
+  --gv-success-color:       #198754;   // saved badge
+  --gv-success-flash-bg:    #d1e7dd;   // inline-edit success flash
+  --gv-danger-color:        #dc3545;   // required asterisk, validation, delete affordance
+  --gv-danger-flash-bg:     #f8d7da;   // inline-edit error flash
+  --gv-accent-bg:           #eef4ff;   // bulk bar tint surface
+  --gv-accent-border:       #cdddff;   // bulk bar border, inline-spinner track
+  --gv-accent-color:        #3b71ca;   // pencil edit icon, inline-spinner head
+  --gv-backdrop:            rgba(0, 0, 0, .4);  // modal / prompt overlay
 
   // ── Column types (Fase 7) ───────────────────────────────────────
   // Image

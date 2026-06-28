@@ -4,22 +4,22 @@
   `action` carries the CSRF token and is submitted via the gridview-crud controller.
 #}
 <div class="gv-delete-confirm">
-    <p class="mb-3" {{ gv_i18n('crud.delete_confirm') }}>{{ 'crud.delete_confirm'|trans({}, 'GridviewBundle') }}</p>
+    <p class="gv-form-intro" {{ gv_i18n('crud.delete_confirm') }}>{{ 'crud.delete_confirm'|trans({}, 'GridviewBundle') }}</p>
 
     {% if rows is not empty %}
-    <dl class="row mb-3">
+    <dl class="gv-recap">
         {% for row in rows %}
-        <dt class="col-sm-4 text-muted">{{ gv_client_text(row.label) }}</dt>
-        <dd class="col-sm-8">{{ row.value }}</dd>
+        <dt>{{ gv_client_text(row.label) }}</dt>
+        <dd>{{ row.value }}</dd>
         {% endfor %}
     </dl>
     {% endif %}
 
     <form method="post" action="{{ action }}" data-action="submit->gridview-crud#submit">
         <input type="hidden" name="_token" value="{{ token }}">
-        <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="gv-btn" data-bs-dismiss="modal" {{ gv_i18n('crud.cancel') }}>{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
-            <button type="submit" class="gv-btn gv-btn-danger" {{ gv_i18n('crud.delete') }}>{{ 'crud.delete'|trans({}, 'GridviewBundle') }}</button>
+        <div class="gv-form-actions">
+            <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-crud#close" {{ gv_i18n('crud.cancel') }}>{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}</button>
+            <button type="submit" class="{{ gridview.cls('btn.danger') }}" {{ gv_i18n('crud.delete') }}>{{ 'crud.delete'|trans({}, 'GridviewBundle') }}</button>
         </div>
     </form>
 </div>

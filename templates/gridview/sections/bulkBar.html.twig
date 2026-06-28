@@ -11,12 +11,12 @@
     </span>
     <span class="gv-bulk-actions">
         {% if crud.bulkUpdateUrl is defined %}
-        <button type="button" class="gv-btn" {{ gv_i18n('bulk.update') }}
+        <button type="button" class="{{ gridview.cls('btn') }}" {{ gv_i18n('bulk.update') }}
                 data-action="gridview-selection#bulk"
                 data-gridview-selection-url-param="{{ crud.bulkUpdateUrl }}">{{ 'bulk.update'|trans({}, 'GridviewBundle') }}</button>
         {% endif %}
         {% if crud.bulkDeleteUrl is defined %}
-        <button type="button" class="gv-btn gv-btn-danger" {{ gv_i18n('bulk.delete') }}
+        <button type="button" class="{{ gridview.cls('btn.danger') }}" {{ gv_i18n('bulk.delete') }}
                 data-action="gridview-selection#bulk"
                 data-gridview-selection-url-param="{{ crud.bulkDeleteUrl }}">{{ 'bulk.delete'|trans({}, 'GridviewBundle') }}</button>
         {% endif %}

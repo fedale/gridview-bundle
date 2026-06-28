@@ -5,6 +5,7 @@ class GridviewConfigRegistry
 {
     private const OPTION_DEFAULTS = [
         'caption'      => null,
+        'theme'        => 'default',
         'emptyText'    => 'No records found',
         'showThead'    => true,
         'showTfoot'    => true,
@@ -56,6 +57,12 @@ class GridviewConfigRegistry
 
         $resolved = array_replace(self::OPTION_DEFAULTS, $yamlDefaults);
         $resolved['layout'] = $this->mergeLayout($yamlDefaults['layout'] ?? []);
+
+        // Global framework theme (top-level `fedale_gridview.theme`); a
+        // per-gridview `options.theme` below overrides it.
+        if (isset($this->config['theme'])) {
+            $resolved['theme'] = $this->config['theme'];
+        }
 
         if ($id !== null && isset($this->config['gridviews'][$id]['options'])) {
             $gridviewOptions = $this->config['gridviews'][$id]['options'];

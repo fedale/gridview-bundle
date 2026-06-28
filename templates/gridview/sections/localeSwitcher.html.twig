@@ -5,7 +5,7 @@
   <html lang> / the window.GridviewI18n API). See the i18n.* bundle config.
 #}
 {% if gv_lang_switcher() %}
-<button type="button" class="gv-btn gv-locale-switcher"
+<button type="button" class="{{ gridview.cls('btn', 'gv-locale-switcher') }}"
         data-controller="gridview-locale-switcher"
         data-action="gridview-locale-switcher#toggle">
     🌐 <span data-gridview-locale-switcher-target="label"></span>

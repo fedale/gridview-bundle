@@ -104,6 +104,14 @@ services:
             - '%fedale_gridview.config%'
     Fedale\GridviewBundle\Grid\GridviewConfigRegistry: '@fedale_gridview.config_registry'
 
+    # Resolves presentational class keys (e.g. btn.primary) to the active
+    # framework theme's classes. Custom themes come from `fedale_gridview.themes`.
+    fedale_gridview.theme_registry:
+        class: Fedale\GridviewBundle\Theme\ThemeRegistry
+        arguments:
+            - '%fedale_gridview.themes%'
+    Fedale\GridviewBundle\Theme\ThemeRegistry: '@fedale_gridview.theme_registry'
+
     # Real-time signal publisher. Hub is optional (@?): without symfony/mercure
     # the publisher is a no-op and the bundle still boots.
     fedale_gridview.mercure_publisher:
@@ -126,6 +134,7 @@ services:
             - '@fedale_gridview.gridview_service'
             - '@fedale_gridview.config_registry'
             - '@fedale_gridview.column_factory'
+            - '@fedale_gridview.theme_registry'
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
     Fedale\GridviewBundle\Contract\GridviewBuilderInterface: '@fedale_gridview.gridview_builder'
 
@@ -160,6 +169,7 @@ services:
             - '@fedale_gridview.gridview_service'
             - '@fedale_gridview.config_registry'
             - '@fedale_gridview.column_factory'
+            - '@fedale_gridview.theme_registry'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
     fedale_gridview.entity_data_provider:

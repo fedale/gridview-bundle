@@ -13,9 +13,9 @@
             'data-gridview-inline-edit-target': 'input',
             'data-action': 'keydown->gridview-inline-edit#key',
         }}) }}
-        <button type="button" class="gv-btn gv-btn-primary gv-inline-ok" {{ gv_i18n_attr('crud.confirm', 'title') }} title="{{ 'crud.confirm'|trans({}, 'GridviewBundle') }}"
+        <button type="button" class="{{ gridview.cls('btn.primary', 'gv-inline-ok') }}" {{ gv_i18n_attr('crud.confirm', 'title') }} title="{{ 'crud.confirm'|trans({}, 'GridviewBundle') }}"
                 data-action="gridview-inline-edit#save">OK</button>
-        <button type="button" class="gv-btn gv-inline-cancel" {{ gv_i18n_attr('crud.cancel', 'title') }} title="{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}"
+        <button type="button" class="{{ gridview.cls('btn', 'gv-inline-cancel') }}" {{ gv_i18n_attr('crud.cancel', 'title') }} title="{{ 'crud.cancel'|trans({}, 'GridviewBundle') }}"
                 data-action="gridview-inline-edit#cancel">✕</button>
     </div>
     {{ form_widget(attribute(form, '_token')) }}
