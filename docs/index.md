@@ -1429,6 +1429,32 @@ an empty region collapses to nothing. The presence of a layout key **promotes** 
 token to a region (it wins over a block template of the same name), so region and
 block names must stay disjoint.
 
+#### How a token is resolved
+
+The engine renders each token through a single dispatch, in this precedence:
+
+1. **slot** → render the inline content (see [Inline slots](#inline-slots));
+2. **region** (a `layout[token]` key exists) → render its template — the first that
+   exists among `layout.templates[token]` → `sections/{token}.html.twig` →
+   the generic `sections/_region.html.twig` — then recurse into the children;
+3. **block** (no layout key, but a template resolves) → render `sections/{token}.html.twig`;
+4. otherwise → empty string (unknown token).
+
+Children are emitted by `gridview_children(region)`, which also applies the inline
+widths (`{token NN%}`). Self/cyclic references are broken by a visited-set guard, so
+a region can never recurse into itself.
+
+> **Naming.** Tokens are `camelCase`, `[A-Za-z0-9_]` only — no dashes, no `gv-`
+> prefix (scoping comes from the tree, not the name). The `gv-` prefix lives only on
+> CSS classes and data-attributes.
+
+> **Upgrading from the old vocabulary.** The root key `gridview` is now **`shell`**
+> and the data region `table` is now **`dataview`**; the chrome widgets moved from
+> `header` into `toolbar` (so `header` is `{title} {toolbar}` by default). The
+> table-internal tokens (`thead`/`filter`/`tbody`/`tfoot`/`empty`) are unchanged but
+> are now internals of the `table` renderer (templates under `sections/dataview/`).
+> Rewrite any `layout.gridview` / `layout.table` keys to `shell` / `dataview`.
+
 ### Default layout
 
 ```
@@ -1550,6 +1576,47 @@ For small snippets that do not justify a separate template file, use **slots**:
 
 Slot content is rendered as a Twig template with full access to the grid context
 (`gridview`, `models`, `columns`, `pagination`, `form`).
+
+### Per-region HTML attributes
+
+Every region wrapper applies the attributes returned by `gridview.regionAttr(name)`.
+Set them per region under `layout.attrs`:
+
+```php
+->setOptions([
+    'layout' => [
+        'attrs' => [
+            'shell' => ['data-analytics' => 'customers-grid'],
+            'thead' => ['class' => 'sticky-top'],
+            'toolbar' => ['data-testid' => 'toolbar'],
+        ],
+    ],
+])
+```
+
+Any region or table-internal name is accepted (`shell`, `header`, `title`,
+`toolbar`, `footer`, `dataview`, `thead`, `filter`, `row`, …). The generic
+`_region.html.twig` wrapper emits them automatically; a dedicated region template
+emits them via `{{ gridview.regionAttr(region)|options }}`.
+
+The legacy [`setAttributes()`](#attributes--styling) bag still works and maps onto
+the same regions (`container → shell`, the table `class` → `dataview`,
+`header → header`, `filter`, `row`); `layout.attrs[T]` overrides it per key.
+
+### Choosing the data renderer
+
+The `dataview` region is renderer-agnostic. `options.renderer` picks the strategy
+template `sections/dataview/{renderer}.html.twig`:
+
+```php
+->setOptions(['renderer' => 'table'])   // the default and only built-in today
+```
+
+Only `table` ships today (it renders the `<table>` and its
+`thead`/`filter`/`tbody`/`tfoot`/`empty` internals); `card` and `list` are planned.
+An unknown renderer falls back to `table`. To fully replace the data markup, either
+add a `sections/dataview/{name}.html.twig` strategy or override the template
+directly with `layout.templates.dataview`.
 
 ### Hiding thead / tfoot without editing layout
 
@@ -2533,13 +2600,18 @@ HTML attributes for the table and its surrounding elements are set via `setAttri
 ])
 ```
 
-| Key | Target element |
-|-----|---------------|
-| `class` | `<table>` element |
-| `container` | Div wrapping the entire grid |
-| `header` | Div wrapping the header section |
-| `filter` | `<tr>` containing filter inputs |
-| `row` | Every `<tr>` in the tbody |
+| Key | Region | Target element |
+|-----|--------|---------------|
+| `class` | `dataview` | `<table>` element |
+| `container` | `shell` | Div wrapping the entire grid |
+| `header` | `header` | The header region div |
+| `filter` | `filter` | `<tr>` containing filter inputs |
+| `row` | `row` | Every `<tr>` in the tbody |
+
+This bag is shorthand for the most common targets; under the hood it feeds the same
+per-region attribute map as [`layout.attrs[T]`](#per-region-html-attributes), which
+can attach attributes to **any** region or table-internal (e.g. `thead`, `toolbar`,
+`title`) and overrides the bag per key.
 
 ---
 
@@ -2603,6 +2675,8 @@ $gridview = $this->createGridviewBuilder()
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `emptyText` | `string` | `'No records found'` | Text shown when there are no data rows |
+| `title` | `string\|null` | `null` | Grid title rendered by the `{heading}` block (the `title` region collapses when empty) |
+| `renderer` | `string` | `'table'` | Data region strategy → `sections/dataview/{renderer}.html.twig` (`table` only today; `card`/`list` planned) |
 | `useTurbo` | `bool` | `true` | Wrap the grid in a Turbo Frame and respond with partial HTML on frame requests |
 | `showThead` | `bool` | `true` | Include `{thead}` in the auto-computed table layout |
 | `showTfoot` | `bool` | `true` | Include `{tfoot}` in the auto-computed table layout |
