@@ -44,9 +44,9 @@ class GridviewLayoutEngineTest extends TestCase
         $layout = $this->gridview()->getOptions()['layout'];
 
         $this->assertSame('{header} {dataview} {footer}', $layout['shell']);
-        $this->assertSame('{title} {toolbar}', $layout['header']);
-        $this->assertSame('{heading}', $layout['title']);
+        $this->assertSame('{heading} {toolbar}', $layout['header']);
         $this->assertSame('{globalSearch} {filterSubmit}', $layout['toolbar']);
+        $this->assertArrayNotHasKey('title', $layout);
         $this->assertNull($layout['dataview']);
         $this->assertSame('{pagination}', $layout['footer']);
         $this->assertArrayNotHasKey('gridview', $layout);
@@ -67,7 +67,7 @@ class GridviewLayoutEngineTest extends TestCase
     {
         $gridview = $this->gridview();
 
-        foreach (['shell', 'header', 'title', 'toolbar', 'dataview', 'footer', 'tfoot'] as $region) {
+        foreach (['shell', 'header', 'toolbar', 'dataview', 'footer', 'tfoot'] as $region) {
             $this->assertTrue($gridview->isRegion($region), "$region should be a region");
         }
 

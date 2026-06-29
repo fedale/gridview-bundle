@@ -17,8 +17,7 @@ class GridviewConfigRegistry
      */
     public const LAYOUT_DEFAULTS = [
         'shell'     => '{header} {dataview} {footer}',
-        'header'    => '{title} {toolbar}',
-        'title'     => '{heading}',
+        'header'    => '{heading} {toolbar}',
         'toolbar'   => '{globalSearch} {filterSubmit}',
         'dataview'  => null,
         'footer'    => '{pagination}',

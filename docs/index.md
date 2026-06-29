@@ -1450,7 +1450,7 @@ a region can never recurse into itself.
 
 > **Upgrading from the old vocabulary.** The root key `gridview` is now **`shell`**
 > and the data region `table` is now **`dataview`**; the chrome widgets moved from
-> `header` into `toolbar` (so `header` is `{title} {toolbar}` by default). The
+> `header` into `toolbar` (so `header` is `{heading} {toolbar}` by default). The
 > table-internal tokens (`thead`/`filter`/`tbody`/`tfoot`/`empty`) are unchanged but
 > are now internals of the `table` renderer (templates under `sections/dataview/`).
 > Rewrite any `layout.gridview` / `layout.table` keys to `shell` / `dataview`.
@@ -1459,8 +1459,7 @@ a region can never recurse into itself.
 
 ```
 shell:    "{header} {dataview} {footer}"        ← root region (the _grid template)
-header:   "{title} {toolbar}"                    ← chrome band (title above toolbar)
-title:    "{heading}"                            ← renders options.title; collapses when empty
+header:   "{heading} {toolbar}"                  ← chrome band; {heading} renders options.title (collapses when empty)
 toolbar:  "{globalSearch} {filterSubmit}"        ← CRUD controllers default to
                                                    "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
 dataview: null                                   ← null → table strategy: "{thead} {filter} {tbody} {tfoot}"
@@ -1478,8 +1477,7 @@ are internals of the table strategy, not top-level tokens.
 | Token | Type / Template | Notes |
 |-------|-----------------|-------|
 | `{shell}` | region (`_grid.html.twig`) | Root region; turbo-frame / form / modal chrome |
-| `{header}` | region (`_region.html.twig`) | Chrome band above the data; `{title} {toolbar}` by default |
-| `{title}` | region (`_region.html.twig`) | Title area; `{heading}` by default |
+| `{header}` | region (`_region.html.twig`) | Chrome band above the data; `{heading} {toolbar}` by default |
 | `{toolbar}` | region (`_region.html.twig`) | Flex row of grid controls |
 | `{dataview}` | region (`sections/dataview/{renderer}.html.twig`) | The data region; renderer-agnostic (the `table` strategy renders the `<table>`) |
 | `{footer}` | region (`_region.html.twig`) | Area below the data |
@@ -1594,7 +1592,7 @@ Set them per region under `layout.attrs`:
 ])
 ```
 
-Any region or table-internal name is accepted (`shell`, `header`, `title`,
+Any region or table-internal name is accepted (`shell`, `header`,
 `toolbar`, `footer`, `dataview`, `thead`, `filter`, `row`, …). The generic
 `_region.html.twig` wrapper emits them automatically; a dedicated region template
 emits them via `{{ gridview.regionAttr(region)|options }}`.
@@ -2611,7 +2609,7 @@ HTML attributes for the table and its surrounding elements are set via `setAttri
 This bag is shorthand for the most common targets; under the hood it feeds the same
 per-region attribute map as [`layout.attrs[T]`](#per-region-html-attributes), which
 can attach attributes to **any** region or table-internal (e.g. `thead`, `toolbar`,
-`title`) and overrides the bag per key.
+`header`) and overrides the bag per key.
 
 ---
 
@@ -2675,7 +2673,7 @@ $gridview = $this->createGridviewBuilder()
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `emptyText` | `string` | `'No records found'` | Text shown when there are no data rows |
-| `title` | `string\|null` | `null` | Grid title rendered by the `{heading}` block (the `title` region collapses when empty) |
+| `title` | `string\|null` | `null` | Grid title text rendered by the `{heading}` block (`{heading}` collapses when empty) |
 | `renderer` | `string` | `'table'` | Data region strategy → `sections/dataview/{renderer}.html.twig` (`table` only today; `card`/`list` planned) |
 | `useTurbo` | `bool` | `true` | Wrap the grid in a Turbo Frame and respond with partial HTML on frame requests |
 | `showThead` | `bool` | `true` | Include `{thead}` in the auto-computed table layout |
