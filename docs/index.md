@@ -1531,9 +1531,10 @@ Pass a `layout` key inside `setOptions()`:
 
 ```php
 ->setOptions([
-    'layout' => [
+    'title'    => 'Customers',     // text rendered by {heading}
+    'layout'   => [
         'shell'    => '{header} {dataview} {footer}',
-        'header'   => '{toolbar}',
+        'header'   => '{heading} {toolbar}',
         'toolbar'  => '{addButton} {globalSearch} {columnVisibility}',
         'footer'   => '{pagination}',
     ],
@@ -1541,6 +1542,26 @@ Pass a `layout` key inside `setOptions()`:
     'addLabel' => 'New Customer',
 ])
 ```
+
+### Adding a title
+
+The `{heading}` block renders the `options.title` text and **collapses when the
+title is empty**, so a grid shows a heading only when you set one. It is a plain
+block, so place it in whichever region you like — the default puts it at the start
+of `header` (`{heading} {toolbar}`):
+
+```php
+->setOptions([
+    'title'  => 'Customers',
+    'layout' => [
+        'header'  => '{heading} {toolbar}',
+        'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+    ],
+])
+```
+
+To change how the title looks, override the `heading` block template
+(`layout.templates.heading`); to change the text, set `options.title`.
 
 ### Overriding individual section templates
 
