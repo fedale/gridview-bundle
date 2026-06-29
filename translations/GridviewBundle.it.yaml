@@ -24,6 +24,9 @@ saved.save_title: "Salva ricerca"
 saved.label: "ricerca"
 saved.empty: "Nessuna ricerca salvata"
 
+sort.title: "Ordina"
+sort.button: "Ordina"
+
 selection.all_records: "Tutti i record"
 selection.menu: "Menu selezione"
 selection.select_all: "Seleziona tutti"

@@ -58,6 +58,8 @@ class Gridview implements GridviewInterface
 
     protected array $options = [
         'caption' => null,
+        'title' => null,
+        'renderer' => 'table',
         'emptyText' => 'No records found',
         'showThead' => true,
         'showTfoot' => true,
@@ -67,16 +69,8 @@ class Gridview implements GridviewInterface
         'addRoute' => null,
         'addLabel' => 'Add',
         'formName' => 'myform',
-        'layout' => [
-            'gridview' => '{header} {table} {footer}',
-            'header' => '{globalSearch} {filterSubmit} {filterBar} {addButton} {columnVisibility}',
-            'toolbar' => '',
-            'table' => null,
-            'footer' => '{pagination}',
-            'tfoot' => '',
-            'templates' => [],
-            'slots' => [],
-        ],
+        // Single source of truth — see GridviewConfigRegistry::LAYOUT_DEFAULTS.
+        'layout' => GridviewConfigRegistry::LAYOUT_DEFAULTS,
         'filterControls' => [
             'headerIcon' => true,
             'inlineClear' => false,
@@ -437,7 +431,7 @@ class Gridview implements GridviewInterface
     {
         $layout = $this->options['layout'][$section] ?? null;
 
-        if ($layout === null && $section === 'table') {
+        if ($layout === null && $section === 'dataview') {
             $tokens = [];
             if ($this->options['showThead']) {
                 $tokens[] = '{thead}';
@@ -479,6 +473,56 @@ class Gridview implements GridviewInterface
     public function slotContent(string $token): string
     {
         return $this->options['layout']['slots'][$token] ?? '';
+    }
+
+    /**
+     * A token is a region (recursive container) when a layout key of that name
+     * exists — even with a null/empty value. The reserved sub-maps
+     * (`templates`/`slots`/`attrs`) are configuration, not regions. The engine
+     * dispatch ({@see OptionsExtension::includeToken()}) uses this to decide
+     * whether to recurse into children or render a leaf block template.
+     */
+    /**
+     * The data region renderer strategy ('table' today; 'card'/'list' planned).
+     * Selects the dataview template sections/dataview/{renderer}.html.twig.
+     */
+    public function getRenderer(): string
+    {
+        return $this->options['renderer'] ?? 'table';
+    }
+
+    public function isRegion(string $token): bool
+    {
+        if (in_array($token, ['templates', 'slots', 'attrs'], true)) {
+            return false;
+        }
+
+        return array_key_exists($token, $this->options['layout']);
+    }
+
+    /**
+     * HTML attributes for a region/internal, applied by its wrapper template via
+     * `gridview.regionAttr(T)`. The legacy fixed bags map to canonical region
+     * names (container→shell, the table-level attr→dataview, header→the header
+     * region, filter/row→the table strategy internals); any other region reads
+     * from the `layout.attrs[T]` map, which also overrides the legacy bags.
+     *
+     * @return array<string, mixed>
+     */
+    public function regionAttr(string $region): array
+    {
+        $base = match ($region) {
+            'shell'    => $this->containerAttr,
+            'dataview' => $this->attr,
+            'header'   => $this->headerAttr,
+            'filter'   => $this->filterAttr,
+            'row'      => $this->rowAttr,
+            default    => [],
+        };
+
+        $extra = $this->options['layout']['attrs'][$region] ?? [];
+
+        return $extra !== [] ? array_replace($base, $extra) : $base;
     }
 
     public function renderGrid(string $view, array $parameters = []): Response

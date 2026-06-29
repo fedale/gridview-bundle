@@ -1,0 +1,10 @@
+{#
+  Generic region wrapper. Used for any region without a dedicated template
+  (header, toolbar, footer, …). The engine passes `region` (the token name) and
+  resolves children/widths via gridview_children(). An empty region collapses to
+  nothing — no stray wrapper div — preserving the old toolbar/footer behaviour.
+#}
+{%- set _children = gridview_children(gridview, region) -%}
+{%- if _children|trim is not empty -%}
+<div class="gv-region gv-region--{{ region }}" data-gv-region="{{ region }}" {{ gridview.regionAttr(region)|options }}>{{ _children|raw }}</div>
+{%- endif -%}

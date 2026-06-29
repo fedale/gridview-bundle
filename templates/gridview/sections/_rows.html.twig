@@ -1,7 +1,7 @@
 {# Solo le <tr> dei modelli correnti. Condiviso tra il render iniziale del
    <tbody> e la risposta turbo-stream "solo righe" dell'infinite scroll. #}
 {% for row in models %}
-    <tr {{ gridview.rowAttr|merge(row.attr ?? {})|options }}>
+    <tr {{ gridview.regionAttr('row')|merge(row.attr ?? {})|options }}>
         {% if gridview.options.responsive|default(false) %}<td class="gv-resp-ctrl"><button type="button" class="gv-resp-toggle" data-action="click->gridview-responsive#toggle" aria-expanded="false" aria-label="Mostra dettagli"></button></td>{% endif %}
         {% for column in gridview.indexColumns %}
             <td data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}" data-priority="{{ column.priority }}"{% if not column.isVisible() %} style="display:none"{% endif %} {{ column.options|options }}>

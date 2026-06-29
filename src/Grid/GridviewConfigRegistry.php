@@ -3,9 +3,37 @@ namespace Fedale\GridviewBundle\Grid;
 
 class GridviewConfigRegistry
 {
+    /**
+     * Single source of truth for the layout token tree. Referenced by
+     * {@see Gridview::$options} too, so the in-class and config-resolved defaults
+     * never drift. The tree is implicit: each region name is a key whose value is
+     * the child-token string; the engine recurses by looking up `layout[child]`.
+     *
+     * `shell` is the root region (the `_grid` template renders it). `header`
+     * wraps `toolbar`; the widgets live in `toolbar` so a controller (e.g. CRUD)
+     * overrides one focused key. `dataview` is the renderer-agnostic data region
+     * (null → the table strategy default in {@see Gridview::resolveLayout()}).
+     * `templates`/`slots`/`attrs` are reserved sub-maps, not regions.
+     */
+    public const LAYOUT_DEFAULTS = [
+        'shell'     => '{header} {dataview} {footer}',
+        'header'    => '{heading} {toolbar}',
+        'toolbar'   => '{globalSearch} {filterSubmit}',
+        'dataview'  => null,
+        'footer'    => '{pagination}',
+        'tfoot'     => '',
+        'templates' => [],
+        'slots'     => [],
+        'attrs'     => [],
+    ];
+
     private const OPTION_DEFAULTS = [
         'caption'      => null,
+        'title'        => null,
         'theme'        => 'default',
+        // Data region renderer strategy: picks sections/dataview/{renderer}.html.twig.
+        // Only 'table' ships today; 'card'/'list' are planned.
+        'renderer'     => 'table',
         'emptyText'    => 'No records found',
         'showThead'    => true,
         'showTfoot'    => true,
@@ -22,16 +50,7 @@ class GridviewConfigRegistry
             'enabled'     => false,
             'topicPrefix' => 'gridview/',
         ],
-        'layout'       => [
-            'gridview'  => '{header} {table} {footer}',
-            'header'    => '{globalSearch} {filterSubmit}',
-            'toolbar'   => '',
-            'table'     => null,
-            'footer'    => '{pagination}',
-            'tfoot'     => '',
-            'templates' => [],
-            'slots'     => [],
-        ],
+        'layout'       => self::LAYOUT_DEFAULTS,
     ];
 
     /**
@@ -81,7 +100,7 @@ class GridviewConfigRegistry
         $result = self::OPTION_DEFAULTS['layout'];
         foreach ($layers as $layer) {
             foreach ($layer as $key => $value) {
-                if ($key === 'templates' || $key === 'slots') {
+                if ($key === 'templates' || $key === 'slots' || $key === 'attrs') {
                     if (!empty($value)) {
                         $result[$key] = array_replace($result[$key], $value);
                     }

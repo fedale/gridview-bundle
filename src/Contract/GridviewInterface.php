@@ -39,6 +39,15 @@ interface GridviewInterface
 
     public function slotContent(string $token): string;
 
+    public function isRegion(string $token): bool;
+
+    public function getRenderer(): string;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function regionAttr(string $region): array;
+
     public function hasCheckboxColumn(): bool;
 
     public function hasHiddenColumns(): bool;

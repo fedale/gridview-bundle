@@ -1,4 +1,4 @@
-<thead {{ gridview.headerAttr|options }}>
+<thead {{ gridview.regionAttr('thead')|options }}>
     <tr>
         {% set gvReorder = gridview.options.reorderColumns|default(false) %}
         {% if gridview.options.responsive|default(false) %}<th class="gv-resp-ctrl" aria-hidden="true"></th>{% endif %}

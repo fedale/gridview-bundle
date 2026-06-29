@@ -241,12 +241,10 @@
 }
 
 // ── Header ───────────────────────────────────────────────────────
+// The header region is the chrome band (border/padding); the controls live in
+// its child toolbar region (flex row, see below).
 
-[data-gridview] .gv-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem 1.25rem;
+[data-gridview] .gv-region--header {
   padding: 1rem 0 1.25rem;
   margin-bottom: .5rem;
   border-bottom: 1px solid var(--gv-color-border);
@@ -254,7 +252,7 @@
 
 // Elastic gap ({spacer}): absorbs the free space so the controls before it stay
 // left and the controls after it are pushed to the right edge.
-[data-gridview] .gv-header__spacer {
+[data-gridview] .gv-region__spacer {
   flex: 1 1 0;
   min-width: 1rem;
 }
@@ -283,9 +281,9 @@
   font-size: .85em;
 }
 
-// A width-sized header slot (e.g. "{globalSearch 40%}"): the slot reserves the
+// A width-sized region slot (e.g. "{globalSearch 40%}"): the slot reserves the
 // track, the control inside keeps its natural size and stays left-aligned.
-[data-gridview] .gv-header .gv-header__slot {
+[data-gridview] .gv-region__slot {
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -299,12 +297,14 @@
 }
 
 // ── Toolbar ──────────────────────────────────────────────────────
+// The toolbar region is the flex row holding the grid controls (search, add,
+// export, …) — the role the old `.gv-header` flex container had.
 
-[data-gridview] .gv-toolbar {
+[data-gridview] .gv-region--toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--gv-toolbar-gap);
+  gap: 1rem 1.25rem;
   padding: var(--gv-toolbar-padding);
 }
 

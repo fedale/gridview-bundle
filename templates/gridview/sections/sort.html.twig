@@ -1,0 +1,28 @@
+{#
+  Sort block: a dropdown listing the sortable columns, each linking to its
+  toggle-sort URL with the active direction marked. Renderer-agnostic — usable in
+  any region (e.g. the toolbar), and a sort affordance for card/list renderers
+  that have no column headers, but equally placeable alongside a table. Collapses
+  when no column is sortable.
+#}
+{%- set sortable = gridview.indexColumns|filter(c => c.sortUrl is not null) -%}
+{%- if sortable is not empty -%}
+<div class="gv-sort gv-dropdown" data-controller="gridview-dropdown">
+    <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-dropdown#toggle" {{ gv_i18n_attr('sort.title', 'title') }} title="{{ 'sort.title'|trans({}, 'GridviewBundle') }}" aria-expanded="false">
+        ⇅ <span {{ gv_i18n('sort.button') }}>{{ 'sort.button'|trans({}, 'GridviewBundle') }}</span>
+    </button>
+    <ul class="gv-dropdown-menu">
+        {% for column in sortable %}
+        {% set state = column.sortState %}
+        <li>
+            <a class="gv-dropdown-item gv-sort-item{% if state in ['asc', 'desc'] %} gv-sort-item--{{ state }}{% endif %}"
+               href="{{ column.sortUrl }}"{% if gridview.options.useTurbo %} data-turbo-action="advance"{% endif %}>
+                <span class="gv-sort-item__label">{{ gv_header_label(column.label) }}</span>
+                {% if state == 'asc' %}<span class="gv-sort-dir" aria-hidden="true">▲</span>
+                {% elseif state == 'desc' %}<span class="gv-sort-dir" aria-hidden="true">▼</span>{% endif %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{%- endif -%}
