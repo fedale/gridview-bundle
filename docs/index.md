@@ -1433,7 +1433,8 @@ block names must stay disjoint.
 
 ```
 shell:    "{header} {dataview} {footer}"        ← root region (the _grid template)
-header:   "{toolbar}"                            ← chrome band wrapping the toolbar
+header:   "{title} {toolbar}"                    ← chrome band (title above toolbar)
+title:    "{heading}"                            ← renders options.title; collapses when empty
 toolbar:  "{globalSearch} {filterSubmit}"        ← CRUD controllers default to
                                                    "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
 dataview: null                                   ← null → table strategy: "{thead} {filter} {tbody} {tfoot}"
@@ -1441,20 +1442,29 @@ footer:   "{pagination}"
 tfoot:    ""
 ```
 
+The data region (`dataview`) is **renderer-agnostic**: its template is the active
+strategy `sections/dataview/{renderer}.html.twig`, selected by `options.renderer`.
+Only `table` ships today (`card`/`list` are planned); `thead`/`filter`/`tbody`/`tfoot`/`empty`
+are internals of the table strategy, not top-level tokens.
+
 ### Available tokens
 
 | Token | Type / Template | Notes |
 |-------|-----------------|-------|
 | `{shell}` | region (`_grid.html.twig`) | Root region; turbo-frame / form / modal chrome |
-| `{header}` | region (`_region.html.twig`) | Chrome band above the data; wraps `{toolbar}` by default |
+| `{header}` | region (`_region.html.twig`) | Chrome band above the data; `{title} {toolbar}` by default |
+| `{title}` | region (`_region.html.twig`) | Title area; `{heading}` by default |
 | `{toolbar}` | region (`_region.html.twig`) | Flex row of grid controls |
-| `{dataview}` | region (`sections/dataview.html.twig`) | The data region; renderer-agnostic (table strategy renders the `<table>`) |
+| `{dataview}` | region (`sections/dataview/{renderer}.html.twig`) | The data region; renderer-agnostic (the `table` strategy renders the `<table>`) |
 | `{footer}` | region (`_region.html.twig`) | Area below the data |
-| `{thead}` | block (`sections/thead.html.twig`) | Column header row (table strategy internal) |
-| `{filter}` | `sections/filter.html.twig` | Column filter inputs row (header) |
+| `{heading}` | block (`sections/heading.html.twig`) | Renders `options.title` (collapses when empty) |
+| `{sort}` | block (`sections/sort.html.twig`) | Sort dropdown of the sortable columns; placeable anywhere |
+| `{thead}` | table-strategy internal (`sections/dataview/thead.html.twig`) | Column header row |
+| `{filter}` | table-strategy internal (`sections/dataview/filter.html.twig`) | Column filter inputs row (header) |
 | `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](#the-filterbar--placing-filters-anywhere)) |
-| `{tbody}` | `sections/tbody.html.twig` | Data rows |
-| `{tfoot}` | `sections/tfoot.html.twig` | Table footer row |
+| `{tbody}` | table-strategy internal (`sections/dataview/tbody.html.twig`) | Data rows |
+| `{tfoot}` | table-strategy internal (`sections/dataview/tfoot.html.twig`) | Table footer row |
+| `{empty}` | table-strategy internal (`sections/dataview/empty.html.twig`) | "No records found" row |
 | `{globalSearch}` | `sections/globalSearch.html.twig` | Global search input |
 | `{filterSubmit}` | `sections/filterSubmit.html.twig` | Filter submit button — visible only when `useTurbo: false` |
 | `{pagination}` | `sections/pagination.html.twig` | Page navigation |
@@ -1462,7 +1472,6 @@ tfoot:    ""
 | `{columnVisibility}` | `sections/columnVisibility.html.twig` | Column show/hide dropdown |
 | `{export}` | `sections/export.html.twig` | Export menu (requires `options.export = { url, formats }`; auto-wired in CRUD controllers) |
 | `{spacer}` | `sections/spacer.html.twig` | Elastic gap — see [Spacing tokens](#spacing-tokens) |
-| `{empty}` | `sections/empty.html.twig` | "No records found" row |
 
 ### Spacing tokens
 

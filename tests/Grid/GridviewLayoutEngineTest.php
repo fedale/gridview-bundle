@@ -44,7 +44,8 @@ class GridviewLayoutEngineTest extends TestCase
         $layout = $this->gridview()->getOptions()['layout'];
 
         $this->assertSame('{header} {dataview} {footer}', $layout['shell']);
-        $this->assertSame('{toolbar}', $layout['header']);
+        $this->assertSame('{title} {toolbar}', $layout['header']);
+        $this->assertSame('{heading}', $layout['title']);
         $this->assertSame('{globalSearch} {filterSubmit}', $layout['toolbar']);
         $this->assertNull($layout['dataview']);
         $this->assertSame('{pagination}', $layout['footer']);
@@ -66,7 +67,7 @@ class GridviewLayoutEngineTest extends TestCase
     {
         $gridview = $this->gridview();
 
-        foreach (['shell', 'header', 'toolbar', 'dataview', 'footer', 'tfoot'] as $region) {
+        foreach (['shell', 'header', 'title', 'toolbar', 'dataview', 'footer', 'tfoot'] as $region) {
             $this->assertTrue($gridview->isRegion($region), "$region should be a region");
         }
 
@@ -138,6 +139,21 @@ class GridviewLayoutEngineTest extends TestCase
         $this->assertSame(['class' => 'sticky'], $gridview->regionAttr('thead'));
         // Merged with (and overriding) the legacy bag.
         $this->assertSame(['id' => 'wrap', 'data-x' => '1'], $gridview->regionAttr('shell'));
+    }
+
+    public function testRendererDefaultsToTable(): void
+    {
+        $this->assertSame('table', $this->gridview()->getRenderer());
+    }
+
+    public function testRendererIsConfigurablePerGridview(): void
+    {
+        $config = ['gridviews' => ['g' => ['options' => ['renderer' => 'card']]]];
+
+        $gridview = $this->gridview($config);
+        $gridview->setOptions((new GridviewConfigRegistry($config))->resolveOptions('g'));
+
+        $this->assertSame('card', $gridview->getRenderer());
     }
 
     public function testLayoutTokensExtractInlineWidths(): void

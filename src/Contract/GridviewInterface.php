@@ -41,6 +41,8 @@ interface GridviewInterface
 
     public function isRegion(string $token): bool;
 
+    public function getRenderer(): string;
+
     /**
      * @return array<string, mixed>
      */

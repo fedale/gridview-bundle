@@ -188,6 +188,12 @@ abstract class AbstractColumn implements ColumnInterface
         return null;
     }
 
+    /** Toggle-sort URL for this column, or null when not managed by Sort. */
+    public function sortUrl(): ?string
+    {
+        return null;
+    }
+
     /**
      * @param bool|\Closure $sortable
      */

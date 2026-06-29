@@ -1,0 +1,10 @@
+{#
+  Heading block: renders the grid's textual title (options.title). Placed in the
+  `title` region by default ({heading}); the region collapses when title is empty,
+  so a grid without a title shows no heading. App-owned text: resolve via the
+  client i18n domain when it is a real key, else render the literal string.
+#}
+{%- set _title = gridview.options.title -%}
+{%- if _title is not empty -%}
+<h2 class="gv-heading" {{ gv_i18n(_title) }}>{{ gv_client_label(_title) ? gv_client_text(_title) : _title }}</h2>
+{%- endif -%}

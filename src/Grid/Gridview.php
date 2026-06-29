@@ -58,6 +58,8 @@ class Gridview implements GridviewInterface
 
     protected array $options = [
         'caption' => null,
+        'title' => null,
+        'renderer' => 'table',
         'emptyText' => 'No records found',
         'showThead' => true,
         'showTfoot' => true,
@@ -480,6 +482,15 @@ class Gridview implements GridviewInterface
      * dispatch ({@see OptionsExtension::includeToken()}) uses this to decide
      * whether to recurse into children or render a leaf block template.
      */
+    /**
+     * The data region renderer strategy ('table' today; 'card'/'list' planned).
+     * Selects the dataview template sections/dataview/{renderer}.html.twig.
+     */
+    public function getRenderer(): string
+    {
+        return $this->options['renderer'] ?? 'table';
+    }
+
     public function isRegion(string $token): bool
     {
         if (in_array($token, ['templates', 'slots', 'attrs'], true)) {

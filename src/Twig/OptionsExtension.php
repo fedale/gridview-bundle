@@ -123,6 +123,18 @@ class OptionsExtension extends AbstractExtension
             return $override;
         }
 
+        // The data region is renderer-agnostic: its template is the active
+        // strategy (sections/dataview/{renderer}.html.twig). Only 'table' ships
+        // today; an unknown/not-yet-built renderer falls back to it.
+        if ($token === 'dataview') {
+            $renderer = $gridview->getRenderer();
+            $strategy = "@FedaleGridview/gridview/sections/dataview/{$renderer}.html.twig";
+
+            return $env->getLoader()->exists($strategy)
+                ? $strategy
+                : '@FedaleGridview/gridview/sections/dataview/table.html.twig';
+        }
+
         $dedicated = "@FedaleGridview/gridview/sections/{$token}.html.twig";
 
         return $env->getLoader()->exists($dedicated) ? $dedicated : self::REGION_WRAPPER;

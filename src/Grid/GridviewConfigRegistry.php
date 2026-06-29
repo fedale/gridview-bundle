@@ -17,7 +17,8 @@ class GridviewConfigRegistry
      */
     public const LAYOUT_DEFAULTS = [
         'shell'     => '{header} {dataview} {footer}',
-        'header'    => '{toolbar}',
+        'header'    => '{title} {toolbar}',
+        'title'     => '{heading}',
         'toolbar'   => '{globalSearch} {filterSubmit}',
         'dataview'  => null,
         'footer'    => '{pagination}',
@@ -29,7 +30,11 @@ class GridviewConfigRegistry
 
     private const OPTION_DEFAULTS = [
         'caption'      => null,
+        'title'        => null,
         'theme'        => 'default',
+        // Data region renderer strategy: picks sections/dataview/{renderer}.html.twig.
+        // Only 'table' ships today; 'card'/'list' are planned.
+        'renderer'     => 'table',
         'emptyText'    => 'No records found',
         'showThead'    => true,
         'showTfoot'    => true,
