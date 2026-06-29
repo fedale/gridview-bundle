@@ -1,5 +1,5 @@
 {% if form is defined and form is not null %}
-<thead {{ gridview.filterAttr|options }}>
+<thead {{ gridview.regionAttr('filter')|options }}>
     <tr>
         {% for column in gridview.indexColumns %}
         <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}>

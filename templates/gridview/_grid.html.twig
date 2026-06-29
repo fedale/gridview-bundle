@@ -15,7 +15,7 @@
     {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.pagination.mode|default('numeric'))) %}
     <div data-gridview
          data-gv-max-query-length="{{ gridview.options.maxQueryLength }}"
-         {{ gridview.containerAttr|options }}
+         {{ gridview.regionAttr('shell')|options }}
          {% if gvControllers is not empty %}data-controller="{{ gvControllers|join(' ') }}"{% endif %}
          {% if gridview.hasCheckboxColumn %}data-gridview-selection-grid-id-value="{{ gridview.key }}"{% endif %}
          {% if gvInline %}data-gridview-inline-edit-base-value="{{ gridview.options.crud.inlineUrl }}"{% endif %}
@@ -26,9 +26,7 @@
         {% if form is defined and form is not null %}
         {{ form_start(form, {'action': gridview.options.routeName ? path(gridview.options.routeName) : '', 'attr': {'id': 'gv-form-' ~ gridview.key, 'data-controller': 'gridview-filter', 'data-turbo-action': 'replace'}}) }}
         {% endif %}
-        {% for section in gridview.parseLayout('gridview') %}
-            {{ gridview_include(gridview, section) }}
-        {% endfor %}
+        {{ gridview_children(gridview, 'shell') }}
         {% if form is defined and form is not null %}
         {{ form_end(form, {'render_rest': false}) }}
         {% endif %}

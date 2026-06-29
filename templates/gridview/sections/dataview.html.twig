@@ -1,10 +1,10 @@
 {% set gvResponsive = gridview.options.responsive|default(false) %}
 {% if gvResponsive %}<div class="gv-resp-wrap" data-gridview-responsive-target="wrap">{% endif %}
-<table {{ gridview.attr|options }} data-gv="{{ gridview.key }}">
+<table {{ gridview.regionAttr('dataview')|options }} data-gv="{{ gridview.key }}">
     {% if gridview.options.caption %}
         <caption>{{ gridview.options.caption }}</caption>
     {% endif %}
-    {% for section in gridview.parseLayout('table') %}
+    {% for section in gridview.parseLayout('dataview') %}
         {{ gridview_include(gridview, section) }}
     {% endfor %}
 </table>

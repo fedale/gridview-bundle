@@ -1392,13 +1392,13 @@ $searchForm->getApplierRegistry()->register('money', new MoneyFilterApplier());
 ### Global search
 
 Global search adds a single text input that queries multiple fields at once.
-Declare the DQL fields to search and add the `{globalSearch}` token to the header layout:
+Declare the DQL fields to search and add the `{globalSearch}` token to the toolbar layout:
 
 ```php
 ->setOptions([
     'globalSearch' => ['c.name', 'c.email', 'c.code'],
     'layout' => [
-        'header' => '{globalSearch}',
+        'toolbar' => '{globalSearch}',
     ],
 ])
 ```
@@ -1407,36 +1407,50 @@ The search field auto-submits with a 300 ms debounce via the `gridview-filter` S
 controller. Matched text is highlighted in the rendered rows with a `<mark>` element.
 
 When `useTurbo: false`, the auto-submit is disabled and a **Filter** button (`{filterSubmit}`)
-appears in the header so the user can submit the form manually.
+appears in the toolbar so the user can submit the form manually.
 
 ---
 
 ## Layout System
 
-The grid renders via a **token-based layout**. Each section is a string of `{token}`
-placeholders that resolve to a Twig template file.
+The grid renders via a **token-based layout** resolved by a recursive engine. Each
+token is one of three node types:
+
+- **region** — a recursive container (it has a layout key of its own; the engine
+  renders a wrapper and recurses into its children). Examples: `shell`, `header`,
+  `toolbar`, `dataview`, `footer`.
+- **block** — a leaf widget that resolves to a `sections/{token}.html.twig`
+  template (no children). Examples: `globalSearch`, `addButton`, `pagination`.
+- **slot** — inline ad-hoc content (see [Inline slots](#inline-slots)).
+
+A region without a dedicated template renders through the shared generic wrapper
+`sections/_region.html.twig` (`<div class="gv-region gv-region--{name}">…children…</div>`);
+an empty region collapses to nothing. The presence of a layout key **promotes** a
+token to a region (it wins over a block template of the same name), so region and
+block names must stay disjoint.
 
 ### Default layout
 
 ```
-gridview: "{header} {table} {footer}"
-header:   "{globalSearch} {filterSubmit}"       ← CRUD controllers default to
-                                                  "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
-table:    "{thead} {filter} {tbody} {tfoot}"    ← computed from showThead/showTfoot
+shell:    "{header} {dataview} {footer}"        ← root region (the _grid template)
+header:   "{toolbar}"                            ← chrome band wrapping the toolbar
+toolbar:  "{globalSearch} {filterSubmit}"        ← CRUD controllers default to
+                                                   "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
+dataview: null                                   ← null → table strategy: "{thead} {filter} {tbody} {tfoot}"
 footer:   "{pagination}"
-toolbar:  ""                                    ← opt-in, empty by default
 tfoot:    ""
 ```
 
 ### Available tokens
 
-| Token | Template | Notes |
-|-------|----------|-------|
-| `{header}` | `sections/header.html.twig` | Wrapper above the table |
-| `{toolbar}` | `sections/toolbar.html.twig` | Opt-in toolbar area |
-| `{table}` | `sections/table.html.twig` | The `<table>` element |
-| `{footer}` | `sections/footer.html.twig` | Wrapper below the table |
-| `{thead}` | `sections/thead.html.twig` | Column header row |
+| Token | Type / Template | Notes |
+|-------|-----------------|-------|
+| `{shell}` | region (`_grid.html.twig`) | Root region; turbo-frame / form / modal chrome |
+| `{header}` | region (`_region.html.twig`) | Chrome band above the data; wraps `{toolbar}` by default |
+| `{toolbar}` | region (`_region.html.twig`) | Flex row of grid controls |
+| `{dataview}` | region (`sections/dataview.html.twig`) | The data region; renderer-agnostic (table strategy renders the `<table>`) |
+| `{footer}` | region (`_region.html.twig`) | Area below the data |
+| `{thead}` | block (`sections/thead.html.twig`) | Column header row (table strategy internal) |
 | `{filter}` | `sections/filter.html.twig` | Column filter inputs row (header) |
 | `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](#the-filterbar--placing-filters-anywhere)) |
 | `{tbody}` | `sections/tbody.html.twig` | Data rows |
@@ -1460,11 +1474,11 @@ and shrinks with the available width, so the layout adapts on its own.
 
 ```php
 // add + search on the left, column-visibility + export pushed right
-'header' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
+'toolbar' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
 ```
 
-This is the **default header for CRUD controllers** (`AbstractCrudGridController`), so a
-CRUD grid gets it without configuring `layout.header`. Override `layout.header` to change it.
+This is the **default toolbar for CRUD controllers** (`AbstractCrudGridController`), so a
+CRUD grid gets it without configuring `layout.toolbar`. Override `layout.toolbar` to change it.
 
 **`{token NN%}` — fixed-width slot.** Append a width inside the braces to give a token
 a fixed share of the row. The width sizes the *slot* (the track), while the control
@@ -1472,7 +1486,7 @@ inside keeps its natural size and stays left-aligned — it is **not** stretched
 the slot. Accepted units: `%` (a bare number is treated as `%`), `px`, `rem`, `em`.
 
 ```php
-'header' => '{addButton 20%} {globalSearch 40%} {columnVisibility 20%} {export 20%}',
+'toolbar' => '{addButton 20%} {globalSearch 40%} {columnVisibility 20%} {export 20%}',
 ```
 
 Slots and `{spacer}` solve opposite problems: use slots when you want rigid proportional
@@ -1485,9 +1499,9 @@ Pass a `layout` key inside `setOptions()`:
 ```php
 ->setOptions([
     'layout' => [
-        'gridview' => '{toolbar} {header} {table} {footer}',
-        'toolbar'  => '{addButton} {columnVisibility}',
-        'header'   => '{globalSearch}',
+        'shell'    => '{header} {dataview} {footer}',
+        'header'   => '{toolbar}',
+        'toolbar'  => '{addButton} {globalSearch} {columnVisibility}',
         'footer'   => '{pagination}',
     ],
     'addRoute' => 'customer_new',
@@ -1530,8 +1544,8 @@ Slot content is rendered as a Twig template with full access to the grid context
 
 ### Hiding thead / tfoot without editing layout
 
-Two boolean options control whether `{thead}` and `{tfoot}` are included when `table` layout
-is computed automatically (i.e. when `table` is `null`):
+Two boolean options control whether `{thead}` and `{tfoot}` are included when the `dataview`
+layout is computed automatically (i.e. when `dataview` is `null`):
 
 ```php
 ->setOptions([
@@ -1833,7 +1847,7 @@ rendering the refreshed grid:
 ->setOptions([
     'routeName' => 'gridview_user_index',
     'crud'   => ['title' => 'User', 'addUrl' => $this->generateUrl('gridview_user_new')],
-    'layout' => ['gridview' => '{toolbar} {header} {table} {footer}', 'toolbar' => '{addButton}'],
+    'layout' => ['shell' => '{toolbar} {header} {dataview} {footer}', 'toolbar' => '{addButton}'],
 ])
 ```
 
@@ -1978,7 +1992,7 @@ With a `checkbox` column the `gridview-selection` controller tracks the selectio
     'bulkDeleteUrl' => $this->generateUrl('gridview_user_bulk_delete'),
     'bulkUpdateUrl' => $this->generateUrl('gridview_user_bulk_update'),
 ],
-'layout' => ['gridview' => '{toolbar} {bulkBar} {header} {table} {footer}'],
+'layout' => ['shell' => '{toolbar} {bulkBar} {header} {dataview} {footer}'],
 ```
 
 Columns editable in the batch dialog declare `batchUpdate => true`; the dialog renders an "apply"
@@ -2538,8 +2552,8 @@ fedale_gridview:
       showThead:  true
       showTfoot:  true
       layout:
-        gridview: "{header} {table} {footer}"
-        header:   "{globalSearch} {filterSubmit}"
+        shell:    "{header} {dataview} {footer}"
+        toolbar:  "{globalSearch} {filterSubmit}"
         footer:   "{pagination}"
     attributes:
       class: "table table-striped"
@@ -2559,7 +2573,7 @@ fedale_gridview:
         globalSearch: ["c.name", "c.email"]
         layout:
           toolbar: "{addButton} {columnVisibility}"
-          gridview: "{toolbar} {header} {table} {footer}"
+          shell: "{toolbar} {header} {dataview} {footer}"
       attributes:
         class: "table table-dark"
         row:
@@ -3061,7 +3075,7 @@ public function list(Request $request): Response
             'addRoute'     => 'customer_new',
             'addLabel'     => 'New Customer',
             'layout'       => [
-                'gridview' => '{toolbar} {header} {table} {footer}',
+                'shell'    => '{toolbar} {header} {dataview} {footer}',
                 'toolbar'  => '{addButton} {columnVisibility}',
                 'header'   => '{globalSearch}',
                 'footer'   => '{pagination}',

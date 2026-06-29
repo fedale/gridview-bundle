@@ -444,11 +444,12 @@ abstract class AbstractCrudGridController extends AbstractGridController
                 'inlineUrl' => $this->generateUrl($this->routeName('index')) . '/inline',
             ],
             'addLabel' => $this->config('addLabel'),
-            // Default CRUD header: add button + global search on the left, the
+            // Default CRUD toolbar: add button + global search on the left, the
             // column-visibility and export controls pushed to the right by the
-            // elastic {spacer}. A controller can override layout.header to change it.
+            // elastic {spacer}. The `header` region wraps the toolbar; a controller
+            // can override layout.toolbar to change it.
             'layout' => [
-                'header' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
+                'toolbar' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
             ],
         ];
     }
