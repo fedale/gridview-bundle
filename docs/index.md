@@ -15,16 +15,17 @@ The grid is not automagic: you configure a data source and a column list, the bu
 6. [Pagination](#pagination)
 7. [Filtering & Search](#filtering--search)
 8. [Layout System](#layout-system)
-9. [CRUD forms (generated from columns)](#crud-forms-generated-from-columns)
-10. [Controller base classes](#controller-base-classes)
-11. [DetailView (single record)](#detailview-single-record)
-12. [Export](#export)
-13. [Attributes & Styling](#attributes--styling)
-14. [YAML Configuration](#yaml-configuration)
-15. [JavaScript Controllers](#javascript-controllers)
-16. [Real-time updates (Mercure)](#real-time-updates-mercure)
-17. [Internationalization (i18n)](#internationalization-i18n)
-18. [Extending the Bundle](#extending-the-bundle)
+9. [Responsive (column collapse)](#responsive-column-collapse)
+10. [CRUD forms (generated from columns)](#crud-forms-generated-from-columns)
+11. [Controller base classes](#controller-base-classes)
+12. [DetailView (single record)](#detailview-single-record)
+13. [Export](#export)
+14. [Attributes & Styling](#attributes--styling)
+15. [YAML Configuration](#yaml-configuration)
+16. [JavaScript Controllers](#javascript-controllers)
+17. [Real-time updates (Mercure)](#real-time-updates-mercure)
+18. [Internationalization (i18n)](#internationalization-i18n)
+19. [Extending the Bundle](#extending-the-bundle)
 
 ---
 
@@ -193,6 +194,7 @@ $columns = [
 | `filterable` | `bool` | `true` | Whether the column shows a filter input |
 | `filterBar` | `bool` | `false` | Render this column's filter in the `{filterBar}` section instead of inline in the header row |
 | `headerMirror` | `bool` | `false` | Only with `filterBar: true` (text/number filters): also render a synced "mirror" input in the column header. Off by default → the filter lives **only** in the filterBar |
+| `priority` | `int` | `0` | [Responsive](#responsive-column-collapse) collapse priority (needs the `responsive` grid option). `0` pins the column; a higher number collapses *first* on narrow screens |
 
 #### `active` vs `visible` — access control
 
@@ -1540,6 +1542,90 @@ is computed automatically (i.e. when `table` is `null`):
 
 ---
 
+## Responsive (column collapse)
+
+On narrow viewports a wide grid normally either overflows the page or squeezes every
+column unreadably. The **responsive** mode solves this DataTables-style: when the table
+no longer fits its container, the least important columns are hidden and folded into an
+expandable **detail row** opened with a per-row toggle (`+` / `−`).
+
+It is entirely **client-side** — every cell is already in the DOM (the body renders all
+columns), so collapsing and expanding never hit the server. There is no extra query, no
+AJAX, and it works the same with or without Turbo.
+
+### Enabling it
+
+Turn the grid option `responsive` on, then give the collapsible columns a `priority`:
+
+```php
+protected function configure(): array
+{
+    return [
+        'options' => ['responsive' => true],
+    ];
+}
+
+protected function buildColumns(): array
+{
+    return [
+        ['type' => 'checkbox'],         // priority 0 → pinned (never collapses)
+        'id',                           // priority 0 → pinned
+        'name',                         // priority 0 → pinned
+        ['attribute' => 'type',     'priority' => 5],
+        ['attribute' => 'roles',    'priority' => 10],
+        ['attribute' => 'groups',   'priority' => 20],
+        ['attribute' => 'locations','priority' => 30],  // drops first
+        ['type' => 'action'],           // priority 0 → pinned
+    ];
+}
+```
+
+You can also enable it per grid in YAML, under the grid's `options`:
+
+```yaml
+fedale_gridview:
+    gridviews:
+        customer:
+            options:
+                responsive: true
+```
+
+### How `priority` works
+
+`priority` is a per-column integer (default `0`):
+
+| Value   | Meaning                                                                    |
+|---------|----------------------------------------------------------------------------|
+| `0`     | **Pinned** — the column is never collapsed (the default).                   |
+| `N > 0` | **Collapsible** — folds into the detail row when space runs out.            |
+
+When the table overflows, columns are collapsed in **descending priority order**, so a
+**higher number drops first** (it is the *least* important). Ties drop right-to-left.
+Structural columns (`action` / `checkbox` / `serial`) keep priority `0`, so they always
+stay visible. The grid hides only as many columns as needed to make the table fit, then
+stops — on a slightly-too-narrow screen only the highest-priority column collapses.
+
+If no column is collapsible (all `0`) but the table is still wider than its container,
+the responsive wrapper falls back to **horizontal scrolling**.
+
+### Behaviour notes
+
+- The recalculation runs on a `ResizeObserver` watching the grid container, so it reacts
+  to window resizes and layout changes, not just the initial load.
+- Collapsing uses a CSS class (`gv-resp-collapsed`), independent of the inline
+  `display` style used by [column visibility](#gridview-visibility): the two never fight.
+  A column the user has manually hidden is skipped — it is neither collapsed nor shown in
+  the detail row.
+- The detail row reads its label/value pairs straight from the hidden `<th>`/`<td>`
+  cells, so column types, formatters and HTML render exactly as in the table.
+- Open detail rows close on recalculation (e.g. when the window is resized).
+
+The markup is driven by the [`gridview-responsive`](#gridview-responsive) Stimulus
+controller and styled through the `--gv-*` tokens, so it follows light/dark mode and any
+[token overrides](#overriding-tokens) automatically.
+
+---
+
 ## CRUD forms (generated from columns)
 
 The grid can generate **add / edit / clone / delete** forms directly from the columns'
@@ -2508,6 +2594,8 @@ $gridview = $this->createGridviewBuilder()
 | `pagination.pageSelectThreshold` | `int` | `10` | Minimum page count before the `<select>` appears |
 | `realtime.enabled` | `bool` | `false` | Enable real-time updates over Mercure (see [Real-time updates](#real-time-updates-mercure)) |
 | `realtime.topicPrefix` | `string` | `'gridview/'` | Prefix for the per-grid Mercure topic (`<prefix><id>`) |
+| `reorderColumns` | `bool` | `false` | Enable drag-and-drop column reordering on the header |
+| `responsive` | `bool` | `false` | Collapse low-priority columns into a detail row on narrow screens (see [Responsive](#responsive-column-collapse)) |
 | `layout` | `array` | see above | Layout token strings, template overrides, and inline slots |
 
 ### Detail-view presets
@@ -2644,6 +2732,20 @@ connect. No template actions — it binds native drag events on the header.
 |-----|---------|
 | `gv-sel-{gridId}` | JSON array of selected row IDs |
 | `gv-sel-{gridId}-all` | `"1"` when in all-mode |
+
+---
+
+### `gridview-responsive`
+
+Collapses the least important columns into an expandable detail row when the table
+overflows its container, and restores them when it fits again. Enabled by the
+`responsive => true` grid option; columns opt in with a `priority > 0`. Pure client-side
+(every cell is already in the DOM) — see [Responsive (column collapse)](#responsive-column-collapse)
+for the full behaviour and `priority` semantics.
+
+**Connects to:** the `.gv-resp-wrap` table wrapper and the per-row `.gv-resp-toggle`
+buttons (`toggle` action). Recomputes on a `ResizeObserver`; uses the `gv-resp-collapsed`
+class so it never collides with `gridview-visibility`.
 
 ---
 
