@@ -166,7 +166,7 @@ $columns = [
     [
         'attribute' => 'email',
         'label'     => 'E-Mail',
-        'value'     => function (array $data, string $key, ColumnInterface $column): string {
+        'value'     => function (array $data, int $index, ColumnInterface $column): string {
             return '<a href="mailto:' . $data['email'] . '">' . $data['email'] . '</a>';
         },
         'twigFilter' => 'raw',
@@ -180,7 +180,11 @@ $columns = [
 |-----|------|---------|-------------|
 | `attribute` | `string` | — | Field name in the data row (supports dot-notation: `profile.fullname`) |
 | `label` | `string` | Same as `attribute` | Column header text |
-| `value` | `Closure\|string\|null` | `null` | Custom cell value; closure receives `($data, $key, $column)` |
+| `value` | `Closure\|string\|null` | `null` | Full-cell override; closure receives `($data, int $index, $column)`. **Short-circuits the whole pipeline** — `type`, `valueGetter`, `formatter` and `renderer` are all ignored when set. Return a `Twig\Markup` for raw HTML, or pair a plain-string return with `twigFilter: 'raw'` |
+| `valueGetter` | `Closure\|null` | `null` | Stage-1 raw-value extractor `($data, int $index, $column)`. Unlike `value` it keeps the rest of the pipeline (`formatter`, the type's `render`, escaping), so it is the way to feed a `type` (e.g. `type: 'html'`) |
+| `formatter` | `Closure\|null` | `null` | Stage-2 display formatter `($rawValue, $data, $column)`; overrides the type's `format` step |
+| `renderer` | `Closure\|null` | `null` | Stage-3 cell renderer `($displayValue, $data, $column)`; overrides the type's `render` step. Return a `Twig\Markup` for raw HTML |
+| `format` | `array` | `[]` | Per-column options passed to the data type's pipeline stages (e.g. `['decimals' => 2]` for `number`/`currency`) |
 | `twigFilter` | `string\|null` | `null` | Any Twig filter applied to the rendered value (e.g. `raw`, `upper`, `date('d/m/Y')`) |
 | `active` | `bool\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
 | `visible` | `bool\|Closure` | `true` | Whether a (registered) column is shown; `false` columns are still rendered in the DOM and data — just hidden with CSS and toggleable via the UI. To remove a column entirely, use `active` instead |
@@ -245,12 +249,26 @@ $columns = [
 
 | Type | Renders as | Default filter |
 |------|-----------|----------------|
-| `text` | Raw scalar / closure value (**default** when `type` is omitted) | `text` |
+| `text` | Raw scalar / closure value, Twig-escaped (**default** when `type` is omitted) | `text` |
+| `html` | Trusted HTML rendered raw (wrapped in `Twig\Markup`) — the explicit "raw" path, alternative to `twigFilter: 'raw'` | — (none) |
+| `richText` | Same as `html` (alias `richtext`) | — (none) |
+| `uuid` | Raw value | `text` |
+| `json` | Raw value | `text` |
 | `boolean` | `✓` / `✗` for truthy / falsy values | `boolean` |
-| `date` | Raw value (format it with `twigFilter`) | `date` |
 | `number` | Raw value | `number` |
-| `relation` | Raw value (use `value` to render the related label) | `relation` |
-| `choice` | Raw value | `choice` |
+| `currency` | Number formatted as currency (see `format` options) | `number` |
+| `percent` | Number formatted as a percentage | `number` |
+| `rating` | Numeric rating | `number` |
+| `date` | Raw value (format it with `twigFilter`) | `date` |
+| `datetime` | Raw value | `date` |
+| `link` | `<a>` link | `text` |
+| `url` | `<a>` link to the value | `text` |
+| `email` | `mailto:` link | `text` |
+| `select` | Raw value mapped through choices (alias `choice`) | `choice` |
+| `multiSelect` | Multiple selected choices | `choice` |
+| `badge` | Value rendered as a styled badge | `text` |
+| `list` | Array rendered as a list | `text` |
+| `relation` | Raw value (use `value`/`valueGetter` to render the related label) | `relation` |
 | `media` | Inline `<img>` for images, otherwise a download link (see [The `media` type](#the-media-type--file-uploads)) | — (none) |
 | `data` | Raw value (legacy alias of `text`) | `text` |
 
@@ -579,7 +597,7 @@ Or use a `value` closure for full control:
 [
     'attribute' => 'profile_fullname',
     'label'     => 'Full Name',
-    'value'     => function (array $data, string $key, ColumnInterface $column): string {
+    'value'     => function (array $data, int $index, ColumnInterface $column): string {
         return $data['profile']['firstname'] . ' ' . $data['profile']['lastname'];
     },
 ],
@@ -593,7 +611,7 @@ When `value` returns an array, combine it with a compound `twigFilter`:
 [
     'attribute'  => 'locations',
     'label'      => 'Locations',
-    'value'      => function (array $data, string $key, ColumnInterface $column): array {
+    'value'      => function (array $data, int $index, ColumnInterface $column): array {
         return array_map(
             fn($loc) => '<a href="/location/' . $loc['id'] . '">' . $loc['zipcode'] . '</a>',
             $data['locations']
@@ -601,6 +619,45 @@ When `value` returns an array, combine it with a compound `twigFilter`:
     },
     'twigFilter' => "join(', ', ' and ')|raw",
 ],
+```
+
+### Rendering raw HTML
+
+Body cells are printed **without** an automatic `|raw`, so Twig escapes the
+output by default. There are three ways to emit trusted HTML, all equivalent in
+output — pick by where you want the safety to live:
+
+```php
+// 1. value closure returning Twig\Markup — marks the string as already-safe
+'value' => fn (array $data, int $index, ColumnInterface $column): Markup =>
+    new Markup('<a href="mailto:' . $data['email'] . '">' . $data['email'] . '</a>', 'UTF-8'),
+
+// 2. value closure returning a plain string + twigFilter: 'raw'
+'value'      => fn (array $data): string => '<a href="mailto:' . $data['email'] . '">' . $data['email'] . '</a>',
+'twigFilter' => 'raw',
+
+// 3. valueGetter (plain string) + type: 'html' — the html type wraps it in Markup for you
+'type'        => 'html',
+'valueGetter' => fn (array $data): string => '<a href="mailto:' . $data['email'] . '">' . $data['email'] . '</a>',
+```
+
+Use `valueGetter` (option 3) rather than `value` whenever you want the `type` to
+handle escaping — `value` short-circuits before the type runs, so `type: 'html'`
+has no effect when paired with `value`.
+
+#### Cell templates with `renderTemplate()`
+
+The closure receives the column as its **last argument**, and the column exposes
+`renderTemplate($name, $context)` which renders a Twig template with the grid's
+environment — handy for non-trivial cell markup:
+
+```php
+'type'        => 'html',
+'valueGetter' => fn (array $data, int $index, ColumnInterface $column): string =>
+    $column->renderTemplate('gridview/_posts_popularity.html.twig', [
+        'count'     => (int) ($data['postCount'] ?? 0),
+        'published' => (int) ($data['publishedCount'] ?? 0),
+    ]),
 ```
 
 ---
