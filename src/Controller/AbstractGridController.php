@@ -45,7 +45,7 @@ abstract class AbstractGridController extends AbstractController
     abstract protected function buildColumns(): array;
 
     /** @return array<string, mixed> Data-provider options: models/pagination/sort. */
-    abstract protected function getDataProviderConfig(): array;
+    abstract protected function dataConfig(): array;
 
     // ---- configuration -------------------------------------------------
 
@@ -55,7 +55,7 @@ abstract class AbstractGridController extends AbstractController
      *
      * @return array<string, mixed>
      */
-    protected function configure(): array
+    protected function viewConfig(): array
     {
         return [];
     }
@@ -84,7 +84,7 @@ abstract class AbstractGridController extends AbstractController
     protected function config(?string $key = null, mixed $default = null): mixed
     {
         if ($this->resolvedConfig === null) {
-            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->configure());
+            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->viewConfig());
         }
 
         if ($key === null) {
@@ -215,7 +215,7 @@ abstract class AbstractGridController extends AbstractController
         return $this->builderFactory()->createGridviewBuilder()
             ->setId($this->config('id'))
             ->setSearchModel($this->searchModel())
-            ->setDataProvider($this->getDataProviderConfig())
+            ->setDataProvider($this->dataConfig())
             ->setColumns($this->gridColumns())
             ->setOptions($options)
             ->setAttributes($this->config('attributes'))

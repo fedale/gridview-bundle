@@ -65,7 +65,7 @@ class CustomerController extends AbstractGridController
         return Customer::class;
     }
 
-    protected function getDataProviderConfig(): array
+    protected function dataConfig(): array
     {
         return [
             'models'     => Customer::class,
@@ -94,10 +94,10 @@ extend `AbstractCrudGridController` instead — see
 
 `index` renders the template named by the `indexTemplate` config key, which
 defaults to `gridview/with_sidebar.html.twig` (a host-app template). Point it at
-the bundle's bare layout, or your own, via [`configure()`](#the-configure-array):
+the bundle's bare layout, or your own, via [`viewConfig()`](#the-viewconfig-array):
 
 ```php
-protected function configure(): array
+protected function viewConfig(): array
 {
     return ['indexTemplate' => '@FedaleGridview/gridview/index.html.twig'];
 }
@@ -379,8 +379,8 @@ A CRUD controller fills a bare `action` column's `buttons` for you, using the sa
 you declare your own `buttons`). The token layout comes from `actionLayout`:
 
 ```php
-// configure() — PHP override (wins over YAML)
-protected function configure(): array
+// viewConfig() — PHP override (wins over YAML)
+protected function viewConfig(): array
 {
     return ['actionLayout' => '{edit} {delete}'];   // drop {view} if there's no show route
 }
@@ -395,7 +395,7 @@ fedale_gridview:
                 actionLayout: '{edit} {clone} {delete}'
 ```
 
-Resolution order: `configure()['actionLayout']` → YAML `gridviews.<id>.options.actionLayout`
+Resolution order: `viewConfig()['actionLayout']` → YAML `gridviews.<id>.options.actionLayout`
 → built-in `'{view} {edit} {delete}'`. You can also keep the auto buttons but reorder/limit
 them per column with a `layout` on the spec (`['type' => 'action', 'layout' => '{edit}']`) —
 the spec `layout` wins over `actionLayout`.
@@ -1667,7 +1667,7 @@ AJAX, and it works the same with or without Turbo.
 Turn the grid option `responsive` on, then give the collapsible columns a `priority`:
 
 ```php
-protected function configure(): array
+protected function viewConfig(): array
 {
     return [
         'options' => ['responsive' => true],
@@ -2231,14 +2231,14 @@ subclass needs **no constructor** unless it has extra dependencies of its own.
 |--------|----------|---------|
 | `getDataClass(): string` | yes | Entity FQCN backing the grid |
 | `buildColumns(): array` | yes | Column definitions |
-| `getDataProviderConfig(): array` | yes | `models` / `pagination` / `sort` |
-| `configure(): array` | no | Scalar config overrides (see below) |
+| `dataConfig(): array` | yes | `models` / `pagination` / `sort` |
+| `viewConfig(): array` | no | Scalar config overrides (see below) |
 | `beforeSave(FormInterface, string $mode): void` | no (CRUD) | Hook before persist (e.g. password hashing) |
 | `onClone(object $clone): void` | no (CRUD) | Extra mutation of a clone (unique fields are cleared automatically) |
 
-### The `configure()` array
+### The `viewConfig()` array
 
-`configure()` returns only the keys you want to change; they are merged over the
+`viewConfig()` returns only the keys you want to change; they are merged over the
 defaults. The live-uniqueness whitelist (`exists`) and the clear-on-clone fields
 are **derived automatically** from the columns flagged `control.unique` — no extra
 config needed.
@@ -2267,7 +2267,7 @@ class CustomerController extends AbstractGridController
 {
     protected function getDataClass(): string { return Customer::class; }
 
-    protected function getDataProviderConfig(): array
+    protected function dataConfig(): array
     {
         return [
             'models' => Customer::class,
@@ -2283,7 +2283,7 @@ class CustomerController extends AbstractGridController
 }
 ```
 
-`id` defaults to `customer`, so no `configure()` is needed; `index` and `export`
+`id` defaults to `customer`, so no `viewConfig()` is needed; `index` and `export`
 come for free.
 
 ### Full-CRUD example
@@ -2296,7 +2296,7 @@ class UserController extends AbstractCrudGridController
 
     protected function getDataClass(): string { return User::class; }
 
-    protected function configure(): array
+    protected function viewConfig(): array
     {
         return [
             'title'    => 'User',
@@ -2306,7 +2306,7 @@ class UserController extends AbstractCrudGridController
         ];
     }
 
-    protected function getDataProviderConfig(): array { /* models / pagination / sort */ }
+    protected function dataConfig(): array { /* models / pagination / sort */ }
 
     protected function buildColumns(): array
     {
@@ -2536,7 +2536,7 @@ una allow-list di key — le chiavi sconosciute vengono ignorate, `null` signifi
 ```php
 final class CustomerController extends AbstractGridController
 {
-    protected function configure(): array
+    protected function viewConfig(): array
     {
         return [
             'exportFormats' => ['csv', 'pdf'],  // solo CSV e PDF, in quest'ordine
@@ -3024,7 +3024,7 @@ server re-applies that user's filters, pagination and authorization. Consequence
 
 Events are scoped to one topic per grid: `<topicPrefix><gridId>` (default
 `gridview/<id>`). The `<id>` is the grid id — the entity short name lowercased
-(e.g. `User` → `user`), or whatever a controller sets via `configure()`'s `id`.
+(e.g. `User` → `user`), or whatever a controller sets via `viewConfig()`'s `id`.
 Subscriptions are therefore limited to the single grid.
 
 ### Private topics

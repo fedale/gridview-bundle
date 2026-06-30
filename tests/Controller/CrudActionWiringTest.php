@@ -29,12 +29,12 @@ class CrudActionWiringTest extends TestCase
                 return $this->cols;
             }
 
-            protected function getDataProviderConfig(): array
+            protected function dataConfig(): array
             {
                 return [];
             }
 
-            protected function configure(): array
+            protected function viewConfig(): array
             {
                 // Avoid the YAML branch (container-free test).
                 return ['actionLayout' => '{view} {edit} {delete}'];

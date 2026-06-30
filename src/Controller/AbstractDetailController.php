@@ -40,7 +40,7 @@ abstract class AbstractDetailController extends AbstractController
      *
      * @return array<string, mixed>
      */
-    protected function configure(): array
+    protected function viewConfig(): array
     {
         return [];
     }
@@ -66,7 +66,7 @@ abstract class AbstractDetailController extends AbstractController
     protected function config(?string $key = null, mixed $default = null): mixed
     {
         if ($this->resolvedConfig === null) {
-            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->configure());
+            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->viewConfig());
         }
 
         return $key === null ? $this->resolvedConfig : ($this->resolvedConfig[$key] ?? $default);
