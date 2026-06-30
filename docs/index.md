@@ -133,7 +133,7 @@ $dataProvider = [
 | `models` | `string` | Fully-qualified entity class name |
 | `pagination` | `array` | Pagination options (see [Pagination](#pagination)) |
 | `sort` | `array` | Sort attribute map (see [Sorting](#sorting)) |
-| `defaultOrder` | `array` | Initial ordering applied when no `?sort=` is present (see [Sorting](#sorting)) |
+| `defaultSort` | `array` | Initial sorting applied when no `?sort=` is present (see [Sorting](#sorting)) |
 | `enableMultiSort` | `bool` | Allow ordering by several attributes at once (see [Sorting](#sorting)) |
 
 ---
@@ -701,7 +701,7 @@ direction is reflected in the `?sort=` query parameter.
 ### Default order
 
 When the request carries no (valid) `?sort=` parameter, the grid is unsorted by default. Set
-an initial ordering with the `defaultOrder` key — a sibling of `sort`, **not** nested inside it.
+an initial ordering with the `defaultSort` key — a sibling of `sort`, **not** nested inside it.
 It maps a **sort name** (a key declared in `sort`) to a direction:
 
 ```php
@@ -711,14 +711,14 @@ $dataProvider = [
         'name'  => ['asc' => ['c.name'],  'desc' => ['c.name'],  'default' => 'asc'],
         'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
     ],
-    'defaultOrder' => ['name' => 'asc'],    // ORDER BY c.name ASC on first visit
+    'defaultSort' => ['name' => 'asc'],    // ORDER BY c.name ASC on first visit
 ];
 ```
 
 The default applies only until the user clicks a header: an explicit `?sort=` in the URL always
-takes precedence. Note that `default` (inside a sort entry) and `defaultOrder` are different
+takes precedence. Note that `default` (inside a sort entry) and `defaultSort` are different
 things — `default` is the direction used the *first* time you click that column's header, while
-`defaultOrder` is the ordering applied when *nothing* has been clicked yet.
+`defaultSort` is the ordering applied when *nothing* has been clicked yet.
 
 ### Multi-attribute sorting
 
@@ -733,7 +733,7 @@ $dataProvider = [
         'email' => ['asc' => ['c.email'], 'desc' => ['c.email']],
     ],
     'enableMultiSort' => true,
-    'defaultOrder'    => ['name' => 'asc', 'email' => 'desc'],
+    'defaultSort'    => ['name' => 'asc', 'email' => 'desc'],
 ];
 ```
 
@@ -742,7 +742,7 @@ marks a descending attribute — e.g. `?sort=name,-email` means `ORDER BY c.name
 With multi-sort off (the default) only the first attribute of such a list is applied, and clicking
 a header **replaces** the current sort instead of adding to it.
 
-`enableMultiSort` is independent of `defaultOrder`: a multi-column `defaultOrder` is always applied
+`enableMultiSort` is independent of `defaultSort`: a multi-column `defaultSort` is always applied
 in full, even when multi-sort is off — it only governs *interactive* sorting by the user.
 
 ---

@@ -67,7 +67,7 @@ class Sort implements SortInterface
      *     'status' => Sort:DESC
      * ]
      */
-    protected array $defaultOrder = [];
+    protected array $defaultSort = [];
 
     /**
      * @var string Symbol that uses to separate sort attributes in query string.
@@ -223,8 +223,8 @@ class Sort implements SortInterface
             }
         }
 
-        if (empty($this->attributeOrders) && is_array($this->defaultOrder)) {
-            $this->attributeOrders = $this->defaultOrder;
+        if (empty($this->attributeOrders) && is_array($this->defaultSort)) {
+            $this->attributeOrders = $this->defaultSort;
         }
 
 
@@ -326,7 +326,7 @@ class Sort implements SortInterface
             $label = $options['label'];
             unset($options['label']);
         } else {
-           $label = $this->attributes[$attribute]['label'] ?? $attribute;
+            $label = $this->attributes[$attribute]['label'] ?? $attribute;
         }
 
         $url        = $this->createUrl($attribute, $gridview);
@@ -367,7 +367,7 @@ class Sort implements SortInterface
     protected function prepareQuerySortParams(string $attribute): array
     {
         if (!isset($this->attributes[$attribute])) {
-            throw new \Exception("Unknown sort attribute name: ".$attribute);
+            throw new \Exception("Unknown sort attribute name: " . $attribute);
         }
 
         $sortData = $this->attributes[$attribute];
@@ -397,7 +397,7 @@ class Sort implements SortInterface
         $sortList = [];
 
         foreach ($sortOrder as $attribute => $sortType) {
-            $sortList[] = $sortType === self::DESC ? '-'.$attribute : $attribute;
+            $sortList[] = $sortType === self::DESC ? '-' . $attribute : $attribute;
         }
 
         return implode($this->separator, $sortList);
@@ -463,13 +463,13 @@ class Sort implements SortInterface
     }
 
     /**
-     * @param array $defaultOrder
+     * @param array $defaultSort
      *
      * @return $this
      */
-    public function setDefaultOrder(array $defaultOrder): static
+    public function setDefaultSort(array $defaultSort): static
     {
-        $this->defaultOrder = $defaultOrder;
+        $this->defaultSort = $defaultSort;
         return $this;
     }
 }

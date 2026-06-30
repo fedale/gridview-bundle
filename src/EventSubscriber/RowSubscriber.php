@@ -17,9 +17,9 @@ class RowSubscriber implements EventSubscriberInterface
 
     public function onBeforeRow(RowEvent $event): void
     {
-        if (($event->row->data['id'] ?? null) !== null && $event->row->data['id'] % 2 === 0) {
-            $event->row->setAttr('class', 'randomClass');
-        }
+        // if (($event->row->data['id'] ?? null) !== null && $event->row->data['id'] % 2 === 0) {
+        //     $event->row->setAttr('class', 'randomClass');
+        // }
     }
 
     public function onAfterRow(RowEvent $event): void

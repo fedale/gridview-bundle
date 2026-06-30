@@ -235,8 +235,8 @@ class Gridview implements GridviewInterface
         if (!empty($this->dataProviderOptions['sort'])) {
             $this->dataProvider->getSort()->setAttributes($this->dataProviderOptions['sort']);
         }
-        if (!empty($this->dataProviderOptions['defaultOrder'])) {
-            $this->dataProvider->getSort()->setDefaultOrder($this->dataProviderOptions['defaultOrder']);
+        if (!empty($this->dataProviderOptions['defaultSort'])) {
+            $this->dataProvider->getSort()->setDefaultSort($this->dataProviderOptions['defaultSort']);
         }
         if (!empty($this->dataProviderOptions['enableMultiSort'])) {
             $this->dataProvider->getSort()->setEnableMultiSort(true);
@@ -387,7 +387,7 @@ class Gridview implements GridviewInterface
             ->filter(
                 fn($col) =>
                 $col instanceof \Fedale\GridviewBundle\Column\DataColumn
-                && $col->isInFilterBar()
+                    && $col->isInFilterBar()
             )
             ->toArray();
     }
