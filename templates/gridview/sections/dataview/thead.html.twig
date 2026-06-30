@@ -1,10 +1,12 @@
-<thead {{ gridview.regionAttr('thead')|options }}>
+{% set theadAttr = gridview.regionAttr('thead') %}
+{% set theadAttr = theadAttr|merge({'class': ('gv-thead-columns ' ~ theadAttr.class|default(''))|trim}) %}
+<thead {{ theadAttr|options }}>
     <tr>
         {% set gvReorder = gridview.options.reorderColumns|default(false) %}
         {% if gridview.options.responsive|default(false) %}<th class="gv-resp-ctrl" aria-hidden="true"></th>{% endif %}
         {% for column in gridview.indexColumns %}
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
-        {% set hasFilterIcon = gridview.options.filterControls.headerIcon and column.isFilterable() and column.filter is not null %}
+        {% set hasFilterIcon = gridview.options.filterControls.inHeader and column.isFilterable() and column.filter is not null %}
         {% set sortState = column.sortState %}
         <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}" data-priority="{{ column.priority }}"{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
             <div class="gv-th">

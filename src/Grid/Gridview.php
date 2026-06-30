@@ -72,7 +72,9 @@ class Gridview implements GridviewInterface
         // Single source of truth — see GridviewConfigRegistry::LAYOUT_DEFAULTS.
         'layout' => GridviewConfigRegistry::LAYOUT_DEFAULTS,
         'filterControls' => [
-            'headerIcon' => true,
+            // Render the per-column filters in the header (the funnel icon plus
+            // the filter <thead> row). When false neither is emitted at all.
+            'inHeader' => true,
             'inlineClear' => false,
             // Multi/relation filters: hide the search box and the
             // select/deselect/invert toolbar when a column has fewer than this

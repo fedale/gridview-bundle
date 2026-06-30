@@ -1,5 +1,7 @@
-{% if form is defined and form is not null %}
-<thead {{ gridview.regionAttr('filter')|options }}>
+{% if form is defined and form is not null and gridview.options.filterControls.inHeader %}
+{% set filterAttr = gridview.regionAttr('filter') %}
+{% set filterAttr = filterAttr|merge({'class': ('gv-thead-filters ' ~ filterAttr.class|default(''))|trim}) %}
+<thead {{ filterAttr|options }}>
     <tr>
         {% for column in gridview.indexColumns %}
         <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}>

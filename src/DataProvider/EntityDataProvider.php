@@ -100,9 +100,15 @@ class EntityDataProvider extends AbstractDataProvider
 
     public function applyGlobalSearch(array $fields, string $term): void
     {
+        // Plain field names ('name') must be qualified with the query's root
+        // alias to be valid DQL; an already-qualified field ('t.name') or any
+        // expression containing a dot is left untouched.
+        $rootAlias = $this->queryBuilder->getRootAliases()[0] ?? $this->alias;
+        $qualify = static fn(string $f): string => str_contains($f, '.') ? $f : $rootAlias . '.' . $f;
+
         $exprs = array_map(
             fn($f) => $this->queryBuilder->expr()->like(
-                $this->queryBuilder->expr()->lower($f),
+                $this->queryBuilder->expr()->lower($qualify($f)),
                 $this->queryBuilder->expr()->literal('%' . strtolower($term) . '%')
             ),
             $fields
