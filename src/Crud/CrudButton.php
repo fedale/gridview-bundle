@@ -39,6 +39,18 @@ final class CrudButton
     }
 
     /**
+     * Generic navigation link for a custom action button (e.g. a cross-grid
+     * jump). A plain <a> sharing the built-in actions' tooltip/i18n conventions:
+     * $icon is raw inline markup (SVG or emoji) supplied by the host, and $title
+     * is a translation key (GridviewBundle or client domain) the i18n runtime
+     * swaps in. The host app owns the target $url.
+     */
+    public static function link(string $url, string $icon, string $title): string
+    {
+        return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), $icon);
+    }
+
+    /**
      * Opens the delete-confirmation recap modal. $url is the confirm endpoint
      * (GET) that returns the recap + CSRF form; no token is needed here.
      */
