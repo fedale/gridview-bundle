@@ -4,4 +4,5 @@
   through form_row here marks the field as rendered on the shared FormView, so
   form_end() in _form_layout.html.twig won't render it twice.
 #}
+{% if formTheme is defined and formTheme %}{% form_theme field with formTheme %}{% endif %}
 {{ form_row(field) }}

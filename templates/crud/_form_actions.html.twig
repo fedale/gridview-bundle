@@ -1,0 +1,26 @@
+{#
+  CRUD form action row for full-page forms (formActionsInHeader). Renders the
+  normalized `formActions` descriptors (see AbstractCrudGridController::resolveFormActions)
+  in order, left to right. No `gridview` is in scope on the form page, so Bootstrap
+  `btn` classes are used directly (the page loads Bootstrap via the form theme).
+
+  Each descriptor:
+   - type 'submit' → a button that submits the form via the HTML5 `form="<formId>"`
+     attribute, posting `_action=<action>` so the controller can branch the redirect.
+   - type 'link'   → a plain <a> to a pre-generated `url` (no submit / no save).
+  `label` is a translation key (already flattened for the current mode): resolved via
+  the client domain when it is a real key, else the system domain — same as addButton.
+#}
+{% for _a in formActions|default([]) %}
+    {% set _label = _a.label|default('') %}
+    {% set _text = _label is not empty
+        ? (gv_client_label(_label) ? gv_client_text(_label) : _label|trans({}, 'GridviewBundle'))
+        : '' %}
+    {% set _variant = _a.variant|default('primary') %}
+    {% if (_a.type|default('submit')) == 'link' %}
+<a href="{{ _a.url|default('#') }}" class="btn btn-{{ _variant }}" {{ gv_i18n(_label) }}>{{ _text }}</a>
+    {% else %}
+<button type="submit" form="{{ formId }}" name="_action" value="{{ _a.action|default('save') }}"
+        class="btn btn-{{ _variant }}" {{ gv_i18n(_label) }}>{{ _text }}</button>
+    {% endif %}
+{% endfor %}

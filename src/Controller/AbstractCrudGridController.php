@@ -25,42 +25,61 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 abstract class AbstractCrudGridController extends AbstractGridController
 {
     /**
-     * Adds the CRUD-specific config keys on top of the read-only defaults:
-     *  - title:          modal/page title
-     *  - mode:           'modal' | 'page' | 'custom'
-     *  - formView:       custom form layout; null = automatic rendering
-     *  - pageTemplate:   full-page wrapper for page/custom; null = bundle default
-     *  - addLabel:       label of the "add" toolbar button
-     *  - filterFormName: query key of the filter form (for "all" bulk ids)
+     * Adds the CRUD-specific config groups on top of the read-only defaults.
+     * Label keys default to null and are derived from the grid id by
+     * {@see applyConventions()} (e.g. `tag.label`, `tag.add`).
+     *
+     *  - labels.heading: grid/page/modal title (null → `{id}.label`)
+     *  - labels.add:     "add" toolbar button + new/clone page title (null → `{id}.add`)
+     *  - labels.edit:    edit-form page title (null → fall back to `labels.heading`)
+     *  - form.mode:      'modal' | 'page' | 'custom' — how/where the form is shown
+     *  - form.theme:     Symfony form theme(s) for the CRUD form (null = default)
+     *  - form.view:      custom form layout; null = automatic rendering
+     *  - form.actions:   header/inline action buttons in a token layout. See
+     *                    resolveFormActions(). `placement` 'header' drops the
+     *                    in-form submit; `layout` orders the named `buttons`.
+     *  - form.filterName: query key of the filter form (for "all" bulk ids)
+     *  - template.page:  full-page wrapper for page/custom; null = bundle default
+     *
+     * The action-column token layout lives in `options.actionLayout` (null = fall
+     * back to YAML `gridviews.<id>.options.actionLayout`, then the built-in default).
      */
     protected function defaultConfig(): array
     {
-        return array_replace(parent::defaultConfig(), [
-            'title'          => '',
-            'mode'           => 'modal',
-            'formView'       => null,
-            'pageTemplate'   => null,
-            'addLabel'       => 'New',
-            'filterFormName' => 'myform',
-            // Default token layout auto-wired into a bare `['type' => 'action']`
-            // column (no explicit `buttons`). null = fall back to YAML
-            // (gridviews.<id>.options.actionLayout) then the built-in default.
-            // Tokens whose convention route doesn't exist render nothing.
-            'actionLayout'   => null,
+        return $this->mergeConfig(parent::defaultConfig(), [
+            'labels'   => ['heading' => null, 'add' => null, 'edit' => null],
+            'form'     => [
+                'mode'       => 'modal',
+                'theme'      => null,
+                'view'       => null,
+                'actions'    => ['placement' => 'inline', 'layout' => null, 'buttons' => null],
+                'filterName' => 'fedaleForm',
+            ],
+            'template' => ['page' => null],
         ]);
+    }
+
+    /** Derives the label keys from the grid id by convention, then the base export filename. */
+    protected function applyConventions(array $resolved): array
+    {
+        $id = $resolved['id'] ?? null;
+        if ($id !== null) {
+            $resolved['labels']['heading'] ??= $id . '.label';
+            $resolved['labels']['add'] ??= $id . '.add';
+        }
+        // Edit title falls back to the heading rather than inventing a `.edit` key.
+        $resolved['labels']['edit'] ??= $resolved['labels']['heading'] ?? null;
+
+        return parent::applyConventions($resolved);
     }
 
     // ---- hooks ---------------------------------------------------------
 
     /** Runs on a valid submitted add/edit/clone form, before persistence (e.g. password hashing). */
-    protected function beforeSave(FormInterface $form, string $mode): void
-    {
-    }
+    protected function beforeSave(FormInterface $form, string $mode): void {}
 
     /** Extra mutation of a freshly cloned entity (unique fields are already cleared). */
-    protected function onClone(object $clone): void
-    {
-    }
+    protected function onClone(object $clone): void {}
 
     // ---- actions: add / edit / clone -----------------------------------
 
@@ -150,8 +169,10 @@ abstract class AbstractCrudGridController extends AbstractGridController
             ));
         }
 
-        if ($this->isCsrfTokenValid('gridcrud_bulk_delete', (string) $request->request->get('_token'))
-            && $this->crud()->bulkDelete($this->getDataClass(), $ids) > 0) {
+        if (
+            $this->isCsrfTokenValid('gridcrud_bulk_delete', (string) $request->request->get('_token'))
+            && $this->crud()->bulkDelete($this->getDataClass(), $ids) > 0
+        ) {
             $this->publishRealtime('delete');
         }
 
@@ -255,7 +276,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
      */
     protected function defaultActionButtons(): array
     {
-        $mode = $this->config('mode');
+        $mode = $this->config('form.mode');
         $buttons = [];
 
         if ($this->routeExists($this->routeName('show'))) {
@@ -287,7 +308,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
     /** Resolved default action-token layout: PHP config wins, else YAML, else the built-in default. */
     private function actionLayout(): string
     {
-        $configured = $this->config('actionLayout');
+        $configured = $this->config('options.actionLayout');
         if (\is_string($configured) && $configured !== '') {
             return $configured;
         }
@@ -319,7 +340,18 @@ abstract class AbstractCrudGridController extends AbstractGridController
         $columns = $gridview->getColumns();
         $uniqueFields = $this->uniqueFields($columns);
 
+        // Modal requests are XHR (gridview-crud fetch); direct navigation is the
+        // full-page form. When the page hoists the form actions into its header
+        // (formActionsInHeader), the form renders no in-form submit button — the
+        // page template provides an external one wired via the `form="…"` attr.
+        $isXhr = $request->isXmlHttpRequest();
+        $headerActions = !$isXhr && $this->config('form.actions.placement') === 'header';
+        // The header action buttons for this mode (drives both the post-save
+        // redirect branch below and the page template's button row).
+        $formActions = $headerActions ? $this->resolveFormActions($mode) : [];
+
         $form = $crud->createForm($dataClass, $columns, $mode, $entity, $request, [
+            'submit' => !$headerActions,
             'cloneCallback' => function (object $clone) use ($uniqueFields): void {
                 // Unique fields must differ on a clone; collections stay prefilled.
                 $accessor = PropertyAccess::createPropertyAccessor();
@@ -332,10 +364,6 @@ abstract class AbstractCrudGridController extends AbstractGridController
             },
         ]);
         $form->handleRequest($request);
-
-        // Modal requests are XHR (gridview-crud fetch); direct navigation is the
-        // full-page form. This drives both the response and the submit behavior.
-        $isXhr = $request->isXmlHttpRequest();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->beforeSave($form, $mode);
@@ -354,13 +382,28 @@ abstract class AbstractCrudGridController extends AbstractGridController
 
                 $this->addFlash('success', 'Record saved.');
 
-                return $this->redirectToRoute($this->routeName('index'));
+                // The clicked submit button posts its `_action` value (e.g.
+                // save_add_another); redirect to that descriptor's target route,
+                // defaulting to the index (also covers an Enter-key submit).
+                $submitted = (string) $request->request->get('_action', 'save');
+                $redirect = 'index';
+                foreach ($formActions as $a) {
+                    if (($a['type'] ?? 'submit') === 'submit' && ($a['action'] ?? 'save') === $submitted) {
+                        $redirect = $a['redirect'] ?? 'index';
+                        break;
+                    }
+                }
+
+                return $this->redirectToRoute($this->routeName($redirect));
             }
         }
 
         $context = [
             'action' => $request->getRequestUri(),
             'mode' => $mode,
+            // Symfony form theme(s) applied to the rendered CRUD form (e.g.
+            // ['bootstrap_5_layout.html.twig']); null = default form theme.
+            'formTheme' => $this->config('form.theme'),
             'validate' => [
                 'checkUrl' => $this->generateUrl($this->routeName('exists')),
                 'unique' => $uniqueFields,
@@ -371,15 +414,85 @@ abstract class AbstractCrudGridController extends AbstractGridController
         ];
 
         if ($isXhr) {
-            return new Response($crud->renderForm($form, $columns, $this->config('formView'), $context));
+            return new Response($crud->renderForm($form, $columns, $this->config('form.view'), $context));
         }
 
-        // Full page (crud.mode = page/custom, or no-JS fallback for modal).
-        $template = $this->config('pageTemplate') ?? '@FedaleGridview/crud/page.html.twig';
+        // Full page (form.mode = page/custom, or no-JS fallback for modal).
+        $template = $this->config('template.page') ?? '@FedaleGridview/crud/page.html.twig';
 
-        return new Response($crud->renderFormPage($form, $columns, $this->config('formView'), $template, $context + [
-            'pageTitle' => $this->config('title'),
+        return new Response($crud->renderFormPage($form, $columns, $this->config('form.view'), $template, $context + [
+            // The page heading follows the action: the "add" label for new/clone,
+            // the "edit" label (falling back to the heading) for an update.
+            'pageTitle' => $mode === GridCrudHandlerInterface::MODE_EDIT
+                ? $this->config('labels.edit')
+                : $this->config('labels.add'),
+            // The page template renders the external submit button (form="formId")
+            // when the form drops its in-form button (formActionsInHeader).
+            'formActionsInHeader' => $headerActions,
+            'formActions' => $formActions,
+            'formId' => $form->getName(),
         ]));
+    }
+
+    /**
+     * The CRUD form action buttons for the current mode, in the order given by
+     * the `form.actions.layout` token string (e.g. `{returnListing} {save}`). The
+     * named descriptors come from `form.actions.buttons`; when unset, a single
+     * primary "save" button (→ index) preserves the default behavior, and an
+     * unset layout falls back to the buttons' declaration order. Each descriptor
+     * is normalized for the page template:
+     *  - a token whose button isn't defined is skipped;
+     *  - descriptors with a `modes` whitelist not matching `$mode` are dropped;
+     *  - a per-mode `label` map (e.g. ['add' => 'crud.create', 'edit' => 'crud.save'])
+     *    is flattened to the key for `$mode`;
+     *  - `link` descriptors get a pre-generated `url` (from `routeName(route)`), so
+     *    the template needs no routing logic.
+     *
+     * @return list<array<string, mixed>>
+     */
+    protected function resolveFormActions(string $mode): array
+    {
+        $buttons = $this->config('form.actions.buttons') ?? [
+            'save' => [
+                'type' => 'submit',
+                'action' => 'save',
+                'redirect' => 'index',
+                'variant' => 'primary',
+                'label' => ['add' => 'crud.create', 'clone' => 'crud.create', 'edit' => 'crud.save'],
+            ],
+        ];
+
+        $layout = $this->config('form.actions.layout');
+        $tokens = \is_string($layout) && $layout !== ''
+            ? (preg_match_all('/\{(\w+)\}/', $layout, $m) ? $m[1] : [])
+            : array_keys($buttons);
+
+        $resolved = [];
+        foreach ($tokens as $token) {
+            $action = $buttons[$token] ?? null;
+            if ($action === null) {
+                continue;
+            }
+
+            $modes = $action['modes'] ?? null;
+            if ($modes !== null && !\in_array($mode, $modes, true)) {
+                continue;
+            }
+
+            $label = $action['label'] ?? '';
+            if (\is_array($label)) {
+                $label = $label[$mode] ?? (reset($label) ?: '');
+            }
+            $action['label'] = $label;
+
+            if (($action['type'] ?? 'submit') === 'link' && isset($action['route'])) {
+                $action['url'] = $this->generateUrl($this->routeName($action['route']));
+            }
+
+            $resolved[] = $action;
+        }
+
+        return $resolved;
     }
 
     /**
@@ -391,7 +504,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
     protected function resolveBulkIds(Request $request): array
     {
         if ($request->query->getBoolean('all')) {
-            $params = $request->query->all($this->config('filterFormName'));
+            $params = $request->query->all($this->config('form.filterName'));
             $qb = $this->em()->getRepository($this->getDataClass())->search($params);
             $alias = $qb->getRootAliases()[0];
             $qb->select("DISTINCT {$alias}.id")->setFirstResult(null)->setMaxResults(null);
@@ -434,16 +547,16 @@ abstract class AbstractCrudGridController extends AbstractGridController
     {
         return [
             'crud' => [
-                'title' => $this->config('title'),
-                'mode' => $this->config('mode'),
-                'pageTemplate' => $this->config('pageTemplate'),
+                'title' => $this->config('labels.heading'),
+                'mode' => $this->config('form.mode'),
+                'pageTemplate' => $this->config('template.page'),
                 'addUrl' => $this->generateUrl($this->routeName('new')),
                 'bulkDeleteUrl' => $this->generateUrl($this->routeName('bulk_delete')),
                 'bulkUpdateUrl' => $this->generateUrl($this->routeName('bulk_update')),
                 // Base for inline editing; the JS appends /{id}/{field}.
                 'inlineUrl' => $this->generateUrl($this->routeName('index')) . '/inline',
             ],
-            'addLabel' => $this->config('addLabel'),
+            'addLabel' => $this->config('labels.add'),
             // Default CRUD toolbar: add button + global search on the left, the
             // column-visibility and export controls pushed to the right by the
             // elastic {spacer}. The `header` region wraps the toolbar; a controller

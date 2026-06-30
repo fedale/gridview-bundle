@@ -10,9 +10,11 @@
 
   `action` is the submit URL; `formAttr` carries Stimulus/Turbo hooks from the handler.
 #}
+{% if formTheme is defined and formTheme %}{% form_theme form with formTheme %}{% endif %}
 {% set validate = validate|default(null) %}
 {% set crudAttr = formAttr|default({})|merge({
     'class': ('gv-crud-form ' ~ formAttr.class|default(''))|trim,
+    'id': formAttr.id|default(form.vars.id),
 }) %}
 {# Full-page mode submits natively (controller redirects); only the modal form
    routes its submit through the gridview-crud controller. #}

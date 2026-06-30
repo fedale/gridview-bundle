@@ -68,7 +68,7 @@ class Gridview implements GridviewInterface
         'routeName' => null,
         'addRoute' => null,
         'addLabel' => 'Add',
-        'formName' => 'myform',
+        'formName' => 'fedaleForm',
         // Single source of truth — see GridviewConfigRegistry::LAYOUT_DEFAULTS.
         'layout' => GridviewConfigRegistry::LAYOUT_DEFAULTS,
         'filterControls' => [

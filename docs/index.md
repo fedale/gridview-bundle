@@ -916,11 +916,11 @@ $columns = [
 
 **Semantics:**
 
-- Defaults apply **only when the request carries no `myform` parameter at all** (first
+- Defaults apply **only when the request carries no `fedaleForm` parameter at all** (first
   visit). A submitted GET form always sends every field — even empty ones — so a
-  present-but-empty `myform` means *the user cleared the filter*, and the default is
+  present-but-empty `fedaleForm` means *the user cleared the filter*, and the default is
   **not** reapplied.
-- Sort and pagination links generated from a first visit carry no `myform` params, so
+- Sort and pagination links generated from a first visit carry no `fedaleForm` params, so
   defaults keep applying consistently while navigating.
 - The default value also pre-fills the form input (via the form `data` option), so what
   the user sees always matches the applied query.
@@ -1176,7 +1176,7 @@ $this->searchForm->andFilterWhere($qb, ['in', 'l.id', $params['locations'] ?? []
 #### `number`
 
 Two text inputs rendered side by side as a from/to range.
-Submits as `myform[field][from]` and `myform[field][to]`.
+Submits as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 
 ```php
 'filter' => ['type' => 'number']
@@ -1241,7 +1241,7 @@ $this->searchForm->andFilterWhere($qb, ['lte', 'p.price', $to]);
 
 A **Flatpickr** calendar popup that replaces the two native `<input type="date">` fields.
 Supports both single-date and date-range selection. Always submits ISO `YYYY-MM-DD` values
-as `myform[field][from]` and `myform[field][to]`.
+as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 
 ```php
 'filter' => ['type' => 'date']   // range mode, Italian locale, d/m/Y display
@@ -1410,6 +1410,12 @@ controller. Matched text is highlighted in the rendered rows with a `<mark>` ele
 
 When `useTurbo: false`, the auto-submit is disabled and a **Filter** button (`{filterSubmit}`)
 appears in the toolbar so the user can submit the form manually.
+
+> 💡 **Want a fully custom filter UI?** The filterBar and header filters are just one UI
+> over a query layer that's decoupled from presentation. See the step-by-step tutorial
+> **[A custom, EasyAdmin-style filter modal](tutorial-custom-filter-modal.md)** — a
+> Filter button + modal with comparison operators and a reset, built entirely in the
+> client app with no bundle changes.
 
 ---
 
@@ -2258,7 +2264,7 @@ config needed.
 | `formView` | `null` | CRUD | Custom form layout (null = auto) |
 | `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
 | `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
-| `filterFormName` | `'myform'` | CRUD | Query key of the filter form (for "all" bulk ids) |
+| `filterFormName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
 | `actionLayout` | `null` → `'{view} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](#default-action-buttons-auto-wired)) |
 
 ### Read-only example
@@ -2706,7 +2712,7 @@ $gridview = $this->createGridviewBuilder()
 | `addLabel` | `string` | `'Add'` | Label for the `{addButton}` link |
 | `routeName` | `string\|null` | `null` | List route used for sort/pagination/filter links instead of the current `_route` — required so the grid renders correctly from a CRUD POST (Turbo Stream) |
 | `crud` | `array` | `[]` | CRUD modal config: `title`, `addUrl` (enables the `{addButton}` modal trigger) |
-| `formName` | `string` | `'myform'` | Name of the filter form; change this to support multiple grids with filters on the same page |
+| `formName` | `string` | `'fedaleForm'` | Name of the filter form; change this to support multiple grids with filters on the same page |
 | `caption` | `string\|null` | `null` | Optional `<caption>` text for the table |
 | `pagination.pageSelect` | `bool` | `true` | Show the jump-to-page `<select>` in the pagination |
 | `pagination.pageSelectThreshold` | `int` | `10` | Minimum page count before the `<select>` appears |

@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Serializer;
  */
 abstract class AbstractDetailController extends AbstractController
 {
-    private ?array $resolvedConfig = null;
+    use ResolvesViewConfig;
 
     /** FQCN of the entity backing the view (e.g. Customer::class). */
     abstract protected function getDataClass(): string;
@@ -56,20 +56,11 @@ abstract class AbstractDetailController extends AbstractController
         $id = strtolower((new \ReflectionClass($this->getDataClass()))->getShortName());
 
         return [
-            'id'           => $id,
-            'showTemplate' => '@FedaleGridview/detailview/detailview.html.twig',
-            'attributes'   => [],   // table-level HTML attrs; falls back to YAML/defaults
-            'options'      => [],   // extra builder options (emptyText, onlyVisible, ...)
+            'id'         => $id,
+            'template'   => ['show' => '@FedaleGridview/detailview/detailview.html.twig'],
+            'attributes' => [],   // table-level HTML attrs; falls back to YAML/defaults
+            'options'    => [],   // extra builder options (emptyText, onlyVisible, ...)
         ];
-    }
-
-    protected function config(?string $key = null, mixed $default = null): mixed
-    {
-        if ($this->resolvedConfig === null) {
-            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->viewConfig());
-        }
-
-        return $key === null ? $this->resolvedConfig : ($this->resolvedConfig[$key] ?? $default);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
@@ -80,7 +71,7 @@ abstract class AbstractDetailController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        return $this->buildDetailView($entity)->render($this->config('showTemplate'));
+        return $this->buildDetailView($entity)->render($this->config('template.show'));
     }
 
     protected function buildDetailView(object $entity): DetailView

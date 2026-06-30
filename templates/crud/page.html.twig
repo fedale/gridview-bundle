@@ -10,7 +10,15 @@
 
 {% block body %}
     <div class="gv-crud-page">
-        {% if pageTitle is defined and pageTitle %}<h1 class="gv-crud-page__title">{{ pageTitle }}</h1>{% endif %}
+        <div class="gv-crud-page__header">
+            {% if pageTitle is defined and pageTitle %}<h1 class="gv-crud-page__title">{{ pageTitle }}</h1>{% endif %}
+            {# Action buttons next to the title when the form drops its in-form submit. #}
+            {% if formActionsInHeader|default(false) and formId|default('') is not empty %}
+                <div class="gv-crud-page__actions">
+                    {% include '@FedaleGridview/crud/_form_actions.html.twig' %}
+                </div>
+            {% endif %}
+        </div>
         {{ formHtml|raw }}
     </div>
 {% endblock %}

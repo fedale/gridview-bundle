@@ -102,7 +102,7 @@ class GridFormBuilder implements GridFormBuilderInterface
 
         if ($options['submit'] ?? true) {
             $builder->add('save', SubmitType::class, [
-                'label' => $options['submit_label'] ?? 'Salva',
+                'label' => $options['submit_label'] ?? 'Save',
                 'attr'  => ['class' => 'gv-btn gv-btn-primary'],
             ]);
         }

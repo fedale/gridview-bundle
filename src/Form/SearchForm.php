@@ -31,7 +31,7 @@ class SearchForm implements SearchFormInterface
 
         // name, method, action and so on must be passed as argument!
         $formBuilder = $this->formFactory->createNamedBuilder(
-            'myform',
+            'fedaleForm',
             FormType::class,
             null,
             [
@@ -128,7 +128,7 @@ class SearchForm implements SearchFormInterface
         unset($args[0]);
         $baseParam = \uniqid();
 
-        if ( in_array($args[1], ['or', 'and']) ) {
+        if (in_array($args[1], ['or', 'and'])) {
             $condition = $args[1];
             unset($args[1]);
         }
@@ -154,7 +154,6 @@ class SearchForm implements SearchFormInterface
             $qb->andWhere(
                 \call_user_func_array([$qb->expr(), 'orX'], $newArgs)
             );
-
         } else {
             \call_user_func_array([$qb, 'andWhere'], $newArgs);
         }
@@ -168,7 +167,7 @@ class SearchForm implements SearchFormInterface
         unset($args[0]);
         $baseParam = \uniqid();
 
-        if ( in_array($args[1], ['or', 'and']) ) {
+        if (in_array($args[1], ['or', 'and'])) {
             $condition = $args[1];
             unset($args[1]);
         }
@@ -194,14 +193,14 @@ class SearchForm implements SearchFormInterface
             $qb->andWhere(
                 \call_user_func_array([$qb->expr(), 'andX'], $newArgs)
             );
-
         } else {
             \call_user_func_array([$qb, 'orWhere'], $newArgs);
         }
         $newArgs = [];
     }
 
-    public function searchWithOperator(QueryBuilder $qb, string $operator, string $attribute, string|array|\DateTimeInterface|null $param): mixed {
+    public function searchWithOperator(QueryBuilder $qb, string $operator, string $attribute, string|array|\DateTimeInterface|null $param): mixed
+    {
         if ($param === null || $param === '' || $param === []) {
             return null;
         }
@@ -210,7 +209,7 @@ class SearchForm implements SearchFormInterface
         if (is_array($param) && $operator !== 'in') {
             return null;
         }
-        $search = match($operator) {
+        $search = match ($operator) {
             'eq', '==' => $this->eq($qb, $attribute, $param),
             'ieq', '=' => $this->ieq($qb, $attribute, $param),
             'neq', 'not', '!==', '<>' => $this->neq($qb, $attribute, $param),
@@ -237,16 +236,15 @@ class SearchForm implements SearchFormInterface
     {
         $token = strtok(strtolower($param), " ");
 
-        if ( $this->isOperator($token) ) {
+        if ($this->isOperator($token)) {
             $operator = $token;
             $searchTerm = trim(str_ireplace($token, '', $param));
-
         } else {
             $operator = 'ilike'; // Default operator
             $searchTerm = $param;
         }
 
-        $search = match($operator) {
+        $search = match ($operator) {
             'eq', '==' => $this->eq($qb, $attribute, $searchTerm),
             'ieq', '=' => $this->ieq($qb, $attribute, $searchTerm),
             'neq', 'not', '!==', '<>' => $this->neq($qb, $attribute, $searchTerm),
@@ -270,29 +268,52 @@ class SearchForm implements SearchFormInterface
     private function getOperators()
     {
         $operators = [
-            'eq', '==',
-            'ieq', '=',
-            'neq', 'not', '!==', '<>',
-            'ineq', '!=',
-            'gt', '>',
-            'gte', '>=',
-            'lt', '<',
-            'lte', '<=',
-            'btw', 'between',
+            'eq',
+            '==',
+            'ieq',
+            '=',
+            'neq',
+            'not',
+            '!==',
+            '<>',
+            'ineq',
+            '!=',
+            'gt',
+            '>',
+            'gte',
+            '>=',
+            'lt',
+            '<',
+            'lte',
+            '<=',
+            'btw',
+            'between',
             'btwe',
-            'like', '%',
-            'notlike', 'nlike', '!%',
+            'like',
+            '%',
+            'notlike',
+            'nlike',
+            '!%',
             'ilike',
-            'notilike', 'nilike', '!ilike',
-            'startwith', '-%',
-            'notstartwith', '!-%',
+            'notilike',
+            'nilike',
+            '!ilike',
+            'startwith',
+            '-%',
+            'notstartwith',
+            '!-%',
             'istartwith',
             'notistartwith',
-            'endwith', '%-',
-            'slike', '',
-            'nslike', '',
-            'rslike', '',
-            'lslike', '',
+            'endwith',
+            '%-',
+            'slike',
+            '',
+            'nslike',
+            '',
+            'rslike',
+            '',
+            'lslike',
+            '',
             'isnull',
             'isnotnull',
             'in',
@@ -302,7 +323,8 @@ class SearchForm implements SearchFormInterface
         return $operators;
     }
 
-    private function isOperator($token) {
+    private function isOperator($token)
+    {
         if (in_array(strtolower($token), $this->getOperators())) {
             return true;
         }
@@ -319,8 +341,11 @@ class SearchForm implements SearchFormInterface
 
     private function ieq(QueryBuilder $qb, string $attribute, string $searchTerm)
     {
-        $qb->andWhere($qb->expr()->eq(
-            $qb->expr()->lower($attribute), ':param')
+        $qb->andWhere(
+            $qb->expr()->eq(
+                $qb->expr()->lower($attribute),
+                ':param'
+            )
         );
         $qb->setParameter(':param', strtolower($searchTerm));
     }
@@ -333,8 +358,11 @@ class SearchForm implements SearchFormInterface
 
     private function ineq(QueryBuilder $qb, string $attribute, string $searchTerm)
     {
-        $qb->andWhere($qb->expr()->neq(
-            $qb->expr()->lower($attribute), ':param')
+        $qb->andWhere(
+            $qb->expr()->neq(
+                $qb->expr()->lower($attribute),
+                ':param'
+            )
         );
         $qb->setParameter(':param', strtolower($searchTerm));
     }
@@ -401,7 +429,7 @@ class SearchForm implements SearchFormInterface
                 $qb->expr()->lower($attribute),
                 ':param'
             )
-            );
+        );
         $qb->setParameter(':param', '%' . strtolower($searchTerm) . '%');
     }
 
@@ -413,7 +441,8 @@ class SearchForm implements SearchFormInterface
 
     private function iStartWith(QueryBuilder $qb, string $attribute, string $searchTerm)
     {
-        $qb->andWhere($qb->expr()->like(
+        $qb->andWhere(
+            $qb->expr()->like(
                 $qb->expr()->lower($attribute),
                 ':param'
             )

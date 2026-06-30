@@ -89,7 +89,7 @@ class Sort implements SortInterface
      * Sort constructor.
      *
      * @param RequestStack $requestStack
-     * @param Router $router
+     * @param RouterInterface $router
      */
     public function __construct(RequestStack $requestStack, RouterInterface $router)
     {

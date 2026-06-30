@@ -1,4 +1,5 @@
 <?php
+
 namespace Fedale\GridviewBundle\Grid;
 
 class GridviewConfigRegistry
@@ -41,7 +42,7 @@ class GridviewConfigRegistry
         'globalSearch' => [],
         'addRoute'     => null,
         'addLabel'     => 'Add',
-        'formName'     => 'myform',
+        'formName'     => 'fedaleForm',
         'pagination'   => [
             'pageSelect'          => true,
             'pageSelectThreshold' => 10,

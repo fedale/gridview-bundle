@@ -37,7 +37,7 @@ class CrudActionWiringTest extends TestCase
             protected function viewConfig(): array
             {
                 // Avoid the YAML branch (container-free test).
-                return ['actionLayout' => '{view} {edit} {delete}'];
+                return ['options' => ['actionLayout' => '{view} {edit} {delete}']];
             }
 
             protected function routeName(string $action): string

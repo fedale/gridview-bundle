@@ -43,6 +43,8 @@ field.name: "Name"
 
 crud.cancel: "Cancel"
 crud.confirm: "Confirm"
+crud.create: "Create"
+crud.save: "Save"
 crud.edit: "Edit"
 crud.clone: "Clone"
 crud.view: "View"

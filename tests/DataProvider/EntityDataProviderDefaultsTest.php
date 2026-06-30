@@ -46,8 +46,8 @@ class EntityDataProviderDefaultsTest extends TestCase
 
     public function testDefaultsDoNotApplyWhenFormWasSubmittedEmpty(): void
     {
-        // A cleared filter submits an empty value: 'myform' is present
-        $provider = $this->createProvider(Request::create('/customers?myform[active]='));
+        // A cleared filter submits an empty value: 'fedaleForm' is present
+        $provider = $this->createProvider(Request::create('/customers?fedaleForm[active]='));
 
         $provider->setDefaultParams(['active' => '1']);
         $provider->prepareModels('App\Entity\Customer');
@@ -57,7 +57,7 @@ class EntityDataProviderDefaultsTest extends TestCase
 
     public function testDefaultsDoNotOverrideSubmittedValues(): void
     {
-        $provider = $this->createProvider(Request::create('/customers?myform[active]=0'));
+        $provider = $this->createProvider(Request::create('/customers?fedaleForm[active]=0'));
 
         $provider->setDefaultParams(['active' => '1']);
         $provider->prepareModels('App\Entity\Customer');
@@ -67,7 +67,7 @@ class EntityDataProviderDefaultsTest extends TestCase
 
     public function testSortAndPageParamsAloneDoNotDisableDefaults(): void
     {
-        // First-visit pagination/sort links carry no 'myform' key
+        // First-visit pagination/sort links carry no 'fedaleForm' key
         $provider = $this->createProvider(Request::create('/customers?sort=-id&page=2'));
 
         $provider->setDefaultParams(['active' => '1']);

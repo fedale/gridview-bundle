@@ -14,13 +14,13 @@ class GridviewUrlState
     /** Parametri della rotta corrente (es. {id}), necessari per rigenerarne l'URL. */
     private array   $routeParams  = [];
 
-    private string $formName  = 'myform';
+    private string $formName  = 'fedaleForm';
     private string $sortParam = 'sort';
     private string $pageParam = 'page';
 
     public static function fromRequest(
         Request $request,
-        string $formName  = 'myform',
+        string $formName  = 'fedaleForm',
         string $sortParam = 'sort',
         string $pageParam = 'page'
     ): static {
@@ -81,8 +81,20 @@ class GridviewUrlState
         return array_merge($this->toArray(), [$this->pageParam => $page]);
     }
 
-    public function getFilters(): array       { return $this->filters; }
-    public function getSort(): ?string        { return $this->sort; }
-    public function getPage(): int            { return $this->page; }
-    public function getGlobalSearch(): ?string { return $this->globalSearch; }
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+    public function getSort(): ?string
+    {
+        return $this->sort;
+    }
+    public function getPage(): int
+    {
+        return $this->page;
+    }
+    public function getGlobalSearch(): ?string
+    {
+        return $this->globalSearch;
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Fedale\GridviewBundle\DataProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,7 +47,7 @@ class EntityDataProvider extends AbstractDataProvider
 
     private function populateParams(): void
     {
-        $this->params = $this->requestStack->getCurrentRequest()?->query->all('myform') ?? [];
+        $this->params = $this->requestStack->getCurrentRequest()?->query->all('fedaleForm') ?? [];
     }
 
     public function setDefaultParams(array $defaults): void
@@ -58,10 +59,10 @@ class EntityDataProvider extends AbstractDataProvider
         }
 
         // A submitted GET form always sends every field (even empty), so a
-        // present-but-empty 'myform' means the user cleared the filters:
-        // defaults apply only when 'myform' is absent from the query string.
+        // present-but-empty 'fedaleForm' means the user cleared the filters:
+        // defaults apply only when 'fedaleForm' is absent from the query string.
         $request = $this->requestStack->getCurrentRequest();
-        if ($request !== null && $request->query->has('myform')) {
+        if ($request !== null && $request->query->has('fedaleForm')) {
             return;
         }
 

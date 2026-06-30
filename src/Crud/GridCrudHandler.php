@@ -61,7 +61,7 @@ class GridCrudHandler implements GridCrudHandlerInterface
             // tokens collapse to empty.
             $body = preg_replace_callback(
                 '/\{\s*([\w.]+)\s*\}/',
-                function (array $m) use ($formView): string {
+                function (array $m) use ($formView, $context): string {
                     $name = $m[1];
                     if (!isset($formView[$name])) {
                         return '';
@@ -69,7 +69,7 @@ class GridCrudHandler implements GridCrudHandlerInterface
 
                     return $this->twig->render(
                         '@FedaleGridview/crud/_field.html.twig',
-                        ['field' => $formView[$name]]
+                        ['field' => $formView[$name], 'formTheme' => $context['formTheme'] ?? null]
                     );
                 },
                 $rawBody

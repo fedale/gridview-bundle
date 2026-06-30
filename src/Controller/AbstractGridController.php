@@ -30,9 +30,9 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 abstract class AbstractGridController extends AbstractController
 {
-    private ?string $routePrefix = null;
+    use ResolvesViewConfig;
 
-    private ?array $resolvedConfig = null;
+    private ?string $routePrefix = null;
 
     private ?array $resolvedRealtime = null;
 
@@ -61,8 +61,16 @@ abstract class AbstractGridController extends AbstractController
     }
 
     /**
-     * Default config. `id` defaults to the entity short name (e.g. User → "user");
-     * `exportFilename` falls back to `id` when null.
+     * Default config, grouped by subsystem. `id` defaults to the entity short
+     * name (e.g. User → "user"); `export.filename` falls back to `id` (see
+     * {@see ResolvesViewConfig::applyConventions()}).
+     *
+     *  - id:              grid id + YAML lookup + real-time topic
+     *  - template.index:  page shell wrapping the grid listing
+     *  - export.filename: export file base (null → fall back to id)
+     *  - export.formats:  null → all exporters; [keys] → ordered allow-list
+     *  - attributes:      table-level HTML attrs
+     *  - options:         extra builder opts (layout, globalSearch, ...)
      *
      * @return array<string, mixed>
      */
@@ -71,27 +79,12 @@ abstract class AbstractGridController extends AbstractController
         $id = strtolower((new \ReflectionClass($this->getDataClass()))->getShortName());
 
         return [
-            'id'             => $id,                              // grid id + YAML lookup
-            'indexTemplate'  => 'gridview/with_sidebar.html.twig',
-            'exportFilename' => null,                            // null → fallback su 'id'
-            'exportFormats'  => null,                            // null → tutti; [keys] → allow-list ordinata
-            'attributes'     => ['class' => 'table'],            // table-level HTML attrs
-            'options'        => [],                              // extra builder opts (layout, ...)
+            'id'         => $id,
+            'template'   => ['index' => 'gridview/with_sidebar.html.twig'],
+            'export'     => ['filename' => null, 'formats' => null],
+            'attributes' => ['class' => 'table'],
+            'options'    => [],
         ];
-    }
-
-    /** Resolved config accessor (whole array when $key is null). Resolved once. */
-    protected function config(?string $key = null, mixed $default = null): mixed
-    {
-        if ($this->resolvedConfig === null) {
-            $this->resolvedConfig = array_replace($this->defaultConfig(), $this->viewConfig());
-        }
-
-        if ($key === null) {
-            return $this->resolvedConfig;
-        }
-
-        return $this->resolvedConfig[$key] ?? $default;
     }
 
     /** @return array<string, mixed> CRUD-specific grid options; empty for read-only grids. */
@@ -119,7 +112,7 @@ abstract class AbstractGridController extends AbstractController
             }
         }
 
-        return $this->buildGridview()->renderGrid($this->config('indexTemplate'));
+        return $this->buildGridview()->renderGrid($this->config('template.index'));
     }
 
     #[Route('/export', name: 'export', methods: ['GET'])]
@@ -145,7 +138,7 @@ abstract class AbstractGridController extends AbstractController
         return $exporter->export(
             $gridview->getExportRows(),
             $gridview->getExportColumns(),
-            ['filename' => $this->config('exportFilename') ?? $this->config('id')],
+            ['filename' => $this->config('export.filename') ?? $this->config('id')],
         );
     }
 
@@ -174,7 +167,7 @@ abstract class AbstractGridController extends AbstractController
     protected function exportFormats(): array
     {
         $all = $this->exporters()->all();
-        $allow = $this->config('exportFormats');
+        $allow = $this->config('export.formats');
 
         if (!\is_array($allow) || $allow === []) {
             return array_values($all);
