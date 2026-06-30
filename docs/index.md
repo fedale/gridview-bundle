@@ -118,7 +118,9 @@ Turbo-Frame request arrives, the bundle automatically switches to the internal
 ## Data Provider
 
 The `dataProvider` array is passed to `setDataProvider()` and controls *where* data comes from,
-*how many* rows to show, and *how* they can be sorted.
+*how many* rows to show, and *how* they can be sorted. In a controller this is exactly the array
+returned by [`dataConfig()`](#what-a-subclass-implements); the builder calls `setDataProvider()` with it
+for you.
 
 ```php
 $dataProvider = [
@@ -698,7 +700,7 @@ A `DataColumn` whose `label` (or `attribute`) matches a key in the sort map auto
 renders its header as a clickable sort link. Clicking toggles `asc` ↔ `desc`. The current
 direction is reflected in the `?sort=` query parameter.
 
-### Default order
+### Default sort
 
 When the request carries no (valid) `?sort=` parameter, the grid is unsorted by default. Set
 an initial ordering with the `defaultSort` key — a sibling of `sort`, **not** nested inside it.
