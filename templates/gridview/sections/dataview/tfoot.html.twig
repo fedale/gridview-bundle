@@ -1,10 +1,14 @@
 <tfoot>
     {% set tfoot_tokens = gridview.parseLayout('tfoot') %}
     {% if tfoot_tokens is empty %}
+        {# Default footer: total-results summary ("<N> results") on the left,
+           N being the current (filtered) query count. Spans the full row,
+           including the responsive control column when present. #}
+        {% set _footCols = gridview.indexColumns|length + (gridview.options.responsive|default(false) ? 1 : 0) %}
         <tr>
-            {% for column in gridview.indexColumns %}
-            <th data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}"{% if not column.isVisible() %} style="display:none"{% endif %}></th>
-            {% endfor %}
+            <td class="gv-tfoot-summary" colspan="{{ _footCols }}">
+                {{ 'grid.results'|trans({'%count%': pagination.totalCount}, 'GridviewBundle') }}
+            </td>
         </tr>
     {% else %}
         <tr>

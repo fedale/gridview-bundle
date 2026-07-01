@@ -60,6 +60,15 @@
   --gv-btn-primary-bg:      #4b6cb7;
   --gv-btn-primary-hover:   #3a58a0;
   --gv-btn-primary-color:   #ffffff;
+  // Danger button — EA "Primer" style: light surface + red text at rest,
+  // solid red with white text on hover/active.
+  --gv-btn-danger-bg:            linear-gradient(180deg, #fff, #f6f8fa);
+  --gv-btn-danger-color:         #d1242f;
+  --gv-btn-danger-border:        #d1d9e0;
+  --gv-btn-danger-hover-bg:      #cf222e;
+  --gv-btn-danger-hover-color:   #ffffff;
+  --gv-btn-danger-hover-border:  #cf222e;
+  --gv-btn-danger-active-bg:     #a40e26;
 
   // Table
   --gv-table-border:        #d0d5dd;

@@ -8,7 +8,7 @@
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
         {% set hasFilterIcon = gridview.options.filterControls.inHeader and column.isFilterable() and column.filter is not null %}
         {% set sortState = column.sortState %}
-        <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}" data-priority="{{ column.priority }}"{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
+        <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}" data-priority="{{ column.priority }}"{% if sortState in ['asc', 'desc'] %} class="sorted sorted--{{ sortState }}"{% endif %}{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
             <div class="gv-th">
                 <span class="gv-th__label">{{ column.renderHeader(gv_header_label(column.label))|raw }}</span>
                 {% if hasFilterIcon or sortState is not null %}

@@ -25,198 +25,346 @@
 [data-gridview] input[type="number"],
 [data-gridview] select,
 [data-gridview] textarea {
-  background: var(--gv-input-bg);
-  border: 1px solid var(--gv-input-border);
-  border-radius: var(--gv-input-radius);
-  color: var(--gv-input-color);
-  font-size: var(--gv-input-font-size);
-  padding: var(--gv-input-padding);
-  transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
-  width: 100%;
-  box-sizing: border-box;
+    background: var(--gv-input-bg);
+    border: 1px solid var(--gv-input-border);
+    border-radius: var(--gv-input-radius);
+    color: var(--gv-input-color);
+    font-size: var(--gv-input-font-size);
+    padding: var(--gv-input-padding);
+    transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
+    width: 100%;
+    box-sizing: border-box;
 
-  &:focus {
-    border-color: var(--gv-input-border-focus);
-    box-shadow: var(--gv-input-shadow-focus);
-    outline: none;
-  }
+    &:focus {
+        border-color: var(--gv-input-border-focus);
+        box-shadow: var(--gv-input-shadow-focus);
+        outline: none;
+    }
+}
+
+// Form checkboxes/radios (boolean controls) just adopt the grid accent for
+// their checked fill; the native widget is otherwise left alone.
+[data-gridview] input[type="checkbox"],
+[data-gridview] input[type="radio"] {
+    accent-color: var(--gv-accent-color);
+}
+
+// Selection-column checkboxes (row + header). A native checkbox ignores
+// `background` while its appearance is `auto`, so under a dark `color-scheme`
+// it keeps the host's grey box. Drop the native appearance and draw our own so
+// the box is transparent by default, with an accent tick when checked.
+[data-gridview] input[type="checkbox"][data-gridview-selection-target] {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    inline-size: 1rem;
+    block-size: 1rem;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--gv-input-border);
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-grid;
+    place-content: center;
+    transition: border-color var(--gv-transition), background var(--gv-transition);
+
+    &::before {
+        content: "";
+        inline-size: .625rem;
+        block-size: .625rem;
+        transform: scale(0);
+        transition: transform var(--gv-transition);
+        background: var(--gv-accent-color);
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+    }
+
+    &:checked {
+        border-color: var(--gv-accent-color);
+
+        &::before {
+            transform: scale(1);
+        }
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--gv-input-shadow-focus);
+    }
 }
 
 // ── gv-btn ────────────────────────────────────────────────────────
 
 [data-gridview] .gv-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  padding: var(--gv-btn-padding);
-  font-size: var(--gv-btn-font-size);
-  border: 1px solid var(--gv-btn-border);
-  border-radius: var(--gv-btn-radius);
-  background: var(--gv-btn-bg);
-  color: var(--gv-btn-color);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background var(--gv-transition), border-color var(--gv-transition);
-  white-space: nowrap;
-
-  &:hover {
-    background: var(--gv-btn-bg-hover);
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: var(--gv-btn-padding);
+    font-size: var(--gv-btn-font-size);
+    border: 1px solid var(--gv-btn-border);
+    border-radius: var(--gv-btn-radius);
+    background: var(--gv-btn-bg);
+    color: var(--gv-btn-color);
+    cursor: pointer;
     text-decoration: none;
-  }
+    transition: background var(--gv-transition), border-color var(--gv-transition);
+    white-space: nowrap;
 
-  &.gv-btn-primary {
-    background: var(--gv-btn-primary-bg);
-    border-color: var(--gv-btn-primary-bg);
-    color: var(--gv-btn-primary-color);
-    &:hover { background: var(--gv-btn-primary-hover); border-color: var(--gv-btn-primary-hover); }
-  }
+    &:hover {
+        background: var(--gv-btn-bg-hover);
+        text-decoration: none;
+    }
+
+    &.gv-btn-primary {
+        background: var(--gv-btn-primary-bg);
+        border-color: var(--gv-btn-primary-bg);
+        color: var(--gv-btn-primary-color);
+
+        &:hover {
+            background: var(--gv-btn-primary-hover);
+            border-color: var(--gv-btn-primary-hover);
+        }
+    }
+
+    // EA-style danger button: red text on a light surface at rest, solid red
+    // with white text on hover/active.
+    &.gv-btn-danger {
+        background: var(--gv-btn-danger-bg);
+        border-color: var(--gv-btn-danger-border);
+        color: var(--gv-btn-danger-color);
+
+        &:hover {
+            background: var(--gv-btn-danger-hover-bg);
+            border-color: var(--gv-btn-danger-hover-border);
+            color: var(--gv-btn-danger-hover-color);
+        }
+
+        &:active {
+            background: var(--gv-btn-danger-active-bg);
+            border-color: var(--gv-btn-danger-active-bg);
+            color: var(--gv-btn-danger-hover-color);
+        }
+    }
 }
 
 // ── Table ──────────────────────────────────────────────────────────
 
 [data-gridview] table[data-gv] {
-  width: 100%;
-  border-collapse: collapse;
-  // Explicit surface so body rows aren't transparent (otherwise they'd show
-  // the page background — e.g. a white page behind a dark grid). thead/hover
-  // override this with their own tokens.
-  background: var(--gv-color-bg);
-  color: var(--gv-color-text);
-
-  thead th {
-    background: var(--gv-th-bg);
-    color: var(--gv-th-color);
-    border-bottom: 2px solid var(--gv-table-border);
-    padding: .4rem .6rem;
-    text-align: left;
-    font-weight: 600;
-    white-space: nowrap;
-
-    a {
-      color: var(--gv-sort-color);
-      text-decoration: none;
-      font-weight: 600;
-      &:hover { color: var(--gv-sort-active-color); }
-    }
-  }
-
-  thead th a.gv-sort.asc,
-  thead th a.gv-sort.desc { color: var(--gv-sort-active-color); }
-
-  tbody td {
-    padding: .35rem .6rem;
-    border-bottom: 1px solid var(--gv-table-border);
-    font-size: var(--gv-input-font-size);
+    width: 100%;
+    border-collapse: collapse;
+    // Explicit surface so body rows aren't transparent (otherwise they'd show
+    // the page background — e.g. a white page behind a dark grid). thead/hover
+    // override this with their own tokens.
+    background: var(--gv-color-bg);
     color: var(--gv-color-text);
-  }
 
-  tbody tr:hover > td { background: var(--gv-tr-hover-bg); }
+    thead th {
+        // No header fill — matches EasyAdmin, headers sit on the table surface.
+        color: var(--gv-th-color);
+        border-bottom: 2px solid var(--gv-table-border);
+        padding: .4rem .6rem;
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+
+        // Non-sorted titles adopt the plain header color (EA: --table-thead-color).
+        a {
+            color: var(--gv-th-color);
+            text-decoration: none;
+            font-weight: 600;
+
+            &:hover {
+                color: var(--gv-sort-active-color);
+            }
+        }
+
+        // Active-sort column, including the default sort: EA-style highlight —
+        // a primary bottom border (drawn as an inset box-shadow so it overlays the
+        // existing border without shifting layout) plus a bold, primary-colored
+        // title.
+        &.sorted {
+            box-shadow: inset 0 -2px 0 var(--gv-sort-active-color);
+
+            a,
+            .gv-th__label {
+                color: var(--gv-sort-active-color);
+                font-weight: 700;
+            }
+
+            // Sort marker (the arrow) mirrors EA's --table-thead-sorted-marker-color:
+            // primary-colored and heavier on the active column.
+            .gv-sort-ind {
+                color: var(--gv-sort-active-color);
+                font-weight: 700;
+            }
+        }
+    }
+
+    thead th a.gv-sort.asc,
+    thead th a.gv-sort.desc {
+        color: var(--gv-sort-active-color);
+    }
+
+    tbody td {
+        padding: .35rem .6rem;
+        border-bottom: 1px solid var(--gv-table-border);
+        font-size: var(--gv-input-font-size);
+        color: var(--gv-color-text);
+    }
+
+    tbody tr:hover>td {
+        background: var(--gv-tr-hover-bg);
+    }
+
+    // Default footer summary ("<N> results"): muted, left-aligned, separated
+    // from the body by a top border.
+    tfoot .gv-tfoot-summary {
+        padding: .4rem .6rem;
+        text-align: left;
+        font-size: var(--gv-input-font-size);
+        color: var(--gv-color-text-muted);
+        border-top: 2px solid var(--gv-table-border);
+    }
 }
 
 // ── Header cell layout (label left, icons pinned far right) ────────
 
 [data-gridview] .gv-th {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
 }
 
-[data-gridview] .gv-th__label { min-width: 0; }
+[data-gridview] .gv-th__label {
+    min-width: 0;
+}
 
 // Icon group pinned to the far right of the cell. DOM order is clear-filter
 // then sort, so they read left→right as: [clear] [sort], sort being rightmost.
 [data-gridview] .gv-th__icons {
-  margin-inline-start: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
+    margin-inline-start: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
 }
 
 // ── Sort indicator (↕ none · ↑ asc · ↓ desc) ───────────────────────
 
 [data-gridview] .gv-sort-ind {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  padding: 0 2px;
-  cursor: pointer;
-  text-decoration: none;
-  color: var(--gv-sort-color);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--gv-sort-color);
 
-  &:hover { color: var(--gv-sort-active-color); }
-  &::after { font-size: 1.1em; }
+    &:hover {
+        color: var(--gv-sort-active-color);
+    }
+
+    &::after {
+        font-size: 1.1em;
+    }
 }
-[data-gridview] .gv-sort-ind--none::after { content: '\2195'; opacity: .5; }                          // ↕
-[data-gridview] .gv-sort-ind--asc::after  { content: '\2191'; color: var(--gv-sort-active-color); }   // ↑
-[data-gridview] .gv-sort-ind--desc::after { content: '\2193'; color: var(--gv-sort-active-color); }   // ↓
+
+[data-gridview] .gv-sort-ind--none::after {
+    content: '\2195';
+    opacity: .5;
+}
+
+// ↕
+[data-gridview] .gv-sort-ind--asc::after {
+    content: '\2191';
+    color: var(--gv-sort-active-color);
+}
+
+// ↑
+[data-gridview] .gv-sort-ind--desc::after {
+    content: '\2193';
+    color: var(--gv-sort-active-color);
+}
+
+// ↓
 
 // ── Filter header icon ─────────────────────────────────────────────
 
 [data-gridview] .gv-filter-icon {
-  // Hidden until a filter is active on this column: it's a "clear filter"
-  // affordance, so it only appears when there's something to clear.
-  display: none;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 0 2px;
-  vertical-align: middle;
-  color: var(--gv-sort-active-color);
-  transition: opacity var(--gv-transition);
+    // Hidden until a filter is active on this column: it's a "clear filter"
+    // affordance, so it only appears when there's something to clear.
+    display: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0 2px;
+    vertical-align: middle;
+    color: var(--gv-sort-active-color);
+    transition: opacity var(--gv-transition);
 
-  &.gv-filter-icon--active {
-    display: inline-flex;
-    align-items: center;
-    opacity: 1;
-  }
+    &.gv-filter-icon--active {
+        display: inline-flex;
+        align-items: center;
+        opacity: 1;
+    }
 
-  &:hover { opacity: .7; }
+    &:hover {
+        opacity: .7;
+    }
 }
 
 // ── Filter cell (inline clear) ────────────────────────────────────
 
 [data-gridview] .gv-filter-cell {
-  position: relative;
+    position: relative;
 
-  .gv-filter-clear {
-    position: absolute;
-    inset-inline-end: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    opacity: .4;
-    font-size: .8em;
-    line-height: 1;
-    color: var(--gv-color-text);
-    &:hover { opacity: 1; }
-  }
+    .gv-filter-clear {
+        position: absolute;
+        inset-inline-end: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        opacity: .4;
+        font-size: .8em;
+        line-height: 1;
+        color: var(--gv-color-text);
+
+        &:hover {
+            opacity: 1;
+        }
+    }
 }
 
 // ── Number filter ────────────────────────────────────────────────
 
 [data-gridview] .gv-number-filter {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-
-  > div { flex: 1; min-width: 0; }
-
-  input { width: 100%; min-width: 0; }
-
-  > div + div {
     display: flex;
     align-items: center;
     gap: 0.25rem;
 
-    &::before {
-      content: '–';
-      flex-shrink: 0;
-      font-size: .8em;
-      color: var(--gv-color-text-muted);
+    >div {
+        flex: 1;
+        min-width: 0;
     }
-  }
+
+    input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    >div+div {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        &::before {
+            content: '–';
+            flex-shrink: 0;
+            font-size: .8em;
+            color: var(--gv-color-text-muted);
+        }
+    }
 }
 
 // ── Date filter (Flatpickr) ────────────────────────────────────────
@@ -226,18 +374,19 @@
 // We show a single full-width input; Flatpickr handles the popup itself.
 
 [data-gridview] .gv-date-filter {
-  // The two Symfony inputs are hidden by the JS controller; show nothing until JS runs
-  // (native <input type="date"> fallback is still functional without JS)
-  > div {
-    flex: 1;
-    min-width: 0;
-  }
 
-  // Flatpickr's managed input (the from-input, repurposed as the display input)
-  .flatpickr-input {
-    width: 100%;
-    min-width: 0;
-  }
+    // The two Symfony inputs are hidden by the JS controller; show nothing until JS runs
+    // (native <input type="date"> fallback is still functional without JS)
+    >div {
+        flex: 1;
+        min-width: 0;
+    }
+
+    // Flatpickr's managed input (the from-input, repurposed as the display input)
+    .flatpickr-input {
+        width: 100%;
+        min-width: 0;
+    }
 }
 
 // ── Header ───────────────────────────────────────────────────────
@@ -245,55 +394,55 @@
 // its child toolbar region (flex row, see below).
 
 [data-gridview] .gv-region--header {
-  padding: 1rem 0 1.25rem;
-  margin-bottom: .5rem;
-  border-bottom: 1px solid var(--gv-color-border);
+    padding: 1rem 0 1.25rem;
+    margin-bottom: .5rem;
+    border-bottom: 1px solid var(--gv-color-border);
 }
 
 // Elastic gap ({spacer}): absorbs the free space so the controls before it stay
 // left and the controls after it are pushed to the right edge.
 [data-gridview] .gv-region__spacer {
-  flex: 1 1 0;
-  min-width: 1rem;
+    flex: 1 1 0;
+    min-width: 1rem;
 }
 
 // Inline button glyphs (add "+", export "⤓"). gv-btn is an inline-flex with a
 // gap, so spacing is handled by the button; the glyph is centred in its own box
 // (inline-flex) to avoid clipping a tall/bold "+".
 [data-gridview] .gv-btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1em;
-  font-weight: 600;
-  line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1;
 }
 
 // Dropdown caret (e.g. Columns ▾): smaller and dimmed next to its label.
 [data-gridview] .gv-caret {
-  font-size: .7em;
-  opacity: .65;
+    font-size: .7em;
+    opacity: .65;
 }
 
 // A glyph rendered slightly smaller than its surrounding text (e.g. the 💾 in
 // the "save search" menu item).
 [data-gridview] .gv-icon-sm {
-  font-size: .85em;
+    font-size: .85em;
 }
 
 // A width-sized region slot (e.g. "{globalSearch 40%}"): the slot reserves the
 // track, the control inside keeps its natural size and stays left-aligned.
 [data-gridview] .gv-region__slot {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  min-width: 0;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 0;
 
-  > * {
-    flex: 0 0 auto;
-    max-width: 100%;
-    margin: 0;
-  }
+    >* {
+        flex: 0 0 auto;
+        max-width: 100%;
+        margin: 0;
+    }
 }
 
 // ── Toolbar ──────────────────────────────────────────────────────
@@ -301,119 +450,127 @@
 // export, …) — the role the old `.gv-header` flex container had.
 
 [data-gridview] .gv-region--toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem 1.25rem;
-  padding: var(--gv-toolbar-padding);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    padding: var(--gv-toolbar-padding);
 }
 
 // ── Global search ─────────────────────────────────────────────────
 
 [data-gridview] .gv-global-search {
-  flex: 1 1 auto;
-  max-width: 300px;
+    flex: 1 1 auto;
+    max-width: 300px;
 }
 
 // ── Filter bar ────────────────────────────────────────────────────
 
 [data-gridview] .gv-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: .75rem;
-  padding: .5rem 0;
-  border-bottom: 1px solid var(--gv-color-border);
-  margin-bottom: .5rem;
-
-  &__item {
     display: flex;
-    flex-direction: column;
-    gap: .2rem;
-    flex: 1 1 160px;
-    max-width: 320px;
-  }
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--gv-color-border);
+    margin-bottom: .5rem;
 
-  &__label {
-    font-size: .75rem;
-    font-weight: 600;
-    color: var(--gv-color-text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    &__item {
+        display: flex;
+        flex-direction: column;
+        gap: .2rem;
+        flex: 1 1 160px;
+        max-width: 320px;
+    }
+
+    &__label {
+        font-size: .75rem;
+        font-weight: 600;
+        color: var(--gv-color-text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 // ── Highlight (full-text search) ──────────────────────────────────
 
 [data-gridview] mark.gv-highlight {
-  background: var(--gv-color-highlight-bg);
-  color: var(--gv-color-highlight-txt);
-  font-weight: bold;
-  border-radius: 2px;
-  padding: 0 2px;
+    background: var(--gv-color-highlight-bg);
+    color: var(--gv-color-highlight-txt);
+    font-weight: bold;
+    border-radius: 2px;
+    padding: 0 2px;
 }
 
 // ── Empty state ───────────────────────────────────────────────────
 
 [data-gridview] .gv-empty {
-  text-align: center;
-  color: var(--gv-color-text-muted);
-  padding: 2rem;
-  font-style: italic;
+    text-align: center;
+    color: var(--gv-color-text-muted);
+    padding: 2rem;
+    font-style: italic;
 }
 
 // ── Pagination ────────────────────────────────────────────────────
 
 [data-gridview] .gv-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .25rem;
-  list-style: none;
-  margin: .75rem 0 0;
-  padding: 0;
-
-  .gv-page-item {
-    &.gv-disabled .gv-page-link {
-      opacity: .4;
-      pointer-events: none;
-    }
-    &.gv-active .gv-page-link {
-      background: var(--gv-page-bg-active);
-      color: var(--gv-page-color-active);
-      border-color: var(--gv-page-bg-active);
-    }
-    // L'ellissi è solo un separatore visivo: niente bordo né hover.
-    &.gv-page-ellipsis .gv-page-link {
-      border-color: transparent;
-      background: transparent;
-      &:hover { background: transparent; }
-    }
-  }
-
-  .gv-page-link {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    padding: var(--gv-page-padding);
-    border: 1px solid var(--gv-page-border);
-    border-radius: var(--gv-page-radius);
-    background: var(--gv-page-bg);
-    color: var(--gv-page-color);
-    text-decoration: none;
-    font-size: var(--gv-input-font-size);
-    transition: background var(--gv-transition);
+    justify-content: center;
+    gap: .25rem;
+    list-style: none;
+    margin: .75rem 0 0;
+    padding: 0;
 
-    &:hover { background: var(--gv-color-bg-hover); }
-  }
+    .gv-page-item {
+        &.gv-disabled .gv-page-link {
+            opacity: .4;
+            pointer-events: none;
+        }
 
-  // Select "vai a pagina": staccata dai bottoni numerici.
-  .gv-page-jump {
-    margin-left: .5rem;
-  }
-  .gv-page-select {
-    cursor: pointer;
-  }
+        &.gv-active .gv-page-link {
+            background: var(--gv-page-bg-active);
+            color: var(--gv-page-color-active);
+            border-color: var(--gv-page-bg-active);
+        }
+
+        // L'ellissi è solo un separatore visivo: niente bordo né hover.
+        &.gv-page-ellipsis .gv-page-link {
+            border-color: transparent;
+            background: transparent;
+
+            &:hover {
+                background: transparent;
+            }
+        }
+    }
+
+    .gv-page-link {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--gv-page-padding);
+        border: 1px solid var(--gv-page-border);
+        border-radius: var(--gv-page-radius);
+        background: var(--gv-page-bg);
+        color: var(--gv-page-color);
+        text-decoration: none;
+        font-size: var(--gv-input-font-size);
+        transition: background var(--gv-transition);
+
+        &:hover {
+            background: var(--gv-color-bg-hover);
+        }
+    }
+
+    // Select "vai a pagina": staccata dai bottoni numerici.
+    .gv-page-jump {
+        margin-left: .5rem;
+    }
+
+    .gv-page-select {
+        cursor: pointer;
+    }
 }
 
 // ── Dropdown menus ({Columns}, {savedSearch}, {export}, selection) ─
@@ -421,188 +578,216 @@
 // Stimulus controllers (no Bootstrap JS). Open state = .gv-open on the menu.
 
 [data-gridview] .gv-dropdown {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 
-  .gv-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 180px;
-    background: var(--gv-dropdown-bg);
-    border: 1px solid var(--gv-dropdown-border);
-    border-radius: var(--gv-dropdown-radius);
-    box-shadow: var(--gv-dropdown-shadow);
-    padding: .3rem 0;
-    margin: 0;
-    list-style: none;
-    z-index: 1050;
-    display: none;
+    .gv-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        min-width: 180px;
+        background: var(--gv-dropdown-bg);
+        border: 1px solid var(--gv-dropdown-border);
+        border-radius: var(--gv-dropdown-radius);
+        box-shadow: var(--gv-dropdown-shadow);
+        padding: .3rem 0;
+        margin: 0;
+        list-style: none;
+        z-index: 1050;
+        display: none;
 
-    &.gv-open { display: block; }
+        &.gv-open {
+            display: block;
+        }
 
-    // Right-aligned menu (was Bootstrap's .dropdown-menu-end).
-    &.gv-dropdown-menu--end { left: auto; right: 0; }
+        // Right-aligned menu (was Bootstrap's .dropdown-menu-end).
+        &.gv-dropdown-menu--end {
+            left: auto;
+            right: 0;
+        }
 
-    li { list-style: none; }
-  }
+        li {
+            list-style: none;
+        }
+    }
 
-  // Works for <label>, <button> and <a> items alike (native styles reset).
-  .gv-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    width: 100%;
-    padding: .3rem .75rem;
-    cursor: pointer;
-    font-size: var(--gv-input-font-size);
-    color: var(--gv-color-text);
-    text-align: left;
-    text-decoration: none;
-    background: transparent;
-    border: 0;
-    user-select: none;
+    // Works for <label>, <button> and <a> items alike (native styles reset).
+    .gv-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        width: 100%;
+        padding: .3rem .75rem;
+        cursor: pointer;
+        font-size: var(--gv-input-font-size);
+        color: var(--gv-color-text);
+        text-align: left;
+        text-decoration: none;
+        background: transparent;
+        border: 0;
+        user-select: none;
 
-    &:hover { background: var(--gv-dropdown-item-hover); }
-  }
+        &:hover {
+            background: var(--gv-dropdown-item-hover);
+        }
+    }
 
-  // Non-interactive item (e.g. the "no saved searches" placeholder).
-  .gv-dropdown-item-text {
-    display: block;
-    padding: .3rem .75rem;
-    font-size: var(--gv-input-font-size);
-  }
+    // Non-interactive item (e.g. the "no saved searches" placeholder).
+    .gv-dropdown-item-text {
+        display: block;
+        padding: .3rem .75rem;
+        font-size: var(--gv-input-font-size);
+    }
 
-  .gv-dropdown-divider {
-    height: 0;
-    margin: .3rem 0;
-    border: 0;
-    border-top: 1px solid var(--gv-dropdown-border);
-  }
+    .gv-dropdown-divider {
+        height: 0;
+        margin: .3rem 0;
+        border: 0;
+        border-top: 1px solid var(--gv-dropdown-border);
+    }
 }
 
 // Caret toggle button (selection-header menu): borderless, dimmed glyph that
 // matches the .gv-caret look used by the {Columns} / filter carets.
 [data-gridview] .gv-caret-toggle {
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  font-size: .7em;
-  opacity: .65;
-  color: inherit;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    font-size: .7em;
+    opacity: .65;
+    color: inherit;
 
-  &:hover { opacity: 1; }
+    &:hover {
+        opacity: 1;
+    }
 }
 
 // Selection column header: checkbox + caret menu.
 [data-gridview] .gv-select-header {
-  display: flex;
-  align-items: center;
-  gap: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
 }
 
 // ── Multi-select (relation filter) ────────────────────────────────
 
 [data-gridview] .gv-multi-select {
-  position: relative;
+    position: relative;
 
-  .gv-multi-trigger {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--gv-input-padding);
-    background: var(--gv-input-bg);
-    border: 1px solid var(--gv-input-border);
-    border-radius: var(--gv-input-radius);
-    color: var(--gv-input-color);
-    font-size: var(--gv-input-font-size);
-    cursor: pointer;
-    text-align: left;
-    transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
+    .gv-multi-trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--gv-input-padding);
+        background: var(--gv-input-bg);
+        border: 1px solid var(--gv-input-border);
+        border-radius: var(--gv-input-radius);
+        color: var(--gv-input-color);
+        font-size: var(--gv-input-font-size);
+        cursor: pointer;
+        text-align: left;
+        transition: border-color var(--gv-transition), box-shadow var(--gv-transition);
 
-    &:focus,
-    &.gv-multi-trigger--open {
-      border-color: var(--gv-input-border-focus);
-      box-shadow: var(--gv-input-shadow-focus);
-      outline: none;
+        &:focus,
+        &.gv-multi-trigger--open {
+            border-color: var(--gv-input-border-focus);
+            box-shadow: var(--gv-input-shadow-focus);
+            outline: none;
+        }
     }
-  }
 
-  .gv-multi-caret {
-    font-size: .6em;
-    opacity: .5;
-    flex-shrink: 0;
-    margin-inline-start: .4rem;
-  }
-
-  .gv-multi-panel {
-    position: absolute;
-    top: calc(100% + 3px);
-    left: 0;
-    min-width: max(100%, 240px);
-    width: max-content;
-    max-width: 420px;
-    background: var(--gv-dropdown-bg);
-    border: 1px solid var(--gv-dropdown-border);
-    border-radius: var(--gv-dropdown-radius);
-    box-shadow: var(--gv-dropdown-shadow);
-    z-index: 1050;
-  }
-
-  .gv-multi-search-wrap {
-    padding: .35rem .45rem;
-    border-bottom: 1px solid var(--gv-color-border);
-
-    input { margin: 0; }
-  }
-
-  // "Seleziona tutto · Deseleziona · Inverti" toolbar
-  .gv-multi-actions {
-    display: flex;
-    gap: .75rem;
-    padding: .2rem .5rem .25rem;
-    border-bottom: 1px solid var(--gv-color-border);
-
-    button {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: .7rem;
-      color: var(--gv-color-text-muted);
-      padding: 0;
-      &:hover { color: var(--gv-color-link); text-decoration: underline; }
+    .gv-multi-caret {
+        font-size: .6em;
+        opacity: .5;
+        flex-shrink: 0;
+        margin-inline-start: .4rem;
     }
-  }
 
-  .gv-multi-list {
-    max-height: 200px;
-    overflow-y: auto;
-    padding: .2rem 0;
-  }
+    .gv-multi-panel {
+        position: absolute;
+        top: calc(100% + 3px);
+        left: 0;
+        min-width: max(100%, 240px);
+        width: max-content;
+        max-width: 420px;
+        background: var(--gv-dropdown-bg);
+        border: 1px solid var(--gv-dropdown-border);
+        border-radius: var(--gv-dropdown-radius);
+        box-shadow: var(--gv-dropdown-shadow);
+        z-index: 1050;
+    }
 
-  .gv-multi-item {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .28rem .6rem;
-    cursor: pointer;
-    font-size: var(--gv-input-font-size);
-    color: var(--gv-color-text);
-    user-select: none;
-    &:hover { background: var(--gv-dropdown-item-hover); }
+    .gv-multi-search-wrap {
+        padding: .35rem .45rem;
+        border-bottom: 1px solid var(--gv-color-border);
 
-    .gv-multi-checkbox { cursor: pointer; flex-shrink: 0; }
-  }
+        input {
+            margin: 0;
+        }
+    }
+
+    // "Seleziona tutto · Deseleziona · Inverti" toolbar
+    .gv-multi-actions {
+        display: flex;
+        gap: .75rem;
+        padding: .2rem .5rem .25rem;
+        border-bottom: 1px solid var(--gv-color-border);
+
+        button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: .7rem;
+            color: var(--gv-color-text-muted);
+            padding: 0;
+
+            &:hover {
+                color: var(--gv-color-link);
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .gv-multi-list {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: .2rem 0;
+    }
+
+    .gv-multi-item {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .28rem .6rem;
+        cursor: pointer;
+        font-size: var(--gv-input-font-size);
+        color: var(--gv-color-text);
+        user-select: none;
+
+        &:hover {
+            background: var(--gv-dropdown-item-hover);
+        }
+
+        .gv-multi-checkbox {
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+    }
 }
 
 // ── Loading overlay ───────────────────────────────────────────────
 
 @keyframes gv-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 // CSS-based loader: Turbo sets [busy] on the <turbo-frame> during loading.
@@ -613,12 +798,40 @@
 // frame is swapped before anything becomes visible — no flicker. The animation
 // holds at its initial frame (full opacity / transparent overlay) during the
 // delay, then fades in; if [busy] is removed first, nothing ever showed.
-turbo-frame[busy] > [data-gridview] {
-  pointer-events: none;
-  animation: gv-busy-dim 0.1s linear 0.15s forwards;
+turbo-frame[busy]>[data-gridview] {
+    pointer-events: none;
+    animation: gv-busy-dim 0.1s linear 0.15s forwards;
 
-  &::after {
-    content: '';
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--gv-overlay-bg);
+        border-radius: var(--gv-radius);
+        opacity: 0;
+        animation: gv-busy-fade 0.1s linear 0.15s forwards;
+    }
+}
+
+@keyframes gv-busy-dim {
+    to {
+        opacity: 0.55;
+    }
+}
+
+@keyframes gv-busy-fade {
+    to {
+        opacity: 1;
+    }
+}
+
+// Spinner inside the after-pseudo is not possible; keep the JS overlay
+// for non-Turbo (useTurbo: false) mode and as a fallback.
+.gv-loading-overlay {
     position: absolute;
     inset: 0;
     z-index: 100;
@@ -627,288 +840,288 @@ turbo-frame[busy] > [data-gridview] {
     justify-content: center;
     background: var(--gv-overlay-bg);
     border-radius: var(--gv-radius);
-    opacity: 0;
-    animation: gv-busy-fade 0.1s linear 0.15s forwards;
-  }
-}
-
-@keyframes gv-busy-dim  { to { opacity: 0.55; } }
-@keyframes gv-busy-fade { to { opacity: 1; } }
-
-// Spinner inside the after-pseudo is not possible; keep the JS overlay
-// for non-Turbo (useTurbo: false) mode and as a fallback.
-.gv-loading-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gv-overlay-bg);
-  border-radius: var(--gv-radius);
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .gv-spinner {
-  width: var(--gv-spinner-size);
-  height: var(--gv-spinner-size);
-  border: 3px solid var(--gv-spinner-border);
-  border-top-color: var(--gv-spinner-color);
-  border-radius: 50%;
-  animation: gv-spin .65s linear infinite;
+    width: var(--gv-spinner-size);
+    height: var(--gv-spinner-size);
+    border: 3px solid var(--gv-spinner-border);
+    border-top-color: var(--gv-spinner-color);
+    border-radius: 50%;
+    animation: gv-spin .65s linear infinite;
 }
 
 // ── Error banner ──────────────────────────────────────────────────
 
 [data-gridview] .gv-error-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-  background: var(--gv-error-bg);
-  color: var(--gv-error-color);
-  border: 1px solid var(--gv-error-border);
-  border-radius: var(--gv-radius);
-  padding: .45rem .65rem;
-  font-size: var(--gv-input-font-size);
-  margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    background: var(--gv-error-bg);
+    color: var(--gv-error-color);
+    border: 1px solid var(--gv-error-border);
+    border-radius: var(--gv-radius);
+    padding: .45rem .65rem;
+    font-size: var(--gv-input-font-size);
+    margin-bottom: .5rem;
 
-  &[hidden] { display: none; }
+    &[hidden] {
+        display: none;
+    }
 
-  &__close {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: inherit;
-    opacity: .7;
-    font-size: .9em;
-    padding: 0;
-    flex-shrink: 0;
-    line-height: 1;
-    &:hover { opacity: 1; }
-  }
+    &__close {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: inherit;
+        opacity: .7;
+        font-size: .9em;
+        padding: 0;
+        flex-shrink: 0;
+        line-height: 1;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
 }
 
 // ── Real-time update notice ───────────────────────────────────────
 
 [data-gridview] .gv-info-banner {
-  background: var(--gv-info-bg);
-  color: var(--gv-info-color);
-  border: 1px solid var(--gv-info-border);
-  border-radius: var(--gv-radius);
-  padding: .45rem .65rem;
-  font-size: var(--gv-input-font-size);
-  margin-bottom: .5rem;
-  transition: opacity .2s ease;
+    background: var(--gv-info-bg);
+    color: var(--gv-info-color);
+    border: 1px solid var(--gv-info-border);
+    border-radius: var(--gv-radius);
+    padding: .45rem .65rem;
+    font-size: var(--gv-input-font-size);
+    margin-bottom: .5rem;
+    transition: opacity .2s ease;
 
-  &[hidden] { display: none; }
+    &[hidden] {
+        display: none;
+    }
 }
 
 // ── Relation filter — single-select search ────────────────────────
 
 [data-gridview] .gv-relation-search-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 // ── CRUD form — mark required fields with an asterisk after the label ──
 
 .gv-crud-form label.required::after {
-  content: " *";
-  color: var(--gv-danger-color);
-  font-weight: 700;
+    content: " *";
+    color: var(--gv-danger-color);
+    font-weight: 700;
 }
 
 // ── CRUD form — live validation inline message ──
 
 .gv-crud-form .gv-validate-msg {
-  color: var(--gv-danger-color);
-  font-size: 0.85em;
-  margin-top: 0.25rem;
+    color: var(--gv-danger-color);
+    font-size: 0.85em;
+    margin-top: 0.25rem;
 }
 
 // ── Bulk action bar ──
 
 .gv-bulk-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
-  background: var(--gv-accent-bg);
-  border: 1px solid var(--gv-accent-border);
-  border-radius: 0.375rem;
-
-  .gv-bulk-actions {
     display: flex;
-    gap: 0.5rem;
-  }
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin: 2rem 0;
+    /*background: var(--gv-accent-bg);
+  border: 1px solid var(--gv-accent-border);
+  border-radius: 0.375rem;*/
+
+    .gv-bulk-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
 }
 
 // ── Inline cell editing ──
 
 .gv-editable {
-  cursor: pointer;
+    cursor: pointer;
 
-  // Pencil edit affordance (replaces the dashed underline). Pseudo-element so it
-  // survives innerHTML swaps and disappears while editing.
-  &::after {
-    content: '✎';
-    margin-left: 0.35rem;
-    font-size: 0.85em;
-    color: var(--gv-accent-color);
-    opacity: 0;
-    transition: opacity 0.12s;
-  }
+    // Pencil edit affordance (replaces the dashed underline). Pseudo-element so it
+    // survives innerHTML swaps and disappears while editing.
+    &::after {
+        content: '✎';
+        margin-left: 0.35rem;
+        font-size: 0.85em;
+        color: var(--gv-accent-color);
+        opacity: 0;
+        transition: opacity 0.12s;
+    }
 
-  &:hover::after {
-    opacity: 0.7;
-  }
+    &:hover::after {
+        opacity: 0.7;
+    }
 }
 
 .gv-editing {
-  display: block;
+    display: block;
 
-  &::after {
-    content: none; // hide the pencil while the editor is open
-  }
-
-  .gv-inline-form {
-    margin: 0;
-  }
-
-  .gv-inline-field {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-
-    .form-control,
-    .form-select {
-      min-width: 6rem;
+    &::after {
+        content: none; // hide the pencil while the editor is open
     }
-  }
 
-  .gv-btn {
-    padding: 0.15rem 0.5rem;
-    font-size: 0.85em;
-    line-height: 1.2;
-  }
+    .gv-inline-form {
+        margin: 0;
+    }
+
+    .gv-inline-field {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        .form-control,
+        .form-select {
+            min-width: 6rem;
+        }
+    }
+
+    .gv-btn {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.85em;
+        line-height: 1.2;
+    }
 }
 
 .gv-inline-spinner {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid var(--gv-accent-border);
-  border-top-color: var(--gv-accent-color);
-  border-radius: 50%;
-  animation: gv-inline-spin 0.6s linear infinite;
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--gv-accent-border);
+    border-top-color: var(--gv-accent-color);
+    border-radius: 50%;
+    animation: gv-inline-spin 0.6s linear infinite;
 }
 
 @keyframes gv-inline-spin {
-  to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 // ── Inline edit — success flash after save ──
 
 .gv-editable.gv-saved {
-  animation: gv-saved-flash 1.5s ease-out;
+    animation: gv-saved-flash 1.5s ease-out;
 }
 
 @keyframes gv-saved-flash {
-  0%   { background-color: var(--gv-success-flash-bg); }
-  100% { background-color: transparent; }
+    0% {
+        background-color: var(--gv-success-flash-bg);
+    }
+
+    100% {
+        background-color: transparent;
+    }
 }
 
 .gv-editable.gv-save-error {
-  animation: gv-save-error-flash 2s ease-out;
+    animation: gv-save-error-flash 2s ease-out;
 }
 
 @keyframes gv-save-error-flash {
-  0%   { background-color: var(--gv-danger-flash-bg); }
-  100% { background-color: transparent; }
+    0% {
+        background-color: var(--gv-danger-flash-bg);
+    }
+
+    100% {
+        background-color: transparent;
+    }
 }
 
 .gv-saved-badge {
-  margin-left: 0.35rem;
-  color: var(--gv-success-color);
-  font-weight: 700;
+    margin-left: 0.35rem;
+    color: var(--gv-success-color);
+    font-weight: 700;
 }
 
 // ── Saved searches / selections dropdown rows ──
 
 .gv-saved-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-  .gv-dropdown-item {
-    flex: 1 1 auto;
-  }
+    .gv-dropdown-item {
+        flex: 1 1 auto;
+    }
 
-  .gv-saved-del {
-    border: 0;
-    background: none;
-    color: var(--gv-danger-color);
-    padding: 0 0.6rem;
-    cursor: pointer;
-  }
+    .gv-saved-del {
+        border: 0;
+        background: none;
+        color: var(--gv-danger-color);
+        padding: 0 0.6rem;
+        cursor: pointer;
+    }
 }
 
 // ── Prompt modal (saved searches/selections naming) ──
 
 .gv-prompt-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1080;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gv-backdrop);
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gv-backdrop);
 }
 
 .gv-prompt {
-  width: min(92vw, 360px);
-  padding: 1rem 1.25rem;
-  background: var(--gv-color-bg, #fff);
-  color: var(--gv-color-text, #1a1f2e);
-  border-radius: 8px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    width: min(92vw, 360px);
+    padding: 1rem 1.25rem;
+    background: var(--gv-color-bg, #fff);
+    color: var(--gv-color-text, #1a1f2e);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
 }
 
 .gv-prompt-title {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
 .gv-prompt-label {
-  display: block;
-  font-size: 0.85em;
-  color: var(--gv-color-text-muted, #6b7280);
-  margin-bottom: 0.25rem;
+    display: block;
+    font-size: 0.85em;
+    color: var(--gv-color-text-muted, #6b7280);
+    margin-bottom: 0.25rem;
 }
 
 .gv-prompt-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
 }
 
 // ── Column reorder (drag-and-drop) ──
 
 [data-gridview] th[draggable="true"] {
-  cursor: grab;
+    cursor: grab;
 }
 
 [data-gridview] th.gv-col-dragging {
-  opacity: 0.5;
+    opacity: 0.5;
 }
 
 [data-gridview] th.gv-col-drop-target {
-  box-shadow: inset 3px 0 0 0 var(--gv-color-primary, #4b6cb7);
+    box-shadow: inset 3px 0 0 0 var(--gv-color-primary, #4b6cb7);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -917,79 +1130,80 @@ turbo-frame[busy] > [data-gridview] {
 
 // Number / currency / percent — right-aligned, tabular figures.
 [data-gridview] .gv-num {
-  display: inline-block;
-  width: 100%;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
 // Image
 [data-gridview] .gv-img {
-  max-height: var(--gv-img-max-h, 40px);
-  width: auto;
-  border-radius: var(--gv-img-radius, 3px);
-  vertical-align: middle;
-  object-fit: cover;
+    max-height: var(--gv-img-max-h, 40px);
+    width: auto;
+    border-radius: var(--gv-img-radius, 3px);
+    vertical-align: middle;
+    object-fit: cover;
 }
 
 // Media download link (non-image files: pdf, doc, …)
 [data-gridview] .gv-file {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    text-decoration: none;
 
-  &::before {
-    content: "\1F4CE"; // paperclip
-    font-size: 0.9em;
-  }
+    &::before {
+        content: "\1F4CE"; // paperclip
+        font-size: 0.9em;
+    }
 
-  &:hover {
-    text-decoration: underline;
-  }
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 // List / array
 [data-gridview] .gv-list {
-  margin: 0;
-  padding-left: 1.1em;
+    margin: 0;
+    padding-left: 1.1em;
 }
+
 [data-gridview] .gv-list li {
-  line-height: 1.4;
+    line-height: 1.4;
 }
 
 // Rating — filled/empty stars
 [data-gridview] .gv-rating {
-  color: var(--gv-rating-color, #f59e0b);
-  letter-spacing: .05em;
-  white-space: nowrap;
+    color: var(--gv-rating-color, #f59e0b);
+    letter-spacing: .05em;
+    white-space: nowrap;
 }
 
 // Badge / status chip
 [data-gridview] .gv-badge {
-  display: inline-block;
-  padding: var(--gv-badge-padding, .1rem .55rem);
-  border-radius: var(--gv-badge-radius, 999px);
-  background: var(--gv-badge-bg, #eaecef);
-  color: var(--gv-badge-color, #374151);
-  font-size: var(--gv-badge-font-size, .75rem);
-  font-weight: 600;
-  line-height: 1.5;
-  white-space: nowrap;
+    display: inline-block;
+    padding: var(--gv-badge-padding, .1rem .55rem);
+    border-radius: var(--gv-badge-radius, 999px);
+    background: var(--gv-badge-bg, #eaecef);
+    color: var(--gv-badge-color, #374151);
+    font-size: var(--gv-badge-font-size, .75rem);
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
 }
 
 // JSON — preformatted block
 [data-gridview] .gv-json {
-  margin: 0;
-  padding: .35rem .5rem;
-  max-height: 12rem;
-  overflow: auto;
-  background: var(--gv-json-bg, #f7f8f9);
-  color: var(--gv-json-color, #374151);
-  border: 1px solid var(--gv-json-border, #d0d5dd);
-  border-radius: var(--gv-radius, 5px);
-  font-size: .8125rem;
-  white-space: pre;
+    margin: 0;
+    padding: .35rem .5rem;
+    max-height: 12rem;
+    overflow: auto;
+    background: var(--gv-json-bg, #f7f8f9);
+    color: var(--gv-json-color, #374151);
+    border: 1px solid var(--gv-json-border, #d0d5dd);
+    border-radius: var(--gv-radius, 5px);
+    font-size: .8125rem;
+    white-space: pre;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1000,115 +1214,147 @@ turbo-frame[busy] > [data-gridview] {
 // when columns no longer fit. Doubles as a horizontal-scroll fallback when no
 // column is collapsible (all priority 0) but the table is still too wide.
 [data-gridview] .gv-resp-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 
-  > table[data-gv] {
-    width: auto;
-    min-width: 100%;
-  }
+    >table[data-gv] {
+        width: auto;
+        min-width: 100%;
+    }
 }
 
 // Cells collapsed by the controller. A class (not inline display) so this never
 // collides with the column-visibility controller's inline style.display.
 [data-gridview] th.gv-resp-collapsed,
-[data-gridview] td.gv-resp-collapsed { display: none; }
+[data-gridview] td.gv-resp-collapsed {
+    display: none;
+}
 
 // Control column: hidden until at least one column collapses.
 [data-gridview] th.gv-resp-ctrl,
 [data-gridview] td.gv-resp-ctrl {
-  display: none;
-  width: 1%;
-  white-space: nowrap;
-  text-align: center;
-  padding-inline: .35rem;
+    display: none;
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding-inline: .35rem;
 }
+
 [data-gridview] .gv-resp-wrap.gv-has-collapsed th.gv-resp-ctrl,
-[data-gridview] .gv-resp-wrap.gv-has-collapsed td.gv-resp-ctrl { display: table-cell; }
+[data-gridview] .gv-resp-wrap.gv-has-collapsed td.gv-resp-ctrl {
+    display: table-cell;
+}
 
 // Expand/collapse toggle (+ / −).
 [data-gridview] .gv-resp-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: 0;
-  line-height: 1;
-  font-weight: 700;
-  border: 1px solid var(--gv-btn-primary-bg);
-  border-radius: 50%;
-  background: var(--gv-btn-primary-bg);
-  color: var(--gv-btn-primary-color);
-  cursor: pointer;
-  transition: background var(--gv-transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    line-height: 1;
+    font-weight: 700;
+    border: 1px solid var(--gv-btn-primary-bg);
+    border-radius: 50%;
+    background: var(--gv-btn-primary-bg);
+    color: var(--gv-btn-primary-color);
+    cursor: pointer;
+    transition: background var(--gv-transition);
 
-  &::before { content: '+'; }
-  &[aria-expanded="true"]::before { content: '\2212'; } // −
-  &:hover { background: var(--gv-btn-primary-hover); }
+    &::before {
+        content: '+';
+    }
+
+    &[aria-expanded="true"]::before {
+        content: '\2212';
+    }
+
+    // −
+    &:hover {
+        background: var(--gv-btn-primary-hover);
+    }
 }
 
 // Detail row: label/value pairs of the hidden cells for that row.
-[data-gridview] tr.gv-resp-detail > td {
-  background: var(--gv-tr-hover-bg);
-  padding: .5rem .75rem;
+[data-gridview] tr.gv-resp-detail>td {
+    background: var(--gv-tr-hover-bg);
+    padding: .5rem .75rem;
 }
-[data-gridview] .gv-resp-detail-item {
-  display: flex;
-  gap: .75rem;
-  padding: .15rem 0;
-  font-size: var(--gv-input-font-size);
 
-  & + .gv-resp-detail-item { border-top: 1px dashed var(--gv-table-border); }
+[data-gridview] .gv-resp-detail-item {
+    display: flex;
+    gap: .75rem;
+    padding: .15rem 0;
+    font-size: var(--gv-input-font-size);
+
+    &+.gv-resp-detail-item {
+        border-top: 1px dashed var(--gv-table-border);
+    }
 }
+
 [data-gridview] .gv-resp-detail-label {
-  flex: 0 0 30%;
-  max-width: 12rem;
-  font-weight: 600;
-  color: var(--gv-color-text-muted);
+    flex: 0 0 30%;
+    max-width: 12rem;
+    font-weight: 600;
+    color: var(--gv-color-text-muted);
 }
-[data-gridview] .gv-resp-detail-value { min-width: 0; }
+
+[data-gridview] .gv-resp-detail-value {
+    min-width: 0;
+}
 
 // ── Infinite scroll ───────────────────────────────────────────────
 
 [data-gridview] .gv-infinite {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 0;
 }
 
 // Invisible bottom marker observed by the IntersectionObserver.
 [data-gridview] .gv-infinite-sentinel {
-  width: 100%;
-  height: 1px;
-  pointer-events: none;
+    width: 100%;
+    height: 1px;
+    pointer-events: none;
 }
 
 [data-gridview] .gv-infinite-more {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .4rem .9rem;
-  cursor: pointer;
-  color: var(--gv-color-text);
-  background: var(--gv-color-bg);
-  border: 1px solid var(--gv-table-border);
-  border-radius: var(--gv-radius);
-  font: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .4rem .9rem;
+    cursor: pointer;
+    color: var(--gv-color-text);
+    background: var(--gv-color-bg);
+    border: 1px solid var(--gv-table-border);
+    border-radius: var(--gv-radius);
+    font: inherit;
 
-  &:hover { background: var(--gv-color-bg-subtle); }
+    &:hover {
+        background: var(--gv-color-bg-subtle);
+    }
 }
 
 // Spinner shows only while a page is being fetched.
-[data-gridview] .gv-infinite-spinner { display: none; }
-[data-gridview] .gv-infinite-loading .gv-infinite-spinner { display: inline-block; }
-[data-gridview] .gv-infinite-loading .gv-infinite-more { opacity: .7; pointer-events: none; }
+[data-gridview] .gv-infinite-spinner {
+    display: none;
+}
+
+[data-gridview] .gv-infinite-loading .gv-infinite-spinner {
+    display: inline-block;
+}
+
+[data-gridview] .gv-infinite-loading .gv-infinite-more {
+    opacity: .7;
+    pointer-events: none;
+}
 
 [data-gridview] .gv-infinite-status {
-  font-size: var(--gv-input-font-size);
-  color: var(--gv-color-text-muted);
+    font-size: var(--gv-input-font-size);
+    color: var(--gv-color-text-muted);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1124,129 +1370,149 @@ turbo-frame[busy] > [data-gridview] {
 // The overlay lives inside the gridview-crud controller element (which carries
 // [data-gridview], so it inherits the --gv-* theme). Toggled open with .gv-open.
 [data-gridview] .gv-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1070;
-  display: none;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 1.75rem 1rem;
-  background: var(--gv-backdrop);
-  overflow-y: auto;
+    position: fixed;
+    inset: 0;
+    z-index: 1070;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1.75rem 1rem;
+    background: var(--gv-backdrop);
+    overflow-y: auto;
 
-  &.gv-open { display: flex; }
+    &.gv-open {
+        display: flex;
+    }
 }
 
 [data-gridview] .gv-modal__dialog {
-  width: 100%;
-  max-width: 800px;
-  margin: auto;
-  background: var(--gv-color-bg);
-  color: var(--gv-color-text);
-  border: 1px solid var(--gv-color-border);
-  border-radius: var(--gv-radius);
-  box-shadow: var(--gv-dropdown-shadow);
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    background: var(--gv-color-bg);
+    color: var(--gv-color-text);
+    border: 1px solid var(--gv-color-border);
+    border-radius: var(--gv-radius);
+    box-shadow: var(--gv-dropdown-shadow);
 }
 
 [data-gridview] .gv-modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-  padding: .85rem 1.1rem;
-  border-bottom: 1px solid var(--gv-color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .85rem 1.1rem;
+    border-bottom: 1px solid var(--gv-color-border);
 }
 
 [data-gridview] .gv-modal__title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
 }
 
 [data-gridview] .gv-modal__close {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 1.4rem;
-  line-height: 1;
-  padding: 0 .25rem;
-  color: var(--gv-color-text-muted);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 0 .25rem;
+    color: var(--gv-color-text-muted);
 
-  &:hover { color: var(--gv-color-text); }
+    &:hover {
+        color: var(--gv-color-text);
+    }
 }
 
-[data-gridview] .gv-modal__body { padding: 1.1rem; }
+[data-gridview] .gv-modal__body {
+    padding: 1.1rem;
+}
 
 // Centred loading state while the form partial is fetched.
 [data-gridview] .gv-modal__loading {
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
 }
 
 // Inline spinner prefixed to a submit button while the request is in flight.
 // gv-btn is an inline-flex with a gap, so the spinner spaces itself.
 [data-gridview] .gv-spinner--inline {
-  width: 1em;
-  height: 1em;
-  border-width: 2px;
+    width: 1em;
+    height: 1em;
+    border-width: 2px;
 }
 
 // ── Alert banner (CRUD fetch errors) ─────────────────────────────
 [data-gridview] .gv-alert {
-  margin: .75rem;
-  padding: .6rem .8rem;
-  border-radius: var(--gv-radius);
-  font-size: var(--gv-input-font-size);
+    margin: .75rem;
+    padding: .6rem .8rem;
+    border-radius: var(--gv-radius);
+    font-size: var(--gv-input-font-size);
 }
 
 [data-gridview] .gv-alert--danger {
-  background: var(--gv-error-bg);
-  color: var(--gv-error-color);
-  border: 1px solid var(--gv-error-border);
+    background: var(--gv-error-bg);
+    color: var(--gv-error-color);
+    border: 1px solid var(--gv-error-border);
 }
 
 // ── Form helpers (CRUD partials) ─────────────────────────────────
 // Muted helper text (intro lines, recap labels).
-[data-gridview] .gv-muted { color: var(--gv-color-text-muted); }
+[data-gridview] .gv-muted {
+    color: var(--gv-color-text-muted);
+}
 
 // Intro paragraph above a CRUD form / confirmation.
-[data-gridview] .gv-form-intro { margin: 0 0 1rem; }
+[data-gridview] .gv-form-intro {
+    margin: 0 0 1rem;
+}
 
 // Right-aligned action row at the bottom of a CRUD form.
 [data-gridview] .gv-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: .5rem;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: 1rem;
 }
 
 // Two-column label/value recap (delete confirmation).
 [data-gridview] .gv-recap {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: .35rem .75rem;
-  margin: 0 0 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: .35rem .75rem;
+    margin: 0 0 1rem;
 
-  dt { font-weight: 500; color: var(--gv-color-text-muted); }
-  dd { margin: 0; }
+    dt {
+        font-weight: 500;
+        color: var(--gv-color-text-muted);
+    }
+
+    dd {
+        margin: 0;
+    }
 }
 
 // Batch-update row: [apply checkbox] [label] [value field].
 [data-gridview] .gv-batch-row {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
 
-  label { margin: 0; }
+    label {
+        margin: 0;
+    }
 
-  .gv-batch-field {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
+    .gv-batch-field {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
 }
 
 // ── CRUD full page (crud.mode = 'page') ──────────────────────────
 // Not scoped to [data-gridview]: this template extends the app base layout.
-.gv-crud-page__title { margin: 0 0 1rem; }
+.gv-crud-page__title {
+    margin: 0 0 1rem;
+}

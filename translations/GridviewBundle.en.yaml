@@ -61,6 +61,7 @@ filter.reset: "Reset filters"
 search.placeholder: "Search…"
 
 grid.index_title: "Index"
+grid.results: "%count% results"
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.
