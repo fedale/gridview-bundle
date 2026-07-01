@@ -8,6 +8,7 @@ export default class extends Controller {
     static values  = { gridId: String };
 
     connect() {
+        this._consumeClearFlag();
         this._restore();
         this._syncHeader();
         this._syncBulkBar();
@@ -16,8 +17,19 @@ export default class extends Controller {
 
     get _scope() { return window.location.pathname; }
 
-    get _key()    { return `gv-sel-${this.gridIdValue}`; }
-    get _allKey() { return `gv-sel-${this.gridIdValue}-all`; }
+    get _key()      { return `gv-sel-${this.gridIdValue}`; }
+    get _allKey()   { return `gv-sel-${this.gridIdValue}-all`; }
+    get _clearKey() { return `gv-sel-${this.gridIdValue}-clear`; }
+
+    // A CRUD mutation (delete/bulk/edit) just replaced the grid frame. Drop the
+    // stored selection so deleted rows don't linger in the count/bulk bar and the
+    // Set doesn't accumulate stale ids across operations.
+    _consumeClearFlag() {
+        if (sessionStorage.getItem(this._clearKey) !== '1') return;
+        sessionStorage.removeItem(this._clearKey);
+        sessionStorage.removeItem(this._key);
+        sessionStorage.removeItem(this._allKey);
+    }
 
     _isAllMode() { return sessionStorage.getItem(this._allKey) === '1'; }
 

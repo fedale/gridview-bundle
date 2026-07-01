@@ -72,6 +72,10 @@ export default class extends Controller {
                 const text = await response.text();
 
                 if (contentType.includes('turbo-stream')) {
+                    // A successful mutation replaces the grid frame and reconnects
+                    // the selection controller; flag it to drop any stored selection
+                    // so deleted ids don't linger in the bulk bar and count.
+                    this._flagSelectionClear();
                     Turbo.renderStreamMessage(text);
                     this._hide();
                 } else {
@@ -81,6 +85,15 @@ export default class extends Controller {
                 }
             })
             .catch(() => { this.modalBodyTarget.innerHTML = this._error(); });
+    }
+
+    // Ask the selection controller (same element) to clear its stored selection
+    // on its next connect. Keyed by the shared grid id so it survives the frame
+    // teardown/reconnect the Turbo Stream triggers. No-op when the grid has no
+    // checkbox column (no selection grid id present).
+    _flagSelectionClear() {
+        const gridId = this.element.dataset.gridviewSelectionGridIdValue;
+        if (gridId) sessionStorage.setItem(`gv-sel-${gridId}-clear`, '1');
     }
 
     // Carry the grid's current filter/sort/page query into the CRUD request.
