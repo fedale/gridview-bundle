@@ -2,24 +2,64 @@
   Bulk action bar — shown by the gridview-selection controller when ≥1 row is
   selected. Buttons carry the bulk endpoint URL; gridview-selection appends the
   selected ids (or all-mode + current filters) and opens the CRUD modal.
+
+  Which buttons render is driven by `crud.bulkActions`, a name→definition map:
+
+      'bulkActions' => [
+          'delete' => true,                  // built-in: url/label/variant auto
+          'update' => ['variant' => ''],     // built-in, optionally overridden
+          'archive' => [                      // custom action
+              'url'     => $this->generateUrl('..._bulk_archive'),
+              'label'   => 'bulk.archive',
+              'variant' => 'danger',          // '' | 'primary' | 'danger'
+          ],
+      ]
+
+  Order follows the map. A `false`/omitted built-in is not rendered (e.g. drop
+  `update` to keep only `delete`). When `bulkActions` is absent both built-ins
+  render as before, gated by their auto-derived URL — so existing grids are
+  unchanged. Custom actions still need their own server endpoint returning a
+  modal partial; the JS side (gridview-selection#bulk) is already generic.
 #}
 {% set crud = gridview.options.crud|default({}) %}
-{% if crud.bulkDeleteUrl is defined or crud.bulkUpdateUrl is defined %}
+
+{# Built-in defaults; URLs come from the auto-derived crud.*Url options. #}
+{% set _builtins = {
+    'update': { 'url': crud.bulkUpdateUrl|default(null), 'label': 'bulk.update', 'variant': '' },
+    'delete': { 'url': crud.bulkDeleteUrl|default(null), 'label': 'bulk.delete', 'variant': 'danger' },
+} %}
+
+{# Resolve the ordered, effective action list. #}
+{% set _actions = [] %}
+{% if crud.bulkActions is defined %}
+    {% for name, def in crud.bulkActions %}
+        {% set _base = _builtins[name]|default({ 'url': null, 'label': name, 'variant': '' }) %}
+        {% if def is iterable %}
+            {% set _actions = _actions|merge([_base|merge(def)]) %}
+        {% elseif def %}
+            {% set _actions = _actions|merge([_base]) %}
+        {% endif %}
+    {% endfor %}
+{% else %}
+    {% if _builtins.update.url %}{% set _actions = _actions|merge([_builtins.update]) %}{% endif %}
+    {% if _builtins.delete.url %}{% set _actions = _actions|merge([_builtins.delete]) %}{% endif %}
+{% endif %}
+
+{% if _actions is not empty %}
 <div class="gv-bulk-bar" data-gridview-selection-target="bulkBar" hidden>
     <span class="gv-bulk-count">
         <strong data-gridview-selection-target="count">0</strong> <span {{ gv_i18n('bulk.selected') }}>{{ 'bulk.selected'|trans({}, 'GridviewBundle') }}</span>
     </span>
     <span class="gv-bulk-actions">
-        {% if crud.bulkUpdateUrl is defined %}
-        <button type="button" class="{{ gridview.cls('btn') }}" {{ gv_i18n('bulk.update') }}
-                data-action="gridview-selection#bulk"
-                data-gridview-selection-url-param="{{ crud.bulkUpdateUrl }}">{{ 'bulk.update'|trans({}, 'GridviewBundle') }}</button>
-        {% endif %}
-        {% if crud.bulkDeleteUrl is defined %}
-        <button type="button" class="{{ gridview.cls('btn.danger') }}" {{ gv_i18n('bulk.delete') }}
-                data-action="gridview-selection#bulk"
-                data-gridview-selection-url-param="{{ crud.bulkDeleteUrl }}">{{ 'bulk.delete'|trans({}, 'GridviewBundle') }}</button>
-        {% endif %}
+        {% for a in _actions %}
+            {% if a.url %}
+            {# Unknown variant → cls() returns '' → fall back to the base btn class. #}
+            {% set _cls = a.variant ? gridview.cls('btn.' ~ a.variant) : '' %}
+            <button type="button" class="{{ _cls ?: gridview.cls('btn') }}" {{ gv_i18n(a.label) }}
+                    data-action="gridview-selection#bulk"
+                    data-gridview-selection-url-param="{{ a.url }}">{{ a.label|trans({}, 'GridviewBundle') }}</button>
+            {% endif %}
+        {% endfor %}
     </span>
 </div>
 {% endif %}

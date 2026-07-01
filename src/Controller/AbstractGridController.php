@@ -187,6 +187,9 @@ abstract class AbstractGridController extends AbstractController
     {
         $rt = $this->realtime();
 
+        $crudOptions = $this->crudOptions();
+        $viewOptions = $this->config('options');
+
         $options = array_replace([
             'routeName' => $this->routeName('index'),
             'export' => [
@@ -203,7 +206,18 @@ abstract class AbstractGridController extends AbstractController
                 'topic'   => $rt['topic'],
                 'hubUrl'  => $rt['hubUrl'],
             ],
-        ], $this->crudOptions(), $this->config('options'));
+        ], $crudOptions, $viewOptions);
+
+        // Deep-merge the `crud` sub-array: array_replace above is shallow, so a
+        // `viewConfig().options.crud` would otherwise clobber the auto-derived
+        // URLs/title from crudOptions(). Merging one level lets a grid set a
+        // single crud key (e.g. `bulkActions`) without re-listing the rest.
+        if (isset($crudOptions['crud']) || isset($viewOptions['crud'])) {
+            $options['crud'] = array_replace(
+                $crudOptions['crud'] ?? [],
+                $viewOptions['crud'] ?? [],
+            );
+        }
 
         return $this->builderFactory()->createGridviewBuilder()
             ->setId($this->config('id'))

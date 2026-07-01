@@ -2095,8 +2095,47 @@ With a `checkbox` column the `gridview-selection` controller tracks the selectio
     'bulkDeleteUrl' => $this->generateUrl('gridview_user_bulk_delete'),
     'bulkUpdateUrl' => $this->generateUrl('gridview_user_bulk_update'),
 ],
-'layout' => ['shell' => '{toolbar} {bulkBar} {header} {dataview} {footer}'],
+'layout' => ['shell' => '{header} {bulkBar} {dataview} {footer}'],
 ```
+
+> Insert `{bulkBar}` into the **existing** shell tree — do not add `{toolbar}` alongside `{header}`.
+> The default `header` region already expands to `{heading} {toolbar}`, so listing both renders the
+> toolbar (and its global-search field) twice, which throws *"Field `_q` has already been rendered"*.
+> If the grid drops the header, just add the bar on its own: `'{bulkBar} {dataview} {footer}'`.
+
+**Choosing which bulk buttons show** — by default both built-ins (`update`, `delete`) render when
+their auto-derived URL exists. To restrict the set, or add your own action, use the `bulkActions`
+map under `crud` (a `viewConfig().options.crud` here is deep-merged over the auto-derived URLs, so
+you set only this key — the URLs/title are preserved):
+
+```php
+'crud' => [
+    'bulkActions' => [
+        'delete' => true,                  // built-in: url + label + variant auto
+        // 'update' omitted → not rendered  (keeps only Delete)
+        'archive' => [                      // custom action
+            'url'     => $this->generateUrl('gridview_user_bulk_archive'),
+            'label'   => 'bulk.archive',    // GridviewBundle translation key
+            'variant' => 'danger',          // '' (base) | 'primary' | 'danger'
+        ],
+    ],
+],
+```
+
+Buttons render in map order. The JS (`gridview-selection#bulk`) is generic — it appends the ids
+(or `all=1` + filters) to the action's `url` and opens the CRUD modal — so a **custom** action only
+needs its own server endpoint returning a modal partial (a confirm like `_bulk_delete` or a form
+like `_batch`) and processing the ids, exactly like the built-in `bulkDelete`/`bulkUpdate` below.
+
+> **EA-style selection mode (client-only).** The selection controller drops the `hidden` attribute
+> from `.gv-bulk-bar` whenever ≥1 row is selected, so you can collapse the page chrome (title,
+> filters, add button) into a bare "N selected + actions" toolbar with CSS alone — no JS. Scope a
+> `:has()` rule to a common ancestor of the header and the grid:
+> ```css
+> .content:has(.gv-bulk-bar:not([hidden])) .content-header { display: none; }
+> ```
+> Elements *outside* the `[data-gridview]` element (e.g. an add button in the page header) need such
+> a shared-ancestor rule; `:has()` scoped to `[data-gridview]` alone can't reach them.
 
 Columns editable in the batch dialog declare `batchUpdate => true`; the dialog renders an "apply"
 checkbox + the control per such column, and only checked fields are applied. Endpoints resolve the
