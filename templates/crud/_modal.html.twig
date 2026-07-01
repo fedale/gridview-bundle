@@ -9,7 +9,8 @@
      data-action="click->gridview-crud#backdropClose">
     <div class="gv-modal__dialog" role="dialog" aria-modal="true">
         <div class="gv-modal__header">
-            <h2 class="gv-modal__title">{{ gridview.options.crud.title|default('') }}</h2>
+            {%- set _crudTitle = gridview.options.crud.title|default('') -%}
+            <h2 class="gv-modal__title"{% if _crudTitle is not empty %} {{ gv_i18n(_crudTitle) }}{% endif %}>{{ _crudTitle is not empty and gv_client_label(_crudTitle) ? gv_client_text(_crudTitle) : _crudTitle }}</h2>
             <button type="button" class="gv-modal__close" data-action="gridview-crud#close" {{ gv_i18n_attr('crud.close', 'aria-label') }} aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}">&times;</button>
         </div>
         <div class="gv-modal__body" data-gridview-crud-target="modalBody"></div>
