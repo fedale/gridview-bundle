@@ -18,7 +18,12 @@ final class FilterDefaultNormalizer
             'text' => self::normalizeText($default),
             'boolean' => self::normalizeBoolean($default),
             'date' => self::normalizeRange($type, $default),
-            'number' => self::normalizeRange($type, $default),
+            // The single-input number widget holds one scalar (a value or an
+            // inline expression like ">10"); the from/to range widget keeps the
+            // {from, to} shape.
+            'number' => ($options['single_input'] ?? true)
+                ? self::normalizeSingleNumber($default)
+                : self::normalizeRange($type, $default),
             'choice', 'relation' => self::normalizeChoice($type, $default, $options),
             default => throw new \InvalidArgumentException(sprintf(
                 'Filter type "%s" does not support a default value.',
@@ -48,6 +53,25 @@ final class FilterDefaultNormalizer
         throw new \InvalidArgumentException(
             'Default for a "boolean" filter must be one of \'1\', \'0\', 1, 0, true, false.'
         );
+    }
+
+    private static function normalizeSingleNumber(mixed $default): string
+    {
+        // Accept a number (34) or an inline expression (">10", "btw 1 and 5",
+        // "1..5"); the applier parses the string. Range arrays belong to the
+        // from/to widget (single_input => false).
+        if (is_array($default)) {
+            throw new \InvalidArgumentException(
+                'Array default for a single-input "number" filter is not supported; '
+                . 'pass a scalar (e.g. 10 or ">10"), or set single_input => false for a from/to range.'
+            );
+        }
+
+        if (!is_scalar($default) || (string) $default === '') {
+            throw new \InvalidArgumentException('Default for a "number" filter must be a non-empty scalar.');
+        }
+
+        return (string) $default;
     }
 
     /**

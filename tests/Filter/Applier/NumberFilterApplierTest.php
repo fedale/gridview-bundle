@@ -50,12 +50,89 @@ class NumberFilterApplierTest extends TestCase
         $this->assertNull($qb->getDQLPart('where'));
     }
 
-    public function testBlankOrNonArrayValuesAreSkipped(): void
+    public function testBlankValuesAreSkipped(): void
     {
         $qb = $this->createTestQueryBuilder();
         $this->applier->apply($qb, 'p.price', ['from' => '', 'to' => null]);
-        $this->applier->apply($qb, 'p.price', '10');
+        $this->applier->apply($qb, 'p.price', '');
         $this->applier->apply($qb, 'p.price', null);
+
+        $this->assertNull($qb->getDQLPart('where'));
+    }
+
+    // ── Single-input mode (scalar value) ───────────────────────────────
+
+    public function testSingleInputPlainNumberProducesEquals(): void
+    {
+        $qb = $this->createTestQueryBuilder();
+        $this->applier->apply($qb, 'p.price', '34');
+
+        $param = $qb->getParameters()->first();
+        $this->assertSame(34, $param->getValue());
+        $this->assertSame(sprintf('p.price = :%s', $param->getName()), $this->whereDql($qb));
+    }
+
+    /**
+     * @dataProvider singleInputOperators
+     */
+    public function testSingleInputOperatorSyntax(string $input, string $expectedDql, int|float $expectedValue): void
+    {
+        $qb = $this->createTestQueryBuilder();
+        $this->applier->apply($qb, 'p.price', $input);
+
+        $param = $qb->getParameters()->first();
+        $this->assertSame($expectedValue, $param->getValue());
+        $this->assertSame(sprintf($expectedDql, $param->getName()), $this->whereDql($qb));
+    }
+
+    public function singleInputOperators(): array
+    {
+        return [
+            'equals'             => ['= 34', 'p.price = :%s', 34],
+            'not equals'         => ['!= 34', 'p.price <> :%s', 34],
+            'not equals diamond' => ['<> 34', 'p.price <> :%s', 34],
+            'greater than'       => ['> 34', 'p.price > :%s', 34],
+            'greater or equal'   => ['>= 34', 'p.price >= :%s', 34],
+            'less than'          => ['< 34', 'p.price < :%s', 34],
+            'less or equal'      => ['<= 34', 'p.price <= :%s', 34],
+        ];
+    }
+
+    /**
+     * @dataProvider singleInputRanges
+     */
+    public function testSingleInputRangeSyntaxProducesBetween(string $input): void
+    {
+        $qb = $this->createTestQueryBuilder();
+        $this->applier->apply($qb, 'p.price', $input);
+
+        $params = $qb->getParameters();
+        $this->assertCount(2, $params);
+        $this->assertSame(10, $params[0]->getValue());
+        $this->assertSame(20, $params[1]->getValue());
+        $this->assertSame(
+            sprintf('p.price BETWEEN :%s AND :%s', $params[0]->getName(), $params[1]->getName()),
+            $this->whereDql($qb)
+        );
+    }
+
+    public function singleInputRanges(): array
+    {
+        return [
+            'btw and'      => ['btw 10 and 20'],
+            'btw uppercase' => ['BTW 10 AND 20'],
+            'arrow'        => ['10 -> 20'],
+            'arrow tight'  => ['10->20'],
+            'dots'         => ['10..20'],
+            'dots reversed' => ['20..10'],
+            'legacy dash'  => ['10-20'],
+        ];
+    }
+
+    public function testSingleInputJunkIsSkipped(): void
+    {
+        $qb = $this->createTestQueryBuilder();
+        $this->applier->apply($qb, 'p.price', 'abc');
 
         $this->assertNull($qb->getDQLPart('where'));
     }

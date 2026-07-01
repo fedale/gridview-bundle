@@ -81,26 +81,40 @@ class FilterDefaultNormalizerTest extends TestCase
         FilterDefaultNormalizer::normalize('date', ['from' => null, 'to' => '']);
     }
 
+    public function testNumberSingleInputScalar(): void
+    {
+        // Single input (default): a scalar default stays a scalar string.
+        $this->assertSame('100', FilterDefaultNormalizer::normalize('number', 100));
+        $this->assertSame('>10', FilterDefaultNormalizer::normalize('number', '>10'));
+    }
+
+    public function testNumberSingleInputRejectsArray(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Array default for a single-input "number" filter');
+        FilterDefaultNormalizer::normalize('number', ['from' => 10, 'to' => 20]);
+    }
+
     public function testNumberRange(): void
     {
         $this->assertSame(
             ['from' => '10', 'to' => '20.5'],
-            FilterDefaultNormalizer::normalize('number', ['from' => 10, 'to' => '20.5'])
+            FilterDefaultNormalizer::normalize('number', ['from' => 10, 'to' => '20.5'], ['single_input' => false])
         );
     }
 
-    public function testNumberScalarShorthand(): void
+    public function testNumberRangeScalarShorthand(): void
     {
         $this->assertSame(
             ['from' => '100', 'to' => null],
-            FilterDefaultNormalizer::normalize('number', 100)
+            FilterDefaultNormalizer::normalize('number', 100, ['single_input' => false])
         );
     }
 
-    public function testNumberRejectsNonNumericBound(): void
+    public function testNumberRangeRejectsNonNumericBound(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        FilterDefaultNormalizer::normalize('number', ['from' => 'abc']);
+        FilterDefaultNormalizer::normalize('number', ['from' => 'abc'], ['single_input' => false]);
     }
 
     public function testChoiceScalar(): void

@@ -338,7 +338,14 @@
 
 // ── Number filter ────────────────────────────────────────────────
 
-[data-gridview] .gv-number-filter {
+// Single-input number filter: one plain text box holding the whole expression.
+[data-gridview] input.gv-number-filter--single {
+    width: 100%;
+    min-width: 0;
+}
+
+// Range number filter (single_input => false): the from/to (Min/Max) pair.
+[data-gridview] .gv-number-filter:not(.gv-number-filter--single) {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -396,7 +403,7 @@
 [data-gridview] .gv-region--header {
     padding: 1rem 0 1.25rem;
     margin-bottom: .5rem;
-    border-bottom: 1px solid var(--gv-color-border);
+    // border-bottom: 1px solid var(--gv-color-border);
 }
 
 // Elastic gap ({spacer}): absorbs the free space so the controls before it stay

@@ -11,7 +11,9 @@
                 {% set filterType  = column.filter.type ?? 'text' %}
                 {% if inFilterBar and column.hasHeaderMirror() and filterType in ['text', 'number'] %}
                 <div class="gv-filter-cell">
-                    <input type="{{ filterType }}"
+                    {# Number filters accept an inline expression (">10", "btw 1 and 5"),
+                       so the mirror is a text input even for the number type. #}
+                    <input type="text"
                            id="gv-mirror-{{ attr }}"
                            class="gv-mirror-input"
                            data-gv-mirror-attr="{{ attr }}"
