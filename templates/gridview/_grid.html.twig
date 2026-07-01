@@ -1,6 +1,11 @@
 {{ gv_i18n_catalog() }}
 {% if gridview.options.useTurbo %}
-<turbo-frame id="gridview-{{ gridview.key }}">
+{# data-turbo="true" re-enables Turbo for the grid subtree even when the host
+   layout disables it globally (e.g. EasyAdmin renders <body data-turbo="false">).
+   Turbo honours the nearest data-turbo ancestor, so the filter form submits and
+   pagination links navigate the frame instead of triggering a full-page reload
+   (which would drop input focus on every keystroke-driven filter update). #}
+<turbo-frame id="gridview-{{ gridview.key }}" data-turbo="true">
 {% endif %}
     {% set gvCrud = gridview.options.crud|default(false) %}
     {% set gvInline = gridview.options.crud.inlineUrl is defined and gridview.options.crud.inlineUrl is not empty %}
