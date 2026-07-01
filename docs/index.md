@@ -191,7 +191,7 @@ $columns = [
 | `twigFilter` | `string\|null` | `null` | Any Twig filter applied to the rendered value (e.g. `raw`, `upper`, `date('d/m/Y')`) |
 | `active` | `bool\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
 | `visible` | `bool\|Closure` | `true` | Whether a (registered) column is shown; `false` columns are still rendered in the DOM and data — just hidden with CSS and toggleable via the UI. To remove a column entirely, use `active` instead |
-| `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it |
+| `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it. The optional `clear` key chooses the clear affordance(s) — funnel icon, inline ✕ or external chip (see [Clearing a single column's filter](#clearing-a-single-columns-filter--filterclear)) |
 | `sortable` | `bool` | `true` | Whether clicking the header sorts the grid |
 | `filterable` | `bool` | `true` | Whether the column shows a filter input |
 | `filterBar` | `bool` | `false` | Render this column's filter in the `{filterBar}` section instead of inline in the header row |
@@ -981,6 +981,75 @@ synced "mirror" input in the column header, so users can type from either place:
 filterBar. It has no effect on non-text/number filters (relation, boolean, date),
 which are never mirrored.
 
+### Clearing a single column's filter — `filter.clear`
+
+Each column decides **how** its active filter can be removed via the `clear` key of
+its `filter` spec. → **[Tutorial: Filter clear affordances](tutorial-filter-clear-affordances.md)**
+
+The available affordances (modes) are:
+
+| Mode | Affordance | Where |
+| --- | --- | --- |
+| `header` | Funnel icon next to the column label (appears only when the filter is active) | Column header |
+| `input` | An inline **✕** button inside the filter input | Filter row |
+| `chip` | A removable chip (`Label: value` + **✕**) | The `{filterChips}` section, outside the table |
+| `none` | No clear affordance | — |
+
+All of them clear the column's filter and re-submit the grid; no custom JS is needed.
+
+```php
+// Shorthand — a single mode:
+'filter' => ['type' => 'text', 'clear' => 'chip'],
+
+// Several affordances at once (funnel icon AND an external chip):
+'filter' => ['type' => 'text', 'clear' => ['header', 'chip']],
+
+// Extended form with custom icons (raw SVG/HTML):
+'filter' => ['type' => 'text', 'clear' => [
+    'mode'     => ['header', 'chip'],
+    'icon'     => '<svg …>…</svg>',   // header/input clear glyph
+    'chipIcon' => '<svg …>…</svg>',   // chip close glyph
+]],
+```
+
+**Default** (when `clear` is omitted): `['header']`, plus `input` when the grid-level
+`filterControls.inlineClear` is `true`. An explicit `clear` always wins and never has
+`input` appended implicitly.
+
+**Chips** are rendered by the `{filterChips}` layout section, which must be placed in
+the layout (it is opt-in — not part of the default layout). It renders one chip per
+column that opted into the `chip` mode **and** currently has an applied filter:
+
+```php
+'options' => [
+    // Give the chips their own row under the toolbar:
+    'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+],
+```
+
+#### Grid-level default clear mode
+
+All columns inherit a **default** clear mode when they don't specify `filter.clear`
+explicitly. Control it via `filterControls.clear`:
+
+```php
+'options' => [
+    'filterControls' => [
+        'clear' => ['chip'],  // all columns show only chip affordance by default
+    ],
+    'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+],
+```
+
+Resolution order for each column:
+1. **Explicit** `filter.clear` always wins (if the column specifies it).
+2. **Grid-level** `filterControls.clear` (if set).
+3. **Fallback**: `['header']` + `'input'` iff `filterControls.inlineClear` is `true`.
+
+This makes it easy to pick a global style (e.g. chips for the whole grid) and only
+override individual columns when needed. Use `'clear' => 'none'` on any column to
+disable all clear affordances for that column specifically.
+
 ### Filter types reference
 
 #### `text`
@@ -1413,6 +1482,10 @@ appears in the toolbar so the user can submit the form manually.
 
 > 💡 **Want a fully custom filter UI?** The filterBar and header filters are just one UI
 > over a query layer that's decoupled from presentation. See the step-by-step tutorial
+> **[Filter clear affordances](tutorial-filter-clear-affordances.md)** — choose how to remove
+> filters (funnel icon, inline ✕, external chip, or custom icons). Grid-level defaults and
+> per-column overrides.
+
 > **[A custom, EasyAdmin-style filter modal](tutorial-custom-filter-modal.md)** — a
 > Filter button + modal with comparison operators and a reset, built entirely in the
 > client app with no bundle changes.

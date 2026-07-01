@@ -6,7 +6,7 @@
         {% if gridview.options.responsive|default(false) %}<th class="gv-resp-ctrl" aria-hidden="true"></th>{% endif %}
         {% for column in gridview.indexColumns %}
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
-        {% set hasFilterIcon = gridview.options.filterControls.inHeader and column.isFilterable() and column.filter is not null %}
+        {% set hasFilterIcon = gridview.options.filterControls.inHeader and column.isFilterable() and column.filter is not null and 'header' in column.filterClear.mode %}
         {% set sortState = column.sortState %}
         <th data-col="{{ loop.index0 }}" data-col-key="{{ colKey }}" data-priority="{{ column.priority }}"{% if sortState in ['asc', 'desc'] %} class="sorted sorted--{{ sortState }}"{% endif %}{% if gvReorder and column.isToggleable() %} draggable="true"{% endif %}{% if not column.isVisible() %} style="display:none"{% endif %}>
             <div class="gv-th">
@@ -19,7 +19,11 @@
                             title="{{ gv_client_text(column.label) }}"{% if gv_client_label(column.label) %} {{ gv_i18n_attr(column.label, 'title') }}{% endif %}
                             data-action="click->gridview-filter#toggleFilter"
                             data-gridview-filter-field-param="{{ column.attribute|replace({'.': '_'}) }}">
+                        {%- if column.filterClear.icon -%}
+                        {{ column.filterClear.icon|raw }}
+                        {%- else -%}
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h13L11 12v6l-4-2v-4z"/><path d="M16.5 16.5l5 5M21.5 16.5l-5 5"/></svg>
+                        {%- endif -%}
                     </button>
                     {% endif %}
                     {% if sortState is not null %}

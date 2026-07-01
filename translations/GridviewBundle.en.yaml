@@ -58,6 +58,7 @@ crud.bulk_delete_confirm: "Delete %count% selected records?"
 inline.saved: "Saved"
 
 filter.reset: "Reset filters"
+filter.clear: "Clear filter"
 search.placeholder: "Search…"
 
 grid.index_title: "Index"

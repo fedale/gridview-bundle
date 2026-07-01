@@ -22,7 +22,8 @@
                            autocomplete="off">
                 </div>
                 {% elseif not inFilterBar %}
-                <div class="gv-filter-cell">
+                {% set hasInlineClear = 'input' in column.filterClear.mode %}
+                <div class="gv-filter-cell{% if hasInlineClear %} gv-filter-cell--has-clear{% endif %}">
                     {% set widgetAttr = {'data-action': 'input->gridview-filter#input'} %}
                     {% if filterType == 'relation' %}
                         {% set widgetAttr = widgetAttr|merge({
@@ -31,11 +32,11 @@
                         }) %}
                     {% endif %}
                     {{ form_widget(form[attr], {'attr': widgetAttr}) }}
-                    {% if gridview.options.filterControls.inlineClear %}
+                    {% if hasInlineClear %}
                     <button type="button"
                             class="gv-filter-clear"
                             data-action="click->gridview-filter#clearFilter"
-                            data-gridview-filter-field-param="{{ attr }}">&#x2715;</button>
+                            data-gridview-filter-field-param="{{ attr }}">{% if column.filterClear.icon %}{{ column.filterClear.icon|raw }}{% else %}&#x2715;{% endif %}</button>
                     {% endif %}
                 </div>
                 {% endif %}

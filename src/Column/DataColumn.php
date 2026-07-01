@@ -2,6 +2,7 @@
 namespace Fedale\GridviewBundle\Column;
 
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
+use Fedale\GridviewBundle\Filter\FilterClearNormalizer;
 use Fedale\GridviewBundle\Grid\Gridview;
 use \Closure;
 
@@ -263,7 +264,40 @@ class DataColumn extends AbstractColumn
     {
         return $this->filter;
     }
-    
+
+    /**
+     * Canonical per-column filter-clear config, resolving the `filter.clear`
+     * spec against the grid-level defaults (filterControls.clear or .inlineClear).
+     * Used by the header/filter/chip templates to decide which clear affordances
+     * to render.
+     *
+     * Resolution order:
+     *   1. filter.clear (explicit per-column spec) if present — always wins
+     *   2. filterControls.clear (grid-level default) if set
+     *   3. Fallback: ['header'] + 'input' iff filterControls.inlineClear is true
+     *
+     * @return array{mode: string[], icon: ?string, chipIcon: ?string}
+     */
+    public function getFilterClear(): array
+    {
+        $clear = \is_array($this->filter) ? ($this->filter['clear'] ?? null) : null;
+
+        // Explicit per-column spec always wins.
+        if ($clear !== null) {
+            return FilterClearNormalizer::normalize($clear);
+        }
+
+        // Grid-level filterControls.clear is the next source.
+        $gridClear = $this->gridview->getOptions()['filterControls']['clear'] ?? null;
+        if ($gridClear !== null) {
+            return FilterClearNormalizer::normalize($gridClear);
+        }
+
+        // Fallback to retro-compatible logic: ['header'] + 'input' iff inlineClear.
+        $inlineClearDefault = (bool) ($this->gridview->getOptions()['filterControls']['inlineClear'] ?? false);
+        return FilterClearNormalizer::normalize(null, $inlineClearDefault);
+    }
+
     public function getOptions(): array
     {
         return $this->options ?? [];

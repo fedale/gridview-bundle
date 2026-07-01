@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Grid;
 use Doctrine\Common\Collections\ArrayCollection;
 use Fedale\GridviewBundle\Column\CheckboxColumn;
 use Fedale\GridviewBundle\Column\ColumnFactory;
+use Fedale\GridviewBundle\Column\DataColumn;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
@@ -76,6 +77,12 @@ class Gridview implements GridviewInterface
             // the filter <thead> row). When false neither is emitted at all.
             'inHeader' => true,
             'inlineClear' => false,
+            // Default clear mode(s) for all columns that don't specify filter.clear
+            // explicitly. Accepts the same format as filter.clear (string, array,
+            // or extended form). When null, the default is ['header'] plus 'input'
+            // if inlineClear is true (retro-compatible). Set to 'none' to hide all
+            // clear affordances by default (per-column specs still override).
+            'clear' => null,
             // Multi/relation filters: hide the search box and the
             // select/deselect/invert toolbar when a column has fewer than this
             // many options. Overridable per column via filter.options.controls_threshold.
@@ -376,6 +383,50 @@ class Gridview implements GridviewInterface
     public function getUrlState(): GridviewUrlState
     {
         return $this->urlState;
+    }
+
+    /**
+     * Active "chip" filters to render outside the table: one entry per index
+     * column that opted into the `chip` clear mode AND currently has an applied
+     * filter. Consumed by the `filterChips` layout section; the chip's close
+     * button reuses the generic `gridview-filter#clearFilter` Stimulus action.
+     *
+     * @return list<array{field: string, label: ?string, display: ?string, icon: ?string}>
+     */
+    public function activeFilterChips(): array
+    {
+        $applied = $this->urlState->getFilters();
+        $chips   = [];
+
+        foreach ($this->getIndexColumns() as $column) {
+            if (!$column instanceof DataColumn || !$column->isFilterable() || empty($column->filter)) {
+                continue;
+            }
+
+            $clear = $column->getFilterClear();
+            if (!\in_array('chip', $clear['mode'], true)) {
+                continue;
+            }
+
+            $field = str_replace('.', '_', (string) $column->getAttribute());
+            if (!\array_key_exists($field, $applied)) {
+                continue;
+            }
+
+            // Best-effort human value: scalars are shown as-is; complex filters
+            // (range/relation arrays) render the label only.
+            $value   = $applied[$field];
+            $display = \is_scalar($value) ? (string) $value : null;
+
+            $chips[] = [
+                'field'   => $field,
+                'label'   => $column->getLabel(),
+                'display' => $display,
+                'icon'    => $clear['chipIcon'],
+            ];
+        }
+
+        return $chips;
     }
 
     public function hasCheckboxColumn(): bool

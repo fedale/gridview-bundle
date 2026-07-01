@@ -1,0 +1,22 @@
+{#
+  Active-filter chips rendered OUTSIDE the table. One chip per index column that
+  opted into the `chip` clear mode (filter.clear) AND currently has an applied
+  filter. The close button reuses the generic `gridview-filter#clearFilter`
+  action, so no extra JS is needed — the enclosing <form data-controller="gridview-filter">
+  wraps the whole shell. Place the section with the `{filterChips}` layout token.
+#}
+{%- set _chips = gridview.activeFilterChips() -%}
+{%- if _chips is not empty -%}
+<div class="gv-filter-chips">
+    {%- for chip in _chips -%}
+    <span class="gv-filter-chip" data-gv-chip-field="{{ chip.field }}">
+        <span class="gv-filter-chip__label">{{ gv_header_label(chip.label) }}{% if chip.display is not empty %}: {{ chip.display }}{% endif %}</span>
+        <button type="button"
+                class="gv-filter-chip__close"
+                title="{{ 'filter.clear'|trans({}, 'GridviewBundle') }}"
+                data-action="click->gridview-filter#clearFilter"
+                data-gridview-filter-field-param="{{ chip.field }}">{% if chip.icon %}{{ chip.icon|raw }}{% else %}&#x2715;{% endif %}</button>
+    </span>
+    {%- endfor -%}
+</div>
+{%- endif -%}

@@ -207,7 +207,7 @@
 
     tbody td {
         padding: .35rem .6rem;
-        border-bottom: 1px solid var(--gv-table-border);
+        // border-bottom: 1px solid var(--gv-table-border);
         font-size: var(--gv-input-font-size);
         color: var(--gv-color-text);
     }
@@ -223,7 +223,7 @@
         text-align: left;
         font-size: var(--gv-input-font-size);
         color: var(--gv-color-text-muted);
-        border-top: 2px solid var(--gv-table-border);
+        // border-top: 2px solid var(--gv-table-border);
     }
 }
 
@@ -329,9 +329,65 @@
         font-size: .8em;
         line-height: 1;
         color: var(--gv-color-text);
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
 
         &:hover {
             opacity: 1;
+        }
+    }
+
+    // Reserve room on the trailing side so the typed text never slides under the
+    // absolutely-positioned clear button. Targets the direct field widget only.
+    &.gv-filter-cell--has-clear>input,
+    &.gv-filter-cell--has-clear>select {
+        padding-inline-end: 1.6em;
+    }
+}
+
+// ── Active-filter chips (external) ────────────────────────────────
+
+[data-gridview] .gv-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35em;
+    align-items: center;
+}
+
+[data-gridview] .gv-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    padding: .15em .25em .15em .6em;
+    border: 1px solid var(--gv-input-border);
+    border-radius: 999px;
+    background: var(--gv-input-bg);
+    font-size: var(--gv-input-font-size);
+    line-height: 1.4;
+
+    .gv-filter-chip__label {
+        white-space: nowrap;
+    }
+
+    .gv-filter-chip__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.3em;
+        height: 1.3em;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        cursor: pointer;
+        opacity: .55;
+        font-size: .85em;
+        line-height: 1;
+        color: var(--gv-color-text);
+
+        &:hover {
+            opacity: 1;
+            background: var(--gv-input-border);
         }
     }
 }

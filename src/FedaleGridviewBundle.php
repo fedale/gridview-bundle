@@ -128,6 +128,7 @@ class FedaleGridviewBundle extends AbstractBundle
             ->children()
             ->booleanNode('inHeader')->defaultTrue()->end()
             ->booleanNode('inlineClear')->defaultFalse()->end()
+            ->variableNode('clear')->defaultNull()->end()
             ->end()
             ->end()
             ->arrayNode('pagination')
