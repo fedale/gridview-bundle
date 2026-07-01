@@ -3,7 +3,7 @@
     {% if tfoot_tokens is empty %}
         <tr>
             {% for column in gridview.indexColumns %}
-            <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}></th>
+            <th data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}"{% if not column.isVisible() %} style="display:none"{% endif %}></th>
             {% endfor %}
         </tr>
     {% else %}

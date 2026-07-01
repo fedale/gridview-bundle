@@ -17,5 +17,5 @@
    (all-visible) columns flash before the hidden ones are removed. Inline
    display:none on the cells (not a global stylesheet rule) so a later
    toggle-on — which clears the inline style — restores the column. #}
-<script>(function(){try{var k={{ gridview.key|json_encode|raw }};var s=sessionStorage.getItem('gv-vis-'+k);if(!s)return;var st=JSON.parse(s);for(var i in st){if(st[i]===false){document.querySelectorAll('table[data-gv="'+k+'"] [data-col="'+i+'"]').forEach(function(c){c.style.display='none';});}}}catch(e){}})();</script>
+<script>(function(){try{var k={{ gridview.key|json_encode|raw }};var s=sessionStorage.getItem('gv-vis-'+k);if(!s)return;var st=JSON.parse(s);for(var i in st){if(st[i]===false){document.querySelectorAll('table[data-gv="'+k+'"] [data-col-key="'+i+'"]').forEach(function(c){c.style.display='none';});}}}catch(e){}})();</script>
 {% if gvResponsive %}</div>{% endif %}

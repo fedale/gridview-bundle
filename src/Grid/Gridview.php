@@ -101,7 +101,12 @@ class Gridview implements GridviewInterface
     public function getKey(): string
     {
         if ($this->key === null) {
-            $this->key = $this->prefix . static::$counter++;
+            // Prefer the stable, per-grid id (entity short name by default) so the
+            // key is unique and reproducible across requests. Fall back to the
+            // positional counter only for grids built without an id — a bare
+            // counter collides between single-grid pages (every page's first grid
+            // is "grid_0"), which leaks column-visibility state across grids.
+            $this->key = $this->id ?? ($this->prefix . static::$counter++);
         }
 
         return $this->key;

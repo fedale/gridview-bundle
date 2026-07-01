@@ -2898,12 +2898,16 @@ consistent for colspan calculations.
 **Scope selectors used internally:**
 
 ```
-table[data-gv="{gridId}"] [data-col="{colIndex}"]
+table[data-gv="{gridId}"] [data-col-key="{columnAttribute}"]
 ```
 
-Every cell (`<th>`, `<td>`) rendered by the bundle carries `data-col="{colIndex}"` and the
-`<table>` element carries `data-gv="{gridId}"`, which is how the controller targets cells
-for a specific column without touching other tables on the page.
+State is keyed by the column's stable `data-col-key` (its attribute, e.g. `name`, falling
+back to `col{index}` for columns without one) rather than by positional index, so the saved
+visibility survives column reordering and keeps its meaning across grids. Every cell
+(`<th>`, `<td>`) rendered by the bundle carries both `data-col="{colIndex}"` (used by the
+responsive controller) and `data-col-key="{columnAttribute}"`, and the `<table>` element
+carries `data-gv="{gridId}"`, which is how the controller targets cells for a specific
+column without touching other tables on the page.
 
 **Columns that are not toggleable** (`CheckboxColumn`, `ActionColumn`) are excluded from the
 dropdown automatically because their `isToggleable()` method returns `false`.

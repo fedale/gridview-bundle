@@ -4,7 +4,7 @@
 <thead {{ filterAttr|options }}>
     <tr>
         {% for column in gridview.indexColumns %}
-        <th data-col="{{ loop.index0 }}"{% if not column.isVisible() %} style="display:none"{% endif %}>
+        <th data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}"{% if not column.isVisible() %} style="display:none"{% endif %}>
             {% set attr = column.attribute|replace({'.': '_'}) %}
             {% if form[attr] is defined %}
                 {% set inFilterBar = column.isInFilterBar() %}

@@ -14,7 +14,7 @@
         <li>
             <label class="gv-dropdown-item">
                 <input type="checkbox"
-                       data-col="{{ colIndex }}"
+                       data-col-key="{{ column.attribute|default('col' ~ colIndex) }}"
                        data-action="change->gridview-visibility#toggle"
                        {{ column.isVisible() ? 'checked' : '' }}>
                 {{ gv_header_label(column.label) }}

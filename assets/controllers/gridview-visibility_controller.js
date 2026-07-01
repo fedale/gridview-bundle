@@ -36,22 +36,22 @@ export default class extends Controller {
     }
 
     toggle(event) {
-        const colIndex = parseInt(event.target.dataset.col);
-        const visible  = event.target.checked;
-        this._setVisible(colIndex, visible);
+        const colKey  = event.target.dataset.colKey;
+        const visible = event.target.checked;
+        this._setVisible(colKey, visible);
         const state = this._load();
-        state[colIndex] = visible;
+        state[colKey] = visible;
         this._save(state);
     }
 
-    _cells(colIndex) {
+    _cells(colKey) {
         return document.querySelectorAll(
-            `table[data-gv="${this.gridIdValue}"] [data-col="${colIndex}"]`
+            `table[data-gv="${this.gridIdValue}"] [data-col-key="${colKey}"]`
         );
     }
 
-    _setVisible(colIndex, visible) {
-        this._cells(colIndex).forEach(cell => {
+    _setVisible(colKey, visible) {
+        this._cells(colKey).forEach(cell => {
             cell.style.display = visible ? '' : 'none';
         });
     }
@@ -67,10 +67,9 @@ export default class extends Controller {
 
     _restore() {
         const state = this._load();
-        Object.entries(state).forEach(([index, visible]) => {
-            const colIndex = parseInt(index);
-            this._setVisible(colIndex, visible);
-            const cb = this.element.querySelector(`input[data-col="${colIndex}"]`);
+        Object.entries(state).forEach(([colKey, visible]) => {
+            this._setVisible(colKey, visible);
+            const cb = this.element.querySelector(`input[data-col-key="${colKey}"]`);
             if (cb) cb.checked = visible;
         });
     }
