@@ -21,6 +21,11 @@ class CheckboxColumn extends AbstractColumn
         return false;
     }
 
+    public function getKind(): string
+    {
+        return 'checkbox';
+    }
+
     public function getAttribute(): string
     {
         return '_selection';

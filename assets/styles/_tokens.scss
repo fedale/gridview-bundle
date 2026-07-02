@@ -142,4 +142,15 @@
   --gv-json-bg:             #f7f8f9;
   --gv-json-color:          #374151;
   --gv-json-border:         #d0d5dd;
+
+  // ── List / Card renderers ───────────────────────────────────────
+  // These reference the neutral surface/border tokens above, so dark mode and
+  // framework bridges re-skin the cards/list automatically.
+  --gv-card-min:            16rem;                         // min card track (auto-fill)
+  --gv-card-gap:            1rem;                          // gap between cards / list items
+  --gv-card-bg:             var(--gv-color-bg);
+  --gv-card-border:         var(--gv-color-border);
+  --gv-card-radius:         var(--gv-radius);
+  --gv-card-padding:        1rem;
+  --gv-card-shadow:         0 1px 3px var(--gv-color-shadow);
 }

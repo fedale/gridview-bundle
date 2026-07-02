@@ -47,7 +47,15 @@ class DataColumn extends AbstractColumn
      */
     public ?string $dataType = null;
 
-    public bool $filterBar = false;
+    /**
+     * Tri-state filter-bar membership:
+     *   - true  → always in the filter bar (explicit opt-in);
+     *   - false → never in the filter bar (explicit exclusion, wins over autoBar);
+     *   - null  → unset: in the bar only when `autoBar` is active (default on the
+     *             list/card renderers) and the column is filterable.
+     * {@see Gridview::getFilterBarColumns()} resolves the effective membership.
+     */
+    public ?bool $filterBar = null;
 
     /**
      * When the filter is shown in the filterBar, also render a "mirror" input in
@@ -225,12 +233,18 @@ class DataColumn extends AbstractColumn
       return $current;
     }
 
+    /**
+     * Whether the column has explicitly opted into the filter bar. Note this is
+     * the explicit opt-in only (used by the table header to decide bar-vs-header
+     * placement); the effective bar membership under `autoBar` is computed in
+     * {@see Gridview::getFilterBarColumns()}.
+     */
     public function isInFilterBar(): bool
     {
-        return $this->filterBar;
+        return $this->filterBar === true;
     }
 
-    public function setFilterBar(bool $filterBar): void
+    public function setFilterBar(?bool $filterBar): void
     {
         $this->filterBar = $filterBar;
     }

@@ -10,12 +10,16 @@
     {% set gvCrud = gridview.options.crud|default(false) %}
     {% set gvInline = gridview.options.crud.inlineUrl is defined and gridview.options.crud.inlineUrl is not empty %}
     {% set gvRealtime = gridview.options.realtime.enabled|default(false) and gridview.options.realtime.hubUrl|default(false) %}
+    {# Table-only client features (column collapse, drag-reorder) target
+       <table>/<th>/<tr>, so they attach only when the active renderer is the
+       table strategy. On list/card they are no-ops and stay off. #}
+    {% set gvIsTable = gridview.renderer == 'table' %}
     {% set gvControllers = ['gridview-i18n'] %}
     {% if gridview.hasCheckboxColumn %}{% set gvControllers = gvControllers|merge(['gridview-selection']) %}{% endif %}
     {% if gvCrud %}{% set gvControllers = gvControllers|merge(['gridview-crud']) %}{% endif %}
     {% if gvInline %}{% set gvControllers = gvControllers|merge(['gridview-inline-edit']) %}{% endif %}
-    {% if gridview.options.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
-    {% if gridview.options.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
+    {% if gvIsTable and gridview.options.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
+    {% if gvIsTable and gridview.options.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
     {% if gvRealtime %}{% set gvControllers = gvControllers|merge(['gridview-mercure']) %}{% endif %}
     {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.pagination.mode|default('numeric'))) %}
     <div data-gridview

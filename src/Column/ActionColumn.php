@@ -45,6 +45,11 @@ class ActionColumn extends AbstractColumn
         return false;
     }
 
+    public function getKind(): string
+    {
+        return 'action';
+    }
+
     public function getAttribute(): string
     {
         return $this->attribute;

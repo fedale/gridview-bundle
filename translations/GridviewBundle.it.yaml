@@ -28,6 +28,11 @@ saved.empty: "Nessuna ricerca salvata"
 sort.title: "Ordina"
 sort.button: "Ordina"
 
+view.switch: "Cambia vista"
+view.table: "Tabella"
+view.list: "Elenco"
+view.card: "Schede"
+
 selection.all_records: "Tutti i record"
 selection.menu: "Menu selezione"
 selection.select_all: "Seleziona tutti"

@@ -1587,3 +1587,196 @@ turbo-frame[busy]>[data-gridview] {
 .gv-crud-page__title {
     margin: 0 0 1rem;
 }
+// ── ListView renderer ────────────────────────────────────────────
+// Renderer-agnostic list of records (renderer: 'list'). Each <li> lays out its
+// data columns as label/value pairs, with the checkbox and actions in their own
+// slots. All colours come from the shared --gv-* tokens (light/dark aware).
+[data-gridview] .gv-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gv-card-gap);
+}
+
+[data-gridview] .gv-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: var(--gv-card-padding);
+    background: var(--gv-card-bg);
+    border: 1px solid var(--gv-card-border);
+    border-radius: var(--gv-card-radius);
+    transition: background var(--gv-transition);
+
+    &:hover {
+        background: var(--gv-tr-hover-bg);
+    }
+}
+
+[data-gridview] .gv-list-item__select {
+    flex: 0 0 auto;
+    padding-top: .1rem;
+}
+
+[data-gridview] .gv-list-item__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: .35rem 1.5rem;
+}
+
+[data-gridview] .gv-list-item__field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+[data-gridview] .gv-list-item__label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--gv-color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+[data-gridview] .gv-list-item__value {
+    color: var(--gv-color-text);
+    min-width: 0;
+    word-break: break-word;
+}
+
+[data-gridview] .gv-list-item__actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+}
+
+[data-gridview] .gv-list__empty {
+    padding: var(--gv-card-padding);
+    text-align: center;
+    color: var(--gv-color-text-muted);
+}
+
+// ── CardView renderer ─────────────────────────────────────────────
+// Responsive grid of cards (renderer: 'card'). auto-fill sizes the number of
+// columns from the container width; --gv-card-min / --gv-card-gap tune it and
+// can be overridden per grid via options.card.min / .gap.
+[data-gridview] .gv-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--gv-card-min), 1fr));
+    gap: var(--gv-card-gap);
+}
+
+[data-gridview] .gv-card {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: var(--gv-card-padding);
+    background: var(--gv-card-bg);
+    border: 1px solid var(--gv-card-border);
+    border-radius: var(--gv-card-radius);
+    box-shadow: var(--gv-card-shadow);
+}
+
+[data-gridview] .gv-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+[data-gridview] .gv-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gv-color-text);
+    min-width: 0;
+    word-break: break-word;
+}
+
+[data-gridview] .gv-card__select {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+[data-gridview] .gv-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+[data-gridview] .gv-card__field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+[data-gridview] .gv-card__label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--gv-color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+[data-gridview] .gv-card__value {
+    color: var(--gv-color-text);
+    min-width: 0;
+    word-break: break-word;
+}
+
+[data-gridview] .gv-card__actions {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: auto;
+    padding-top: .5rem;
+    border-top: 1px solid var(--gv-card-border);
+}
+
+[data-gridview] .gv-cards__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--gv-color-text-muted);
+}
+
+// ── View switcher ─────────────────────────────────────────────────
+// Opt-in control (renderer: multiple views allowed) to switch the active data
+// renderer at runtime. A segmented group of links; the active view is marked.
+[data-gridview] .gv-view-switcher {
+    display: inline-flex;
+    border: 1px solid var(--gv-btn-border);
+    border-radius: var(--gv-btn-radius);
+    overflow: hidden;
+}
+
+[data-gridview] .gv-view-switcher__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: var(--gv-btn-padding);
+    font-size: var(--gv-btn-font-size);
+    background: var(--gv-btn-bg);
+    color: var(--gv-btn-color);
+    text-decoration: none;
+    border: 0;
+    border-left: 1px solid var(--gv-btn-border);
+    cursor: pointer;
+    transition: background var(--gv-transition), color var(--gv-transition);
+
+    &:first-child {
+        border-left: 0;
+    }
+
+    &:hover {
+        background: var(--gv-btn-bg-hover);
+    }
+
+    &.is-active {
+        background: var(--gv-btn-primary-bg);
+        color: var(--gv-btn-primary-color);
+    }
+}

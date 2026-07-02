@@ -8,7 +8,7 @@
        top-level layout vocabulary, so they are included by path from within the
        strategy rather than dispatched as blocks. #}
     {% for section in gridview.parseLayout('dataview') %}
-        {% include '@FedaleGridview/gridview/sections/dataview/' ~ section ~ '.html.twig' ignore missing %}
+        {% include '@FedaleGridview/gridview/sections/dataview/table/' ~ section ~ '.html.twig' ignore missing %}
     {% endfor %}
 </table>
 {# Apply the user's saved column visibility before paint, mirroring the

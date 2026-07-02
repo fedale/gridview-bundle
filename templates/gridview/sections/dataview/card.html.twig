@@ -1,0 +1,19 @@
+{# CardView renderer strategy: renders the records as a responsive grid of cards
+   (CSS Grid, auto-fill). The number of cards per row adapts to the container
+   width; `options.card.min` / `options.card.gap` tune the track size and gap via
+   CSS custom properties. Chrome (toolbar, sortBar, filterBar, pagination) lives
+   outside the dataview and is unaffected. #}
+{% set cardOpts = gridview.options.card|default({}) %}
+{% set cardStyle %}
+    {%- if cardOpts.min is defined %}--gv-card-min: {{ cardOpts.min }};{% endif -%}
+    {%- if cardOpts.gap is defined %}--gv-card-gap: {{ cardOpts.gap }};{% endif -%}
+{% endset %}
+<div class="gv-cards" data-gv="{{ gridview.key }}"{% if cardStyle|trim %} style="{{ cardStyle|trim }}"{% endif %}>
+    {% if models is empty %}
+        {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/card/empty.html.twig') %}
+    {% else %}
+        {% for row in models %}
+            {% include '@FedaleGridview/gridview/sections/dataview/card/_item.html.twig' with {'rowIndex': loop.index0, 'titleField': cardOpts.titleField|default(null)} %}
+        {% endfor %}
+    {% endif %}
+</div>

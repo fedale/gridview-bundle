@@ -252,6 +252,11 @@ abstract class AbstractColumn implements ColumnInterface
         return true;
     }
 
+    public function getKind(): string
+    {
+        return 'data';
+    }
+
     public function getFilter(): mixed
     {
         return null;

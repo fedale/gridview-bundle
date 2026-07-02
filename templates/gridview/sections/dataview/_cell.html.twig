@@ -1,0 +1,19 @@
+{# Shared cell-content renderer for the renderer-agnostic views (list/card).
+   Reproduces the value pipeline of table/_rows.html.twig (twigFilter + inline
+   edit) WITHOUT the <td> wrapper, so it can be dropped into any markup.
+   Expects `column`, `row` and `rowIndex` in the context. #}
+{%- set cellContent -%}
+    {%- if column.twigFilter -%}
+        {{ include(template_from_string('{{ column.render(row, rowIndex)|' ~ column.twigFilter ~ ' }}')) }}
+    {%- else -%}
+        {{ column.render(row, rowIndex) }}
+    {%- endif -%}
+{%- endset -%}
+{%- if column.isEditable() -%}
+    <span class="gv-editable"
+          data-action="{{ column.editableTrigger }}->gridview-inline-edit#edit"
+          data-gv-field="{{ column.attribute }}"
+          data-gv-id="{{ row.data.id }}">{{ cellContent|raw }}</span>
+{%- else -%}
+    {{- cellContent|raw -}}
+{%- endif -%}

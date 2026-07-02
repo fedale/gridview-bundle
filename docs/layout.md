@@ -41,7 +41,7 @@ a region can never recurse into itself.
 > and the data region `table` is now **`dataview`**; the chrome widgets moved from
 > `header` into `toolbar` (so `header` is `{heading} {toolbar}` by default). The
 > table-internal tokens (`thead`/`filter`/`tbody`/`tfoot`/`empty`) are unchanged but
-> are now internals of the `table` renderer (templates under `sections/dataview/`).
+> are now internals of the `table` renderer (templates under `sections/dataview/table/`).
 > Rewrite any `layout.gridview` / `layout.table` keys to `shell` / `dataview`.
 
 ### Default layout
@@ -71,13 +71,14 @@ are internals of the table strategy, not top-level tokens.
 | `{dataview}` | region (`sections/dataview/{renderer}.html.twig`) | The data region; renderer-agnostic (the `table` strategy renders the `<table>`) |
 | `{footer}` | region (`_region.html.twig`) | Area below the data |
 | `{heading}` | block (`sections/heading.html.twig`) | Renders `options.title` (collapses when empty) |
-| `{sort}` | block (`sections/sort.html.twig`) | Sort dropdown of the sortable columns; placeable anywhere |
-| `{thead}` | table-strategy internal (`sections/dataview/thead.html.twig`) | Column header row |
-| `{filter}` | table-strategy internal (`sections/dataview/filter.html.twig`) | Column filter inputs row (header) |
+| `{sortBar}` | block (`sections/sortBar.html.twig`) | Sort dropdown of the sortable columns; placeable anywhere. The sort affordance for card/list renderers (which have no column headers). `{sort}` is a back-compat alias |
+| `{viewSwitcher}` | block (`sections/viewSwitcher.html.twig`) | Runtime renderer switch; collapses unless `options.renderers` lists more than one view (see [Switching views at runtime](#switching-views-at-runtime)) |
+| `{thead}` | table-strategy internal (`sections/dataview/table/thead.html.twig`) | Column header row |
+| `{filter}` | table-strategy internal (`sections/dataview/table/filter.html.twig`) | Column filter inputs row (header) |
 | `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](filtering.md#the-filterbar--placing-filters-anywhere)) |
-| `{tbody}` | table-strategy internal (`sections/dataview/tbody.html.twig`) | Data rows |
-| `{tfoot}` | table-strategy internal (`sections/dataview/tfoot.html.twig`) | Table footer row |
-| `{empty}` | table-strategy internal (`sections/dataview/empty.html.twig`) | "No records found" row |
+| `{tbody}` | table-strategy internal (`sections/dataview/table/tbody.html.twig`) | Data rows |
+| `{tfoot}` | table-strategy internal (`sections/dataview/table/tfoot.html.twig`) | Table footer row |
+| `{empty}` | table-strategy internal (`sections/dataview/table/empty.html.twig`) | "No records found" row |
 | `{globalSearch}` | `sections/globalSearch.html.twig` | Global search input |
 | `{filterSubmit}` | `sections/filterSubmit.html.twig` | Filter submit button — visible only when `useTurbo: false` |
 | `{pagination}` | `sections/pagination.html.twig` | Page navigation |
@@ -214,17 +215,89 @@ the same regions (`container → shell`, the table `class` → `dataview`,
 ### Choosing the data renderer
 
 The `dataview` region is renderer-agnostic. `options.renderer` picks the strategy
-template `sections/dataview/{renderer}.html.twig`:
+template `sections/dataview/{renderer}.html.twig`. Three renderers ship built-in:
+
+| Renderer | Markup | Internals |
+|----------|--------|-----------|
+| `table` (default) | `<table>` | `sections/dataview/table/{thead,filter,tbody,tfoot,empty,_rows}.html.twig` |
+| `list` | `<ul class="gv-list">` of `<li>` items | `sections/dataview/list/{_item,empty}.html.twig` |
+| `card` | responsive CSS-grid of `<article class="gv-card">` boxes | `sections/dataview/card/{_item,empty}.html.twig` |
 
 ```php
-->setOptions(['renderer' => 'table'])   // the default and only built-in today
+->setOptions(['renderer' => 'card'])   // 'table' (default) | 'list' | 'card'
 ```
 
-Only `table` ships today (it renders the `<table>` and its
-`thead`/`filter`/`tbody`/`tfoot`/`empty` internals); `card` and `list` are planned.
-An unknown renderer falls back to `table`. To fully replace the data markup, either
-add a `sections/dataview/{name}.html.twig` strategy or override the template
-directly with `layout.templates.dataview`.
+An unknown renderer falls back to `table`. To add your own, drop a
+`sections/dataview/{name}.html.twig` strategy (it receives `gridview`, `models`,
+`columns`, `pagination`, `form`) or override `layout.templates.dataview`.
+
+The `list` and `card` strategies iterate `gridview.indexColumns` and reuse the same
+`column.render()` pipeline as the table (via the shared
+`sections/dataview/_cell.html.twig` partial), placing each column by its
+`getKind()`: `checkbox` → selection slot, `action` → actions slot, `data`/`serial`
+→ label/value pair. Per-row attributes from the `RowSubscriber`/`Row` (even/odd,
+custom classes) apply to the `<li>`/`<article>` just as they do to `<tr>`.
+
+**CardView layout.** Cards flow in a CSS-grid `repeat(auto-fill, minmax(--gv-card-min, 1fr))`,
+so the column count adapts to the container width (down to one column on mobile).
+Tune it per grid with `options.card`:
+
+```php
+->setOptions([
+    'renderer' => 'card',
+    'card'     => [
+        'min'        => '18rem',   // → --gv-card-min (min card width)
+        'gap'        => '1rem',    // → --gv-card-gap
+        'titleField' => 'name',    // column rendered as the card title (no label)
+    ],
+])
+```
+
+#### Switching views at runtime
+
+Declare `renderers` (the allowed set) to let the **user** switch views with a
+button. When it holds more than one entry the toolbar shows a `{viewSwitcher}`
+(and, since list/card have no column headers, the header-less `{sortBar}` and
+`{filterBar}` are added automatically — additively, so a custom `layout.toolbar`
+is respected). The active view is stored in the `view` query param and preserved
+across sort/filter/pagination; it defaults to `renderer`. Omit `renderers` (or
+give a single entry) for a fixed single-view grid — the default, no switcher.
+
+```php
+->setOptions([
+    'renderer'  => 'table',                    // initial view
+    'renderers' => ['table', 'card', 'list'],  // views offered by the switcher
+])
+```
+
+The layout stays a stable **superset**: switching only swaps the `{dataview}`
+strategy; renderer-inappropriate controls (e.g. `{columnVisibility}` on card/list)
+collapse to nothing on their own. See
+[Token dynamics per renderer](#token-dynamics-per-renderer).
+
+**Filters on list/card (`autoBar`).** Without column headers there is no per-column
+filter row, so filters surface in the `{filterBar}`. By default (`filterControls.autoBar`
+is `null`) the bar auto-includes **every filterable column** when the active
+renderer is not `table`; on `table` it keeps the opt-in behaviour (only columns
+with `filterBar: true`). Set `filterControls.autoBar` to `true`/`false` to force
+it. A column excludes itself from the bar with `filterBar: false`, even under
+autoBar.
+
+**What does not carry to list/card.** `caption`, `showThead`/`showTfoot`, the
+`responsive` column-collapse (+ column `priority`), `reorderColumns`, the header
+filter funnel (`filterControls.inHeader`), the column-visibility toggle and
+infinite scroll are table-only; they are silently ignored on the other renderers.
+
+#### Token dynamics per renderer
+
+Rather than swapping the whole layout tree per renderer, the layout is a single
+stable superset and each token decides whether to render. A token that returns an
+empty string is skipped by the engine (no stray wrapper), so a runtime view switch
+only swaps `{dataview}` while the surrounding chrome stays put. `{viewSwitcher}`
+collapses unless more than one renderer is allowed; `{sortBar}`/`{filterBar}`
+collapse when there is nothing to show; `{columnVisibility}` collapses off `table`;
+the `{thead}`/`{filter}`/`{tbody}`/`{tfoot}`/`{empty}` tokens are table-strategy
+internals and never exist as top-level tokens on list/card.
 
 ### Hiding thead / tfoot without editing layout
 

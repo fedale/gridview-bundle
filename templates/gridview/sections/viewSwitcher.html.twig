@@ -1,0 +1,27 @@
+{# View switcher: opt-in control to change the active data renderer at runtime.
+   Renders one link per allowed view (gridview.renderers); collapses to nothing
+   unless more than one view is allowed. Each link carries the full target URL
+   (view param set, page reset) so, like sort/pagination, the turbo-frame reloads
+   with the new renderer — no client controller needed. #}
+{%- set views = gridview.renderers -%}
+{%- if views|length > 1 -%}
+{%- set _route  = app.request.attributes.get('_route') -%}
+{%- set active  = gridview.renderer -%}
+{%- set _icons = {
+    'table': '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>',
+    'list':  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    'card':  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+} -%}
+<div class="gv-view-switcher" role="group" {{ gv_i18n_attr('view.switch', 'aria-label') }} aria-label="{{ 'view.switch'|trans({}, 'GridviewBundle') }}">
+    {%- for view in views -%}
+    <a class="gv-view-switcher__btn{{ view == active ? ' is-active' }}"
+       href="{{ path(_route, gridview.urlState.withView(view)) }}"
+       {% if gridview.options.useTurbo %}data-turbo-action="advance"{% endif %}
+       {% if view == active %}aria-current="true"{% endif %}
+       {{ gv_i18n_attr('view.' ~ view, 'title') }} title="{{ ('view.' ~ view)|trans({}, 'GridviewBundle') }}">
+        {{- _icons[view]|default('')|raw -}}
+        <span {{ gv_i18n('view.' ~ view) }}>{{ ('view.' ~ view)|trans({}, 'GridviewBundle') }}</span>
+    </a>
+    {%- endfor -%}
+</div>
+{%- endif -%}

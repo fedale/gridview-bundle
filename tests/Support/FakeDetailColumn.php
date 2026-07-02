@@ -32,6 +32,7 @@ class FakeDetailColumn implements ColumnInterface
     public function isFilterable(): bool { return false; }
     public function isSortable(): bool { return false; }
     public function isToggleable(): bool { return true; }
+    public function getKind(): string { return 'data'; }
     public function setGridview(Gridview $gridview): void {}
     public function getAttribute(): ?string { return $this->attribute; }
     public function getLabel(): ?string { return $this->label; }

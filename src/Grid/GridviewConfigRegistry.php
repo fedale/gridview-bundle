@@ -33,8 +33,11 @@ class GridviewConfigRegistry
         'title'        => null,
         'theme'        => 'default',
         // Data region renderer strategy: picks sections/dataview/{renderer}.html.twig.
-        // Only 'table' ships today; 'card'/'list' are planned.
+        // Built-in: 'table' (default), 'list', 'card'.
         'renderer'     => 'table',
+        // Views the user may switch between at runtime (opt-in). More than one
+        // entry surfaces the {viewSwitcher}; empty/single = single-view grid.
+        'renderers'    => [],
         'emptyText'    => 'No records found',
         // When truthy, the {restrictionNotice} section renders a banner telling
         // the user the list is filtered by their permissions (see the docs). A

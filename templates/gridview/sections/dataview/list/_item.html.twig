@@ -1,0 +1,28 @@
+{# A single ListView record. Reuses the per-row attributes/classes set by the
+   RowSubscriber and the Row model (even/odd/first/last), exactly like the table
+   strategy's _rows.html.twig — only the wrapper element changes (<li> not <tr>).
+   Columns are placed by their structural kind: checkbox → selection slot,
+   action → actions slot, data/serial → label/value pairs. #}
+{% set liAttr = gridview.regionAttr('row')|merge(row.attr ?? {}) %}
+{% set liAttr = liAttr|merge({'class': ('gv-list-item ' ~ liAttr.class|default(''))|trim}) %}
+<li {{ liAttr|options }}>
+    {% for column in gridview.indexColumns|filter(c => c.kind == 'checkbox') %}
+        <div class="gv-list-item__select">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
+    {% endfor %}
+
+    <div class="gv-list-item__body">
+        {% for column in gridview.indexColumns|filter(c => c.kind in ['data', 'serial'] and c.isVisible()) %}
+            <div class="gv-list-item__field" data-col-key="{{ column.attribute|default('col') }}">
+                <span class="gv-list-item__label">{{ gv_header_label(column.label) }}</span>
+                <span class="gv-list-item__value">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% set actionColumns = gridview.indexColumns|filter(c => c.kind == 'action') %}
+    {% if actionColumns is not empty %}
+        <div class="gv-list-item__actions">
+            {% for column in actionColumns %}{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}{% endfor %}
+        </div>
+    {% endif %}
+</li>

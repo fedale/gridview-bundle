@@ -1,8 +1,0 @@
-
-<tbody id="gv-tbody-{{ gridview.key }}">
-{% if models is empty %}
-    {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/empty.html.twig') %}
-{% else %}
-    {% include '@FedaleGridview/gridview/sections/_rows.html.twig' %}
-{% endif %}
-</tbody>

@@ -20,6 +20,13 @@ interface ColumnInterface
 
     public function isToggleable(): bool;
 
+    /**
+     * Structural role of the column, used by renderer-agnostic templates
+     * (list/card) to place it: 'data' (label/value pair), 'checkbox' (selection),
+     * 'action' (row actions) or 'serial' (row number).
+     */
+    public function getKind(): string;
+
     public function setGridview(Gridview $gridview): void;
 
     public function getAttribute(): ?string;

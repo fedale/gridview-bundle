@@ -28,6 +28,11 @@ saved.empty: "No saved searches"
 sort.title: "Sort"
 sort.button: "Sort"
 
+view.switch: "Change view"
+view.table: "Table"
+view.list: "List"
+view.card: "Cards"
+
 selection.all_records: "All records"
 selection.menu: "Selection menu"
 selection.select_all: "Select all"

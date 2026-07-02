@@ -61,6 +61,10 @@ class Gridview implements GridviewInterface
         'caption' => null,
         'title' => null,
         'renderer' => 'table',
+        // Views the user may switch between at runtime (opt-in): when it holds
+        // more than one entry the {viewSwitcher} control appears. Empty/single =
+        // no switcher (single-view grid, the default).
+        'renderers' => [],
         'emptyText' => 'No records found',
         'showThead' => true,
         'showTfoot' => true,
@@ -77,6 +81,10 @@ class Gridview implements GridviewInterface
             // the filter <thead> row). When false neither is emitted at all.
             'inHeader' => true,
             'inlineClear' => false,
+            // Filter-bar auto-population. null → derived from the active renderer:
+            // ON for non-table views (list/card have no header filters), OFF for
+            // table. Explicit true/false overrides. See getFilterBarColumns().
+            'autoBar' => null,
             // Default clear mode(s) for all columns that don't specify filter.clear
             // explicitly. Accepts the same format as filter.clear (string, array,
             // or extended form). When null, the default is ['header'] plus 'input'
@@ -442,13 +450,31 @@ class Gridview implements GridviewInterface
         return $this->columns->exists(fn($k, $col) => !$col->isVisible());
     }
 
+    /**
+     * Columns to render in the filter bar, resolving the tri-state `filterBar`
+     * flag against {@see isAutoBar()}:
+     *   - filterBar === true  → always included (explicit opt-in);
+     *   - filterBar === false → always excluded (explicit exclusion);
+     *   - filterBar === null  → included only when autoBar is active AND the
+     *                           column is filterable with a filter defined.
+     *
+     * @return array<int, \Fedale\GridviewBundle\Column\DataColumn>
+     */
     public function getFilterBarColumns(): array
     {
+        $autoBar = $this->isAutoBar();
+
         return $this->columns
             ->filter(
                 fn($col) =>
                 $col instanceof \Fedale\GridviewBundle\Column\DataColumn
-                    && $col->isInFilterBar()
+                    && (
+                        $col->filterBar === true
+                        || ($autoBar
+                            && $col->filterBar !== false
+                            && $col->isFilterable()
+                            && !empty($col->filter))
+                    )
             )
             ->toArray();
     }
@@ -505,7 +531,26 @@ class Gridview implements GridviewInterface
             $layout = implode(' ', $tokens);
         }
 
-        return (string) $layout;
+        $layout = (string) $layout;
+
+        // Switchable grids: ensure the toolbar carries the view switcher and the
+        // header-less sort/filter affordances, without clobbering a custom
+        // layout. Additive and idempotent — a token already present (with or
+        // without an inline width) is left untouched, and each of these collapses
+        // to nothing when not applicable, so the toolbar stays stable across a
+        // runtime view switch (see docs/layout.md "Dinamica dei token").
+        if ($section === 'toolbar' && \count($this->getRenderers()) > 1) {
+            foreach (['viewSwitcher', 'sortBar', 'filterBar'] as $token) {
+                if (str_contains($layout, '{' . $token . '}') || str_contains($layout, '{' . $token . ' ')) {
+                    continue;
+                }
+                $layout = $token === 'viewSwitcher'
+                    ? trim('{viewSwitcher} ' . $layout)
+                    : trim($layout . ' {' . $token . '}');
+            }
+        }
+
+        return $layout;
     }
 
     /** Validates an inline width spec, returning a safe CSS length or null. */
@@ -544,12 +589,50 @@ class Gridview implements GridviewInterface
      * whether to recurse into children or render a leaf block template.
      */
     /**
-     * The data region renderer strategy ('table' today; 'card'/'list' planned).
-     * Selects the dataview template sections/dataview/{renderer}.html.twig.
+     * The ACTIVE data region renderer strategy, selecting the dataview template
+     * sections/dataview/{renderer}.html.twig. It is the `view` chosen via the URL
+     * when that view is in the allowed {@see getRenderers()} set, else the
+     * configured `renderer` default. Falls back to the default before the URL
+     * state is built (i.e. outside renderGrid()).
      */
     public function getRenderer(): string
     {
-        return $this->options['renderer'] ?? 'table';
+        $default = $this->options['renderer'] ?? 'table';
+
+        if (!isset($this->urlState)) {
+            return $default;
+        }
+
+        $requested = $this->urlState->getView();
+        if ($requested !== null && \in_array($requested, $this->getRenderers(), true)) {
+            return $requested;
+        }
+
+        return $default;
+    }
+
+    /**
+     * The views the user may switch between at runtime (the {viewSwitcher} shows
+     * a button per entry when there is more than one). Empty = single-view grid.
+     *
+     * @return list<string>
+     */
+    public function getRenderers(): array
+    {
+        return $this->options['renderers'] ?? [];
+    }
+
+    /**
+     * Whether the filter bar auto-includes every filterable column. Resolves the
+     * `filterControls.autoBar` flag: an explicit bool wins, otherwise it is
+     * derived from the active renderer (ON for non-table views, which have no
+     * header filters; OFF for table).
+     */
+    public function isAutoBar(): bool
+    {
+        $flag = $this->options['filterControls']['autoBar'] ?? null;
+
+        return $flag ?? ($this->getRenderer() !== 'table');
     }
 
     public function isRegion(string $token): bool

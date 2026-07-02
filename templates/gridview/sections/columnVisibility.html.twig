@@ -1,4 +1,7 @@
-{% set toggleable = gridview.indexColumns|filter(c => c.isToggleable() and c.label) %}
+{# Column show/hide targets the table cells (data-col on <th>/<td>), so it is a
+   table-only affordance: it collapses on the list/card renderers, keeping the
+   toolbar stable across a runtime view switch. #}
+{% set toggleable = gridview.renderer == 'table' ? gridview.indexColumns|filter(c => c.isToggleable() and c.label) : [] %}
 {% if toggleable is not empty %}
 <div class="gv-dropdown"
      data-controller="gridview-visibility"
