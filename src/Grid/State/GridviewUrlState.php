@@ -139,4 +139,20 @@ class GridviewUrlState
     {
         return $this->view;
     }
+    public function getPageSize(): ?int
+    {
+        return $this->pageSize;
+    }
+    public function getSortParam(): string
+    {
+        return $this->sortParam;
+    }
+    public function getPageSizeParam(): string
+    {
+        return $this->pageSizeParam;
+    }
+    public function getViewParam(): string
+    {
+        return $this->viewParam;
+    }
 }

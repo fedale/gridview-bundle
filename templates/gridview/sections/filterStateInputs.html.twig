@@ -1,0 +1,9 @@
+{%- if gridview.urlState.getView() is not null -%}
+<input type="hidden" name="{{ gridview.urlState.getViewParam() }}" value="{{ gridview.urlState.getView() }}" form="gv-form-{{ gridview.key }}">
+{%- endif -%}
+{%- if gridview.urlState.getSort() is not null -%}
+<input type="hidden" name="{{ gridview.urlState.getSortParam() }}" value="{{ gridview.urlState.getSort() }}" form="gv-form-{{ gridview.key }}">
+{%- endif -%}
+{%- if gridview.urlState.getPageSize() is not null -%}
+<input type="hidden" name="{{ gridview.urlState.getPageSizeParam() }}" value="{{ gridview.urlState.getPageSize() }}" form="gv-form-{{ gridview.key }}">
+{%- endif -%}

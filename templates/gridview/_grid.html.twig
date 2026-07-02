@@ -37,6 +37,7 @@
         {% endif %}
         {{ gridview_children(gridview, 'shell') }}
         {% if form is defined and form is not null %}
+        {% include '@FedaleGridview/gridview/sections/filterStateInputs.html.twig' %}
         {{ form_end(form, {'render_rest': false}) }}
         {% endif %}
         {% if gvCrud %}
