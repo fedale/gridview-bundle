@@ -1,0 +1,22 @@
+{# Selettore della dimensione-pagina: renderizzato solo quando il DataProvider
+   dichiara `pagination.pageSizeOptions`. Riusa il controller Stimulus generico
+   gridview-page-jump: ogni <option> ha come valore l'URL completo (con `per-page`
+   aggiornato e pagina azzerata), così non serve ricostruire la query lato JS. #}
+{% if pagination.pageSizeOptions is not empty %}
+    {% set _currentRoute = app.request.attributes.get('_route') %}
+    {% set turboAction   = gridview.options.useTurbo %}
+    <div class="gv-page-size"
+         data-controller="gridview-page-jump"
+         data-gridview-page-jump-turbo-value="{{ turboAction ? 'true' : 'false' }}">
+        <label class="gv-page-size-label">{{ 'pagination.pageSize'|trans({}, 'GridviewBundle') }}</label>
+        <select class="gv-page-size-select"
+                {{ gv_i18n_attr('pagination.pageSize', 'aria-label') }}
+                aria-label="{{ 'pagination.pageSize'|trans({}, 'GridviewBundle') }}"
+                data-action="change->gridview-page-jump#jump">
+            {% for size in pagination.pageSizeOptions %}
+                <option value="{{ path(_currentRoute, gridview.urlState.withPageSize(size)) }}"
+                        {{ size == pagination.pageSize ? 'selected' : '' }}>{{ size }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endif %}

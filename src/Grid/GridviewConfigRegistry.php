@@ -21,7 +21,7 @@ class GridviewConfigRegistry
         'header'    => '{heading} {toolbar}',
         'toolbar'   => '{globalSearch} {filterSubmit}',
         'dataview'  => null,
-        'footer'    => '{pagination}',
+        'footer'    => '{pagination} {pageSize}',
         'tfoot'     => '',
         'templates' => [],
         'slots'     => [],

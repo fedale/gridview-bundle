@@ -10,24 +10,28 @@ class GridviewUrlState
     private ?string $globalSearch = null;
     private ?string $sort         = null;
     private int     $page         = 1;
+    private ?int    $pageSize     = null;
 
     /** Parametri della rotta corrente (es. {id}), necessari per rigenerarne l'URL. */
     private array   $routeParams  = [];
 
-    private string $formName  = 'fedaleForm';
-    private string $sortParam = 'sort';
-    private string $pageParam = 'page';
+    private string $formName      = 'fedaleForm';
+    private string $sortParam     = 'sort';
+    private string $pageParam     = 'page';
+    private string $pageSizeParam = 'per-page';
 
     public static function fromRequest(
         Request $request,
-        string $formName  = 'fedaleForm',
-        string $sortParam = 'sort',
-        string $pageParam = 'page'
+        string $formName      = 'fedaleForm',
+        string $sortParam     = 'sort',
+        string $pageParam     = 'page',
+        string $pageSizeParam = 'per-page'
     ): static {
         $state = new static();
-        $state->formName  = $formName;
-        $state->sortParam = $sortParam;
-        $state->pageParam = $pageParam;
+        $state->formName      = $formName;
+        $state->sortParam     = $sortParam;
+        $state->pageParam     = $pageParam;
+        $state->pageSizeParam = $pageSizeParam;
 
         $formData = $request->query->all($formName);
         $state->globalSearch = $formData['_q'] ?? null;
@@ -36,6 +40,9 @@ class GridviewUrlState
 
         $state->sort = $request->query->get($sortParam) ?: null;
         $state->page = max(1, (int) $request->query->get($pageParam, 1));
+
+        $requestedSize = (int) $request->query->get($pageSizeParam, 0);
+        $state->pageSize = $requestedSize > 0 ? $requestedSize : null;
 
         // Parametri di rotta (es. {id}) necessari a path() per rigenerare l'URL corrente.
         $routeParams = $request->attributes->get('_route_params', []);
@@ -62,6 +69,10 @@ class GridviewUrlState
         if ($this->page > 1) {
             $params[$this->pageParam] = $this->page;
         }
+        // Preserve the chosen page size across sort/page navigation.
+        if ($this->pageSize !== null) {
+            $params[$this->pageSizeParam] = $this->pageSize;
+        }
 
         return $params;
     }
@@ -79,6 +90,15 @@ class GridviewUrlState
     public function withPage(int $page): array
     {
         return array_merge($this->toArray(), [$this->pageParam => $page]);
+    }
+
+    /** Parametri per il selettore di dimensione-pagina — resetta la pagina */
+    public function withPageSize(int $size): array
+    {
+        return array_merge($this->toArray(), [
+            $this->pageSizeParam => $size,
+            $this->pageParam     => null,
+        ]);
     }
 
     public function getFilters(): array

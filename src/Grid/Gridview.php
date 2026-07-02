@@ -182,12 +182,12 @@ class Gridview implements GridviewInterface
     }
 
     /**
-     * The entity FQCN backing this grid (the data provider `models` option),
+     * The entity FQCN backing this grid (the data provider `model` option),
      * used as the data_class for generated CRUD forms. Null when unset.
      */
     public function getDataClass(): ?string
     {
-        return $this->dataProviderOptions['models'] ?? null;
+        return $this->dataProviderOptions['model'] ?? null;
     }
 
     /** All rows matching the current filters/sort, unpaginated (for export). */
@@ -244,15 +244,18 @@ class Gridview implements GridviewInterface
             $this->dataProvider->setSearchFields($this->dataProviderOptions['searchFields']);
         }
 
-        $this->dataProvider->prepareModels($this->dataProviderOptions['models']);
+        $this->dataProvider->prepareModels($this->dataProviderOptions['model']);
 
-        if (!empty($this->dataProviderOptions['sort'])) {
-            $this->dataProvider->getSort()->setAttributes($this->dataProviderOptions['sort']);
+        // Sort config is grouped under `sort`: `map` (attribute definitions),
+        // `default` (initial order) and `multiSort` (multi-column toggle).
+        $sortOptions = $this->dataProviderOptions['sort'] ?? [];
+        if (!empty($sortOptions['map'])) {
+            $this->dataProvider->getSort()->setAttributes($sortOptions['map']);
         }
-        if (!empty($this->dataProviderOptions['defaultSort'])) {
-            $this->dataProvider->getSort()->setDefaultSort($this->dataProviderOptions['defaultSort']);
+        if (!empty($sortOptions['default'])) {
+            $this->dataProvider->getSort()->setDefaultSort($sortOptions['default']);
         }
-        if (!empty($this->dataProviderOptions['enableMultiSort'])) {
+        if (!empty($sortOptions['multiSort'])) {
             $this->dataProvider->getSort()->setEnableMultiSort(true);
         }
         if (!empty($this->dataProviderOptions['pagination'])) {
@@ -594,7 +597,8 @@ class Gridview implements GridviewInterface
             $request,
             $formName,
             $this->dataProvider->getSort()->getSortParam(),
-            $this->dataProvider->getPagination()->getPageParamName()
+            $this->dataProvider->getPagination()->getPageParamName(),
+            $this->dataProvider->getPagination()->getPageSizeParam()
         );
 
         $globalFields = $this->options['globalSearch'];

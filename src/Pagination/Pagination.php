@@ -51,6 +51,13 @@ class Pagination implements PaginationInterface
     protected ?int $pageSize;
 
     /**
+     * @var int[] Selectable page sizes offered to the user (e.g. [25, 50, 100]).
+     * When non-empty a page-size selector is rendered and a requested page size
+     * is only honoured if it is one of these values.
+     */
+    protected array $pageSizeOptions = [];
+
+    /**
      * array to overwrite Pagination attributes
      * 'attributes' => [
      *      'pageParam' => 'page',
@@ -92,6 +99,7 @@ class Pagination implements PaginationInterface
         $this->pageSizeParam  = $attributes['pageSizeParam'] ?? $this->pageSizeParam;
         $this->defaultPageSize  = $attributes['defaultPageSize'] ?? $this->defaultPageSize;
         $this->maxPageSize  = $attributes['maxPageSize'] ?? $this->maxPageSize;
+        $this->pageSizeOptions  = $attributes['pageSizeOptions'] ?? $this->pageSizeOptions;
     }
 
     /**
@@ -175,6 +183,12 @@ class Pagination implements PaginationInterface
             $this->defaultPageSize
         );
 
+        // When a fixed set of page sizes is offered, ignore any value outside it
+        // (e.g. a hand-crafted query string) and fall back to the default.
+        if ($this->pageSizeOptions !== [] && !in_array($pageSize, $this->pageSizeOptions, true)) {
+            $pageSize = $this->defaultPageSize;
+        }
+
         $this->setPageSize($pageSize, true);
 
         return $this->pageSize;
@@ -255,6 +269,16 @@ class Pagination implements PaginationInterface
     public function getDefaultPageSize(): int
     {
         return $this->defaultPageSize;
+    }
+
+    /**
+     * Get the selectable page sizes (empty when no selector should be rendered).
+     *
+     * @return int[]
+     */
+    public function getPageSizeOptions(): array
+    {
+        return $this->pageSizeOptions;
     }
 
     /**

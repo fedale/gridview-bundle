@@ -48,7 +48,7 @@ class GridviewLayoutEngineTest extends TestCase
         $this->assertSame('{globalSearch} {filterSubmit}', $layout['toolbar']);
         $this->assertArrayNotHasKey('title', $layout);
         $this->assertNull($layout['dataview']);
-        $this->assertSame('{pagination}', $layout['footer']);
+        $this->assertSame('{pagination} {pageSize}', $layout['footer']);
         $this->assertArrayNotHasKey('gridview', $layout);
         $this->assertArrayNotHasKey('table', $layout);
     }

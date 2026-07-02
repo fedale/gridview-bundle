@@ -17,4 +17,9 @@ interface PaginationInterface
     public function getCurrentPage(): int;
 
     public function getPageParamName(): string;
+
+    public function getPageSizeParam();
+
+    /** @return int[] */
+    public function getPageSizeOptions(): array;
 }

@@ -35,7 +35,7 @@ $columns = [
 
 $dataProvider = [
     // 'queryBuilder' => $queryBuilder,
-    'models' => \App\Entity\Customer\Customer::class,
+    'model' => \App\Entity\Customer\Customer::class,
 ];
 
 $gridview = $this->createGridviewBuilder()
@@ -63,9 +63,13 @@ $columns = [
     ]    
 ];
 
-In $dataProvider you can also set 'pagination' and 'sort' parameters:
+In $dataProvider you can also set 'pagination' and 'sort' parameters.
 
-// be careful that IDs must have same name as columns
+The 'sort' option is a sub-array: 'map' holds the sortable attribute
+definitions, 'default' the initial order and 'multiSort' toggles multi-column
+sorting.
+
+// be careful that the map keys must have the same name as columns
 $sortAttributes = [
     'id' => [
         'asc' => ['c.id' => Sort::ASC],
@@ -79,10 +83,20 @@ $sortAttributes = [
     ],
 ];
 
-and Gridview become sortable by 'id' and 'code' columns!
-With 'pagination' like this: you can set default page size
+$sort = [
+    'map' => $sortAttributes,
+    // 'multiSort' => true,
+    // 'default'   => ['code' => 'desc'],
+];
+
+and Gridview becomes sortable by 'id' and 'code' columns!
+
+The 'pagination' option sets the default page size and, optionally, a list of
+selectable page sizes rendered as a footer selector ('pageSizeOptions'):
 $paginationAttributes = [
-    'defaultPageSize' => 10
+    'defaultPageSize' => 25,
+    'pageSizeOptions' => [25, 50, 100],
+    // 'maxPageSize'  => 100,
 ];
 
 
@@ -115,9 +129,9 @@ where $this->customerSearchModel is a child of Fedale\GridviewBundle\Service\Sea
 $dataProvider represents a way and how to get data from a source like a database
 $dataProvider = [
             // 'queryBuilder' => $queryBuilder,
-            'models' => \App\Entity\Customer\Customer::class,
+            'model' => \App\Entity\Customer\Customer::class,
             'pagination' => $paginationAttributes,
-            'sort' => $sortAttributes
+            'sort' => $sort
         ];
 
 Let's try with one entity.

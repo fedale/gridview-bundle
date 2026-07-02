@@ -7,6 +7,7 @@ pagination.previous: "Previous page"
 pagination.next: "Next page"
 pagination.last: "Last page"
 pagination.jump: "Go to page"
+pagination.pageSize: "Per page"
 pagination.loadMore: "Load more"
 pagination.results: "%total% results"
 

@@ -68,11 +68,13 @@ class CustomerController extends AbstractGridController
     protected function dataConfig(): array
     {
         return [
-            'models'     => Customer::class,
+            'model'      => Customer::class,
             'pagination' => ['defaultPageSize' => 25],
             'sort'       => [
-                'name'  => ['asc' => ['c.name'], 'desc' => ['c.name'], 'default' => 'asc'],
-                'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+                'map' => [
+                    'name'  => ['asc' => ['c.name'], 'desc' => ['c.name'], 'default' => 'asc'],
+                    'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+                ],
             ],
         ];
     }
@@ -124,19 +126,17 @@ for you.
 
 ```php
 $dataProvider = [
-    'models'     => Customer::class,   // Doctrine entity class (full namespace)
+    'model'      => Customer::class,   // Doctrine entity class (full namespace)
     'pagination' => ['defaultPageSize' => 25],
-    'sort'       => [...],             // see Sorting section
+    'sort'       => ['map' => [...]],  // see Sorting section
 ];
 ```
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `models` | `string` | Fully-qualified entity class name |
-| `pagination` | `array` | Pagination options (see [Pagination](#pagination)) |
-| `sort` | `array` | Sort attribute map (see [Sorting](#sorting)) |
-| `defaultSort` | `array` | Initial sorting applied when no `?sort=` is present (see [Sorting](#sorting)) |
-| `enableMultiSort` | `bool` | Allow ordering by several attributes at once (see [Sorting](#sorting)) |
+| `model` | `string` | Fully-qualified entity class name |
+| `pagination` | `array` | Pagination options — `defaultPageSize`, `maxPageSize`, and the optional `pageSizeOptions` selector (see [Pagination](#pagination)) |
+| `sort` | `array` | Grouped sort config: `map` (the attribute → ORDER BY fields map), `default` (initial ordering when no `?sort=` is present) and `multiSort` (allow ordering by several attributes at once). See [Sorting](#sorting). |
 
 ---
 
@@ -668,29 +668,33 @@ environment — handy for non-trivial cell markup:
 
 ## Sorting
 
-Sorting is declared in the `sort` key of the data provider array. Each entry maps a **sort name**
-(used in the URL query string) to the Doctrine ORDER BY fields.
+Sorting is declared in the `sort` key of the data provider array. `sort` is a **grouped**
+config holding three sub-keys: `map` (the attribute map), `default` (the initial ordering)
+and `multiSort` (multi-attribute toggle). Each entry of `map` maps a **sort name** (used in the
+URL query string) to the Doctrine ORDER BY fields.
 
 ```php
 $dataProvider = [
-    'models' => Customer::class,
-    'sort'   => [
-        'name' => [
-            'asc'     => ['c.name'],           // ORDER BY c.name ASC
-            'desc'    => ['c.name'],            // ORDER BY c.name DESC
-            'default' => 'asc',
-            'label'   => 'Customer Name',       // optional, overrides column label in the link
-        ],
-        'email' => [
-            'asc'     => ['c.email'],
-            'desc'    => ['c.email'],
-            'default' => 'asc',
-        ],
-        'fullname' => [                         // sort by multiple fields
-            'asc'     => ['p.firstname', 'p.lastname'],
-            'desc'    => ['p.firstname', 'p.lastname'],
-            'default' => 'asc',
-            'label'   => 'Full Name',
+    'model' => Customer::class,
+    'sort'  => [
+        'map' => [
+            'name' => [
+                'asc'     => ['c.name'],           // ORDER BY c.name ASC
+                'desc'    => ['c.name'],            // ORDER BY c.name DESC
+                'default' => 'asc',
+                'label'   => 'Customer Name',       // optional, overrides column label in the link
+            ],
+            'email' => [
+                'asc'     => ['c.email'],
+                'desc'    => ['c.email'],
+                'default' => 'asc',
+            ],
+            'fullname' => [                         // sort by multiple fields
+                'asc'     => ['p.firstname', 'p.lastname'],
+                'desc'    => ['p.firstname', 'p.lastname'],
+                'default' => 'asc',
+                'label'   => 'Full Name',
+            ],
         ],
     ],
 ];
@@ -703,39 +707,44 @@ direction is reflected in the `?sort=` query parameter.
 ### Default sort
 
 When the request carries no (valid) `?sort=` parameter, the grid is unsorted by default. Set
-an initial ordering with the `defaultSort` key — a sibling of `sort`, **not** nested inside it.
-It maps a **sort name** (a key declared in `sort`) to a direction:
+an initial ordering with the `default` key **nested inside** `sort` (alongside `map`). It maps a
+**sort name** (a key declared in `sort.map`) to a direction:
 
 ```php
 $dataProvider = [
-    'models'       => Customer::class,
-    'sort'         => [
-        'name'  => ['asc' => ['c.name'],  'desc' => ['c.name'],  'default' => 'asc'],
-        'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+    'model' => Customer::class,
+    'sort'  => [
+        'map' => [
+            'name'  => ['asc' => ['c.name'],  'desc' => ['c.name'],  'default' => 'asc'],
+            'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+        ],
+        'default' => ['name' => 'asc'],    // ORDER BY c.name ASC on first visit
     ],
-    'defaultSort' => ['name' => 'asc'],    // ORDER BY c.name ASC on first visit
 ];
 ```
 
 The default applies only until the user clicks a header: an explicit `?sort=` in the URL always
-takes precedence. Note that `default` (inside a sort entry) and `defaultSort` are different
-things — `default` is the direction used the *first* time you click that column's header, while
-`defaultSort` is the ordering applied when *nothing* has been clicked yet.
+takes precedence. Note that `default` (inside a `sort.map` attribute entry) and `sort.default` are
+different things — the attribute-level `default` is the direction used the *first* time you click
+that column's header, while `sort.default` is the grid-level ordering applied when *nothing* has
+been clicked yet.
 
 ### Multi-attribute sorting
 
 By default the grid sorts by a **single** attribute: clicking a header replaces the current sort.
-Set `enableMultiSort` to `true` to let the grid order by several attributes at once:
+Set `sort.multiSort` to `true` to let the grid order by several attributes at once:
 
 ```php
 $dataProvider = [
-    'models'          => Customer::class,
-    'sort'            => [
-        'name'  => ['asc' => ['c.name'],  'desc' => ['c.name']],
-        'email' => ['asc' => ['c.email'], 'desc' => ['c.email']],
+    'model' => Customer::class,
+    'sort'  => [
+        'map' => [
+            'name'  => ['asc' => ['c.name'],  'desc' => ['c.name']],
+            'email' => ['asc' => ['c.email'], 'desc' => ['c.email']],
+        ],
+        'multiSort' => true,
+        'default'   => ['name' => 'asc', 'email' => 'desc'],
     ],
-    'enableMultiSort' => true,
-    'defaultSort'    => ['name' => 'asc', 'email' => 'desc'],
 ];
 ```
 
@@ -744,7 +753,7 @@ marks a descending attribute — e.g. `?sort=name,-email` means `ORDER BY c.name
 With multi-sort off (the default) only the first attribute of such a list is applied, and clicking
 a header **replaces** the current sort instead of adding to it.
 
-`enableMultiSort` is independent of `defaultSort`: a multi-column `defaultSort` is always applied
+`sort.multiSort` is independent of `sort.default`: a multi-column `sort.default` is always applied
 in full, even when multi-sort is off — it only governs *interactive* sorting by the user.
 
 ---
@@ -755,12 +764,18 @@ Pagination attributes are passed inside the data provider:
 
 ```php
 $dataProvider = [
-    'models'     => Customer::class,
+    'model'      => Customer::class,
     'pagination' => [
         'defaultPageSize' => 25,
+        'pageSizeOptions' => [25, 50, 100],   // optional footer page-size selector
     ],
 ];
 ```
+
+`pageSizeOptions` is an optional array of ints sitting next to `defaultPageSize` and
+`maxPageSize`. When set, the footer renders a page-size `<select>` offering exactly those
+values; only the listed sizes are honoured (a request for any other size falls back to
+`defaultPageSize`). Omit the key to hide the selector entirely.
 
 The `{pagination}` token in the footer layout renders the page navigation links.
 To remove pagination entirely, omit the token from the footer layout:
@@ -2351,7 +2366,7 @@ subclass needs **no constructor** unless it has extra dependencies of its own.
 |--------|----------|---------|
 | `getDataClass(): string` | yes | Entity FQCN backing the grid |
 | `buildColumns(): array` | yes | Column definitions |
-| `dataConfig(): array` | yes | `models` / `pagination` / `sort` |
+| `dataConfig(): array` | yes | `model` / `pagination` / `sort` |
 | `viewConfig(): array` | no | Scalar config overrides (see below) |
 | `beforeSave(FormInterface, string $mode): void` | no (CRUD) | Hook before persist (e.g. password hashing) |
 | `onClone(object $clone): void` | no (CRUD) | Extra mutation of a clone (unique fields are cleared automatically) |
@@ -2390,9 +2405,9 @@ class CustomerController extends AbstractGridController
     protected function dataConfig(): array
     {
         return [
-            'models' => Customer::class,
+            'model' => Customer::class,
             'pagination' => ['defaultPageSize' => 20],
-            'sort' => ['id' => ['asc' => ['c.id'], 'desc' => ['c.id'], 'default' => 'desc']],
+            'sort' => ['map' => ['id' => ['asc' => ['c.id'], 'desc' => ['c.id'], 'default' => 'desc']]],
         ];
     }
 
@@ -2426,7 +2441,7 @@ class UserController extends AbstractCrudGridController
         ];
     }
 
-    protected function dataConfig(): array { /* models / pagination / sort */ }
+    protected function dataConfig(): array { /* model / pagination / sort */ }
 
     protected function buildColumns(): array
     {
@@ -3246,11 +3261,13 @@ use Fedale\GridviewBundle\Column\ActionButton;
 public function list(Request $request): Response
 {
     $dataProvider = [
-        'models'     => Customer::class,
+        'model'      => Customer::class,
         'pagination' => ['defaultPageSize' => 25],
         'sort'       => [
-            'name'  => ['asc' => ['c.name'],  'desc' => ['c.name'],  'default' => 'asc'],
-            'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+            'map' => [
+                'name'  => ['asc' => ['c.name'],  'desc' => ['c.name'],  'default' => 'asc'],
+                'email' => ['asc' => ['c.email'], 'desc' => ['c.email'], 'default' => 'asc'],
+            ],
         ],
     ];
 
