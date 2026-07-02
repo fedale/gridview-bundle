@@ -1,34 +1,38 @@
 {# A single CardView record. Same column pipeline as the list/table strategies,
-   laid out as a card: checkbox in the top-right, an optional title (the column
-   named by `card.titleField`, rendered without a label), the remaining data
-   columns as label/value pairs, and the actions in the footer.
-   Reuses the per-row attributes/classes from the RowSubscriber and Row model. #}
+laid out as a card: checkbox in the top-right, an optional title (the column
+named by `card.titleField`, rendered without a label), the remaining data
+columns as label/value pairs, and the actions in the footer.
+Reuses the per-row attributes/classes from the RowSubscriber and Row model. #}
 {% set cardAttr = gridview.regionAttr('row')|merge(row.attr ?? {}) %}
 {% set cardAttr = cardAttr|merge({'class': ('gv-card ' ~ cardAttr.class|default(''))|trim}) %}
 <article {{ cardAttr|options }}>
     <header class="gv-card__header">
-        {% set titleColumns = gridview.indexColumns|filter(c => titleField and c.kind == 'data' and c.attribute == titleField) %}
+        {% set titleColumns = gridview.indexColumns|filter(c => titleField and c.kind == 'data' and c.attribute ==
+        titleField) %}
         {% for column in titleColumns %}
-            <div class="gv-card__title">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
+        <div class="gv-card__title">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
         {% endfor %}
         {% for column in gridview.indexColumns|filter(c => c.kind == 'checkbox') %}
-            <div class="gv-card__select">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
+        <div class="gv-card__select">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
         {% endfor %}
     </header>
 
     <div class="gv-card__body">
-        {% for column in gridview.indexColumns|filter(c => c.kind in ['data', 'serial'] and c.isVisible() and c.attribute != titleField) %}
-            <div class="gv-card__field" data-col-key="{{ column.attribute|default('col') }}">
-                <span class="gv-card__label">{{ gv_header_label(column.label) }}</span>
-                <span class="gv-card__value">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</span>
-            </div>
+        {% for column in gridview.indexColumns|filter(c => c.kind in ['data', 'serial'] and c.isVisible() and
+        c.attribute != titleField) %}
+        <div class="gv-card__field" data-col-key="{{ column.attribute|default('col') }}">
+            <span class="gv-card__label">{{ gv_header_label(column.label) }}</span>
+            <span class="gv-card__value">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig'
+                %}</span>
+        </div>
         {% endfor %}
     </div>
 
     {% set actionColumns = gridview.indexColumns|filter(c => c.kind == 'action') %}
     {% if actionColumns is not empty %}
-        <footer class="gv-card__actions">
-            {% for column in actionColumns %}{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}{% endfor %}
-        </footer>
+    <footer class="gv-card__actions">
+        {% for column in actionColumns %}{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}{%
+        endfor %}
+    </footer>
     {% endif %}
 </article>
