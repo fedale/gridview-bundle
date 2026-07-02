@@ -80,10 +80,17 @@ const i18n = {
         load();
         if (state.locale) return state.locale;
         const cfg = state.config;
+        const htmlLang = normalize(document.documentElement.lang);
+        // When the host drives the locale (observeHtmlLang), the server-rendered
+        // <html lang> is authoritative and must win over any previously persisted
+        // choice — otherwise a stale localStorage/cookie value keeps forcing the
+        // old language after the host switches. When html-lang is not observed the
+        // grid owns its own locale, so the persisted choice takes precedence.
         state.locale =
+            (cfg.observeHtmlLang ? htmlLang : null) ||
             normalize(safeLs()) ||
             normalize(readCookie(cfg.cookie)) ||
-            normalize(document.documentElement.lang) ||
+            htmlLang ||
             cfg.default ||
             'en';
         return state.locale;

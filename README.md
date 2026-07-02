@@ -201,6 +201,6 @@ fedale_gridview:
         client_domain: Gridview
 ```
 
-See [docs/index.md → Internationalization (i18n)](docs/index.md#internationalization-i18n)
+See [Internationalization (i18n)](docs/i18n.md)
 for the full guide (external switchers, server-side persistence, tagging your own
 templates, dynamic JS strings).
