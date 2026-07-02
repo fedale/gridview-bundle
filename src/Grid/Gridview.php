@@ -60,11 +60,17 @@ class Gridview implements GridviewInterface
     protected array $options = [
         'caption' => null,
         'title' => null,
-        'renderer' => 'table',
-        // Views the user may switch between at runtime (opt-in): when it holds
-        // more than one entry the {viewSwitcher} control appears. Empty/single =
-        // no switcher (single-view grid, the default).
-        'renderers' => [],
+        // Data-renderer configuration. `default` is the initial/active strategy
+        // (picks sections/dataview/{renderer}.html.twig); `map` holds one entry
+        // per available renderer, keyed by name, whose value is that renderer's
+        // option bag (e.g. template, min, gap). The runtime {viewSwitcher} offers
+        // exactly the map keys — more than one entry surfaces it; empty/single =
+        // single-view grid (the table strategy is the fallback). Built-in
+        // renderers: 'table' (default), 'list', 'card'.
+        'renderer' => [
+            'default' => 'table',
+            'map'     => [],
+        ],
         'emptyText' => 'No records found',
         'showThead' => true,
         'showTfoot' => true,
@@ -348,6 +354,11 @@ class Gridview implements GridviewInterface
         if (isset($options['pagination'])) {
             $options['pagination'] = array_replace($this->options['pagination'] ?? [], $options['pagination']);
         }
+        if (isset($options['renderer'])) {
+            // Keep the `default` when a controller supplies only `map`; the `map`
+            // itself is replaced wholesale (the controller owns the renderer set).
+            $options['renderer'] = array_replace($this->options['renderer'] ?? [], $options['renderer']);
+        }
         $this->options = array_merge($this->options, $options);
     }
 
@@ -592,12 +603,14 @@ class Gridview implements GridviewInterface
      * The ACTIVE data region renderer strategy, selecting the dataview template
      * sections/dataview/{renderer}.html.twig. It is the `view` chosen via the URL
      * when that view is in the allowed {@see getRenderers()} set, else the
-     * configured `renderer` default. Falls back to the default before the URL
-     * state is built (i.e. outside renderGrid()).
+     * configured `renderer.default` (falling back to the first mapped renderer,
+     * then 'table'). Falls back to the default before the URL state is built
+     * (i.e. outside renderGrid()).
      */
     public function getRenderer(): string
     {
-        $default = $this->options['renderer'] ?? 'table';
+        $map = $this->options['renderer']['map'] ?? [];
+        $default = $this->options['renderer']['default'] ?? (array_key_first($map) ?? 'table');
 
         if (!isset($this->urlState)) {
             return $default;
@@ -612,14 +625,26 @@ class Gridview implements GridviewInterface
     }
 
     /**
-     * The views the user may switch between at runtime (the {viewSwitcher} shows
-     * a button per entry when there is more than one). Empty = single-view grid.
+     * The views the user may switch between at runtime — the keys of the
+     * configured `renderer.map`, in declaration order. The {viewSwitcher} shows a
+     * button per entry when there is more than one; empty/single = single-view grid.
      *
      * @return list<string>
      */
     public function getRenderers(): array
     {
-        return $this->options['renderers'] ?? [];
+        return array_keys($this->options['renderer']['map'] ?? []);
+    }
+
+    /**
+     * The per-renderer option bag (e.g. `template`, `min`, `gap`, `titleField`)
+     * for the named renderer, or an empty array when the renderer is not mapped.
+     *
+     * @return array<string, mixed>
+     */
+    public function rendererOptions(string $name): array
+    {
+        return $this->options['renderer']['map'][$name] ?? [];
     }
 
     /**

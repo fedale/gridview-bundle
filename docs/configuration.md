@@ -59,7 +59,7 @@ $gridview = $this->createGridviewBuilder()
 |--------|------|---------|-------------|
 | `emptyText` | `string` | `'No records found'` | Text shown when there are no data rows |
 | `title` | `string\|null` | `null` | Grid title text rendered by the `{heading}` block (`{heading}` collapses when empty) |
-| `renderer` | `string` | `'table'` | Data region strategy → `sections/dataview/{renderer}.html.twig` (`table` only today; `card`/`list` planned) |
+| `renderer` | `array` | `['default' => 'table', 'map' => []]` | Data-renderer config: `default` picks the active strategy → `sections/dataview/{renderer}.html.twig`; `map` keys are the available renderers (values are per-renderer option bags) and drive the runtime `{viewSwitcher}`. Built-in: `table`, `list`, `card` |
 | `useTurbo` | `bool` | `true` | Wrap the grid in a Turbo Frame and respond with partial HTML on frame requests |
 | `showThead` | `bool` | `true` | Include `{thead}` in the auto-computed table layout |
 | `showTfoot` | `bool` | `true` | Include `{tfoot}` in the auto-computed table layout |

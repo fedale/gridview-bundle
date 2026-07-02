@@ -57,7 +57,7 @@ tfoot:    ""
 ```
 
 The data region (`dataview`) is **renderer-agnostic**: its template is the active
-strategy `sections/dataview/{renderer}.html.twig`, selected by `options.renderer`.
+strategy `sections/dataview/{renderer}.html.twig`, selected by `options.renderer.default`.
 Only `table` ships today (`card`/`list` are planned); `thead`/`filter`/`tbody`/`tfoot`/`empty`
 are internals of the table strategy, not top-level tokens.
 
@@ -72,7 +72,7 @@ are internals of the table strategy, not top-level tokens.
 | `{footer}` | region (`_region.html.twig`) | Area below the data |
 | `{heading}` | block (`sections/heading.html.twig`) | Renders `options.title` (collapses when empty) |
 | `{sortBar}` | block (`sections/sortBar.html.twig`) | Sort dropdown of the sortable columns; placeable anywhere. The sort affordance for card/list renderers (which have no column headers). `{sort}` is a back-compat alias |
-| `{viewSwitcher}` | block (`sections/viewSwitcher.html.twig`) | Runtime renderer switch; collapses unless `options.renderers` lists more than one view (see [Switching views at runtime](#switching-views-at-runtime)) |
+| `{viewSwitcher}` | block (`sections/viewSwitcher.html.twig`) | Runtime renderer switch; collapses unless `renderer.map` has more than one entry (see [Switching views at runtime](#switching-views-at-runtime)) |
 | `{thead}` | table-strategy internal (`sections/dataview/table/thead.html.twig`) | Column header row |
 | `{filter}` | table-strategy internal (`sections/dataview/table/filter.html.twig`) | Column filter inputs row (header) |
 | `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](filtering.md#the-filterbar--placing-filters-anywhere)) |
@@ -214,8 +214,8 @@ the same regions (`container → shell`, the table `class` → `dataview`,
 
 ### Choosing the data renderer
 
-The `dataview` region is renderer-agnostic. `options.renderer` picks the strategy
-template `sections/dataview/{renderer}.html.twig`. Three renderers ship built-in:
+The `dataview` region is renderer-agnostic. `options.renderer.default` picks the
+strategy template `sections/dataview/{renderer}.html.twig`. Three renderers ship built-in:
 
 | Renderer | Markup | Internals |
 |----------|--------|-----------|
@@ -224,7 +224,7 @@ template `sections/dataview/{renderer}.html.twig`. Three renderers ship built-in
 | `card` | responsive CSS-grid of `<article class="gv-card">` boxes | `sections/dataview/card/{_item,empty}.html.twig` |
 
 ```php
-->setOptions(['renderer' => 'card'])   // 'table' (default) | 'list' | 'card'
+->setOptions(['renderer' => ['default' => 'card']])   // 'table' (default) | 'list' | 'card'
 ```
 
 An unknown renderer falls back to `table`. To add your own, drop a
@@ -240,15 +240,19 @@ custom classes) apply to the `<li>`/`<article>` just as they do to `<tr>`.
 
 **CardView layout.** Cards flow in a CSS-grid `repeat(auto-fill, minmax(--gv-card-min, 1fr))`,
 so the column count adapts to the container width (down to one column on mobile).
-Tune it per grid with `options.card`:
+Tune it per grid with the card entry in `renderer.map`:
 
 ```php
 ->setOptions([
-    'renderer' => 'card',
-    'card'     => [
-        'min'        => '18rem',   // → --gv-card-min (min card width)
-        'gap'        => '1rem',    // → --gv-card-gap
-        'titleField' => 'name',    // column rendered as the card title (no label)
+    'renderer' => [
+        'default' => 'card',
+        'map' => [
+            'card' => [
+                'min'        => '18rem',   // → --gv-card-min (min card width)
+                'gap'        => '1rem',    // → --gv-card-gap
+                'titleField' => 'name',    // column rendered as the card title (no label)
+            ],
+        ],
     ],
 ])
 ```
@@ -258,13 +262,15 @@ Tune it per grid with `options.card`:
 The built-in `card`/`list` item renders every column as a label/value pair — a
 sensible default, but it can't express a specific arrangement (a title, a badge,
 an image, a per-row background from a field, actions in a precise spot). For that,
-point `options.card.template` (or `options.list.template`) at your own Twig
-template for the item:
+point `renderer.map.card.template` (or `renderer.map.list.template`) at your own
+Twig template for the item:
 
 ```php
 ->setOptions([
-    'renderer' => 'card',
-    'card'     => ['template' => 'gridview/category_card.html.twig'],
+    'renderer' => [
+        'default' => 'card',
+        'map' => ['card' => ['template' => 'gridview/category_card.html.twig']],
+    ],
 ])
 ```
 
@@ -300,18 +306,25 @@ the default item. The empty state is overridable separately via
 
 #### Switching views at runtime
 
-Declare `renderers` (the allowed set) to let the **user** switch views with a
-button. When it holds more than one entry the toolbar shows a `{viewSwitcher}`
-(and, since list/card have no column headers, the header-less `{sortBar}` and
-`{filterBar}` are added automatically — additively, so a custom `layout.toolbar`
-is respected). The active view is stored in the `view` query param and preserved
-across sort/filter/pagination; it defaults to `renderer`. Omit `renderers` (or
-give a single entry) for a fixed single-view grid — the default, no switcher.
+List more than one renderer in `renderer.map` to let the **user** switch views
+with a button: the switcher offers exactly the map keys, in declaration order.
+When there is more than one the toolbar shows a `{viewSwitcher}` (and, since
+list/card have no column headers, the header-less `{sortBar}` and `{filterBar}`
+are added automatically — additively, so a custom `layout.toolbar` is respected).
+The active view is stored in the `view` query param and preserved across
+sort/filter/pagination; it defaults to `renderer.default`. A single map entry (or
+an empty map) gives a fixed single-view grid — the default, no switcher.
 
 ```php
 ->setOptions([
-    'renderer'  => 'table',                    // initial view
-    'renderers' => ['table', 'card', 'list'],  // views offered by the switcher
+    'renderer' => [
+        'default' => 'table',   // initial view
+        'map' => [              // views offered by the switcher, in this order
+            'table' => [],
+            'card'  => [],
+            'list'  => [],
+        ],
+    ],
 ])
 ```
 

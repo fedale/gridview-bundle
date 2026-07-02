@@ -1,10 +1,10 @@
 {# CardView renderer strategy: renders the records as a responsive grid of cards
    (CSS Grid, auto-fill). The number of cards per row adapts to the container
-   width; `options.card.min` / `options.card.gap` tune the track size and gap via
-   CSS custom properties. Chrome (toolbar, sortBar, filterBar, pagination) lives
+   width; `renderer.map.card.min` / `.gap` tune the track size and gap via CSS
+   custom properties. Chrome (toolbar, sortBar, filterBar, pagination) lives
    outside the dataview and is unaffected. #}
-{% set cardOpts = gridview.options.card|default({}) %}
-{# Per-item template: override with `options.card.template` to lay the card out
+{% set cardOpts = gridview.rendererOptions('card') %}
+{# Per-item template: override with `renderer.map.card.template` to lay the card out
    however you like (see docs/layout.md). It receives gridview, row, rowIndex,
    columns and titleField, and can reuse sections/dataview/_cell.html.twig. #}
 {% set cardItem = cardOpts.template|default('@FedaleGridview/gridview/sections/dataview/card/_item.html.twig') %}
