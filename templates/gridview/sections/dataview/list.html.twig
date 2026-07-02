@@ -1,12 +1,17 @@
 {# ListView renderer strategy: renders the records as a <ul> of items, one <li>
    per record. Renderer-agnostic chrome (toolbar, sortBar, filterBar, pagination)
    lives outside the dataview and is unaffected. #}
+{% set listOpts = gridview.options.list|default({}) %}
+{# Per-item template: override with `options.list.template` for a custom layout
+   (see docs/layout.md). It receives gridview, row, rowIndex, columns and can
+   reuse sections/dataview/_cell.html.twig. #}
+{% set listItem = listOpts.template|default('@FedaleGridview/gridview/sections/dataview/list/_item.html.twig') %}
 <ul class="gv-list" data-gv="{{ gridview.key }}">
     {% if models is empty %}
         {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/list/empty.html.twig') %}
     {% else %}
         {% for row in models %}
-            {% include '@FedaleGridview/gridview/sections/dataview/list/_item.html.twig' with {'rowIndex': loop.index0} %}
+            {% include listItem with {'rowIndex': loop.index0} %}
         {% endfor %}
     {% endif %}
 </ul>

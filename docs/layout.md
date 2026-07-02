@@ -253,6 +253,51 @@ Tune it per grid with `options.card`:
 ])
 ```
 
+#### Custom item template (full control over the layout)
+
+The built-in `card`/`list` item renders every column as a label/value pair — a
+sensible default, but it can't express a specific arrangement (a title, a badge,
+an image, a per-row background from a field, actions in a precise spot). For that,
+point `options.card.template` (or `options.list.template`) at your own Twig
+template for the item:
+
+```php
+->setOptions([
+    'renderer' => 'card',
+    'card'     => ['template' => 'gridview/category_card.html.twig'],
+])
+```
+
+The item template receives a stable context: **`gridview`**, **`row`**,
+**`rowIndex`**, **`columns`** (plus the grid's `models`, `pagination`, `form`).
+Read raw record fields from `row.data.*` for free-form markup, and reuse the
+shared `sections/dataview/_cell.html.twig` partial to render **any** column with
+its full pipeline (formatter, `value` closure, inline edit) — it only needs
+`column`, `row` and `rowIndex` in scope:
+
+```twig
+{# templates/gridview/category_card.html.twig #}
+<article class="gv-card" style="--card-accent: {{ row.data.color|default('#ccc') }}">
+    <header class="gv-card__header" style="background: {{ row.data.color }}; color: #fff;">
+        <h3 class="gv-card__title">{{ row.data.name }}</h3>
+        {# edit/show actions, top-right — rendered via the shared cell partial #}
+        {% for column in gridview.indexColumns|filter(c => c.kind == 'action') %}
+            {% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}
+        {% endfor %}
+    </header>
+    <div class="gv-card__body">
+        {{ row.data.description }}
+        <small>{{ row.data.postCount }} posts</small>
+    </div>
+</article>
+```
+
+`column.kind` (`data`/`checkbox`/`action`/`serial`) lets you pick columns by role;
+`gv_header_label(column.label)` gives a column's label. A missing template path
+raises a clear Twig error rather than failing silently. Omit `template` to keep
+the default item. The empty state is overridable separately via
+`layout.templates.empty`.
+
 #### Switching views at runtime
 
 Declare `renderers` (the allowed set) to let the **user** switch views with a

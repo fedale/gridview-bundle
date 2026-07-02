@@ -4,6 +4,10 @@
    CSS custom properties. Chrome (toolbar, sortBar, filterBar, pagination) lives
    outside the dataview and is unaffected. #}
 {% set cardOpts = gridview.options.card|default({}) %}
+{# Per-item template: override with `options.card.template` to lay the card out
+   however you like (see docs/layout.md). It receives gridview, row, rowIndex,
+   columns and titleField, and can reuse sections/dataview/_cell.html.twig. #}
+{% set cardItem = cardOpts.template|default('@FedaleGridview/gridview/sections/dataview/card/_item.html.twig') %}
 {% set cardStyle %}
     {%- if cardOpts.min is defined %}--gv-card-min: {{ cardOpts.min }};{% endif -%}
     {%- if cardOpts.gap is defined %}--gv-card-gap: {{ cardOpts.gap }};{% endif -%}
@@ -13,7 +17,7 @@
         {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/card/empty.html.twig') %}
     {% else %}
         {% for row in models %}
-            {% include '@FedaleGridview/gridview/sections/dataview/card/_item.html.twig' with {'rowIndex': loop.index0, 'titleField': cardOpts.titleField|default(null)} %}
+            {% include cardItem with {'rowIndex': loop.index0, 'titleField': cardOpts.titleField|default(null)} %}
         {% endfor %}
     {% endif %}
 </div>
