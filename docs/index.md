@@ -1475,6 +1475,96 @@ and register the instance on the `fedale_gridview.filter_applier_registry` servi
 $searchForm->getApplierRegistry()->register('money', new MoneyFilterApplier());
 ```
 
+### Hiding rows by permission (filter in the query)
+
+To make **entire rows** visible only to some users (authorization, multi-tenancy,
+soft delete, …), apply the rule as a **query condition** in the repository
+`search()` (or in `prepareModels()`), right next to the other filters. Doing it
+at the query level keeps pagination and the total-row count coherent: the
+database returns only the visible rows, so page sizes stay full, the totals are
+correct and no "phantom" pages appear.
+
+```php
+use Symfony\Bundle\SecurityBundle\Security;
+
+class CustomerRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry, private Security $security)
+    {
+        parent::__construct($registry, Customer::class);
+    }
+
+    public function search(array $params = [])
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->join('c.company', 'company');
+
+        $this->searchForm->applyFilters($qb, $params, [
+            'name'  => ['text', 'c.name'],
+            'email' => ['text', 'c.email'],
+        ]);
+
+        // Non-commercial users never see Acme's rows.
+        if (!$this->security->isGranted('ROLE_COMMERCIAL')) {
+            $qb->andWhere('company.name != :hidden')
+               ->setParameter('hidden', 'acme');
+        }
+
+        return $qb;
+    }
+}
+```
+
+Inject Symfony's `Security` (`Symfony\Bundle\SecurityBundle\Security`) into the
+repository, or build the pre-filtered `QueryBuilder` in the controller — where
+`isGranted()` is already available — and hand it to the data provider.
+
+> **Why not do this in a row event?** A `RowSubscriber` runs *after* the paginator
+> has already sliced the current page, and the total count is computed at the DB
+> level — so dropping rows there would leave short or empty pages and a wrong
+> total. Row events are for **styling and value overrides**; query conditions are
+> for **visibility**. See [Listening to row events](#listening-to-row-events).
+
+#### Telling the user the list is restricted
+
+Because the hidden rows never reach the grid, the user sees a shorter list with
+no hint that anything is missing. Set the `restriction` grid option to render a
+notice banner at the top of the grid whenever the query is filtered by the user's
+permissions:
+
+```php
+// In the controller — viewConfig()/options, where isGranted() is available:
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'restriction' => !$this->isGranted('ROLE_COMMERCIAL'),
+        ],
+    ];
+}
+```
+
+`restriction: true` shows a **default, translated** message
+(`grid.restriction`, localized in it/en). Pass a **string** to override it with
+your own text:
+
+```php
+'options' => ['restriction' => 'You are only seeing your own customers.'],
+```
+
+A falsy value (the default) renders nothing — no banner, no wrapper markup. The
+banner is emitted by the `{restrictionNotice}` layout token, added to the default
+`shell` layout, so it appears automatically once the flag is set. Move it
+elsewhere (or drop it) by editing the layout:
+
+```php
+// Render it inside the header instead of at the very top:
+'options' => ['layout' => ['header' => '{restrictionNotice} {heading} {toolbar}']],
+```
+
+> Keep the flag in sync with the query condition: it's a **presentational** hint,
+> not the enforcement — the actual filtering must still live in the query (above).
+
 ### Global search
 
 Global search adds a single text input that queries multiple fields at once.
@@ -3445,6 +3535,12 @@ class MyRowSubscriber implements EventSubscriberInterface
 ```
 
 Tag the subscriber with `kernel.event_subscriber` or rely on Symfony's autoconfigure.
+
+> **Not for hiding rows.** Row events fire *after* the paginator has sliced the
+> current page, while the total count is computed at the DB level — so skipping a
+> row here would leave short or empty pages and a wrong total. To make entire rows
+> visible only to some users, filter in the query instead — see
+> [Hiding rows by permission](#hiding-rows-by-permission-filter-in-the-query).
 
 ## Theming
 

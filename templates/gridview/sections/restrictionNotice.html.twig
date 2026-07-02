@@ -1,0 +1,10 @@
+{# Access-control notice: shown when the grid query is filtered by the user's
+   permissions/role, so the visible list is intentionally incomplete. Driven by
+   the `restriction` option — `true` renders the default translated message, a
+   string overrides it. Renders nothing (no wrapper) when the option is falsy. #}
+{% set r = gridview.options.restriction|default(false) %}
+{% if r %}
+    <div class="gv-info-banner gv-restriction-notice" role="status">
+        {{ r is same as(true) ? 'grid.restriction'|trans({}, 'GridviewBundle') : r }}
+    </div>
+{% endif %}

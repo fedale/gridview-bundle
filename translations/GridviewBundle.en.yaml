@@ -64,6 +64,7 @@ search.placeholder: "Search…"
 
 grid.index_title: "Index"
 grid.results: "%count% results"
+grid.restriction: "You are not seeing all records — some are hidden by your access permissions."
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.

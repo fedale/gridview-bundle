@@ -969,6 +969,13 @@ turbo-frame[busy]>[data-gridview] {
     }
 }
 
+// Access-control notice ({restrictionNotice} section): a top-of-grid banner, so
+// it needs gutters the header-embedded realtime notice doesn't (which sits in a
+// padded region). Reuses the .gv-info-banner look.
+[data-gridview] .gv-restriction-notice {
+    margin: .75rem;
+}
+
 // ── Relation filter — single-select search ────────────────────────
 
 [data-gridview] .gv-relation-search-wrap {

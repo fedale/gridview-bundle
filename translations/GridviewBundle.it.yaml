@@ -64,6 +64,7 @@ search.placeholder: "Cerca…"
 
 grid.index_title: "Elenco"
 grid.results: "%count% risultati"
+grid.restriction: "Non stai visualizzando tutti i record — alcuni sono nascosti dai tuoi permessi di accesso."
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.

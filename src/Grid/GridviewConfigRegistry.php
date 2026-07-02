@@ -17,7 +17,7 @@ class GridviewConfigRegistry
      * `templates`/`slots`/`attrs` are reserved sub-maps, not regions.
      */
     public const LAYOUT_DEFAULTS = [
-        'shell'     => '{header} {dataview} {footer}',
+        'shell'     => '{restrictionNotice} {header} {dataview} {footer}',
         'header'    => '{heading} {toolbar}',
         'toolbar'   => '{globalSearch} {filterSubmit}',
         'dataview'  => null,
@@ -36,6 +36,10 @@ class GridviewConfigRegistry
         // Only 'table' ships today; 'card'/'list' are planned.
         'renderer'     => 'table',
         'emptyText'    => 'No records found',
+        // When truthy, the {restrictionNotice} section renders a banner telling
+        // the user the list is filtered by their permissions (see the docs). A
+        // string value overrides the default translated message.
+        'restriction'  => false,
         'showThead'    => true,
         'showTfoot'    => true,
         'useTurbo'     => true,
