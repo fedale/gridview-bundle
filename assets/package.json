@@ -2,7 +2,114 @@
   "name": "@fedale/gridview-bundle",
   "version": "1.0.0",
   "symfony": {
-    "controllers": {},
-    "importmap": []
+    "controllers": {
+      "crud": {
+        "main": "controllers/gridview-crud_controller.js",
+        "name": "gridview-crud",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "dropdown": {
+        "main": "controllers/gridview-dropdown_controller.js",
+        "name": "gridview-dropdown",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "visibility": {
+        "main": "controllers/gridview-visibility_controller.js",
+        "name": "gridview-visibility",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "saved-search": {
+        "main": "controllers/gridview-saved-search_controller.js",
+        "name": "gridview-saved-search",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "selection": {
+        "main": "controllers/gridview-selection_controller.js",
+        "name": "gridview-selection",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "infinite-scroll": {
+        "main": "controllers/gridview-infinite-scroll_controller.js",
+        "name": "gridview-infinite-scroll",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "inline-edit": {
+        "main": "controllers/gridview-inline-edit_controller.js",
+        "name": "gridview-inline-edit",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "column-order": {
+        "main": "controllers/gridview-column-order_controller.js",
+        "name": "gridview-column-order",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "responsive": {
+        "main": "controllers/gridview-responsive_controller.js",
+        "name": "gridview-responsive",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "filter": {
+        "main": "controllers/gridview-filter_controller.js",
+        "name": "gridview-filter",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "date-filter": {
+        "main": "controllers/gridview-date-filter_controller.js",
+        "name": "gridview-date-filter",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "relation-filter": {
+        "main": "controllers/gridview-relation-filter_controller.js",
+        "name": "gridview-relation-filter",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "form-validate": {
+        "main": "controllers/gridview-form-validate_controller.js",
+        "name": "gridview-form-validate",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "page-jump": {
+        "main": "controllers/gridview-page-jump_controller.js",
+        "name": "gridview-page-jump",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "i18n": {
+        "main": "controllers/gridview-i18n_controller.js",
+        "name": "gridview-i18n",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "locale-switcher": {
+        "main": "controllers/gridview-locale-switcher_controller.js",
+        "name": "gridview-locale-switcher",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "mercure": {
+        "main": "controllers/gridview-mercure_controller.js",
+        "name": "gridview-mercure",
+        "fetch": "lazy",
+        "enabled": true
+      }
+    },
+    "importmap": {
+      "@hotwired/stimulus": "^3.2.2",
+      "@hotwired/turbo": "^7.1.0 || ^8.0",
+      "flatpickr": "^4.6.13"
+    }
   }
 }
