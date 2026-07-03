@@ -28,6 +28,9 @@ class EntityDataProvider extends AbstractDataProvider
 
     private array $params;
 
+    /** The filter-form param name (grid `formName` option); drives which query params are read. */
+    private string $formName = 'fedaleForm';
+
     private ?SearchFormInterface $searchForm = null;
 
     public function __construct(
@@ -47,7 +50,18 @@ class EntityDataProvider extends AbstractDataProvider
 
     private function populateParams(): void
     {
-        $this->params = $this->requestStack->getCurrentRequest()?->query->all('fedaleForm') ?? [];
+        $this->params = $this->requestStack->getCurrentRequest()?->query->all($this->formName) ?? [];
+    }
+
+    /**
+     * Set the filter-form param name (the grid `formName` option) and re-read the
+     * request params under it. The constructor primes params with the default
+     * 'fedaleForm'; the grid forwards the configured name before prepareModels().
+     */
+    public function setFormName(string $formName): void
+    {
+        $this->formName = $formName;
+        $this->populateParams();
     }
 
     public function setDefaultParams(array $defaults): void
@@ -59,10 +73,10 @@ class EntityDataProvider extends AbstractDataProvider
         }
 
         // A submitted GET form always sends every field (even empty), so a
-        // present-but-empty 'fedaleForm' means the user cleared the filters:
-        // defaults apply only when 'fedaleForm' is absent from the query string.
+        // present-but-empty form param means the user cleared the filters:
+        // defaults apply only when the form is absent from the query string.
         $request = $this->requestStack->getCurrentRequest();
-        if ($request !== null && $request->query->has('fedaleForm')) {
+        if ($request !== null && $request->query->has($this->formName)) {
             return;
         }
 

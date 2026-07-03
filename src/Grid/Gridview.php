@@ -240,6 +240,12 @@ class Gridview implements GridviewInterface
         }
         $this->dataProviderInitialized = true;
 
+        // Forward the configured form param name so the provider reads the request
+        // filters under it (e.g. a global `formName: myform` override) instead of
+        // the default 'fedaleForm'. Must precede setDefaultParams()/prepareModels(),
+        // which both key off the form param name.
+        $this->dataProvider->setFormName($this->options['formName']);
+
         if ($this->defaultFilterParams !== []) {
             $this->dataProvider->setDefaultParams($this->defaultFilterParams);
         }
@@ -355,6 +361,12 @@ class Gridview implements GridviewInterface
             $options['pagination'] = array_replace($this->options['pagination'] ?? [], $options['pagination']);
         }
         if (isset($options['renderer'])) {
+            // A scalar renderer (e.g. `renderer: 'card'`) is shorthand for the
+            // active strategy; normalize it into the {default, map} structure so
+            // it merges instead of overwriting the whole renderer config.
+            if (!is_array($options['renderer'])) {
+                $options['renderer'] = ['default' => $options['renderer']];
+            }
             // Keep the `default` when a controller supplies only `map`; the `map`
             // itself is replaced wholesale (the controller owns the renderer set).
             $options['renderer'] = array_replace($this->options['renderer'] ?? [], $options['renderer']);

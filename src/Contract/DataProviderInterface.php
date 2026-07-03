@@ -8,6 +8,9 @@ interface DataProviderInterface
 
     public function setDefaultParams(array $defaults): void;
 
+    /** Filter-form param name (grid `formName` option) the request params are read under. */
+    public function setFormName(string $formName): void;
+
     /** Root alias for the fallback QueryBuilder built when the repository has no search(). */
     public function setAlias(string $alias): void;
 
