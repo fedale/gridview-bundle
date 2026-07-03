@@ -31,6 +31,9 @@ class EntityDataProvider extends AbstractDataProvider
     /** The filter-form param name (grid `formName` option); drives which query params are read. */
     private string $formName = 'fedaleForm';
 
+    /** How the current filters were applied: repository search(), searchFields, or none. */
+    private string $filterPath = 'none';
+
     private ?SearchFormInterface $searchForm = null;
 
     public function __construct(
@@ -98,6 +101,7 @@ class EntityDataProvider extends AbstractDataProvider
         // `searchFields` map here, so sorting, pagination and filtering keep
         // working either way.
         if (method_exists($repository, 'search')) {
+            $this->filterPath = 'repository search()';
             $this->queryBuilder = $repository->search($this->params);
 
             return;
@@ -106,6 +110,7 @@ class EntityDataProvider extends AbstractDataProvider
         $qb = $repository->createQueryBuilder($this->alias);
 
         if ($this->searchFields !== [] && $this->searchForm !== null) {
+            $this->filterPath = 'searchFields';
             $this->searchForm->applyFilters($qb, $this->params, $this->searchFields);
         }
 
@@ -213,5 +218,84 @@ class EntityDataProvider extends AbstractDataProvider
         $this->totalRows = count($this->paginator);
 
         return $this->totalRows;
+    }
+
+    /** How the current filters were applied (for the profiler). */
+    public function getFilterPath(): string
+    {
+        return $this->filterPath;
+    }
+
+    /** The raw filter-form params read from the request (for the profiler). */
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
+    /**
+     * A best-effort, serializable view of the built query for the profiler: DQL,
+     * SQL and bound parameters. Read after getData(), so it reflects the page
+     * query (max results, offset and order by included).
+     *
+     * @return array{dql: ?string, sql: ?string, params: list<array{name: string, value: string}>, rootAlias: ?string}
+     */
+    public function getDebugQuery(): array
+    {
+        if (!isset($this->queryBuilder)) {
+            return ['dql' => null, 'sql' => null, 'params' => [], 'rootAlias' => null];
+        }
+
+        $qb = $this->queryBuilder;
+
+        $dql = null;
+        $sql = null;
+        try {
+            $dql = $qb->getDQL();
+        } catch (\Throwable) {
+        }
+        try {
+            $sql = $qb->getQuery()->getSQL();
+        } catch (\Throwable) {
+        }
+
+        $params = [];
+        foreach ($qb->getParameters() as $parameter) {
+            $params[] = [
+                'name' => (string) $parameter->getName(),
+                'value' => $this->stringifyParam($parameter->getValue()),
+            ];
+        }
+
+        return [
+            'dql' => $dql,
+            'sql' => is_array($sql) ? implode('; ', $sql) : $sql,
+            'params' => $params,
+            'rootAlias' => $qb->getRootAliases()[0] ?? null,
+        ];
+    }
+
+    private function stringifyParam(mixed $value): string
+    {
+        if (is_scalar($value) || $value === null) {
+            return (string) $value;
+        }
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format(\DateTimeInterface::ATOM);
+        }
+        if (is_array($value)) {
+            return '[' . implode(', ', array_map($this->stringifyParam(...), $value)) . ']';
+        }
+        if (is_object($value)) {
+            if (method_exists($value, 'getId')) {
+                return sprintf('%s#%s', get_debug_type($value), (string) $value->getId());
+            }
+            if (method_exists($value, '__toString')) {
+                return (string) $value;
+            }
+
+            return get_debug_type($value);
+        }
+
+        return get_debug_type($value);
     }
 }

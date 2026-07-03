@@ -434,6 +434,11 @@ class Sort implements SortInterface
         return $this;
     }
 
+    public function isMultiSortEnabled(): bool
+    {
+        return $this->enableMultiSort;
+    }
+
     /**
      * @param string $sortParam
      *

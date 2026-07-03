@@ -8,7 +8,25 @@ services:
             - [setRequest, ['@request_stack']]
             - [setDataProvider, ['@fedale_gridview.entity_data_provider']]
             - [setPaginatorStrategyRegistry, ['@fedale_gridview.paginator_strategy_registry']]
+            - [setProfileRegistry, ['@fedale_gridview.profile_registry']]
     Fedale\GridviewBundle\Service\GridviewService: '@fedale_gridview.gridview_service'
+
+    # Per-request store of grid render snapshots for the WebProfiler. Disabled
+    # (no-op) outside debug, so production builds no snapshot or DQL.
+    fedale_gridview.profile_registry:
+        class: Fedale\GridviewBundle\Profiler\GridviewProfileRegistry
+        arguments:
+            - '%kernel.debug%'
+    Fedale\GridviewBundle\Profiler\GridviewProfileRegistry: '@fedale_gridview.profile_registry'
+
+    # Grid panel on the WebProfiler toolbar. The data_collector tag only activates
+    # it when the profiler is enabled, so it stays inert in production.
+    fedale_gridview.data_collector:
+        class: Fedale\GridviewBundle\Profiler\GridviewDataCollector
+        arguments:
+            - '@fedale_gridview.profile_registry'
+        tags:
+            - { name: data_collector, template: '@FedaleGridview/Collector/gridview.html.twig', id: fedale_gridview, priority: 250 }
 
     fedale_gridview.search_model:
         class: Fedale\GridviewBundle\Form\SearchModel

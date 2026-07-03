@@ -14,7 +14,9 @@ use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Filter\FilterDefaultNormalizer;
 use Fedale\GridviewBundle\Grid\State\GridviewUrlState;
+use Fedale\GridviewBundle\Profiler\GridviewProfile;
 use Fedale\GridviewBundle\Service\GridviewService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
 
@@ -755,6 +757,8 @@ class Gridview implements GridviewInterface
             'pagination' => $this->dataProvider->getPagination(),
         ]);
 
+        $this->recordProfile($request, $view, $parameters['models'], $parameters['pagination']);
+
         // Infinite scroll: rows-only Turbo Stream for ?_rows=1 (append rows + replace
         // the infinite section). The requested page already drives getData(), so the
         // models in $parameters are the next page's rows.
@@ -771,5 +775,97 @@ class Gridview implements GridviewInterface
             : $view;
 
         return new Response($this->twig->render($template, $parameters));
+    }
+
+    /**
+     * Capture a serializable snapshot of this render for the WebProfiler. A no-op
+     * unless the profiler is enabled (production builds no snapshot or DQL).
+     */
+    private function recordProfile(Request $request, string $view, iterable $models, $pagination): void
+    {
+        $registry = $this->gridviewService->getProfileRegistry();
+        if ($registry === null || !$registry->isEnabled()) {
+            return;
+        }
+
+        $useTurbo = (bool) ($this->options['useTurbo'] ?? false);
+        $responseType = match (true) {
+            $useTurbo && $request->query->getBoolean('_rows') => '_rows stream',
+            $useTurbo && $request->headers->has('Turbo-Frame') => '_grid frame',
+            default => 'full page',
+        };
+
+        $provider = $this->dataProvider;
+        $query = method_exists($provider, 'getDebugQuery')
+            ? $provider->getDebugQuery()
+            : ['dql' => null, 'sql' => null, 'params' => [], 'rootAlias' => null];
+        $filterPath = method_exists($provider, 'getFilterPath') ? $provider->getFilterPath() : 'unknown';
+        $rawParams = method_exists($provider, 'getParams') ? $provider->getParams() : [];
+
+        $sort = $provider->getSort();
+        $sortData = [
+            'orders' => $sort->fetchOrders(),
+            'urlSort' => $this->urlState->getSort(),
+            'multiSort' => method_exists($sort, 'isMultiSortEnabled') ? $sort->isMultiSortEnabled() : null,
+        ];
+
+        $paginationData = [
+            'mode' => $this->options['pagination']['mode'] ?? 'numeric',
+            'page' => $pagination->getCurrentPage(),
+            'pageSize' => $pagination->getPageSize(),
+            'offset' => $pagination->getOffset(),
+            'totalCount' => $pagination->getTotalCount(),
+            'pageCount' => $pagination->getPageCount(),
+            'pageSizeOptions' => $pagination->getPageSizeOptions(),
+        ];
+
+        $columns = [];
+        foreach ($this->columns as $column) {
+            $columns[] = [
+                'label' => $column->getLabel(),
+                'attribute' => $column->getAttribute(),
+                'type' => (new \ReflectionClass($column))->getShortName(),
+                'activeIndex' => $column->isActiveIn('index'),
+                'sortable' => $column->isSortable(),
+                'filterable' => $column->isFilterable(),
+                'exportable' => $column->isExportable(),
+                'visible' => $column->isVisible(),
+                'editable' => $column->isEditable(),
+                'filterBar' => $column instanceof DataColumn ? $column->filterBar : null,
+            ];
+        }
+
+        $filterBarColumns = array_map(
+            static fn(DataColumn $column): string => (string) $column->getAttribute(),
+            $this->getFilterBarColumns(),
+        );
+
+        $registry->record(new GridviewProfile(
+            key: $this->getKey(),
+            id: $this->getId(),
+            responseType: $responseType,
+            route: $this->options['routeName'] ?? null,
+            template: match ($responseType) {
+                '_rows stream' => '@FedaleGridview/gridview/sections/_rows_stream.html.twig',
+                '_grid frame' => '@FedaleGridview/gridview/_grid.html.twig',
+                default => $view,
+            },
+            theme: $this->theme,
+            options: $this->options,
+            formName: (string) ($this->options['formName'] ?? 'fedaleForm'),
+            filterPath: $filterPath,
+            globalSearch: $this->urlState->getGlobalSearch(),
+            rawParams: $rawParams,
+            filters: $this->urlState->getFilters(),
+            query: $query,
+            sort: $sortData,
+            pagination: $paginationData,
+            renderer: $this->getRenderer(),
+            renderers: $this->getRenderers(),
+            autoBar: $this->isAutoBar(),
+            filterBarColumns: array_values($filterBarColumns),
+            rowsOnPage: is_countable($models) ? count($models) : iterator_count($models),
+            columns: $columns,
+        ));
     }
 }
