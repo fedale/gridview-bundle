@@ -81,12 +81,24 @@ class GridviewBuilder implements GridviewBuilderInterface
         $yamlOptions    = $this->configRegistry->resolveOptions($id);
         $yamlAttributes = $this->configRegistry->resolveAttributes($id);
 
-        $this->gridview->setOptions(array_replace($yamlOptions, $this->runtimeOptions));
+        // Merge group-by-group (display/behavior/integration), not with a single
+        // top-level array_replace: the latter would let a runtime override of
+        // e.g. just `behavior.pagination` wholesale-replace the entire `behavior`
+        // group — silently dropping unrelated YAML-resolved keys like `useTurbo`
+        // or `formName`. Gridview::setOptions() then does its own finer-grained
+        // merge for the nested sub-keys that need it (layout, filterControls, ...).
+        $merged = $yamlOptions;
+        foreach (['display', 'behavior', 'integration'] as $group) {
+            if (isset($this->runtimeOptions[$group])) {
+                $merged[$group] = array_replace($yamlOptions[$group] ?? [], $this->runtimeOptions[$group]);
+            }
+        }
+        $this->gridview->setOptions($merged);
         $this->gridview->setAttributes($this->mergeAttributes($yamlAttributes, $this->runtimeAttributes));
 
         // Resolve the framework theme: pre-build its class map for cls() and
         // expose the name on the container ([data-gv-framework]) for CSS presets.
-        $theme = $this->gridview->getOptions()['theme'] ?? 'default';
+        $theme = $this->gridview->getOptions()['display']['theme'] ?? 'default';
         $this->gridview->theme = $theme;
         $this->gridview->setClassMap($this->themeRegistry->classMap($theme));
         if ($theme !== 'default') {

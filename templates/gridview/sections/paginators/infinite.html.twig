@@ -8,7 +8,7 @@
 {% set _page         = max(1, min(gridview.urlState.page, _lastPage > 0 ? _lastPage : 1)) %}
 {% set _hasMore      = _page < _lastPage %}
 {% set _nextUrl      = path(_currentRoute, gridview.urlState.withPage(_page + 1)|merge({'_rows': 1})) %}
-{% set _rootMargin   = gridview.options.pagination.options.infiniteRootMargin|default('300px') %}
+{% set _rootMargin   = gridview.options.behavior.pagination.options.infiniteRootMargin|default('300px') %}
 
 <div id="gv-infinite-{{ gridview.key }}"
      class="gv-infinite"

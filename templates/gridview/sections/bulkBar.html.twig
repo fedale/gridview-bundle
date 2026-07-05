@@ -21,7 +21,7 @@
   unchanged. Custom actions still need their own server endpoint returning a
   modal partial; the JS side (gridview-selection#bulk) is already generic.
 #}
-{% set crud = gridview.options.crud|default({}) %}
+{% set crud = gridview.options.integration.crud|default({}) %}
 
 {# Built-in defaults; URLs come from the auto-derived crud.*Url options. #}
 {% set _builtins = {

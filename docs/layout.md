@@ -121,37 +121,43 @@ Pass a `layout` key inside `setOptions()`:
 
 ```php
 ->setOptions([
-    'title'    => 'Customers',     // text rendered by {heading}
-    'layout'   => [
-        'shell'    => '{header} {dataview} {footer}',
-        'header'   => '{heading} {toolbar}',
-        'toolbar'  => '{addButton} {globalSearch} {columnVisibility}',
-        'footer'   => '{pagination}',
+    'display' => [
+        'title'    => 'Customers',     // text rendered by {heading}
+        'layout'   => [
+            'shell'    => '{header} {dataview} {footer}',
+            'header'   => '{heading} {toolbar}',
+            'toolbar'  => '{addButton} {globalSearch} {columnVisibility}',
+            'footer'   => '{pagination}',
+        ],
+        'addLabel' => 'New Customer',
     ],
-    'addRoute' => 'customer_new',
-    'addLabel' => 'New Customer',
+    'integration' => [
+        'addRoute' => 'customer_new',
+    ],
 ])
 ```
 
 ### Adding a title
 
-The `{heading}` block renders the `options.title` text and **collapses when the
+The `{heading}` block renders the `display.title` text and **collapses when the
 title is empty**, so a grid shows a heading only when you set one. It is a plain
 block, so place it in whichever region you like — the default puts it at the start
 of `header` (`{heading} {toolbar}`):
 
 ```php
 ->setOptions([
-    'title'  => 'Customers',
-    'layout' => [
-        'header'  => '{heading} {toolbar}',
-        'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+    'display' => [
+        'title'  => 'Customers',
+        'layout' => [
+            'header'  => '{heading} {toolbar}',
+            'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+        ],
     ],
 ])
 ```
 
 To change how the title looks, override the `heading` block template
-(`layout.templates.heading`); to change the text, set `options.title`.
+(`layout.templates.heading`); to change the text, set `display.title`.
 
 ### Overriding individual section templates
 
@@ -159,10 +165,12 @@ Point a token to a custom Twig template:
 
 ```php
 ->setOptions([
-    'layout' => [
-        'templates' => [
-            'header' => '@App/gridview/custom_header.html.twig',
-            'empty'  => '@App/gridview/no_results.html.twig',
+    'display' => [
+        'layout' => [
+            'templates' => [
+                'header' => '@App/gridview/custom_header.html.twig',
+                'empty'  => '@App/gridview/no_results.html.twig',
+            ],
         ],
     ],
 ])
@@ -174,10 +182,12 @@ For small snippets that do not justify a separate template file, use **slots**:
 
 ```php
 ->setOptions([
-    'layout' => [
-        'toolbar' => '{addButton} {recordCount}',
-        'slots'   => [
-            'recordCount' => '<span class="badge bg-secondary">{{ models|length }} records</span>',
+    'display' => [
+        'layout' => [
+            'toolbar' => '{addButton} {recordCount}',
+            'slots'   => [
+                'recordCount' => '<span class="badge bg-secondary">{{ models|length }} records</span>',
+            ],
         ],
     ],
 ])
@@ -193,11 +203,13 @@ Set them per region under `layout.attrs`:
 
 ```php
 ->setOptions([
-    'layout' => [
-        'attrs' => [
-            'shell' => ['data-analytics' => 'customers-grid'],
-            'thead' => ['class' => 'sticky-top'],
-            'toolbar' => ['data-testid' => 'toolbar'],
+    'display' => [
+        'layout' => [
+            'attrs' => [
+                'shell' => ['data-analytics' => 'customers-grid'],
+                'thead' => ['class' => 'sticky-top'],
+                'toolbar' => ['data-testid' => 'toolbar'],
+            ],
         ],
     ],
 ])
@@ -214,7 +226,7 @@ the same regions (`container → shell`, the table `class` → `dataview`,
 
 ### Choosing the data renderer
 
-The `dataview` region is renderer-agnostic. `options.renderer.default` picks the
+The `dataview` region is renderer-agnostic. `display.renderer.default` picks the
 strategy template `sections/dataview/{renderer}.html.twig`. Three renderers ship built-in:
 
 | Renderer | Markup | Internals |
@@ -224,7 +236,7 @@ strategy template `sections/dataview/{renderer}.html.twig`. Three renderers ship
 | `card` | responsive CSS-grid of `<article class="gv-card">` boxes | `sections/dataview/card/{_item,empty}.html.twig` |
 
 ```php
-->setOptions(['renderer' => ['default' => 'card']])   // 'table' (default) | 'list' | 'card'
+->setOptions(['display' => ['renderer' => ['default' => 'card']]])   // 'table' (default) | 'list' | 'card'
 ```
 
 An unknown renderer falls back to `table`. To add your own, drop a
@@ -244,13 +256,15 @@ Tune it per grid with the card entry in `renderer.map`:
 
 ```php
 ->setOptions([
-    'renderer' => [
-        'default' => 'card',
-        'map' => [
-            'card' => [
-                'min'        => '18rem',   // → --gv-card-min (min card width)
-                'gap'        => '1rem',    // → --gv-card-gap
-                'titleField' => 'name',    // column rendered as the card title (no label)
+    'display' => [
+        'renderer' => [
+            'default' => 'card',
+            'map' => [
+                'card' => [
+                    'min'        => '18rem',   // → --gv-card-min (min card width)
+                    'gap'        => '1rem',    // → --gv-card-gap
+                    'titleField' => 'name',    // column rendered as the card title (no label)
+                ],
             ],
         ],
     ],
@@ -267,9 +281,11 @@ Twig template for the item:
 
 ```php
 ->setOptions([
-    'renderer' => [
-        'default' => 'card',
-        'map' => ['card' => ['template' => 'gridview/category_card.html.twig']],
+    'display' => [
+        'renderer' => [
+            'default' => 'card',
+            'map' => ['card' => ['template' => 'gridview/category_card.html.twig']],
+        ],
     ],
 ])
 ```
@@ -317,12 +333,14 @@ an empty map) gives a fixed single-view grid — the default, no switcher.
 
 ```php
 ->setOptions([
-    'renderer' => [
-        'default' => 'table',   // initial view
-        'map' => [              // views offered by the switcher, in this order
-            'table' => [],
-            'card'  => [],
-            'list'  => [],
+    'display' => [
+        'renderer' => [
+            'default' => 'table',   // initial view
+            'map' => [              // views offered by the switcher, in this order
+                'table' => [],
+                'card'  => [],
+                'list'  => [],
+            ],
         ],
     ],
 ])
@@ -334,16 +352,16 @@ collapse to nothing on their own. See
 [Token dynamics per renderer](#token-dynamics-per-renderer).
 
 **Filters on list/card (`autoBar`).** Without column headers there is no per-column
-filter row, so filters surface in the `{filterBar}`. By default (`filterControls.autoBar`
+filter row, so filters surface in the `{filterBar}`. By default (`behavior.filterControls.autoBar`
 is `null`) the bar auto-includes **every filterable column** when the active
 renderer is not `table`; on `table` it keeps the opt-in behaviour (only columns
-with `filterBar: true`). Set `filterControls.autoBar` to `true`/`false` to force
+with `filterBar: true`). Set `behavior.filterControls.autoBar` to `true`/`false` to force
 it. A column excludes itself from the bar with `filterBar: false`, even under
 autoBar.
 
 **What does not carry to list/card.** `caption`, `showThead`/`showTfoot`, the
 `responsive` column-collapse (+ column `priority`), `reorderColumns`, the header
-filter funnel (`filterControls.inHeader`), the column-visibility toggle and
+filter funnel (`behavior.filterControls.inHeader`), the column-visibility toggle and
 infinite scroll are table-only; they are silently ignored on the other renderers.
 
 #### Token dynamics per renderer
@@ -364,8 +382,10 @@ layout is computed automatically (i.e. when `dataview` is `null`):
 
 ```php
 ->setOptions([
-    'showThead' => true,   // default
-    'showTfoot' => false,  // removes tfoot from the table
+    'display' => [
+        'showThead' => true,   // default
+        'showTfoot' => false,  // removes tfoot from the table
+    ],
 ])
 ```
 
@@ -390,7 +410,7 @@ Turn the grid option `responsive` on, then give the collapsible columns a `prior
 protected function viewConfig(): array
 {
     return [
-        'options' => ['responsive' => true],
+        'options' => ['behavior' => ['responsive' => true]],
     ];
 }
 
@@ -409,14 +429,14 @@ protected function buildColumns(): array
 }
 ```
 
-You can also enable it per grid in YAML, under the grid's `options`:
+`responsive` is a runtime-only option (see [Configuration](configuration.md#behavior)) — enable it
+per grid via `viewConfig()['options']['behavior']['responsive']`, not YAML:
 
-```yaml
-fedale_gridview:
-    gridviews:
-        customer:
-            options:
-                responsive: true
+```php
+protected function viewConfig(): array
+{
+    return ['options' => ['behavior' => ['responsive' => true]]];
+}
 ```
 
 ### How `priority` works

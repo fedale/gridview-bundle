@@ -2,9 +2,9 @@
   Export menu: lists the available formats (from the exporter registry) as links
   to the export endpoint, carrying the current filters/sort (querystring). Place
   the {export} token in the layout (e.g. toolbar).
-  Requires options.export = { url, formats: [{key, label}, ...] }.
+  Requires options.integration.export = { url, formats: [{key, label}, ...] }.
 #}
-{% set ex = gridview.options.export|default({}) %}
+{% set ex = gridview.options.integration.export|default({}) %}
 {% if ex.url is defined and ex.formats is defined and ex.formats is not empty %}
 <div class="gv-export gv-dropdown" data-controller="gridview-dropdown">
     <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-dropdown#toggle" aria-expanded="false">{{ 'export.label'|trans({}, 'GridviewBundle') }} <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">⤓</span></button>

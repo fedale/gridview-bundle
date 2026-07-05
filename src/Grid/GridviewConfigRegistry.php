@@ -28,44 +28,68 @@ class GridviewConfigRegistry
         'attrs'     => [],
     ];
 
-    private const OPTION_DEFAULTS = [
-        'caption'      => null,
-        'title'        => null,
-        'theme'        => 'default',
+    /**
+     * `display` / `behavior` / `integration` are a readability grouping only —
+     * see FedaleGridviewBundle::configure() — resolved and returned as a single
+     * nested array by {@see resolveOptions()}.
+     */
+    private const DISPLAY_DEFAULTS = [
+        'caption'    => null,
+        'title'      => null,
         // Data-renderer configuration. `default` picks the active strategy
         // (sections/dataview/{renderer}.html.twig); `map` keys are the available
         // renderers (their values are per-renderer option bags). The runtime
         // {viewSwitcher} offers the map keys; empty/single = single-view grid.
         // Built-in: 'table' (default), 'list', 'card'.
-        'renderer'     => [
+        'renderer'   => [
             'default' => 'table',
             'map'     => [],
         ],
-        'emptyText'    => 'No records found',
-        // When truthy, the {restrictionNotice} section renders a banner telling
-        // the user the list is filtered by their permissions (see the docs). A
-        // string value overrides the default translated message.
-        'restriction'  => false,
-        'showThead'    => true,
-        'showTfoot'    => true,
-        'useTurbo'     => true,
-        'globalSearch' => [],
-        'addRoute'     => null,
-        'addLabel'     => 'Add',
-        'formName'     => 'fedaleForm',
-        'pagination'   => [
+        'emptyText'  => 'No records found',
+        'showThead'  => true,
+        'showTfoot'  => true,
+        'addLabel'   => 'Add',
+        // Full-page CRUD wrapper template; bridged from viewConfig()['template']['page'].
+        'crudTemplate' => null,
+        'layout'     => self::LAYOUT_DEFAULTS,
+    ];
+
+    private const BEHAVIOR_DEFAULTS = [
+        'useTurbo'       => true,
+        'globalSearch'   => [],
+        'formName'       => 'fedaleForm',
+        'maxQueryLength' => 4000,
+        // 'modal' | 'page' | 'custom'; bridged from viewConfig()['form']['mode'].
+        'crudMode'       => 'modal',
+        'filterControls' => [
+            'inHeader'                => true,
+            'inlineClear'             => false,
+            'clear'                   => null,
+            'autoBar'                 => null,
+            'choiceControlsThreshold' => 20,
+        ],
+        'pagination'     => [
             'pageSelect'          => true,
             'pageSelectThreshold' => 10,
         ],
-        'realtime'     => [
+        'realtime'       => [
             'enabled'     => false,
             'topicPrefix' => 'gridview/',
         ],
-        'layout'       => self::LAYOUT_DEFAULTS,
+        'reorderColumns' => false,
+        'responsive'     => false,
+        // When truthy, the {restrictionNotice} section renders a banner telling
+        // the user the list is filtered by their permissions (see the docs). A
+        // string value overrides the default translated message.
+        'restriction'    => false,
+    ];
+
+    private const INTEGRATION_DEFAULTS = [
+        'addRoute' => null,
     ];
 
     /**
-     * Detail-view defaults. Deliberately disjoint from OPTION_DEFAULTS: a detail
+     * Detail-view defaults. Deliberately disjoint from the grid defaults above: a detail
      * has no pagination/realtime/global-search nor a table layout — only the few
      * knobs that make sense for a key/value record view.
      */
@@ -83,32 +107,43 @@ class GridviewConfigRegistry
 
     public function resolveOptions(?string $id): array
     {
-        $yamlDefaults = $this->config['defaults']['options'] ?? [];
+        $displayDefaults = $this->config['defaults']['display'] ?? [];
 
-        $resolved = array_replace(self::OPTION_DEFAULTS, $yamlDefaults);
-        $resolved['layout'] = $this->mergeLayout($yamlDefaults['layout'] ?? []);
+        $display     = array_replace(self::DISPLAY_DEFAULTS, $displayDefaults);
+        $behavior    = array_replace(self::BEHAVIOR_DEFAULTS, $this->config['defaults']['behavior'] ?? []);
+        $integration = array_replace(self::INTEGRATION_DEFAULTS, $this->config['defaults']['integration'] ?? []);
+        $display['layout'] = $this->mergeLayout($displayDefaults['layout'] ?? []);
 
         // Global framework theme (top-level `fedale_gridview.theme`); a
-        // per-gridview `options.theme` below overrides it.
+        // per-gridview `display.theme` below overrides it.
         if (isset($this->config['theme'])) {
-            $resolved['theme'] = $this->config['theme'];
+            $display['theme'] = $this->config['theme'];
         }
 
-        if ($id !== null && isset($this->config['gridviews'][$id]['options'])) {
-            $gridviewOptions = $this->config['gridviews'][$id]['options'];
-            $resolved = array_replace($resolved, $gridviewOptions);
-            $resolved['layout'] = $this->mergeLayout(
-                $yamlDefaults['layout'] ?? [],
-                $gridviewOptions['layout'] ?? []
-            );
+        if ($id !== null) {
+            $gridview = $this->config['gridviews'][$id] ?? [];
+
+            if (isset($gridview['display'])) {
+                $display = array_replace($display, $gridview['display']);
+                $display['layout'] = $this->mergeLayout(
+                    $displayDefaults['layout'] ?? [],
+                    $gridview['display']['layout'] ?? []
+                );
+            }
+            if (isset($gridview['behavior'])) {
+                $behavior = array_replace($behavior, $gridview['behavior']);
+            }
+            if (isset($gridview['integration'])) {
+                $integration = array_replace($integration, $gridview['integration']);
+            }
         }
 
-        return $resolved;
+        return ['display' => $display, 'behavior' => $behavior, 'integration' => $integration];
     }
 
     private function mergeLayout(array ...$layers): array
     {
-        $result = self::OPTION_DEFAULTS['layout'];
+        $result = self::DISPLAY_DEFAULTS['layout'];
         foreach ($layers as $layer) {
             foreach ($layer as $key => $value) {
                 if ($key === 'templates' || $key === 'slots' || $key === 'attrs') {

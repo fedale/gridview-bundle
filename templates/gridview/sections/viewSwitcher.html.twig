@@ -16,7 +16,7 @@
     {%- for view in views -%}
     <a class="gv-view-switcher__btn{{ view == active ? ' is-active' }}"
        href="{{ path(_route, gridview.urlState.withView(view)) }}"
-       {% if gridview.options.useTurbo %}data-turbo-action="advance"{% endif %}
+       {% if gridview.options.behavior.useTurbo %}data-turbo-action="advance"{% endif %}
        {% if view == active %}aria-current="true"{% endif %}
        {{ gv_i18n_attr('view.' ~ view, 'title') }} title="{{ ('view.' ~ view)|trans({}, 'GridviewBundle') }}">
         {{- _icons[view]|default('')|raw -}}

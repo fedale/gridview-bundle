@@ -1,8 +1,8 @@
-{% set gvResponsive = gridview.options.responsive|default(false) %}
+{% set gvResponsive = gridview.options.behavior.responsive|default(false) %}
 {% if gvResponsive %}<div class="gv-resp-wrap" data-gridview-responsive-target="wrap">{% endif %}
 <table {{ gridview.regionAttr('dataview')|options }} data-gv="{{ gridview.key }}">
-    {% if gridview.options.caption %}
-        <caption>{{ gridview.options.caption }}</caption>
+    {% if gridview.options.display.caption %}
+        <caption>{{ gridview.options.display.caption }}</caption>
     {% endif %}
     {# thead/filter/tbody/tfoot/empty are internals of the table strategy, not
        top-level layout vocabulary, so they are included by path from within the

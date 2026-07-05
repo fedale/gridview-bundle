@@ -59,56 +59,74 @@ class Gridview implements GridviewInterface
 
     public ?SearchModelInterface $searchModel = null;
 
+    /**
+     * `display` / `behavior` / `integration` are a readability grouping only —
+     * see GridviewConfigRegistry — there is no semantic significance to the
+     * split beyond making the tree easier to scan.
+     */
     protected array $options = [
-        'caption' => null,
-        'title' => null,
-        // Data-renderer configuration. `default` is the initial/active strategy
-        // (picks sections/dataview/{renderer}.html.twig); `map` holds one entry
-        // per available renderer, keyed by name, whose value is that renderer's
-        // option bag (e.g. template, min, gap). The runtime {viewSwitcher} offers
-        // exactly the map keys — more than one entry surfaces it; empty/single =
-        // single-view grid (the table strategy is the fallback). Built-in
-        // renderers: 'table' (default), 'list', 'card'.
-        'renderer' => [
-            'default' => 'table',
-            'map'     => [],
+        'display' => [
+            'caption' => null,
+            'title' => null,
+            // Data-renderer configuration. `default` is the initial/active strategy
+            // (picks sections/dataview/{renderer}.html.twig); `map` holds one entry
+            // per available renderer, keyed by name, whose value is that renderer's
+            // option bag (e.g. template, min, gap). The runtime {viewSwitcher} offers
+            // exactly the map keys — more than one entry surfaces it; empty/single =
+            // single-view grid (the table strategy is the fallback). Built-in
+            // renderers: 'table' (default), 'list', 'card'.
+            'renderer' => [
+                'default' => 'table',
+                'map'     => [],
+            ],
+            'emptyText' => 'No records found',
+            'showThead' => true,
+            'showTfoot' => true,
+            'addLabel' => 'Add',
+            // Full-page CRUD wrapper template; ex `crud.pageTemplate`.
+            'crudTemplate' => null,
+            // Single source of truth — see GridviewConfigRegistry::LAYOUT_DEFAULTS.
+            'layout' => GridviewConfigRegistry::LAYOUT_DEFAULTS,
         ],
-        'emptyText' => 'No records found',
-        'showThead' => true,
-        'showTfoot' => true,
-        'useTurbo' => true,
-        'globalSearch' => [],
-        'routeName' => null,
-        'addRoute' => null,
-        'addLabel' => 'Add',
-        'formName' => 'fedaleForm',
-        // Single source of truth — see GridviewConfigRegistry::LAYOUT_DEFAULTS.
-        'layout' => GridviewConfigRegistry::LAYOUT_DEFAULTS,
-        'filterControls' => [
-            // Render the per-column filters in the header (the funnel icon plus
-            // the filter <thead> row). When false neither is emitted at all.
-            'inHeader' => true,
-            'inlineClear' => false,
-            // Filter-bar auto-population. null → derived from the active renderer:
-            // ON for non-table views (list/card have no header filters), OFF for
-            // table. Explicit true/false overrides. See getFilterBarColumns().
-            'autoBar' => null,
-            // Default clear mode(s) for all columns that don't specify filter.clear
-            // explicitly. Accepts the same format as filter.clear (string, array,
-            // or extended form). When null, the default is ['header'] plus 'input'
-            // if inlineClear is true (retro-compatible). Set to 'none' to hide all
-            // clear affordances by default (per-column specs still override).
-            'clear' => null,
-            // Multi/relation filters: hide the search box and the
-            // select/deselect/invert toolbar when a column has fewer than this
-            // many options. Overridable per column via filter.options.controls_threshold.
-            'choiceControlsThreshold' => 20,
+        'behavior' => [
+            'useTurbo' => true,
+            'globalSearch' => [],
+            'formName' => 'fedaleForm',
+            'maxQueryLength' => 4000,
+            // 'modal' | 'page' | 'custom'; ex `crud.mode`.
+            'crudMode' => 'modal',
+            'filterControls' => [
+                // Render the per-column filters in the header (the funnel icon plus
+                // the filter <thead> row). When false neither is emitted at all.
+                'inHeader' => true,
+                'inlineClear' => false,
+                // Filter-bar auto-population. null → derived from the active renderer:
+                // ON for non-table views (list/card have no header filters), OFF for
+                // table. Explicit true/false overrides. See getFilterBarColumns().
+                'autoBar' => null,
+                // Default clear mode(s) for all columns that don't specify filter.clear
+                // explicitly. Accepts the same format as filter.clear (string, array,
+                // or extended form). When null, the default is ['header'] plus 'input'
+                // if inlineClear is true (retro-compatible). Set to 'none' to hide all
+                // clear affordances by default (per-column specs still override).
+                'clear' => null,
+                // Multi/relation filters: hide the search box and the
+                // select/deselect/invert toolbar when a column has fewer than this
+                // many options. Overridable per column via filter.options.controls_threshold.
+                'choiceControlsThreshold' => 20,
+            ],
+            'pagination' => [
+                'pageSelect' => true,
+                'pageSelectThreshold' => 10,
+            ],
+            'reorderColumns' => false,
+            'responsive' => false,
+            'restriction' => false,
         ],
-        'pagination' => [
-            'pageSelect' => true,
-            'pageSelectThreshold' => 10,
+        'integration' => [
+            'routeName' => null,
+            'addRoute' => null,
         ],
-        'maxQueryLength' => 4000,
     ];
 
     public function __construct(
@@ -246,7 +264,7 @@ class Gridview implements GridviewInterface
         // filters under it (e.g. a global `formName: myform` override) instead of
         // the default 'fedaleForm'. Must precede setDefaultParams()/prepareModels(),
         // which both key off the form param name.
-        $this->dataProvider->setFormName($this->options['formName']);
+        $this->dataProvider->setFormName($this->options['behavior']['formName']);
 
         if ($this->defaultFilterParams !== []) {
             $this->dataProvider->setDefaultParams($this->defaultFilterParams);
@@ -290,8 +308,8 @@ class Gridview implements GridviewInterface
         // Pin sort/pagination/filter links to an explicit list route so the grid
         // renders correctly even when handled by a different route (e.g. a CRUD
         // POST returning a Turbo Stream). Falls back to the current _route.
-        if (!empty($this->options['routeName'])) {
-            $this->dataProvider->getPagination()->setRoute($this->options['routeName']);
+        if (!empty($this->options['integration']['routeName'])) {
+            $this->dataProvider->getPagination()->setRoute($this->options['integration']['routeName']);
         }
     }
 
@@ -353,27 +371,51 @@ class Gridview implements GridviewInterface
 
     public function setOptions(array $options): void
     {
-        if (isset($options['layout'])) {
-            $options['layout'] = array_replace($this->options['layout'] ?? [], $options['layout']);
+        if (isset($options['display']['layout'])) {
+            $options['display']['layout'] = array_replace(
+                $this->options['display']['layout'] ?? [],
+                $options['display']['layout']
+            );
         }
-        if (isset($options['filterControls'])) {
-            $options['filterControls'] = array_replace($this->options['filterControls'] ?? [], $options['filterControls']);
-        }
-        if (isset($options['pagination'])) {
-            $options['pagination'] = array_replace($this->options['pagination'] ?? [], $options['pagination']);
-        }
-        if (isset($options['renderer'])) {
+        if (isset($options['display']['renderer'])) {
             // A scalar renderer (e.g. `renderer: 'card'`) is shorthand for the
             // active strategy; normalize it into the {default, map} structure so
             // it merges instead of overwriting the whole renderer config.
-            if (!is_array($options['renderer'])) {
-                $options['renderer'] = ['default' => $options['renderer']];
+            if (!is_array($options['display']['renderer'])) {
+                $options['display']['renderer'] = ['default' => $options['display']['renderer']];
             }
             // Keep the `default` when a controller supplies only `map`; the `map`
             // itself is replaced wholesale (the controller owns the renderer set).
-            $options['renderer'] = array_replace($this->options['renderer'] ?? [], $options['renderer']);
+            $options['display']['renderer'] = array_replace(
+                $this->options['display']['renderer'] ?? [],
+                $options['display']['renderer']
+            );
         }
-        $this->options = array_merge($this->options, $options);
+        if (isset($options['display'])) {
+            $this->options['display'] = array_replace($this->options['display'], $options['display']);
+            unset($options['display']);
+        }
+
+        if (isset($options['behavior']['filterControls'])) {
+            $options['behavior']['filterControls'] = array_replace(
+                $this->options['behavior']['filterControls'] ?? [],
+                $options['behavior']['filterControls']
+            );
+        }
+        if (isset($options['behavior']['pagination'])) {
+            $options['behavior']['pagination'] = array_replace(
+                $this->options['behavior']['pagination'] ?? [],
+                $options['behavior']['pagination']
+            );
+        }
+        if (isset($options['behavior'])) {
+            $this->options['behavior'] = array_replace($this->options['behavior'], $options['behavior']);
+            unset($options['behavior']);
+        }
+
+        if (isset($options['integration'])) {
+            $this->options['integration'] = array_replace($this->options['integration'], $options['integration']);
+        }
     }
 
     public function getOptions(): array
@@ -541,16 +583,16 @@ class Gridview implements GridviewInterface
 
     private function resolveLayout(string $section): string
     {
-        $layout = $this->options['layout'][$section] ?? null;
+        $layout = $this->options['display']['layout'][$section] ?? null;
 
         if ($layout === null && $section === 'dataview') {
             $tokens = [];
-            if ($this->options['showThead']) {
+            if ($this->options['display']['showThead']) {
                 $tokens[] = '{thead}';
             }
             $tokens[] = '{filter}';
             $tokens[] = '{tbody}';
-            if ($this->options['showTfoot']) {
+            if ($this->options['display']['showTfoot']) {
                 $tokens[] = '{tfoot}';
             }
             $layout = implode(' ', $tokens);
@@ -592,18 +634,18 @@ class Gridview implements GridviewInterface
 
     public function layoutTemplate(string $token): string
     {
-        return $this->options['layout']['templates'][$token]
+        return $this->options['display']['layout']['templates'][$token]
             ?? "@FedaleGridview/gridview/sections/{$token}.html.twig";
     }
 
     public function isSlot(string $token): bool
     {
-        return isset($this->options['layout']['slots'][$token]);
+        return isset($this->options['display']['layout']['slots'][$token]);
     }
 
     public function slotContent(string $token): string
     {
-        return $this->options['layout']['slots'][$token] ?? '';
+        return $this->options['display']['layout']['slots'][$token] ?? '';
     }
 
     /**
@@ -623,8 +665,8 @@ class Gridview implements GridviewInterface
      */
     public function getRenderer(): string
     {
-        $map = $this->options['renderer']['map'] ?? [];
-        $default = $this->options['renderer']['default'] ?? (array_key_first($map) ?? 'table');
+        $map = $this->options['display']['renderer']['map'] ?? [];
+        $default = $this->options['display']['renderer']['default'] ?? (array_key_first($map) ?? 'table');
 
         if (!isset($this->urlState)) {
             return $default;
@@ -647,7 +689,7 @@ class Gridview implements GridviewInterface
      */
     public function getRenderers(): array
     {
-        return array_keys($this->options['renderer']['map'] ?? []);
+        return array_keys($this->options['display']['renderer']['map'] ?? []);
     }
 
     /**
@@ -658,7 +700,7 @@ class Gridview implements GridviewInterface
      */
     public function rendererOptions(string $name): array
     {
-        return $this->options['renderer']['map'][$name] ?? [];
+        return $this->options['display']['renderer']['map'][$name] ?? [];
     }
 
     /**
@@ -669,7 +711,7 @@ class Gridview implements GridviewInterface
      */
     public function isAutoBar(): bool
     {
-        $flag = $this->options['filterControls']['autoBar'] ?? null;
+        $flag = $this->options['behavior']['filterControls']['autoBar'] ?? null;
 
         return $flag ?? ($this->getRenderer() !== 'table');
     }
@@ -680,7 +722,7 @@ class Gridview implements GridviewInterface
             return false;
         }
 
-        return array_key_exists($token, $this->options['layout']);
+        return array_key_exists($token, $this->options['display']['layout']);
     }
 
     /**
@@ -703,7 +745,7 @@ class Gridview implements GridviewInterface
             default    => [],
         };
 
-        $extra = $this->options['layout']['attrs'][$region] ?? [];
+        $extra = $this->options['display']['layout']['attrs'][$region] ?? [];
 
         return $extra !== [] ? array_replace($base, $extra) : $base;
     }
@@ -713,7 +755,7 @@ class Gridview implements GridviewInterface
         $this->initializeDataProvider();
 
         $request = $this->gridviewService->getRequest();
-        $formName = $this->options['formName'];
+        $formName = $this->options['behavior']['formName'];
 
         $this->urlState = GridviewUrlState::fromRequest(
             $request,
@@ -723,7 +765,7 @@ class Gridview implements GridviewInterface
             $this->dataProvider->getPagination()->getPageSizeParam()
         );
 
-        $globalFields = $this->options['globalSearch'];
+        $globalFields = $this->options['behavior']['globalSearch'];
 
         if (isset($this->searchModel)) {
             if (!empty($globalFields)) {
@@ -743,7 +785,7 @@ class Gridview implements GridviewInterface
         // Let the active paginator strategy influence data fetching before getData()
         // (e.g. virtual scroll disabling paging). Pure-presentation strategies
         // (numeric, infinite) don't implement the capability and are left untouched.
-        $paginationOptions = $this->options['pagination'] ?? [];
+        $paginationOptions = $this->options['behavior']['pagination'] ?? [];
         $strategy = $this->gridviewService->getPaginatorStrategyRegistry()
             ->get($paginationOptions['mode'] ?? 'numeric');
         if ($strategy instanceof PaginationConfiguringInterface) {
@@ -762,7 +804,7 @@ class Gridview implements GridviewInterface
         // Infinite scroll: rows-only Turbo Stream for ?_rows=1 (append rows + replace
         // the infinite section). The requested page already drives getData(), so the
         // models in $parameters are the next page's rows.
-        if ($this->options['useTurbo'] && $request->query->getBoolean('_rows')) {
+        if ($this->options['behavior']['useTurbo'] && $request->query->getBoolean('_rows')) {
             return new Response(
                 $this->twig->render('@FedaleGridview/gridview/sections/_rows_stream.html.twig', $parameters),
                 Response::HTTP_OK,
@@ -770,7 +812,7 @@ class Gridview implements GridviewInterface
             );
         }
 
-        $template = ($this->options['useTurbo'] && $request->headers->has('Turbo-Frame'))
+        $template = ($this->options['behavior']['useTurbo'] && $request->headers->has('Turbo-Frame'))
             ? '@FedaleGridview/gridview/_grid.html.twig'
             : $view;
 
@@ -788,7 +830,7 @@ class Gridview implements GridviewInterface
             return;
         }
 
-        $useTurbo = (bool) ($this->options['useTurbo'] ?? false);
+        $useTurbo = (bool) ($this->options['behavior']['useTurbo'] ?? false);
         $responseType = match (true) {
             $useTurbo && $request->query->getBoolean('_rows') => '_rows stream',
             $useTurbo && $request->headers->has('Turbo-Frame') => '_grid frame',
@@ -810,7 +852,7 @@ class Gridview implements GridviewInterface
         ];
 
         $paginationData = [
-            'mode' => $this->options['pagination']['mode'] ?? 'numeric',
+            'mode' => $this->options['behavior']['pagination']['mode'] ?? 'numeric',
             'page' => $pagination->getCurrentPage(),
             'pageSize' => $pagination->getPageSize(),
             'offset' => $pagination->getOffset(),
@@ -844,7 +886,7 @@ class Gridview implements GridviewInterface
             key: $this->getKey(),
             id: $this->getId(),
             responseType: $responseType,
-            route: $this->options['routeName'] ?? null,
+            route: $this->options['integration']['routeName'] ?? null,
             template: match ($responseType) {
                 '_rows stream' => '@FedaleGridview/gridview/sections/_rows_stream.html.twig',
                 '_grid frame' => '@FedaleGridview/gridview/_grid.html.twig',
@@ -852,7 +894,7 @@ class Gridview implements GridviewInterface
             },
             theme: $this->theme,
             options: $this->options,
-            formName: (string) ($this->options['formName'] ?? 'fedaleForm'),
+            formName: (string) ($this->options['behavior']['formName'] ?? 'fedaleForm'),
             filterPath: $filterPath,
             globalSearch: $this->urlState->getGlobalSearch(),
             rawParams: $rawParams,

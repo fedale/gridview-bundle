@@ -49,7 +49,10 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return $this->mergeConfig(parent::defaultConfig(), [
             'labels'   => ['heading' => null, 'add' => null, 'edit' => null],
             'form'     => [
-                'mode'       => 'modal',
+                // null falls through to YAML `behavior.crudMode` in crudOptions(),
+                // then the built-in 'modal' default — see actionLayout() for the
+                // same PHP-then-YAML-then-built-in resolution pattern.
+                'mode'       => null,
                 'theme'      => null,
                 'view'       => null,
                 'actions'    => ['placement' => 'inline', 'layout' => null, 'buttons' => null],
@@ -276,7 +279,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
      */
     protected function defaultActionButtons(): array
     {
-        $mode = $this->config('form.mode');
+        $mode = $this->resolvedCrudMode();
         $buttons = [];
 
         if ($this->routeExists($this->routeName('show'))) {
@@ -303,6 +306,27 @@ abstract class AbstractCrudGridController extends AbstractGridController
         }
 
         return $buttons;
+    }
+
+    /**
+     * Resolved CRUD presentation mode ('modal' | 'page' | 'custom'): PHP
+     * `form.mode` wins, else YAML `behavior.crudMode`, else 'modal'. Guards the
+     * container lookup with `isset()` (not just `has()`) because this is reached
+     * by {@see defaultActionButtons()} — exercised by tests that build a bare
+     * controller without ever calling `setContainer()`.
+     */
+    private function resolvedCrudMode(): string
+    {
+        $configured = $this->config('form.mode');
+        if (\is_string($configured) && $configured !== '') {
+            return $configured;
+        }
+
+        $yaml = isset($this->container) && $this->container->has(GridviewConfigRegistry::class)
+            ? $this->container->get(GridviewConfigRegistry::class)->resolveOptions($this->config('id'))['behavior']['crudMode'] ?? null
+            : null;
+
+        return \is_string($yaml) && $yaml !== '' ? $yaml : 'modal';
     }
 
     /** Resolved default action-token layout: PHP config wins, else YAML, else the built-in default. */
@@ -545,24 +569,42 @@ abstract class AbstractCrudGridController extends AbstractGridController
 
     protected function crudOptions(): array
     {
+        // 'mode'/'pageTemplate' are no longer a `crud.*` sub-array: `mode` is a
+        // behavior toggle (modal/page/custom), `pageTemplate` a display concern
+        // (which template renders the full page). `crud.title` is dropped
+        // entirely — it was always a duplicate of the grid's own `title`, both
+        // derived from `labels.heading`.
+        // PHP `viewConfig()['form']['mode']`/['template']['page'] win when set;
+        // else fall back to the YAML `behavior.crudMode`/`display.crudTemplate`
+        // default, then the built-in 'modal'/null — same resolution order as
+        // actionLayout() below.
+        $yamlCrudTemplate = $this->container->get(GridviewConfigRegistry::class)
+            ->resolveOptions($this->config('id'))['display']['crudTemplate'] ?? null;
+
         return [
-            'crud' => [
+            'display' => [
                 'title' => $this->config('labels.heading'),
-                'mode' => $this->config('form.mode'),
-                'pageTemplate' => $this->config('template.page'),
-                'addUrl' => $this->generateUrl($this->routeName('new')),
-                'bulkDeleteUrl' => $this->generateUrl($this->routeName('bulk_delete')),
-                'bulkUpdateUrl' => $this->generateUrl($this->routeName('bulk_update')),
-                // Base for inline editing; the JS appends /{id}/{field}.
-                'inlineUrl' => $this->generateUrl($this->routeName('index')) . '/inline',
+                'addLabel' => $this->config('labels.add'),
+                'crudTemplate' => $this->config('template.page') ?? $yamlCrudTemplate,
+                // Default CRUD toolbar: add button + global search on the left, the
+                // column-visibility and export controls pushed to the right by the
+                // elastic {spacer}. The `header` region wraps the toolbar; a
+                // controller can override layout.toolbar to change it.
+                'layout' => [
+                    'toolbar' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
+                ],
             ],
-            'addLabel' => $this->config('labels.add'),
-            // Default CRUD toolbar: add button + global search on the left, the
-            // column-visibility and export controls pushed to the right by the
-            // elastic {spacer}. The `header` region wraps the toolbar; a controller
-            // can override layout.toolbar to change it.
-            'layout' => [
-                'toolbar' => '{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}',
+            'behavior' => [
+                'crudMode' => $this->resolvedCrudMode(),
+            ],
+            'integration' => [
+                'crud' => [
+                    'addUrl' => $this->generateUrl($this->routeName('new')),
+                    'bulkDeleteUrl' => $this->generateUrl($this->routeName('bulk_delete')),
+                    'bulkUpdateUrl' => $this->generateUrl($this->routeName('bulk_update')),
+                    // Base for inline editing; the JS appends /{id}/{field}.
+                    'inlineUrl' => $this->generateUrl($this->routeName('index')) . '/inline',
+                ],
             ],
         ];
     }

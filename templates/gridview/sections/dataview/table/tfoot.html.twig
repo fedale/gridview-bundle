@@ -4,7 +4,7 @@
         {# Default footer: total-results summary ("<N> results") on the left,
            N being the current (filtered) query count. Spans the full row,
            including the responsive control column when present. #}
-        {% set _footCols = gridview.indexColumns|length + (gridview.options.responsive|default(false) ? 1 : 0) %}
+        {% set _footCols = gridview.indexColumns|length + (gridview.options.behavior.responsive|default(false) ? 1 : 0) %}
         <tr>
             <td class="gv-tfoot-summary" colspan="{{ _footCols }}">
                 {{ 'grid.results'|trans({'%count%': pagination.totalCount}, 'GridviewBundle') }}

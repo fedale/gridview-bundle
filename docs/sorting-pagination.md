@@ -115,7 +115,7 @@ The `{pagination}` token in the footer layout renders the page navigation links.
 To remove pagination entirely, omit the token from the footer layout:
 
 ```php
-->setOptions(['layout' => ['footer' => '']])
+->setOptions(['display' => ['layout' => ['footer' => '']]])
 ```
 
 ### Navigation UI
@@ -151,15 +151,15 @@ For long lists a `<select>` lets the user jump directly to any page. It is contr
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `pagination.pageSelect` | `bool` | `true` | Show the jump-to-page `<select>` |
-| `pagination.pageSelectThreshold` | `int` | `10` | Minimum page count before the `<select>` appears |
+| `behavior.pagination.pageSelect` | `bool` | `true` | Show the jump-to-page `<select>` |
+| `behavior.pagination.pageSelectThreshold` | `int` | `10` | Minimum page count before the `<select>` appears |
 
 ```php
 // Disable the select for this grid
-->setOptions(['pagination' => ['pageSelect' => false]])
+->setOptions(['behavior' => ['pagination' => ['pageSelect' => false]]])
 
 // Or only show it from 20 pages up
-->setOptions(['pagination' => ['pageSelectThreshold' => 20]])
+->setOptions(['behavior' => ['pagination' => ['pageSelectThreshold' => 20]]])
 ```
 
 Each `<option>` value is the fully-built page URL, so navigation needs no client-side query

@@ -202,8 +202,10 @@ column that opted into the `chip` mode **and** currently has an applied filter:
 
 ```php
 'options' => [
-    // Give the chips their own row under the toolbar:
-    'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+    'display' => [
+        // Give the chips their own row under the toolbar:
+        'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+    ],
 ],
 ```
 
@@ -214,10 +216,14 @@ explicitly. Control it via `filterControls.clear`:
 
 ```php
 'options' => [
-    'filterControls' => [
-        'clear' => ['chip'],  // all columns show only chip affordance by default
+    'behavior' => [
+        'filterControls' => [
+            'clear' => ['chip'],  // all columns show only chip affordance by default
+        ],
     ],
-    'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+    'display' => [
+        'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+    ],
 ],
 ```
 
@@ -389,14 +395,14 @@ search input and optional AJAX loading.
 | `ajax_url` | `string\|null` | `null` | URL that returns `[{"id":1,"name":"…"},…]` |
 | `option_label` | `string` | `'name'` | JSON key used as option label (AJAX mode) |
 | `option_value` | `string` | `'id'` | JSON key used as option value (AJAX mode) |
-| `controls_threshold` | `int` | *(grid `filterControls.choiceControlsThreshold`, 20)* | Hide the search box and the select/deselect/invert toolbar when the column has fewer than this many options. Per-column override of the grid-level default. AJAX lists always keep their controls. |
+| `controls_threshold` | `int` | *(grid `behavior.filterControls.choiceControlsThreshold`, 20)* | Hide the search box and the select/deselect/invert toolbar when the column has fewer than this many options. Per-column override of the grid-level default. AJAX lists always keep their controls. |
 
-The grid-level default lives in `options.filterControls.choiceControlsThreshold` (default `20`),
-alongside the other filter-UI knobs:
+The grid-level default lives in `options.behavior.filterControls.choiceControlsThreshold`
+(default `20`), alongside the other filter-UI knobs:
 
 ```php
 // Raise the threshold for the whole grid (controls appear only from 30 options up)
-->setOptions(['filterControls' => ['choiceControlsThreshold' => 30]])
+->setOptions(['behavior' => ['filterControls' => ['choiceControlsThreshold' => 30]]])
 
 // …or per column, overriding the grid default
 'filter' => ['type' => 'relation', 'options' => [
@@ -703,7 +709,9 @@ protected function viewConfig(): array
 {
     return [
         'options' => [
-            'restriction' => !$this->isGranted('ROLE_COMMERCIAL'),
+            'behavior' => [
+                'restriction' => !$this->isGranted('ROLE_COMMERCIAL'),
+            ],
         ],
     ];
 }
@@ -714,7 +722,7 @@ protected function viewConfig(): array
 your own text:
 
 ```php
-'options' => ['restriction' => 'You are only seeing your own customers.'],
+'options' => ['behavior' => ['restriction' => 'You are only seeing your own customers.']],
 ```
 
 A falsy value (the default) renders nothing — no banner, no wrapper markup. The
@@ -724,7 +732,7 @@ elsewhere (or drop it) by editing the layout:
 
 ```php
 // Render it inside the header instead of at the very top:
-'options' => ['layout' => ['header' => '{restrictionNotice} {heading} {toolbar}']],
+'options' => ['display' => ['layout' => ['header' => '{restrictionNotice} {heading} {toolbar}']]],
 ```
 
 > Keep the flag in sync with the query condition: it's a **presentational** hint,
@@ -737,9 +745,13 @@ Declare the DQL fields to search and add the `{globalSearch}` token to the toolb
 
 ```php
 ->setOptions([
-    'globalSearch' => ['c.name', 'c.email', 'c.code'],
-    'layout' => [
-        'toolbar' => '{globalSearch}',
+    'behavior' => [
+        'globalSearch' => ['c.name', 'c.email', 'c.code'],
+    ],
+    'display' => [
+        'layout' => [
+            'toolbar' => '{globalSearch}',
+        ],
     ],
 ])
 ```

@@ -1,5 +1,5 @@
 {{ gv_i18n_catalog() }}
-{% if gridview.options.useTurbo %}
+{% if gridview.options.behavior.useTurbo %}
 {# data-turbo="true" re-enables Turbo for the grid subtree even when the host
    layout disables it globally (e.g. EasyAdmin renders <body data-turbo="false">).
    Turbo honours the nearest data-turbo ancestor, so the filter form submits and
@@ -7,9 +7,9 @@
    (which would drop input focus on every keystroke-driven filter update). #}
 <turbo-frame id="gridview-{{ gridview.key }}" data-turbo="true">
 {% endif %}
-    {% set gvCrud = gridview.options.crud|default(false) %}
-    {% set gvInline = gridview.options.crud.inlineUrl is defined and gridview.options.crud.inlineUrl is not empty %}
-    {% set gvRealtime = gridview.options.realtime.enabled|default(false) and gridview.options.realtime.hubUrl|default(false) %}
+    {% set gvCrud = gridview.options.integration.crud|default(false) %}
+    {% set gvInline = gridview.options.integration.crud.inlineUrl is defined and gridview.options.integration.crud.inlineUrl is not empty %}
+    {% set gvRealtime = gridview.options.behavior.realtime.enabled|default(false) and gridview.options.behavior.realtime.hubUrl|default(false) %}
     {# Table-only client features (column collapse, drag-reorder) target
        <table>/<th>/<tr>, so they attach only when the active renderer is the
        table strategy. On list/card they are no-ops and stay off. #}
@@ -18,22 +18,22 @@
     {% if gridview.hasCheckboxColumn %}{% set gvControllers = gvControllers|merge(['gridview-selection']) %}{% endif %}
     {% if gvCrud %}{% set gvControllers = gvControllers|merge(['gridview-crud']) %}{% endif %}
     {% if gvInline %}{% set gvControllers = gvControllers|merge(['gridview-inline-edit']) %}{% endif %}
-    {% if gvIsTable and gridview.options.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
-    {% if gvIsTable and gridview.options.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
+    {% if gvIsTable and gridview.options.behavior.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
+    {% if gvIsTable and gridview.options.behavior.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
     {% if gvRealtime %}{% set gvControllers = gvControllers|merge(['gridview-mercure']) %}{% endif %}
-    {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.pagination.mode|default('numeric'))) %}
+    {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.behavior.pagination.mode|default('numeric'))) %}
     <div data-gridview
-         data-gv-max-query-length="{{ gridview.options.maxQueryLength }}"
+         data-gv-max-query-length="{{ gridview.options.behavior.maxQueryLength }}"
          {{ gridview.regionAttr('shell')|options }}
          {% if gvControllers is not empty %}data-controller="{{ gvControllers|join(' ') }}"{% endif %}
          {% if gridview.hasCheckboxColumn %}data-gridview-selection-grid-id-value="{{ gridview.key }}"{% endif %}
-         {% if gvInline %}data-gridview-inline-edit-base-value="{{ gridview.options.crud.inlineUrl }}"{% endif %}
-         {% if gvRealtime %}data-gridview-mercure-hub-value="{{ gridview.options.realtime.hubUrl }}"
-         data-gridview-mercure-topic-value="{{ gridview.options.realtime.topic }}"
+         {% if gvInline %}data-gridview-inline-edit-base-value="{{ gridview.options.integration.crud.inlineUrl }}"{% endif %}
+         {% if gvRealtime %}data-gridview-mercure-hub-value="{{ gridview.options.behavior.realtime.hubUrl }}"
+         data-gridview-mercure-topic-value="{{ gridview.options.behavior.realtime.topic }}"
          data-gridview-mercure-form-value="gv-form-{{ gridview.key }}"{% endif %}
          {% if gvCrud and gridview.hasCheckboxColumn %}data-action="gridview-selection:open->gridview-crud#openFromEvent"{% endif %}>
         {% if form is defined and form is not null %}
-        {{ form_start(form, {'action': gridview.options.routeName ? path(gridview.options.routeName) : '', 'attr': {'id': 'gv-form-' ~ gridview.key, 'data-controller': 'gridview-filter', 'data-turbo-action': 'replace'}}) }}
+        {{ form_start(form, {'action': gridview.options.integration.routeName ? path(gridview.options.integration.routeName) : '', 'attr': {'id': 'gv-form-' ~ gridview.key, 'data-controller': 'gridview-filter', 'data-turbo-action': 'replace'}}) }}
         {% endif %}
         {{ gridview_children(gridview, 'shell') }}
         {% if form is defined and form is not null %}
@@ -44,6 +44,6 @@
         {% include '@FedaleGridview/crud/_modal.html.twig' %}
         {% endif %}
     </div>
-{% if gridview.options.useTurbo %}
+{% if gridview.options.behavior.useTurbo %}
 </turbo-frame>
 {% endif %}

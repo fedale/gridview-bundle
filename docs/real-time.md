@@ -57,7 +57,7 @@ that cookie when opening the `EventSource` (`withCredentials`).
    fedale_gridview:
      gridviews:
        user:                    # the grid id (entity short name, lowercased)
-         options:
+         behavior:
            realtime:
              enabled: true
              # topicPrefix: "gridview/"   # optional, this is the default

@@ -302,13 +302,13 @@ class DataColumn extends AbstractColumn
         }
 
         // Grid-level filterControls.clear is the next source.
-        $gridClear = $this->gridview->getOptions()['filterControls']['clear'] ?? null;
+        $gridClear = $this->gridview->getOptions()['behavior']['filterControls']['clear'] ?? null;
         if ($gridClear !== null) {
             return FilterClearNormalizer::normalize($gridClear);
         }
 
         // Fallback to retro-compatible logic: ['header'] + 'input' iff inlineClear.
-        $inlineClearDefault = (bool) ($this->gridview->getOptions()['filterControls']['inlineClear'] ?? false);
+        $inlineClearDefault = (bool) ($this->gridview->getOptions()['behavior']['filterControls']['inlineClear'] ?? false);
         return FilterClearNormalizer::normalize(null, $inlineClearDefault);
     }
 

@@ -190,32 +190,51 @@ abstract class AbstractGridController extends AbstractController
         $crudOptions = $this->crudOptions();
         $viewOptions = $this->config('options');
 
-        $options = array_replace([
-            'routeName' => $this->routeName('index'),
-            'export' => [
-                'url' => $this->generateUrl($this->routeName('export')),
-                'formats' => array_map(
-                    static fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
-                    $this->exportFormats(),
-                ),
+        $defaults = [
+            'integration' => [
+                'routeName' => $this->routeName('index'),
+                'export' => [
+                    'url' => $this->generateUrl($this->routeName('export')),
+                    'formats' => array_map(
+                        static fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
+                        $this->exportFormats(),
+                    ),
+                ],
             ],
             // Resolved real-time settings consumed by _grid.html.twig. `enabled`
             // is only true when both the grid opts in *and* a hub is available.
-            'realtime' => [
-                'enabled' => $rt['active'],
-                'topic'   => $rt['topic'],
-                'hubUrl'  => $rt['hubUrl'],
+            'behavior' => [
+                'realtime' => [
+                    'enabled' => $rt['active'],
+                    'topic'   => $rt['topic'],
+                    'hubUrl'  => $rt['hubUrl'],
+                ],
             ],
-        ], $crudOptions, $viewOptions);
+        ];
+
+        // Merge group-by-group (display/behavior/integration): a single flat
+        // array_replace across the three layers would let e.g. a bare
+        // `viewOptions['integration']` wholesale-replace `crudOptions()`'s
+        // `integration.crud` URLs. Each group itself is still merged shallowly
+        // (matching the original flat-key behavior) — only `integration.crud`
+        // gets its own one-level merge below, same as before the regrouping.
+        $options = ['display' => [], 'behavior' => [], 'integration' => []];
+        foreach (['display', 'behavior', 'integration'] as $group) {
+            $options[$group] = array_replace(
+                $defaults[$group] ?? [],
+                $crudOptions[$group] ?? [],
+                $viewOptions[$group] ?? [],
+            );
+        }
 
         // Deep-merge the `crud` sub-array: array_replace above is shallow, so a
-        // `viewConfig().options.crud` would otherwise clobber the auto-derived
-        // URLs/title from crudOptions(). Merging one level lets a grid set a
-        // single crud key (e.g. `bulkActions`) without re-listing the rest.
-        if (isset($crudOptions['crud']) || isset($viewOptions['crud'])) {
-            $options['crud'] = array_replace(
-                $crudOptions['crud'] ?? [],
-                $viewOptions['crud'] ?? [],
+        // `viewConfig().options.integration.crud` would otherwise clobber the
+        // auto-derived URLs from crudOptions(). Merging one level lets a grid
+        // set a single crud key (e.g. `bulkActions`) without re-listing the rest.
+        if (isset($crudOptions['integration']['crud']) || isset($viewOptions['integration']['crud'])) {
+            $options['integration']['crud'] = array_replace(
+                $crudOptions['integration']['crud'] ?? [],
+                $viewOptions['integration']['crud'] ?? [],
             );
         }
 
@@ -271,7 +290,7 @@ abstract class AbstractGridController extends AbstractController
     {
         if ($this->resolvedRealtime === null) {
             $rt = $this->container->get(GridviewConfigRegistry::class)
-                ->resolveOptions($this->config('id'))['realtime'] ?? [];
+                ->resolveOptions($this->config('id'))['behavior']['realtime'] ?? [];
             $rt += ['enabled' => false, 'topicPrefix' => 'gridview/'];
 
             $hub    = $this->mercureHub();

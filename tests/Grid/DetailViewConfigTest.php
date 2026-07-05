@@ -66,11 +66,11 @@ class DetailViewConfigTest extends TestCase
     {
         // Same id used by BOTH a grid and a detail: they must not collide.
         $registry = new GridviewConfigRegistry([
-            'gridviews'   => ['customer' => ['options' => ['emptyText' => 'No records']]],
+            'gridviews'   => ['customer' => ['display' => ['emptyText' => 'No records']]],
             'detailviews' => ['customer' => ['options' => ['emptyText' => 'No record']]],
         ]);
 
-        $this->assertSame('No records', $registry->resolveOptions('customer')['emptyText']);
+        $this->assertSame('No records', $registry->resolveOptions('customer')['display']['emptyText']);
         $this->assertSame('No record', $registry->resolveDetailOptions('customer')['emptyText']);
     }
 }

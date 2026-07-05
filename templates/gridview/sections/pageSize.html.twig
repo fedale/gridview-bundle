@@ -4,7 +4,7 @@
    aggiornato e pagina azzerata), così non serve ricostruire la query lato JS. #}
 {% if pagination.pageSizeOptions is not empty %}
     {% set _currentRoute = app.request.attributes.get('_route') %}
-    {% set turboAction   = gridview.options.useTurbo %}
+    {% set turboAction   = gridview.options.behavior.useTurbo %}
     <div class="gv-page-size"
          data-controller="gridview-page-jump"
          data-gridview-page-jump-turbo-value="{{ turboAction ? 'true' : 'false' }}">

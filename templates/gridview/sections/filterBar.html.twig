@@ -16,7 +16,7 @@
                 {% if (column.filter.type ?? 'text') == 'relation' %}
                     {% set widgetAttr = widgetAttr|merge({
                         'data-gridview-relation-filter-controls-threshold-value':
-                            column.filter.options.controls_threshold ?? gridview.options.filterControls.choiceControlsThreshold ?? 20
+                            column.filter.options.controls_threshold ?? gridview.options.behavior.filterControls.choiceControlsThreshold ?? 20
                     }) %}
                 {% endif %}
                 {{ form_widget(form[attr], {'attr': widgetAttr}) }}

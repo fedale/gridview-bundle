@@ -8,7 +8,7 @@
 {% set listItem = listOpts.template|default('@FedaleGridview/gridview/sections/dataview/list/_item.html.twig') %}
 <ul class="gv-list" data-gv="{{ gridview.key }}">
     {% if models is empty %}
-        {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/list/empty.html.twig') %}
+        {% include gridview.options.display.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/list/empty.html.twig') %}
     {% else %}
         {% for row in models %}
             {% include listItem with {'rowIndex': loop.index0} %}

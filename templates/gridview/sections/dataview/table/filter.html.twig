@@ -1,4 +1,4 @@
-{% if form is defined and form is not null and gridview.options.filterControls.inHeader %}
+{% if form is defined and form is not null and gridview.options.behavior.filterControls.inHeader %}
 {% set filterAttr = gridview.regionAttr('filter') %}
 {% set filterAttr = filterAttr|merge({'class': ('gv-thead-filters ' ~ filterAttr.class|default(''))|trim}) %}
 <thead {{ filterAttr|options }}>
@@ -28,7 +28,7 @@
                     {% if filterType == 'relation' %}
                         {% set widgetAttr = widgetAttr|merge({
                             'data-gridview-relation-filter-controls-threshold-value':
-                                column.filter.options.controls_threshold ?? gridview.options.filterControls.choiceControlsThreshold ?? 20
+                                column.filter.options.controls_threshold ?? gridview.options.behavior.filterControls.choiceControlsThreshold ?? 20
                         }) %}
                     {% endif %}
                     {{ form_widget(form[attr], {'attr': widgetAttr}) }}

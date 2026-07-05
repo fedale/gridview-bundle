@@ -240,7 +240,7 @@ private function handleForm(Request $request, string $mode, ?int $id): Response
 }
 ```
 
-The action buttons and the `{addButton}` token open the modal (or navigate, per `crud.mode`). Use the
+The action buttons and the `{addButton}` token open the modal (or navigate, per `form.mode`). Use the
 `CrudButton` helper inside an `action` column so the URLs (route-owned by the app) get the right hooks:
 
 ```php
@@ -263,13 +263,14 @@ app.register('gridview-crud', GridviewCrudController);
 
 ### Presentation mode: modal / page / custom
 
-`crud.mode` (set by the host app) chooses how the form is presented:
+`form.mode` (set in the controller's `viewConfig()`, or via the YAML `behavior.crudMode`
+default — see [Configuration](configuration.md#behavior)) chooses how the form is presented:
 
 | Mode | Buttons | Form endpoint | Submit |
 |------|---------|---------------|--------|
 | `modal` (default) | open the dialog (real `href` as no-JS fallback) | XHR → partial | Turbo Stream |
 | `page` | plain links to the form page | direct → full page (`@FedaleGridview/crud/page.html.twig`, extends `pageBase`) | redirect |
-| `custom` | plain links | direct → **your** template (`crud.pageTemplate`) which prints `formHtml` | redirect |
+| `custom` | plain links | direct → **your** template (`template.page`, or YAML `display.crudTemplate`) which prints `formHtml` | redirect |
 
 The endpoint itself is mode-agnostic — it branches on `Request::isXmlHttpRequest()` (the modal
 fetches with `X-Requested-With`), so direct navigation always yields a full page (a no-JS fallback
@@ -606,7 +607,7 @@ class UserController extends AbstractCrudGridController
             'title'    => 'User',
             'addLabel' => 'New user',
             'formView' => 'gridview/user/_form.html.twig',
-            'options'  => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']],
+            'options'  => ['display' => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']]],
         ];
     }
 

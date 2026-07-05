@@ -331,7 +331,7 @@ class Sort implements SortInterface
 
         $url        = $this->createUrl($attribute, $gridview);
         $dataSort   = htmlspecialchars($this->createSortParam($attribute), ENT_QUOTES);
-        $turboAttr  = $gridview->getOptions()['useTurbo'] ? ' data-turbo-action="advance"' : '';
+        $turboAttr  = $gridview->getOptions()['behavior']['useTurbo'] ? ' data-turbo-action="advance"' : '';
 
         return '<a href="' . $url . '" class="' . implode(' ', $classes) . '"'
             . ' data-sort="' . $dataSort . '"' . $turboAttr . '>' . $label . '</a>';
@@ -352,7 +352,7 @@ class Sort implements SortInterface
         $parameters = $gridview->getUrlState()->withSort($this->createSortParam($attribute));
 
         return $this->router->generate(
-            $gridview->getOptions()['routeName'] ?? $this->request->attributes->get('_route'),
+            $gridview->getOptions()['integration']['routeName'] ?? $this->request->attributes->get('_route'),
             $parameters,
             $absolute ? RouterInterface::ABSOLUTE_URL : RouterInterface::ABSOLUTE_PATH
         );

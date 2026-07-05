@@ -1,4 +1,4 @@
 {# Dispatcher del token {pagination}: delega alla strategia selezionata via
-   options.pagination.mode (registry PaginatorStrategy). 'numeric' è il default. #}
-{% set mode = gridview.options.pagination.mode|default('numeric') %}
+   options.behavior.pagination.mode (registry PaginatorStrategy). 'numeric' è il default. #}
+{% set mode = gridview.options.behavior.pagination.mode|default('numeric') %}
 {% include gridview_paginator_template(mode) %}

@@ -1,14 +1,14 @@
 {% set _currentRoute = app.request.attributes.get('_route') %}
 {% set _lastPage     = pagination.pageCount %}
 {% set _currentPage  = gridview.urlState.page %}
-{% set turboAction   = gridview.options.useTurbo ? 'advance' : null %}
+{% set turboAction   = gridview.options.behavior.useTurbo ? 'advance' : null %}
 
 {# Quante pagine numeriche mostrare per lato rispetto a quella corrente. #}
 {% set _window       = 2 %}
 
 {# Select "vai a pagina": on/off e da quante pagine in su mostrarla. #}
-{% set _showSelect   = gridview.options.pagination.pageSelect %}
-{% set _selectAfter  = gridview.options.pagination.pageSelectThreshold %}
+{% set _showSelect   = gridview.options.behavior.pagination.pageSelect %}
+{% set _selectAfter  = gridview.options.behavior.pagination.pageSelectThreshold %}
 
 {% if _lastPage > 1 %}
     {# Normalizza la pagina corrente nell'intervallo valido. #}

@@ -52,7 +52,7 @@ class GridviewThemeTest extends TestCase
     {
         $config = [
             'theme'     => 'bootstrap5',
-            'gridviews' => ['users' => ['options' => ['theme' => 'tailwind']]],
+            'gridviews' => ['users' => ['display' => ['theme' => 'tailwind']]],
         ];
 
         $gridview = $this->builder($config)->setId('users')->renderGridview();

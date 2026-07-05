@@ -14,7 +14,7 @@
 {% endset %}
 <div class="gv-cards" data-gv="{{ gridview.key }}"{% if cardStyle|trim %} style="{{ cardStyle|trim }}"{% endif %}>
     {% if models is empty %}
-        {% include gridview.options.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/card/empty.html.twig') %}
+        {% include gridview.options.display.layout.templates.empty|default('@FedaleGridview/gridview/sections/dataview/card/empty.html.twig') %}
     {% else %}
         {% for row in models %}
             {% include cardItem with {'rowIndex': loop.index0, 'titleField': cardOpts.titleField|default(null)} %}

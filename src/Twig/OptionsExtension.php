@@ -118,7 +118,7 @@ class OptionsExtension extends AbstractExtension
      */
     private function regionTemplate(Environment $env, Gridview $gridview, string $token): string
     {
-        $override = $gridview->getOptions()['layout']['templates'][$token] ?? null;
+        $override = $gridview->getOptions()['display']['layout']['templates'][$token] ?? null;
         if ($override !== null) {
             return $override;
         }

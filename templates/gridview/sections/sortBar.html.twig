@@ -16,7 +16,7 @@
         {% set state = column.sortState %}
         <li>
             <a class="gv-dropdown-item gv-sort-item{% if state in ['asc', 'desc'] %} gv-sort-item--{{ state }}{% endif %}"
-               href="{{ column.sortUrl }}"{% if gridview.options.useTurbo %} data-turbo-action="advance"{% endif %}>
+               href="{{ column.sortUrl }}"{% if gridview.options.behavior.useTurbo %} data-turbo-action="advance"{% endif %}>
                 <span class="gv-sort-item__label">{{ gv_header_label(column.label) }}</span>
                 {% if state == 'asc' %}<span class="gv-sort-dir" aria-hidden="true">▲</span>
                 {% elseif state == 'desc' %}<span class="gv-sort-dir" aria-hidden="true">▼</span>{% endif %}

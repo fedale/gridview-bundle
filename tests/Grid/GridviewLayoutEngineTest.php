@@ -41,7 +41,7 @@ class GridviewLayoutEngineTest extends TestCase
 
     public function testDefaultLayoutUsesTheNewVocabulary(): void
     {
-        $layout = $this->gridview()->getOptions()['layout'];
+        $layout = $this->gridview()->getOptions()['display']['layout'];
 
         $this->assertSame('{restrictionNotice} {header} {dataview} {footer}', $layout['shell']);
         $this->assertSame('{heading} {toolbar}', $layout['header']);
@@ -59,7 +59,7 @@ class GridviewLayoutEngineTest extends TestCase
         // constant, so the two never drift apart again.
         $this->assertSame(
             GridviewConfigRegistry::LAYOUT_DEFAULTS,
-            $this->gridview()->getOptions()['layout'],
+            $this->gridview()->getOptions()['display']['layout'],
         );
     }
 
@@ -90,7 +90,7 @@ class GridviewLayoutEngineTest extends TestCase
 
     public function testDataviewStrategyHonoursShowTheadShowTfoot(): void
     {
-        $config = ['gridviews' => ['g' => ['options' => [
+        $config = ['gridviews' => ['g' => ['display' => [
             'showThead' => false,
             'showTfoot' => false,
         ]]]];
@@ -126,7 +126,7 @@ class GridviewLayoutEngineTest extends TestCase
 
     public function testLayoutAttrsOverrideAndExtendRegionAttr(): void
     {
-        $config = ['gridviews' => ['g' => ['options' => ['layout' => ['attrs' => [
+        $config = ['gridviews' => ['g' => ['display' => ['layout' => ['attrs' => [
             'thead' => ['class' => 'sticky'],
             'shell' => ['data-x' => '1'],
         ]]]]]];
@@ -148,7 +148,7 @@ class GridviewLayoutEngineTest extends TestCase
 
     public function testRendererIsConfigurablePerGridview(): void
     {
-        $config = ['gridviews' => ['g' => ['options' => ['renderer' => 'card']]]];
+        $config = ['gridviews' => ['g' => ['display' => ['renderer' => 'card']]]];
 
         $gridview = $this->gridview($config);
         $gridview->setOptions((new GridviewConfigRegistry($config))->resolveOptions('g'));
@@ -158,7 +158,7 @@ class GridviewLayoutEngineTest extends TestCase
 
     public function testLayoutTokensExtractInlineWidths(): void
     {
-        $config = ['gridviews' => ['g' => ['options' => ['layout' => [
+        $config = ['gridviews' => ['g' => ['display' => ['layout' => [
             'toolbar' => '{globalSearch 40%} {spacer} {export 120px}',
         ]]]]];
 
