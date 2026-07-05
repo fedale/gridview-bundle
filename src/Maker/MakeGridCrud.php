@@ -99,9 +99,28 @@ final class MakeGridCrud extends AbstractMaker
             $choices = array_map(static fn(array $f) => $f['name'], $selectable);
             $default = $mapper->defaultSelection($allFields);
 
-            $selected = $choices !== []
-                ? (array) $io->choice('Fields to expose as grid columns', $choices, implode(',', $default), true)
-                : [];
+            $selected = [];
+            if ($choices !== []) {
+                // A plain free-text Question, not $io->choice(): ChoiceQuestion
+                // auto-enables its raw-terminal autocompleter, which is unreliable
+                // outside a real TTY and can turn a stray PHP warning into an
+                // infinite retry loop (QuestionHelper retries forever when
+                // maxAttempts is unset). No autocompleter is attached here.
+                $question = new Question('Fields to expose as grid columns', implode(',', $default));
+                $question->setValidator(function (?string $answer) use ($choices): array {
+                    $names = array_filter(array_map('trim', explode(',', (string) $answer)));
+                    foreach ($names as $name) {
+                        if (!\in_array($name, $choices, true)) {
+                            throw new RuntimeCommandException(\sprintf('Unknown field "%s".', $name));
+                        }
+                    }
+
+                    return $names;
+                });
+                $question->setMaxAttempts(3);
+                $io->writeln(\sprintf('Available fields: %s', implode(', ', $choices)));
+                $selected = $io->askQuestion($question);
+            }
             $input->setOption('fields', implode(',', $selected));
         }
 
