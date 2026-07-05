@@ -7,6 +7,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Fedale\GridviewBundle\Serializer\LazyAwareObjectNormalizer;
@@ -181,6 +182,11 @@ class EntityDataProvider extends AbstractDataProvider
                 DateTimeNormalizer::FORMAT_KEY   => \DateTimeInterface::ATOM,
                 DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone(date_default_timezone_get()),
             ]),
+            // Without this, a backed-enum property falls through to
+            // LazyAwareObjectNormalizer's inner ObjectNormalizer, which treats
+            // it as a generic object and normalizes it to {name, value} instead
+            // of its scalar backing value — breaking any column that prints it.
+            new BackedEnumNormalizer(),
             new LazyAwareObjectNormalizer(null, null, null, null, null, null, $defaultContext),
         ];
         $serializer  = new Serializer($normalizers);
