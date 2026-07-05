@@ -17,6 +17,9 @@
     "require-dev": {
         "phpunit/phpunit": "^9.6",
         "doctrine/orm": "^2.12 || ^3.0",
+        "doctrine/doctrine-bundle": "^2.7 || ^3.0",
+        "symfony/console": "^6.4 || ^7.0 || ^8.0",
+        "symfony/maker-bundle": "^1.50",
         "symfony/form": "^6.4 || ^7.0 || ^8.0",
         "symfony/serializer": "^6.4 || ^7.0 || ^8.0",
         "symfony/property-access": "^6.4 || ^7.0 || ^8.0",
@@ -25,7 +28,8 @@
         "twig/twig": "^3.0"
     },
     "suggest": {
-        "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure"
+        "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",
+        "symfony/maker-bundle": "Enables the make:gv:crud scaffolding command. Install it in your app with: composer require --dev symfony/maker-bundle"
     },
     "autoload": {
         "psr-4": {
