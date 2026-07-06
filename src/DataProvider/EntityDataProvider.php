@@ -10,12 +10,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
 use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
+use Fedale\GridviewBundle\Contract\ScopeVerifiableInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Event\RowEvent;
 
-class EntityDataProvider extends AbstractDataProvider implements GroupingCapableInterface
+class EntityDataProvider extends AbstractDataProvider implements GroupingCapableInterface, ScopeVerifiableInterface
 {
     protected QueryBuilder $queryBuilder;
 
@@ -145,6 +146,26 @@ class EntityDataProvider extends AbstractDataProvider implements GroupingCapable
             $fields
         );
         $this->queryBuilder->andWhere($this->queryBuilder->expr()->orX(...$exprs));
+    }
+
+    /**
+     * Whether a row with the given key would appear in the current, filtered
+     * query — i.e. it passes any row-level restriction the repository's
+     * search() applies, not just "this id exists". Cloned off the already
+     * prepared queryBuilder (before pagination limits) so it inherits the
+     * exact same WHERE/JOIN as the list itself.
+     */
+    public function isKeyInScope(int|string $key, string $keyField = 'id'): bool
+    {
+        $rootAlias = $this->queryBuilder->getRootAliases()[0] ?? $this->alias;
+
+        $qb = (clone $this->queryBuilder)
+            ->select('1')
+            ->andWhere(sprintf('%s.%s = :gvScopeKey', $rootAlias, $keyField))
+            ->setParameter('gvScopeKey', $key)
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult() !== null;
     }
 
     public function getData()

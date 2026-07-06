@@ -12,6 +12,7 @@ use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
 use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
 use Fedale\GridviewBundle\Contract\PaginationConfiguringInterface;
+use Fedale\GridviewBundle\Contract\ScopeVerifiableInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Filter\FilterDefaultNormalizer;
@@ -21,6 +22,7 @@ use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 
 class Gridview implements GridviewInterface
@@ -903,10 +905,24 @@ class Gridview implements GridviewInterface
      * `?_children=<key>` request the lazy Stimulus controller fetches on first
      * expand. Reuses the grid's own route/action (no dedicated route), so it
      * inherits the same authorization guards as the index it's called from.
+     * The key itself is still attacker-controlled, so it's checked against
+     * the data provider's own row-level scope before being resolved (see
+     * {@see ScopeVerifiableInterface}).
      */
     private function renderGroupChildren(string|int $key): Response
     {
         $config = $this->getGroupingConfig();
+
+        // A raw key from the client must be checked against the same
+        // filters/restrictions the main list query applies — otherwise a
+        // caller could walk arbitrary ids and read children of parent rows
+        // outside their scope (e.g. another tenant's), bypassing whatever
+        // row-level restriction the data provider's repository enforces.
+        if ($this->dataProvider instanceof ScopeVerifiableInterface
+            && !$this->dataProvider->isKeyInScope($key, $config->getParentKey())) {
+            throw new NotFoundHttpException();
+        }
+
         $resolver = $this->dataProvider instanceof GroupingCapableInterface
             ? $this->dataProvider->getChildResolver()
             : null;

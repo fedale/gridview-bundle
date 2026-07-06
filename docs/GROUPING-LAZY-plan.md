@@ -77,6 +77,13 @@ Notes:
 - Response is a plain HTML fragment. The controller already injects it with
   `inner.innerHTML = await res.text()`. It is our own server-rendered grid
   fragment (same-origin, trusted) — same trust model as Turbo stream HTML.
+- **IDOR guard**: `$key` is client-controlled and `resolveForParent()` looks it
+  up directly (bypassing the main list's filters). Before resolving, `Gridview`
+  checks `$this->dataProvider instanceof ScopeVerifiableInterface` and calls
+  `isKeyInScope($key, $config->getParentKey())` — 404 if the key wouldn't
+  appear in the grid's own (possibly restricted) query. Implemented on
+  `EntityDataProvider` by cloning its prepared QueryBuilder. A data provider
+  without this capability is trusted to not need row-level scoping.
 
 ### 2. Split the loading placeholder from the sub-table body (required)
 
