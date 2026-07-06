@@ -48,6 +48,8 @@ class FedaleGridviewBundle extends AbstractBundle
         if (class_exists(\Symfony\Bundle\MakerBundle\Maker\AbstractMaker::class)) {
             $containerBuilder->register(\Fedale\GridviewBundle\Maker\MakeGridCrud::class, \Fedale\GridviewBundle\Maker\MakeGridCrud::class)
                 ->setArgument('$doctrineHelper', new \Symfony\Component\DependencyInjection\Reference('maker.doctrine_helper'))
+                ->setArgument('$generator', new \Symfony\Component\DependencyInjection\Reference('maker.generator'))
+                ->setArgument('$fileManager', new \Symfony\Component\DependencyInjection\Reference('maker.file_manager'))
                 ->addTag('maker.command');
         }
 

@@ -7,6 +7,7 @@ use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper;
 use Symfony\Bundle\MakerBundle\Exception\RuntimeCommandException;
+use Symfony\Bundle\MakerBundle\FileManager;
 use Symfony\Bundle\MakerBundle\Generator;
 use Symfony\Bundle\MakerBundle\InputConfiguration;
 use Symfony\Bundle\MakerBundle\Maker\AbstractMaker;
@@ -31,8 +32,11 @@ final class MakeGridCrud extends AbstractMaker
     /** @var array<string, array{label?: string, sortable?: bool, filter?: bool, control?: bool}> */
     private array $advancedOverrides = [];
 
-    public function __construct(private readonly DoctrineHelper $doctrineHelper)
-    {
+    public function __construct(
+        private readonly DoctrineHelper $doctrineHelper,
+        private readonly Generator $generator,
+        private readonly FileManager $fileManager,
+    ) {
     }
 
     public static function getCommandName(): string
@@ -84,8 +88,23 @@ final class MakeGridCrud extends AbstractMaker
         $metadata = $this->doctrineHelper->getMetadata($this->resolveEntityFqcn($entityClassName));
         $shortName = Str::getShortClassName($entityClassName);
 
-        if ($input->getOption('controller-class') === null) {
-            $input->setOption('controller-class', $io->ask('Controller class name', $this->defaultControllerClassName($shortName)));
+        $controllerClass = $input->getOption('controller-class');
+        if ($controllerClass === null) {
+            // Reject a name whose target file already exists here, at the prompt,
+            // rather than letting the whole wizard run and fail at generation time.
+            $default = $this->defaultControllerClassName($shortName);
+            do {
+                $controllerClass = $io->ask('Controller class name', $default);
+                $existingPath = $this->controllerFileIfExists($controllerClass);
+                if ($existingPath !== null) {
+                    $io->error(\sprintf('The controller file "%s" already exists. Choose a different class name.', $existingPath));
+                    $default = null;
+                }
+            } while ($existingPath !== null);
+
+            $input->setOption('controller-class', $controllerClass);
+        } elseif (($existingPath = $this->controllerFileIfExists($controllerClass)) !== null) {
+            throw new RuntimeCommandException(\sprintf('The controller file "%s" already exists. Pass a different --controller-class.', $existingPath));
         }
 
         if ($input->getOption('route-prefix') === null) {
@@ -223,6 +242,20 @@ final class MakeGridCrud extends AbstractMaker
         }
 
         return rtrim($this->doctrineHelper->getEntityNamespace(), '\\') . '\\' . $entityClassName;
+    }
+
+    /**
+     * The relative path of the controller that {@see generate()} would write for
+     * this class name, but only when that file already exists; null otherwise.
+     * Resolution mirrors the {@see Generator::createClassNameDetails()} call in
+     * {@see generate()}, so the check matches what generation would produce.
+     */
+    private function controllerFileIfExists(string $controllerName): ?string
+    {
+        $details = $this->generator->createClassNameDetails($controllerName, 'Controller\\Gridview\\', 'Controller');
+        $path = $this->fileManager->getRelativePathForFutureClass($details->getFullName());
+
+        return $path !== null && $this->fileManager->fileExists($path) ? $path : null;
     }
 
     private function defaultControllerClassName(string $entityShortName): string
