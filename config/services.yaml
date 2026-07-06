@@ -190,17 +190,34 @@ services:
             - '@fedale_gridview.theme_registry'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
+    # Builds the entity-to-row serializer, shared by the data provider (parent
+    # rows) and the child-row resolver (grouped rows) for identical row data.
+    fedale_gridview.row_serializer_factory:
+        class: Fedale\GridviewBundle\Serializer\RowSerializerFactory
+    Fedale\GridviewBundle\Serializer\RowSerializerFactory: '@fedale_gridview.row_serializer_factory'
+
+    # Resolves grouped child rows by navigating a Doctrine association on the
+    # parent entity. Injected into the entity provider as its grouping capability.
+    fedale_gridview.child_row_resolver:
+        class: Fedale\GridviewBundle\Grid\DoctrineChildRowResolver
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
+            - '@fedale_gridview.row_serializer_factory'
+    Fedale\GridviewBundle\Contract\ChildRowResolverInterface: '@fedale_gridview.child_row_resolver'
+
     fedale_gridview.entity_data_provider:
         class: Fedale\GridviewBundle\DataProvider\EntityDataProvider
         arguments:
             - '@event_dispatcher'
             - '@doctrine.orm.default_entity_manager'
             - '@request_stack'
+            - '@fedale_gridview.row_serializer_factory'
         calls:
             - [setSort, ['@fedale_gridview.sort']]
             - [setPagination, ['@fedale_gridview.pagination']]
             - [setSearchModel, ['@fedale_gridview.search_model']]
             - [setSearchForm, ['@fedale_gridview.search_form']]
+            - [setChildResolver, ['@fedale_gridview.child_row_resolver']]
     Fedale\GridviewBundle\Contract\DataProviderInterface: '@fedale_gridview.entity_data_provider'
 
     fedale_gridview.sort:

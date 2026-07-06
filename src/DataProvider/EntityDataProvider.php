@@ -6,18 +6,16 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Fedale\GridviewBundle\Serializer\LazyAwareObjectNormalizer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
+use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Row\Row;
+use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Event\RowEvent;
 
-class EntityDataProvider extends AbstractDataProvider
+class EntityDataProvider extends AbstractDataProvider implements GroupingCapableInterface
 {
     protected QueryBuilder $queryBuilder;
 
@@ -37,13 +35,26 @@ class EntityDataProvider extends AbstractDataProvider
 
     private ?SearchFormInterface $searchForm = null;
 
+    private ?ChildRowResolverInterface $childResolver = null;
+
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private EntityManagerInterface $entityManager,
         private RequestStack $requestStack,
+        private RowSerializerFactory $serializerFactory,
     ) {
         $this->models = new ArrayCollection();
         $this->populateParams();
+    }
+
+    public function setChildResolver(ChildRowResolverInterface $childResolver): void
+    {
+        $this->childResolver = $childResolver;
+    }
+
+    public function getChildResolver(): ?ChildRowResolverInterface
+    {
+        return $this->childResolver;
     }
 
     /** Used to apply the declarative `searchFields` map when the repository has no search(). */
@@ -173,23 +184,7 @@ class EntityDataProvider extends AbstractDataProvider
             throw new \Exception('The "queryBuilder" property must be an instance of Doctrine\ORM\QueryBuilder.');
         }
 
-        $defaultContext = [
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn($object) => $object->getId(),
-            AbstractNormalizer::IGNORED_ATTRIBUTES => $this->ignoredAttributes,
-        ];
-        $normalizers = [
-            new DateTimeNormalizer([
-                DateTimeNormalizer::FORMAT_KEY   => \DateTimeInterface::ATOM,
-                DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone(date_default_timezone_get()),
-            ]),
-            // Without this, a backed-enum property falls through to
-            // LazyAwareObjectNormalizer's inner ObjectNormalizer, which treats
-            // it as a generic object and normalizes it to {name, value} instead
-            // of its scalar backing value — breaking any column that prints it.
-            new BackedEnumNormalizer(),
-            new LazyAwareObjectNormalizer(null, null, null, null, null, null, $defaultContext),
-        ];
-        $serializer  = new Serializer($normalizers);
+        $serializer = $this->serializerFactory->create($this->ignoredAttributes);
 
         $this->paginator = new Paginator($this->queryBuilder, true);
 

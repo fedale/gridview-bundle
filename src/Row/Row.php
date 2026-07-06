@@ -10,6 +10,20 @@ class Row
 
     public string $prefixKey = 'row_';
 
+    /**
+     * Whether this row is a grouping parent (expands to reveal children). Only
+     * set on grouped grids; a plain grid leaves it false.
+     */
+    public bool $isParent = false;
+
+    /**
+     * Child rows of a grouping parent, one per related record. Populated up
+     * front in eager mode and left empty in lazy mode (filled on expand).
+     *
+     * @var array<int, Row>
+     */
+    public array $children = [];
+
     public function __construct(int $key, int $total, int $offset = 0)
     {
         $i = $key + 1;

@@ -9,6 +9,7 @@ use Fedale\GridviewBundle\Column\DataColumn;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
+use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
 use Fedale\GridviewBundle\Contract\PaginationConfiguringInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
@@ -30,6 +31,10 @@ class Gridview implements GridviewInterface
     private ?array $dataProviderOptions = null;
     private array $defaultFilterParams = [];
     private bool $dataProviderInitialized = false;
+    private ?GroupingConfig $groupingConfig = null;
+
+    /** @var array<int, ColumnInterface>|null */
+    private ?array $childColumns = null;
 
     protected ?string $key = null;
     protected ?string $id = null;
@@ -122,6 +127,12 @@ class Gridview implements GridviewInterface
             'reorderColumns' => false,
             'responsive' => false,
             'restriction' => false,
+            // Row grouping: parent rows that expand to reveal a relation's
+            // records as child rows. See GroupingConfig for the accepted keys
+            // (enabled, mode, relation, columns, label, childKey, limit). Empty
+            // = ungrouped. Only takes effect when the data provider can resolve
+            // children (implements GroupingCapableInterface).
+            'grouping' => [],
         ],
         'integration' => [
             'routeName' => null,
@@ -187,6 +198,59 @@ class Gridview implements GridviewInterface
     public function addColumn(ColumnInterface $column): void
     {
         $this->columns->add($column);
+    }
+
+    /**
+     * Resolved grouping configuration, built once from the `behavior.grouping`
+     * option and the grid's entity (the parent class the relation hangs off).
+     */
+    public function getGroupingConfig(): GroupingConfig
+    {
+        return $this->groupingConfig ??= GroupingConfig::fromArray(
+            $this->options['behavior']['grouping'] ?? [],
+            $this->getDataClass(),
+        );
+    }
+
+    /**
+     * Whether this grid renders grouped parent/child rows: grouping is enabled
+     * AND the data provider can actually resolve children. A provider without
+     * the capability degrades to a plain, ungrouped grid.
+     */
+    public function isGrouped(): bool
+    {
+        if (!$this->getGroupingConfig()->isEnabled()) {
+            return false;
+        }
+
+        return $this->dataProvider instanceof GroupingCapableInterface
+            && $this->dataProvider->getChildResolver() !== null;
+    }
+
+    /**
+     * The columns used to render each child row's sub-table, built from the
+     * grouping `columns` specs through the same factory as the main columns.
+     *
+     * @return array<int, ColumnInterface>
+     */
+    public function getChildColumns(): array
+    {
+        if ($this->childColumns !== null) {
+            return $this->childColumns;
+        }
+
+        $this->childColumns = [];
+        foreach ($this->getGroupingConfig()->getChildColumns() as $key => $spec) {
+            $column = $this->columnFactory->create($spec, $this, $key);
+            $column->setGridview($this);
+            // Child columns render in a nested sub-table; they are display-only,
+            // so never sortable against the parent grid's Sort (a child header
+            // sharing an attribute name would otherwise emit a parent sort link).
+            $column->setSortable(false);
+            $this->childColumns[] = $column;
+        }
+
+        return $this->childColumns;
     }
 
     public function getDataProvider(): DataProviderInterface
@@ -792,10 +856,15 @@ class Gridview implements GridviewInterface
             $strategy->configurePagination($this->dataProvider->getPagination(), $paginationOptions);
         }
 
+        $models = $this->dataProvider->getData();
+        if ($this->isGrouped()) {
+            $this->applyGrouping($models);
+        }
+
         $parameters = array_merge($parameters, [
             'gridview' => $this,
             'columns' => $this->columns,
-            'models' => $this->dataProvider->getData(),
+            'models' => $models,
             'pagination' => $this->dataProvider->getPagination(),
         ]);
 
@@ -817,6 +886,35 @@ class Gridview implements GridviewInterface
             : $view;
 
         return new Response($this->twig->render($template, $parameters));
+    }
+
+    /**
+     * Flag the page's rows as grouping parents and, in eager mode, attach their
+     * children up front in a single resolver pass. Lazy mode leaves children
+     * empty — they are fetched on demand when a parent is expanded.
+     *
+     * @param iterable<\Fedale\GridviewBundle\Row\Row> $models
+     */
+    private function applyGrouping(iterable $models): void
+    {
+        $config   = $this->getGroupingConfig();
+        $resolver = $this->dataProvider instanceof GroupingCapableInterface
+            ? $this->dataProvider->getChildResolver()
+            : null;
+
+        foreach ($models as $row) {
+            $row->isParent = true;
+        }
+
+        if ($resolver === null || !$config->isEager()) {
+            return;
+        }
+
+        $childMap = $resolver->resolveForParents($models, $config);
+        foreach ($models as $row) {
+            $key = $row->data[$config->getParentKey()] ?? null;
+            $row->children = $key !== null ? ($childMap[$key] ?? []) : [];
+        }
     }
 
     /**

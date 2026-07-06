@@ -1375,6 +1375,110 @@ turbo-frame[busy]>[data-gridview] {
     min-width: 0;
 }
 
+// ── Row grouping (parent rows expanding to child sub-tables) ───────
+
+[data-gridview] th.gv-group-ctrl,
+[data-gridview] td.gv-group-ctrl {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding-inline: .35rem;
+}
+
+// Expand/collapse toggle (▸ / ▾).
+[data-gridview] .gv-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    line-height: 1;
+    border: 1px solid var(--gv-table-border);
+    border-radius: var(--gv-radius);
+    background: transparent;
+    color: var(--gv-color-text-muted);
+    cursor: pointer;
+    transition: background var(--gv-transition), color var(--gv-transition);
+
+    &::before {
+        content: '\25B8';
+    }
+
+    // ▸
+    &[aria-expanded="true"]::before {
+        content: '\25BE';
+    }
+
+    // ▾
+    &:hover {
+        background: var(--gv-tr-hover-bg);
+        color: var(--gv-color-text);
+    }
+}
+
+// Detail row holding the child sub-table, spanning the full width.
+[data-gridview] tr.gv-group-detail>td {
+    background: var(--gv-tr-hover-bg);
+    padding: .5rem .75rem;
+}
+
+[data-gridview] .gv-group-detail-inner {
+    overflow-x: auto;
+}
+
+[data-gridview] .gv-group-table {
+    width: 100%;
+    margin: 0;
+    font-size: var(--gv-input-font-size);
+    background: var(--gv-color-bg);
+
+    th,
+    td {
+        padding: .35rem .6rem;
+        text-align: start;
+        border-bottom: 1px solid var(--gv-table-border);
+    }
+
+    thead th {
+        font-weight: 600;
+        color: var(--gv-color-text-muted);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: 0;
+    }
+}
+
+[data-gridview] .gv-group-empty {
+    padding: .35rem .2rem;
+    color: var(--gv-color-text-muted);
+    font-size: var(--gv-input-font-size);
+}
+
+// Lazy placeholder shown while children are being fetched.
+[data-gridview] .gv-group-loading {
+    min-height: 2rem;
+
+    &::after {
+        content: '';
+        display: block;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin: .4rem auto;
+        border: 2px solid var(--gv-table-border);
+        border-top-color: var(--gv-color-text-muted);
+        border-radius: 50%;
+        animation: gv-group-spin .6s linear infinite;
+    }
+}
+
+@keyframes gv-group-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 // ── Infinite scroll ───────────────────────────────────────────────
 
 [data-gridview] .gv-infinite {

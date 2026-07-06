@@ -57,6 +57,12 @@
         "fetch": "lazy",
         "enabled": true
       },
+      "grouping": {
+        "main": "controllers/gridview-grouping_controller.js",
+        "name": "gridview-grouping",
+        "fetch": "lazy",
+        "enabled": true
+      },
       "filter": {
         "main": "controllers/gridview-filter_controller.js",
         "name": "gridview-filter",

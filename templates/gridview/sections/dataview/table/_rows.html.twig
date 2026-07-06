@@ -1,7 +1,9 @@
 {# Solo le <tr> dei modelli correnti. Condiviso tra il render iniziale del
    <tbody> e la risposta turbo-stream "solo righe" dell'infinite scroll. #}
 {% for row in models %}
+    {% set gvHasChildren = gridview.groupingConfig.lazy or row.children is not empty %}
     <tr {{ gridview.regionAttr('row')|merge(row.attr ?? {})|options }}>
+        {% if gridview.isGrouped %}<td class="gv-group-ctrl">{% if gvHasChildren %}<button type="button" class="gv-group-toggle" data-action="click->gridview-grouping#toggle" aria-expanded="false" aria-label="Toggle related records"></button>{% endif %}</td>{% endif %}
         {% if gridview.options.behavior.responsive|default(false) %}<td class="gv-resp-ctrl"><button type="button" class="gv-resp-toggle" data-action="click->gridview-responsive#toggle" aria-expanded="false" aria-label="Mostra dettagli"></button></td>{% endif %}
         {% for column in gridview.indexColumns %}
             <td data-col="{{ loop.index0 }}" data-col-key="{{ column.attribute|default('col' ~ loop.index0) }}" data-priority="{{ column.priority }}"{% if not column.isVisible() %} style="display:none"{% endif %} {{ column.options|options }}>
@@ -24,4 +26,7 @@
             </td>
         {% endfor %}
     </tr>
+    {% if gridview.isGrouped and gvHasChildren %}
+        {% include '@FedaleGridview/gridview/sections/dataview/table/_group_children.html.twig' %}
+    {% endif %}
 {% endfor %}

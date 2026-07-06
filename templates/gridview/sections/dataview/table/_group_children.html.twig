@@ -1,0 +1,22 @@
+{# Detail row mechanics for one parent's children: the full-width row, colspan,
+   toggle target and lazy hook. These must stay so expand/collapse keeps working.
+   The visible content (the child sub-table) is a configurable template —
+   override it per grid via the grouping `template` option, defaulting to
+   _group_table.html.twig. See GroupingConfig::getTemplate(). #}
+{% set gvKey = gridview.groupingConfig.parentKey %}
+{% set gvColspan = gridview.indexColumns|length
+    + (gridview.isGrouped ? 1 : 0)
+    + (gridview.options.behavior.responsive|default(false) ? 1 : 0) %}
+<tr class="gv-group-detail" data-gv-group-detail hidden>
+    <td class="gv-group-detail-cell" colspan="{{ gvColspan }}">
+        <div class="gv-group-detail-inner"
+             data-gridview-grouping-target="detail"
+             data-gv-group-key="{{ row.data[gvKey]|default('') }}"
+             {% if gridview.groupingConfig.lazy and row.children is empty %}data-gv-group-lazy{% endif %}>
+            {% include gridview.groupingConfig.template with {
+                'row': row,
+                'childColumns': gridview.childColumns,
+            } %}
+        </div>
+    </td>
+</tr>

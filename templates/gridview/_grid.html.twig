@@ -20,6 +20,7 @@
     {% if gvInline %}{% set gvControllers = gvControllers|merge(['gridview-inline-edit']) %}{% endif %}
     {% if gvIsTable and gridview.options.behavior.reorderColumns|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-column-order']) %}{% endif %}
     {% if gvIsTable and gridview.options.behavior.responsive|default(false) %}{% set gvControllers = gvControllers|merge(['gridview-responsive']) %}{% endif %}
+    {% if gvIsTable and gridview.isGrouped %}{% set gvControllers = gvControllers|merge(['gridview-grouping']) %}{% endif %}
     {% if gvRealtime %}{% set gvControllers = gvControllers|merge(['gridview-mercure']) %}{% endif %}
     {% set gvControllers = gvControllers|merge(gridview_paginator_controllers(gridview.options.behavior.pagination.mode|default('numeric'))) %}
     <div data-gridview
@@ -28,6 +29,7 @@
          {% if gvControllers is not empty %}data-controller="{{ gvControllers|join(' ') }}"{% endif %}
          {% if gridview.hasCheckboxColumn %}data-gridview-selection-grid-id-value="{{ gridview.key }}"{% endif %}
          {% if gvInline %}data-gridview-inline-edit-base-value="{{ gridview.options.integration.crud.inlineUrl }}"{% endif %}
+         {% if gvIsTable and gridview.isGrouped and gridview.groupingConfig.lazy and gridview.options.integration.routeName %}data-gridview-grouping-url-value="{{ path(gridview.options.integration.routeName) }}"{% endif %}
          {% if gvRealtime %}data-gridview-mercure-hub-value="{{ gridview.options.behavior.realtime.hubUrl }}"
          data-gridview-mercure-topic-value="{{ gridview.options.behavior.realtime.topic }}"
          data-gridview-mercure-form-value="gv-form-{{ gridview.key }}"{% endif %}

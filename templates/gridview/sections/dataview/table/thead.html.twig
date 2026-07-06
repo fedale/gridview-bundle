@@ -3,6 +3,7 @@
 <thead {{ theadAttr|options }}>
     <tr>
         {% set gvReorder = gridview.options.behavior.reorderColumns|default(false) %}
+        {% if gridview.isGrouped %}<th class="gv-group-ctrl" aria-hidden="true"></th>{% endif %}
         {% if gridview.options.behavior.responsive|default(false) %}<th class="gv-resp-ctrl" aria-hidden="true"></th>{% endif %}
         {% for column in gridview.indexColumns %}
         {% set colKey = column.attribute|default('col' ~ loop.index0) %}
