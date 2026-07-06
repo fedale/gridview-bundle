@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Inflector\EnglishInflector;
 
 /**
- * `make:gv:crud`: scaffolds a full CRUD gridview controller for a Doctrine
+ * `make:gridview:crud`: scaffolds a full CRUD gridview controller for a Doctrine
  * entity, deriving the column/filter/control/sort configuration from the
  * entity's metadata via {@see DoctrineTypeMapper}.
  */
@@ -37,7 +37,7 @@ final class MakeGridCrud extends AbstractMaker
 
     public static function getCommandName(): string
     {
-        return 'make:gv:crud';
+        return 'make:gridview:crud';
     }
 
     public static function getCommandDescription(): string

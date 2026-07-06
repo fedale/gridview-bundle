@@ -246,7 +246,7 @@ Two things to know:
   ),
   ```
 
-`make:gv:crud` scaffolds the class-level `#[Route]` with a **pluralized path**
+`make:gridview:crud` scaffolds the class-level `#[Route]` with a **pluralized path**
 (`/gridview/users`) and a **singular name prefix** (`gridview_user_`) — the same
 split Sylius uses (`/admin/suppliers` ↔ `app_admin_supplier_index`). Unlike
 Sylius, which registers routes from resource metadata via a route loader served

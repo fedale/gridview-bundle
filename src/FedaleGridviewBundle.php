@@ -41,7 +41,7 @@ class FedaleGridviewBundle extends AbstractBundle
         $containerBuilder->registerForAutoconfiguration(PaginatorStrategyInterface::class)
             ->addTag('fedale_gridview.paginator_strategy');
 
-        // make:gv:crud is dev-tooling only, guarded so an app without
+        // make:gridview:crud is dev-tooling only, guarded so an app without
         // symfony/maker-bundle installed never sees the service defined at all.
         // DoctrineHelper is wired by its MakerBundle service id, not autowired by
         // class: MakerBundle's own service definition for it isn't autowireable.
