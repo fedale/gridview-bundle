@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class ActionColumn extends AbstractColumn
 {
-    public string $layout = '{view} {edit} {delete}';
+    public string $layout = '{show} {edit} {delete}';
 
     /** @var array<string, ActionButtonInterface> */
     private array $buttonMap = [];

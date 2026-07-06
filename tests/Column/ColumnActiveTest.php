@@ -22,7 +22,7 @@ class ColumnActiveTest extends TestCase
         $column = $this->column();
 
         $this->assertTrue($column->isActive());
-        foreach (['index', 'view', 'create', 'update'] as $ctx) {
+        foreach (['index', 'show', 'create', 'update'] as $ctx) {
             $this->assertTrue($column->isActiveIn($ctx));
         }
     }
@@ -33,7 +33,7 @@ class ColumnActiveTest extends TestCase
         $column->setActive(false);
 
         $this->assertFalse($column->isActive());
-        foreach (['index', 'view', 'create', 'update'] as $ctx) {
+        foreach (['index', 'show', 'create', 'update'] as $ctx) {
             $this->assertFalse($column->isActiveIn($ctx));
         }
     }
@@ -46,7 +46,7 @@ class ColumnActiveTest extends TestCase
         // Still registered because it is active somewhere.
         $this->assertTrue($column->isActive());
         $this->assertFalse($column->isActiveIn('index'));
-        $this->assertTrue($column->isActiveIn('view'));
+        $this->assertTrue($column->isActiveIn('show'));
         $this->assertTrue($column->isActiveIn('create'));
         $this->assertTrue($column->isActiveIn('update'));
     }
@@ -56,13 +56,13 @@ class ColumnActiveTest extends TestCase
         $column = $this->column();
         $column->setActive([
             'inIndex'  => true,
-            'inView'   => false,
+            'inShow'   => false,
             'inCreate' => true,
             'inUpdate' => false,
         ]);
 
         $this->assertTrue($column->isActiveIn('index'));
-        $this->assertFalse($column->isActiveIn('view'));
+        $this->assertFalse($column->isActiveIn('show'));
         $this->assertTrue($column->isActiveIn('create'));
         $this->assertFalse($column->isActiveIn('update'));
     }

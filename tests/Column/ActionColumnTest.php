@@ -58,7 +58,7 @@ class ActionColumnTest extends TestCase
     public function testUnmappedLayoutTokenIsSkipped(): void
     {
         $column = $this->column();
-        $column->setLayout('{view} {edit}');
+        $column->setLayout('{show} {edit}');
         $column->setButtons([
             'edit' => '<a class="edit">e</a>',
         ]);
@@ -66,7 +66,7 @@ class ActionColumnTest extends TestCase
         $out = $column->render($this->row(['id' => 1]), 0);
 
         $this->assertStringContainsString('class="edit"', $out);
-        $this->assertStringNotContainsString('view', $out);
+        $this->assertStringNotContainsString('show', $out);
         $this->assertStringNotContainsString('href="#"', $out);
     }
 }

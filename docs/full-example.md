@@ -41,9 +41,9 @@ public function list(Request $request): Response
         ],
         [
             'type'    => 'action',
-            'layout'  => '{view} {edit} {delete}',
+            'layout'  => '{show} {edit} {delete}',
             'buttons' => [
-                'view' => new ActionButton(
+                'show' => new ActionButton(
                     fn(array $row) => sprintf('<a href="/customers/%d">View</a>', $row['id'])
                 ),
                 'edit' => new ActionButton(
@@ -63,7 +63,7 @@ public function list(Request $request): Response
         ->setSearchModel($this->customerSearchModel)
         ->setOptions([
             'globalSearch' => ['c.name', 'c.email'],
-            'addRoute'     => 'customer_new',
+            'addRoute'     => 'customer_create',
             'addLabel'     => 'New Customer',
             'layout'       => [
                 'shell'    => '{toolbar} {header} {dataview} {footer}',

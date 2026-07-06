@@ -9,6 +9,7 @@ use Fedale\GridviewBundle\Export\GridExporterRegistry;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
 use Fedale\GridviewBundle\Grid\GridviewConfigRegistry;
+use Fedale\GridviewBundle\Routing\GridAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -192,9 +193,9 @@ abstract class AbstractGridController extends AbstractController
 
         $defaults = [
             'integration' => [
-                'routeName' => $this->routeName('index'),
+                'routeName' => $this->routeName(GridAction::Index),
                 'export' => [
-                    'url' => $this->generateUrl($this->routeName('export')),
+                    'url' => $this->generateUrl($this->routeName(GridAction::Export)),
                     'formats' => array_map(
                         static fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
                         $this->exportFormats(),
@@ -253,7 +254,7 @@ abstract class AbstractGridController extends AbstractController
      * the concrete class's own `#[Route(name: ...)]` attribute, so subclasses
      * don't have to declare it twice.
      */
-    protected function routeName(string $action): string
+    protected function routeName(GridAction|string $action): string
     {
         if ($this->routePrefix === null) {
             $this->routePrefix = '';
@@ -268,7 +269,7 @@ abstract class AbstractGridController extends AbstractController
             }
         }
 
-        return $this->routePrefix . $action;
+        return $this->routePrefix . ($action instanceof GridAction ? $action->value : $action);
     }
 
     /** Whether a route with this name is registered (guards optional convention routes). */

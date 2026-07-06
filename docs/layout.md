@@ -132,7 +132,7 @@ Pass a `layout` key inside `setOptions()`:
         'addLabel' => 'New Customer',
     ],
     'integration' => [
-        'addRoute' => 'customer_new',
+        'addRoute' => 'customer_create',
     ],
 ])
 ```

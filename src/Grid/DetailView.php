@@ -96,7 +96,7 @@ class DetailView
         return array_values(array_filter(
             $this->columns->toArray(),
             static fn (ColumnInterface $c) => $c->getAttribute() !== null
-                && $c->isActiveIn('view')
+                && $c->isActiveIn('show')
                 && (!$onlyVisible || $c->isVisible())
         ));
     }

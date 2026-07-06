@@ -206,7 +206,7 @@ without re-uploading leaves the file untouched). Add a `File`/`Image` constraint
 
 ## ActionColumn — token-based actions
 
-`ActionColumn` renders per-row action buttons (view, edit, delete, or anything custom).
+`ActionColumn` renders per-row action buttons (show, edit, delete, or anything custom).
 Which buttons appear is controlled by a **layout string** of `{token}` placeholders — the same
 concept used for the grid layout system.
 
@@ -219,17 +219,17 @@ concept used for the grid layout system.
 What it renders depends on the controller:
 
 - **Under `AbstractCrudGridController`** the column is **auto-wired**: a bare
-  `['type' => 'action']` (no explicit `buttons`) gets working `{view} {edit} {delete}`
+  `['type' => 'action']` (no explicit `buttons`) gets working `{show} {edit} {delete}`
   triggers pointing at the convention CRUD routes — no hand-written closures. Each
-  token is only emitted if its route actually exists (`view`→`show`, `edit`→`update`,
-  `clone`→`clone`, `delete`→`delete`), so missing routes render nothing instead of dead
-  links. See [Default action buttons (auto-wired)](#default-action-buttons-auto-wired).
+  token maps to a route (`show`, `edit`→`update`, `clone`, `delete`) and is only
+  emitted if that route actually exists, so missing routes render nothing instead of
+  dead links. See [Default action buttons (auto-wired)](#default-action-buttons-auto-wired).
 - **Under the read-only `AbstractGridController`** (or a standalone `ActionColumn` with
   no `buttons`) the cell renders **empty** — declare `buttons` to populate it.
 
-> Out of the box `{view}` needs a `show` route with the same prefix (e.g. an
+> Out of the box `{show}` needs a `show` route with the same prefix (e.g. an
 > `AbstractDetailController`); a plain `AbstractCrudGridController` has no such route, so
-> `{view}` stays empty until you add one. Set `actionLayout => '{edit} {delete}'` if you
+> `{show}` stays empty until you add one. Set `actionLayout => '{edit} {delete}'` if you
 > don't use a detail view.
 
 ### Default action buttons (auto-wired)
@@ -242,7 +242,7 @@ you declare your own `buttons`). The token layout comes from `actionLayout`:
 // viewConfig() — PHP override (wins over YAML)
 protected function viewConfig(): array
 {
-    return ['actionLayout' => '{edit} {delete}'];   // drop {view} if there's no show route
+    return ['actionLayout' => '{edit} {delete}'];   // drop {show} if there's no show route
 }
 ```
 
@@ -256,7 +256,7 @@ fedale_gridview:
 ```
 
 Resolution order: `viewConfig()['actionLayout']` → YAML `gridviews.<id>.options.actionLayout`
-→ built-in `'{view} {edit} {delete}'`. You can also keep the auto buttons but reorder/limit
+→ built-in `'{show} {edit} {delete}'`. You can also keep the auto buttons but reorder/limit
 them per column with a `layout` on the spec (`['type' => 'action', 'layout' => '{edit}']`) —
 the spec `layout` wins over `actionLayout`.
 
@@ -265,11 +265,11 @@ the spec `layout` wins over `actionLayout`.
 Set `layout` to any combination of built-in or custom token names:
 
 ```php
-['type' => 'action', 'layout' => '{view}']
+['type' => 'action', 'layout' => '{show}']
 
 ['type' => 'action', 'layout' => '{edit} {delete}']
 
-['type' => 'action', 'layout' => '{view} {archive} {delete}']
+['type' => 'action', 'layout' => '{show} {archive} {delete}']
 ```
 
 ### Custom button content
@@ -283,10 +283,10 @@ use Fedale\GridviewBundle\Column\ActionButton;
 $columns = [
     [
         'type'    => 'action',
-        'layout'  => '{view} {edit} {delete}',
+        'layout'  => '{show} {edit} {delete}',
         'buttons' => [
             // Closure — full control, receives the row data and row index
-            'view' => new ActionButton(
+            'show' => new ActionButton(
                 fn(array $row, int $i) => sprintf(
                     '<a href="/customers/%d" class="btn btn-sm btn-outline-primary">View</a>',
                     $row['id']
@@ -319,7 +319,7 @@ Only one role needs to match (OR logic). Requires the Symfony Security component
 use Fedale\GridviewBundle\Column\ActionButton;
 
 'buttons' => [
-    'view' => new ActionButton(
+    'show' => new ActionButton(
         fn(array $row) => '<a href="/customers/' . $row['id'] . '">View</a>',
     ),
 
@@ -372,9 +372,9 @@ Any token name works — just add a matching entry in `buttons`:
 ```php
 [
     'type'    => 'action',
-    'layout'  => '{view} {impersonate}',
+    'layout'  => '{show} {impersonate}',
     'buttons' => [
-        'view'        => new ActionButton(fn($row) => '<a href="/customers/' . $row['id'] . '">View</a>'),
+        'show'        => new ActionButton(fn($row) => '<a href="/customers/' . $row['id'] . '">View</a>'),
         'impersonate' => new ActionButton(
             fn($row) => '<a href="/?_switch_user=' . $row['email'] . '">Impersonate</a>',
             roles: ['ROLE_ALLOWED_TO_SWITCH'],
@@ -400,7 +400,7 @@ These keys are specific to `['type' => 'action']` and have no meaning for data c
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `layout` | `string` | `'{view} {edit} {delete}'` | Token string controlling which buttons appear and in what order |
+| `layout` | `string` | `'{show} {edit} {delete}'` | Token string controlling which buttons appear and in what order |
 | `buttons` | `array` | built-in icon placeholders | Map of token name → `ActionButton`, callable, HTML string, or array spec |
 | `label` | `string` | `'Actions'` | Column header text |
 

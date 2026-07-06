@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Tests\Controller;
 
 use Fedale\GridviewBundle\Controller\AbstractCrudGridController;
+use Fedale\GridviewBundle\Routing\GridAction;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -37,12 +38,12 @@ class CrudActionWiringTest extends TestCase
             protected function viewConfig(): array
             {
                 // Avoid the YAML branch (container-free test).
-                return ['options' => ['actionLayout' => '{view} {edit} {delete}']];
+                return ['options' => ['actionLayout' => '{show} {edit} {delete}']];
             }
 
-            protected function routeName(string $action): string
+            protected function routeName(GridAction|string $action): string
             {
-                return 'r_' . $action;
+                return 'r_' . ($action instanceof GridAction ? $action->value : $action);
             }
 
             protected function routeExists(string $name): bool
@@ -67,13 +68,13 @@ class CrudActionWiringTest extends TestCase
         $columns = $this->controller([['type' => 'action']])->exposeColumns();
         $action  = $columns[0];
 
-        // {view} has no `show` route here → not wired; edit/clone/delete are.
+        // {show} has no `show` route here → not wired; edit/clone/delete are.
         $this->assertArrayHasKey('buttons', $action);
         $this->assertSame(['edit', 'clone', 'delete'], array_keys($action['buttons']));
-        $this->assertArrayNotHasKey('view', $action['buttons']);
+        $this->assertArrayNotHasKey('show', $action['buttons']);
 
         // Default layout applied; closures generate the convention URLs + modal hook.
-        $this->assertSame('{view} {edit} {delete}', $action['layout']);
+        $this->assertSame('{show} {edit} {delete}', $action['layout']);
         $edit = ($action['buttons']['edit'])(['id' => 11]);
         $this->assertStringContainsString('/r_update/11', $edit);
         $this->assertStringContainsString('data-action="gridview-crud#open"', $edit);

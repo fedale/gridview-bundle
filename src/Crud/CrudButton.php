@@ -33,7 +33,7 @@ final class CrudButton
      * Plain navigation link to a record's detail/show page (no modal). The host
      * app owns the `show` route; auto-wired only when such a route exists.
      */
-    public static function view(string $url, string $title = 'crud.view'): string
+    public static function show(string $url, string $title = 'crud.show'): string
     {
         return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), self::ICON_VIEW);
     }

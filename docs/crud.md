@@ -198,6 +198,61 @@ for the Security contract), pass Symfony's field `getter`/`setter` through `cont
 > and the routes/actions below are inherited. The manual wiring here is the
 > low-level reference, useful when you need a fully custom action set.
 
+#### Routing convention
+
+Routes are **app-owned**: you put a single class-level `#[Route]` on your
+controller, and every CRUD route is derived from it by convention. The full
+route name for an action is the class-level name prefix + the action's suffix,
+resolved by `routeName()`. The canonical list of suffixes lives in one place —
+the `Fedale\GridviewBundle\Routing\GridAction` enum.
+
+Given `#[Route('/gridview/users', name: 'gridview_user_')]` on your controller:
+
+| Action | Route name suffix | Default path | Method | Provided by |
+| --- | --- | --- | --- | --- |
+| index | `index` | `/gridview/users` | GET | `AbstractGridController` |
+| export | `export` | `/gridview/users/export` | GET | `AbstractGridController` |
+| create | `create` | `/gridview/users/new` | GET, POST | `AbstractCrudGridController` |
+| update | `update` | `/gridview/users/update/{id}` | GET, POST | `AbstractCrudGridController` |
+| clone | `clone` | `/gridview/users/clone/{id}` | GET, POST | `AbstractCrudGridController` |
+| delete | `delete` | `/gridview/users/{id}/delete` | GET, POST | `AbstractCrudGridController` |
+| bulk delete | `bulk_delete` | `/gridview/users/bulk/delete` | GET, POST | `AbstractCrudGridController` |
+| bulk update | `bulk_update` | `/gridview/users/bulk/update` | GET, POST | `AbstractCrudGridController` |
+| inline | `inline` | `/gridview/users/inline/{id}/{field}` | GET, POST | `AbstractCrudGridController` |
+| exists | `exists` | `/gridview/users/exists` | GET | `AbstractCrudGridController` |
+| show | `show` | `/gridview/users/{id}` | GET | `AbstractDetailController` |
+
+Two things to know:
+
+- The action `#[Route]` attributes live on the base controllers and are
+  **inherited**, so the full set materialises from Symfony's normal
+  attribute-routing under your one class-level prefix — no route loader, no
+  route files.
+- **`show` is one name everywhere** — the `{show}` action-column token, the
+  `show` button, and the `show` route/operation (Sylius/REST convention:
+  `index / show / new / create / edit / update`). The `{show}` button auto-wires
+  to `routeName('show')` when that route exists (guarded by `routeExists()`).
+  The route itself is **not** on the CRUD controller — it ships on
+  `AbstractDetailController` (see [DetailView](detail-view.md)), a separate
+  controller because a detail page shares only the columns, not the list
+  machinery. Give the detail controller the **same name prefix** as the grid
+  (`gridview_user_`) and the `{show}` button lights up with zero extra code. To
+  point it elsewhere — e.g. an external detail route — override the `show`
+  button instead:
+
+  ```php
+  'show' => fn($row) => CrudButton::show(
+      $this->generateUrl('admin_user_detail', ['id' => $row['id']])
+  ),
+  ```
+
+`make:gv:crud` scaffolds the class-level `#[Route]` with a **pluralized path**
+(`/gridview/users`) and a **singular name prefix** (`gridview_user_`) — the same
+split Sylius uses (`/admin/suppliers` ↔ `app_admin_supplier_index`). Unlike
+Sylius, which registers routes from resource metadata via a route loader served
+by one shared generic controller, gridview keeps the routes on your own
+controller subclass so per-action overrides and security stay trivially yours.
+
 The bundle ships the services; the app provides thin actions that delegate to
 `GridCrudHandlerInterface`. Build the grid once (shared by index + form + delete) and set
 `routeName` so sort/pagination/filter links stay pinned to the list route even while a CRUD POST is
@@ -206,7 +261,7 @@ rendering the refreshed grid:
 ```php
 ->setOptions([
     'routeName' => 'gridview_user_index',
-    'crud'   => ['title' => 'User', 'addUrl' => $this->generateUrl('gridview_user_new')],
+    'crud'   => ['title' => 'User', 'addUrl' => $this->generateUrl('gridview_user_create')],
     'layout' => ['shell' => '{toolbar} {header} {dataview} {footer}', 'toolbar' => '{addButton}'],
 ])
 ```
@@ -215,8 +270,8 @@ Use semantic routes — `new` / `update/{id}` / `clone/{id}` — each delegating
 with an explicit mode (cleaner URLs; `/gridview/user/update/2` opens the edit form directly):
 
 ```php
-#[Route('/new', name: 'new', methods: ['GET','POST'])]
-public function new(Request $r): Response { return $this->handleForm($r, 'add', null); }
+#[Route('/new', name: 'create', methods: ['GET','POST'])]
+public function create(Request $r): Response { return $this->handleForm($r, 'add', null); }
 
 #[Route('/update/{id}', name: 'update', methods: ['GET','POST'], requirements: ['id' => '\d+'])]
 public function update(Request $r, int $id): Response { return $this->handleForm($r, 'edit', $id); }
@@ -521,7 +576,7 @@ They live in `Fedale\GridviewBundle\Controller`:
 The `#[Route]` attributes sit on the base methods and are **inherited** by every
 concrete controller; each picks up that controller's own class-level prefix. So a
 single `#[Route('/gridview/user', name: 'gridview_user_')]` on the subclass yields
-`gridview_user_index`, `gridview_user_new`, … automatically. The route loader only
+`gridview_user_index`, `gridview_user_create`, … automatically. The route loader only
 scans the app's `src/Controller/`, so the abstract bases never register routes on
 their own. To customise one route, override that method in the subclass with a new
 `#[Route]`.
@@ -562,7 +617,7 @@ config needed.
 | `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
 | `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
 | `filterFormName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
-| `actionLayout` | `null` → `'{view} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](columns.md#default-action-buttons-auto-wired)) |
+| `actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](columns.md#default-action-buttons-auto-wired)) |
 
 ### Read-only example
 

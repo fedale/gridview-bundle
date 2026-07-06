@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Inflector\EnglishInflector;
 
 /**
  * `make:gv:crud`: scaffolds a full CRUD gridview controller for a Doctrine
@@ -231,7 +232,13 @@ final class MakeGridCrud extends AbstractMaker
 
     private function defaultRoutePrefix(string $entityShortName): string
     {
-        return '/gridview/' . strtolower($entityShortName);
+        // Pluralize the path segment (Sylius parity: '/admin/suppliers'), while
+        // the route-name prefix stays singular ('gridview_supplier_'). The route
+        // name uses '_' word boundaries, the path a single lowercased word.
+        $segment = str_replace('_', '', Str::asSnakeCase($entityShortName));
+        $plural = (new EnglishInflector())->pluralize($segment);
+
+        return '/gridview/' . ($plural[0] ?? $segment);
     }
 
     /** @return array{0: string, 1: 'asc'|'desc'} */

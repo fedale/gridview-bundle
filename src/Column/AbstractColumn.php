@@ -24,14 +24,14 @@ abstract class AbstractColumn implements ColumnInterface
      *   - true  (default): rendered everywhere;
      *   - false: rendered nowhere — the access-control kill-switch (no header,
      *     body cell, filter, export entry or CRUD form field);
-     *   - array: granular `{inIndex, inView, inCreate, inUpdate}` (omitted keys
+     *   - array: granular `{inIndex, inShow, inCreate, inUpdate}` (omitted keys
      *     default to true), mapped to the contexts below. A column inactive in
      *     `index` only is still registered (filterable, exportable, editable in
      *     forms) but produces no table cell and no "Columns" toggle entry.
      *
-     * @var array{index: bool, view: bool, create: bool, update: bool}
+     * @var array{index: bool, show: bool, create: bool, update: bool}
      */
-    protected array $active = ['index' => true, 'view' => true, 'create' => true, 'update' => true];
+    protected array $active = ['index' => true, 'show' => true, 'create' => true, 'update' => true];
     protected bool $visible    = true;
     protected bool $sortable   = true;
     protected bool $filterable = true;
@@ -145,13 +145,13 @@ abstract class AbstractColumn implements ColumnInterface
         if (\is_array($active)) {
             $this->active = [
                 'index'  => (bool) ($active['inIndex']  ?? true),
-                'view'   => (bool) ($active['inView']   ?? true),
+                'show'   => (bool) ($active['inShow']   ?? true),
                 'create' => (bool) ($active['inCreate'] ?? true),
                 'update' => (bool) ($active['inUpdate'] ?? true),
             ];
         } else {
             $flag = (bool) $active;
-            $this->active = ['index' => $flag, 'view' => $flag, 'create' => $flag, 'update' => $flag];
+            $this->active = ['index' => $flag, 'show' => $flag, 'create' => $flag, 'update' => $flag];
         }
 
         return $this;

@@ -6,6 +6,7 @@ use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
 use Fedale\GridviewBundle\Crud\CrudButton;
 use Fedale\GridviewBundle\Grid\GridviewConfigRegistry;
 use Fedale\GridviewBundle\Mercure\GridviewMercurePublisher;
+use Fedale\GridviewBundle\Routing\GridAction;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,8 +87,8 @@ abstract class AbstractCrudGridController extends AbstractGridController
 
     // ---- actions: add / edit / clone -----------------------------------
 
-    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
+    #[Route('/new', name: 'create', methods: ['GET', 'POST'])]
+    public function create(Request $request): Response
     {
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_ADD, null);
     }
@@ -223,7 +224,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
             throw $this->createNotFoundException();
         }
 
-        $action = $this->generateUrl($this->routeName('inline'), ['id' => $id, 'field' => $field]);
+        $action = $this->generateUrl($this->routeName(GridAction::Inline), ['id' => $id, 'field' => $field]);
 
         if ($request->isMethod('GET')) {
             return new Response($this->crud()->renderInlineEditor($this->getDataClass(), $column, $entity, $action, ['gridview' => $gridview]));
@@ -282,26 +283,26 @@ abstract class AbstractCrudGridController extends AbstractGridController
         $mode = $this->resolvedCrudMode();
         $buttons = [];
 
-        if ($this->routeExists($this->routeName('show'))) {
-            $buttons['view'] = fn(array $row) => CrudButton::view(
-                $this->generateUrl($this->routeName('show'), ['id' => $row['id']])
+        if ($this->routeExists($this->routeName(GridAction::Show))) {
+            $buttons['show'] = fn(array $row) => CrudButton::show(
+                $this->generateUrl($this->routeName(GridAction::Show), ['id' => $row['id']])
             );
         }
-        if ($this->routeExists($this->routeName('update'))) {
+        if ($this->routeExists($this->routeName(GridAction::Update))) {
             $buttons['edit'] = fn(array $row) => CrudButton::edit(
-                $this->generateUrl($this->routeName('update'), ['id' => $row['id']]),
+                $this->generateUrl($this->routeName(GridAction::Update), ['id' => $row['id']]),
                 $mode
             );
         }
-        if ($this->routeExists($this->routeName('clone'))) {
+        if ($this->routeExists($this->routeName(GridAction::Clone))) {
             $buttons['clone'] = fn(array $row) => CrudButton::clone(
-                $this->generateUrl($this->routeName('clone'), ['id' => $row['id']]),
+                $this->generateUrl($this->routeName(GridAction::Clone), ['id' => $row['id']]),
                 $mode
             );
         }
-        if ($this->routeExists($this->routeName('delete'))) {
+        if ($this->routeExists($this->routeName(GridAction::Delete))) {
             $buttons['delete'] = fn(array $row) => CrudButton::delete(
-                $this->generateUrl($this->routeName('delete'), ['id' => $row['id']])
+                $this->generateUrl($this->routeName(GridAction::Delete), ['id' => $row['id']])
             );
         }
 
@@ -340,7 +341,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
         $yaml = $this->container->get(GridviewConfigRegistry::class)
             ->resolveOptions($this->config('id'))['actionLayout'] ?? null;
 
-        return \is_string($yaml) && $yaml !== '' ? $yaml : '{view} {edit} {delete}';
+        return \is_string($yaml) && $yaml !== '' ? $yaml : '{show} {edit} {delete}';
     }
 
     /**
@@ -429,7 +430,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
             // ['bootstrap_5_layout.html.twig']); null = default form theme.
             'formTheme' => $this->config('form.theme'),
             'validate' => [
-                'checkUrl' => $this->generateUrl($this->routeName('exists')),
+                'checkUrl' => $this->generateUrl($this->routeName(GridAction::Exists)),
                 'unique' => $uniqueFields,
                 // Only exclude the current row in edit; a clone is a new record.
                 'id' => $mode === GridCrudHandlerInterface::MODE_EDIT ? $id : null,
@@ -599,11 +600,11 @@ abstract class AbstractCrudGridController extends AbstractGridController
             ],
             'integration' => [
                 'crud' => [
-                    'addUrl' => $this->generateUrl($this->routeName('new')),
-                    'bulkDeleteUrl' => $this->generateUrl($this->routeName('bulk_delete')),
-                    'bulkUpdateUrl' => $this->generateUrl($this->routeName('bulk_update')),
+                    'addUrl' => $this->generateUrl($this->routeName(GridAction::Create)),
+                    'bulkDeleteUrl' => $this->generateUrl($this->routeName(GridAction::BulkDelete)),
+                    'bulkUpdateUrl' => $this->generateUrl($this->routeName(GridAction::BulkUpdate)),
                     // Base for inline editing; the JS appends /{id}/{field}.
-                    'inlineUrl' => $this->generateUrl($this->routeName('index')) . '/inline',
+                    'inlineUrl' => $this->generateUrl($this->routeName(GridAction::Index)) . '/inline',
                 ],
             ],
         ];
