@@ -137,7 +137,7 @@ final class DoctrineTypeMapper
      *
      * @param list<array{name: string, kind: string, isIdentifier: bool, inverseSide?: bool, targetClass?: string}> $selectedFields
      * @param array<string, array{label?: string, sortable?: bool, filter?: bool, control?: bool}> $advancedOverrides field name => overrides from the wizard's advanced step
-     * @return list<array{attribute: string, label: string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}>
+     * @return list<array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}>
      */
     public function buildColumnPlans(array $selectedFields, DoctrineHelper $doctrineHelper, ClassMetadata $metadata, array $advancedOverrides = []): array
     {
@@ -156,7 +156,7 @@ final class DoctrineTypeMapper
         return $plans;
     }
 
-    /** @return array{attribute: string, label: string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
+    /** @return array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
     private function planForScalarField(array $field, ClassMetadata $metadata, array $override): array
     {
         $name = $field['name'];
@@ -195,6 +195,7 @@ final class DoctrineTypeMapper
         return [
             'attribute' => $name,
             'label' => $override['label'] ?? $this->humanLabel($name),
+            'type' => $columnType,
             'sortable' => $override['sortable'] ?? ($columnType !== 'json'),
             'filter' => $filter,
             'control' => $control,
@@ -202,7 +203,7 @@ final class DoctrineTypeMapper
         ];
     }
 
-    /** @return array{attribute: string, label: string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
+    /** @return array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
     private function planForToOneAssociation(array $field, DoctrineHelper $doctrineHelper, array $override): array
     {
         $name = $field['name'];
@@ -228,6 +229,9 @@ final class DoctrineTypeMapper
         return [
             'attribute' => $name,
             'label' => $override['label'] ?? $this->humanLabel($name),
+            // The `value` closure below fully governs display, so no column type
+            // is emitted; filter/control still carry their explicit `relation` type.
+            'type' => null,
             'sortable' => $override['sortable'] ?? false,
             'filter' => $filter,
             'control' => $control,
@@ -235,7 +239,7 @@ final class DoctrineTypeMapper
         ];
     }
 
-    /** @return array{attribute: string, label: string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
+    /** @return array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp} */
     private function planForToManyAssociation(array $field, array $override): array
     {
         $name = $field['name'];
@@ -243,6 +247,7 @@ final class DoctrineTypeMapper
         return [
             'attribute' => $name,
             'label' => $override['label'] ?? $this->humanLabel($name),
+            'type' => null,
             'sortable' => false,
             'filter' => null,
             'control' => null,
@@ -258,7 +263,7 @@ final class DoctrineTypeMapper
      * The `buildColumns()`-ready array: one entry per plan (only the non-null
      * keys are emitted), plus the trailing action column.
      *
-     * @param list<array{attribute: string, label: string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}> $plans
+     * @param list<array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}> $plans
      */
     public function columnsArrayFor(array $plans): array
     {
@@ -266,6 +271,12 @@ final class DoctrineTypeMapper
 
         foreach ($plans as $plan) {
             $column = ['attribute' => $plan['attribute'], 'label' => $plan['label']];
+            // Emit the resolved column type so the grid renders the value with the
+            // right type (e.g. `json` for array columns). Omit plain `text`: it is
+            // the ColumnFactory default, so writing it would just add noise.
+            if (($plan['type'] ?? null) !== null && $plan['type'] !== 'text') {
+                $column['type'] = $plan['type'];
+            }
             if ($plan['sortable']) {
                 $column['sortable'] = true;
             }
