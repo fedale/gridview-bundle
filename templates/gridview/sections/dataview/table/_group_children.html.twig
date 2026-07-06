@@ -7,16 +7,21 @@
 {% set gvColspan = gridview.indexColumns|length
     + (gridview.isGrouped ? 1 : 0)
     + (gridview.options.behavior.responsive|default(false) ? 1 : 0) %}
+{% set gvNotYetLoaded = gridview.groupingConfig.lazy and row.children is empty %}
 <tr class="gv-group-detail" data-gv-group-detail hidden>
     <td class="gv-group-detail-cell" colspan="{{ gvColspan }}">
         <div class="gv-group-detail-inner"
              data-gridview-grouping-target="detail"
              data-gv-group-key="{{ row.data[gvKey]|default('') }}"
-             {% if gridview.groupingConfig.lazy and row.children is empty %}data-gv-group-lazy{% endif %}>
-            {% include gridview.groupingConfig.template with {
-                'row': row,
-                'childColumns': gridview.childColumns,
-            } %}
+             {% if gvNotYetLoaded %}data-gv-group-lazy{% endif %}>
+            {% if gvNotYetLoaded %}
+                <div class="gv-group-loading" aria-live="polite"></div>
+            {% else %}
+                {% include gridview.groupingConfig.template with {
+                    'row': row,
+                    'childColumns': gridview.childColumns,
+                } %}
+            {% endif %}
         </div>
     </td>
 </tr>

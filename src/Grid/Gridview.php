@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Fedale\GridviewBundle\Column\CheckboxColumn;
 use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Column\DataColumn;
+use Fedale\GridviewBundle\Contract\ChildCountResolverInterface;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
@@ -16,6 +17,7 @@ use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Filter\FilterDefaultNormalizer;
 use Fedale\GridviewBundle\Grid\State\GridviewUrlState;
 use Fedale\GridviewBundle\Profiler\GridviewProfile;
+use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -819,6 +821,14 @@ class Gridview implements GridviewInterface
         $this->initializeDataProvider();
 
         $request = $this->gridviewService->getRequest();
+
+        // Lazy grouping: a single parent's children, fetched on demand. Handled
+        // before pagination/sort/URL-state — the child sub-table doesn't need any
+        // of it, and the main grid's own page isn't necessarily involved.
+        if ($this->isGrouped() && $request->query->has('_children')) {
+            return $this->renderGroupChildren($request->query->get('_children'));
+        }
+
         $formName = $this->options['behavior']['formName'];
 
         $this->urlState = GridviewUrlState::fromRequest(
@@ -889,6 +899,32 @@ class Gridview implements GridviewInterface
     }
 
     /**
+     * Renders a single parent's children as an HTML fragment, answering the
+     * `?_children=<key>` request the lazy Stimulus controller fetches on first
+     * expand. Reuses the grid's own route/action (no dedicated route), so it
+     * inherits the same authorization guards as the index it's called from.
+     */
+    private function renderGroupChildren(string|int $key): Response
+    {
+        $config = $this->getGroupingConfig();
+        $resolver = $this->dataProvider instanceof GroupingCapableInterface
+            ? $this->dataProvider->getChildResolver()
+            : null;
+
+        $row = new Row(0, 0);
+        $row->isParent = true;
+        $row->children = $resolver?->resolveForParent($key, $config) ?? [];
+
+        $html = $this->twig->render($config->getTemplate(), [
+            'row' => $row,
+            'gridview' => $this,
+            'childColumns' => $this->getChildColumns(),
+        ]);
+
+        return new Response($html);
+    }
+
+    /**
      * Flag the page's rows as grouping parents and, in eager mode, attach their
      * children up front in a single resolver pass. Lazy mode leaves children
      * empty — they are fetched on demand when a parent is expanded.
@@ -906,7 +942,19 @@ class Gridview implements GridviewInterface
             $row->isParent = true;
         }
 
-        if ($resolver === null || !$config->isEager()) {
+        if ($resolver === null) {
+            return;
+        }
+
+        if (!$config->isEager()) {
+            if ($resolver instanceof ChildCountResolverInterface) {
+                $counts = $resolver->countForParents($models, $config);
+                foreach ($models as $row) {
+                    $key = $row->data[$config->getParentKey()] ?? null;
+                    $row->childCount = $key !== null ? ($counts[$key] ?? 0) : 0;
+                }
+            }
+
             return;
         }
 

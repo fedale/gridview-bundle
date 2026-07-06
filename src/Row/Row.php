@@ -24,6 +24,14 @@ class Row
      */
     public array $children = [];
 
+    /**
+     * Child count for a grouping parent in lazy mode, resolved without fetching
+     * any child (gates the expand toggle and feeds the count badge). Left at 0
+     * when the resolver can't count, or in eager mode where `children` is the
+     * source of truth.
+     */
+    public int $childCount = 0;
+
     public function __construct(int $key, int $total, int $offset = 0)
     {
         $i = $key + 1;

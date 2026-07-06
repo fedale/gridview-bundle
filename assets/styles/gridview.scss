@@ -1417,6 +1417,13 @@ turbo-frame[busy]>[data-gridview] {
     }
 }
 
+// Child count badge next to the lazy toggle (only rendered when count > 0).
+[data-gridview] .gv-group-count {
+    margin-inline-start: .25rem;
+    font-size: .75em;
+    color: var(--gv-color-text-muted);
+}
+
 // Detail row holding the child sub-table, spanning the full width.
 [data-gridview] tr.gv-group-detail>td {
     background: var(--gv-tr-hover-bg);

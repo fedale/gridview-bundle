@@ -8,9 +8,7 @@
 
    Render child cells with `column.render(child, index)` to reuse the column
    pipeline, or lay the data out however you like from `child.data`. #}
-{% if row.children is empty and gridview.groupingConfig.lazy %}
-    <div class="gv-group-loading" aria-live="polite"></div>
-{% elseif row.children is empty %}
+{% if row.children is empty %}
     <div class="gv-group-empty">No related records</div>
 {% else %}
     <table class="gv-group-table">
