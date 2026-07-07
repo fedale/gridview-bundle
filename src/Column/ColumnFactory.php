@@ -8,6 +8,27 @@ use Fedale\GridviewBundle\Form\Control\ControlResolver;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ * @phpstan-type ColumnSpec array{
+ *     attribute?: string,
+ *     type?: string|\Fedale\GridviewBundle\Column\Type\ColumnType,
+ *     label?: string|bool,
+ *     value?: callable|string,
+ *     valueGetter?: callable,
+ *     formatter?: callable,
+ *     renderer?: callable,
+ *     format?: array<string, mixed>,
+ *     filter?: bool|string|\Fedale\GridviewBundle\Filter\FilterType|array<string, mixed>,
+ *     control?: bool|string|\Fedale\GridviewBundle\Form\Control\ControlType|array<string, mixed>,
+ *     sortable?: bool,
+ *     visible?: bool|callable,
+ *     active?: bool|callable,
+ *     twigFilter?: string,
+ *     filterBar?: bool,
+ *     editable?: bool,
+ *     ...
+ * }
+ */
 class ColumnFactory
 {
     private ControlResolver $controlResolver;
@@ -70,6 +91,7 @@ class ColumnFactory
     private function createFromArray(array $spec, Gridview $gridview, int|string $key): ColumnInterface
     {
         $type      = $spec['type'] ?? 'text';
+        $type      = $type instanceof \BackedEnum ? $type->value : $type;
         $attribute = $spec['attribute'] ?? 'column_' . $key;
         $value     = $spec['value'] ?? null;
 
@@ -98,8 +120,15 @@ class ColumnFactory
             // The per-column control (write-side field) inherits the type's
             // default control unless it names its own type, mirroring the filter.
             if (\array_key_exists('control', $spec)) {
+                $control = $spec['control'];
+                if ($control instanceof \BackedEnum) {
+                    $control = $control->value;
+                } elseif (\is_array($control) && ($control['type'] ?? null) instanceof \BackedEnum) {
+                    $control['type'] = $control['type']->value;
+                }
+
                 $spec['control'] = $this->controlResolver->resolve(
-                    $spec['control'],
+                    $control,
                     $columnType->inferControlType() ?? 'text'
                 );
             }
@@ -129,7 +158,14 @@ class ColumnFactory
     {
         $inherited = $inheritedType ?? 'text';
 
+        if ($filter instanceof \BackedEnum) {
+            $filter = $filter->value;
+        }
+
         if (\is_array($filter)) {
+            if (($filter['type'] ?? null) instanceof \BackedEnum) {
+                $filter['type'] = $filter['type']->value;
+            }
             $filter['type'] ??= $inherited;
 
             return $filter;

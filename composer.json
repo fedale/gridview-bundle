@@ -25,7 +25,8 @@
         "symfony/property-access": "^6.4 || ^7.0 || ^8.0",
         "symfony/translation": "^6.4 || ^7.0 || ^8.0",
         "symfony/twig-bundle": "^6.4 || ^7.0 || ^8.0",
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "phpstan/phpstan": "^2.0"
     },
     "suggest": {
         "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",
@@ -40,6 +41,10 @@
         "psr-4": {
             "Fedale\\GridviewBundle\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse",
+        "test": "phpunit"
     },
     "extra": {
         "branch-alias": {

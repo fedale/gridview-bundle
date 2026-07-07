@@ -1,0 +1,2545 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Instantiated class Symfony\\Component\\Validator\\Constraints\\NotBlank not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:getContent\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:getControl\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:getOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:getShowInDeleteConfirm\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:renderHeader\(\) has parameter \$label with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setActive\(\) has parameter \$active with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setContent\(\) has parameter \$content with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setControl\(\) has parameter \$control with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setEditable\(\) has parameter \$editable with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setLabel\(\) has parameter \$label with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:setShowInDeleteConfirm\(\) has parameter \$showInDeleteConfirm with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:\$control type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:\$editable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:\$showInDeleteConfirm type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:\$value has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Column/AbstractColumn.php
+
+		-
+			message: '#^Call to method isGranted\(\) on an unknown class Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\ActionColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\ActionColumn\:\:setButtons\(\) has parameter \$buttons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Parameter \$authChecker of method Fedale\\GridviewBundle\\Column\\ActionColumn\:\:__construct\(\) has invalid type Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\ActionColumn\:\:\$authChecker has unknown class Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\ActionColumn\:\:\$gridview is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\ActionColumn\:\:\$urlGenerator is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Column/ActionColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\BooleanColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/BooleanColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\BooleanColumn\:\:render\(\) has parameter \$_index with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/BooleanColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\BooleanColumn\:\:render\(\) has parameter \$row with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/BooleanColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\BooleanColumn\:\:\$gridview is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Column/BooleanColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\CheckboxColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/CheckboxColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\CheckboxColumn\:\:render\(\) has parameter \$index with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/CheckboxColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\CheckboxColumn\:\:render\(\) has parameter \$row with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/CheckboxColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\CheckboxColumn\:\:renderHeader\(\) has parameter \$label with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/CheckboxColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\CheckboxColumn\:\:\$gridview is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Column/CheckboxColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:create\(\) has parameter \$spec with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:createFromArray\(\) has parameter \$spec with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:normalizeFilter\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Parameter \$authChecker of method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:__construct\(\) has invalid type Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:\$authChecker has unknown class Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:\$registry type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/ColumnFactory.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:defaultRawValue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:getFormat\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:getOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:renderHeader\(\) has parameter \$label with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:resolve\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:resolve\(\) has parameter \$a with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:resolve\(\) has parameter \$default with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:resolve\(\) has parameter \$path with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:setFilter\(\) has parameter \$filter with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\DataColumn\:\:setFormat\(\) has parameter \$format with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\DataColumn\:\:\$filter has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\DataColumn\:\:\$format type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/DataColumn.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\AbstractColumnType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/AbstractColumnType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\AbstractColumnType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/AbstractColumnType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\AbstractColumnType\:\:getRawValue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/AbstractColumnType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\AbstractColumnType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/AbstractColumnType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\AbstractColumnType\:\:resolvePath\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/AbstractColumnType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\BadgeType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/BadgeType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\BadgeType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/BadgeType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\BooleanType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/BooleanType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\BooleanType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/BooleanType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeInterface\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColumnTypeInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeInterface\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColumnTypeInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeInterface\:\:getRawValue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColumnTypeInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeInterface\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColumnTypeInterface.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeRegistry\:\:\$aliases type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColumnTypeRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\CurrencyType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/CurrencyType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\CurrencyType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/CurrencyType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\DateType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/DateType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\DateType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/DateType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\DatetimeType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/DatetimeType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\HtmlType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/HtmlType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\JsonType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/JsonType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\JsonType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/JsonType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LinkType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/LinkType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ListType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ListType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ListType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ListType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:isImage\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:renderDownload\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:renderImage\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MultiSelectType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MultiSelectType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\NumberType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/NumberType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\NumberType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/NumberType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\NumberType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/NumberType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\PercentType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/PercentType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\PercentType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/PercentType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\RatingType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/RatingType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\RatingType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/RatingType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\RatingType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/RatingType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\SelectType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/SelectType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\SelectType\:\:labelFor\(\) has parameter \$choices with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/SelectType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\UrlType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/UrlType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\ColumnInterface\:\:getControl\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/ColumnInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\ColumnInterface\:\:getShowInDeleteConfirm\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/ColumnInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:applyGlobalSearch\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:getAllData\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:getData\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:getPagination\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:getSort\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:prepareModels\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:prepareModels\(\) has parameter \$models with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:setDefaultParams\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\DataProviderInterface\:\:setSearchFields\(\) has parameter \$searchFields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/DataProviderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\FilterApplierInterface\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/FilterApplierInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:applyBatch\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:bulkDelete\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:createBatchForm\(\) has parameter \$columns with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:createForm\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderBatchForm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderBulkDeleteConfirm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderDeleteConfirm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderForm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderFormPage\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:renderInlineEditor\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridCrudHandlerInterface\:\:saveInline\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridCrudHandlerInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridFormBuilderInterface\:\:build\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridFormBuilderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridFormBuilderInterface\:\:buildBatchForm\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridFormBuilderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewBuilderInterface\:\:setDataProvider\(\) has parameter \$dataProviderOptions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridviewBuilderInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewInterface\:\:getColumns\(\) return type with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Contract/GridviewInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewInterface\:\:getOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridviewInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewInterface\:\:parseLayout\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridviewInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewInterface\:\:renderGrid\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridviewInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\GridviewInterface\:\:setOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/GridviewInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\PaginationInterface\:\:getPageSizeParam\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/PaginationInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\PaginationInterface\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/PaginationInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchFormInterface\:\:addFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/SearchFormInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchFormInterface\:\:addFilter\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SearchFormInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchFormInterface\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SearchFormInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchFormInterface\:\:applyFilters\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SearchFormInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchFormInterface\:\:getModelType\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/SearchFormInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SearchModelInterface\:\:search\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Contract/SearchModelInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SortInterface\:\:createLink\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SortInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SortInterface\:\:fetchOrders\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SortInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Contract\\SortInterface\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Contract/SortInterface.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<object\>\:\:search\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Call to method getToken\(\) on an unknown class Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Class Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Controller\\AbstractCrudGridController\:\:csrf\(\) has invalid return type Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Offset ''unique'' on array\{type\: string, required\: bool, options\: array\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManagerInterface\:\:getRepository\(\)$#'
+			identifier: argument.templateType
+			count: 4
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to method Symfony\\Component\\HttpFoundation\\ParameterBag\:\:all\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Controller/AbstractCrudGridController.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Controller\\AbstractDetailController\:\:isAssoc\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AbstractDetailController.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Controller\\AbstractDetailController\:\:\$resolvedConfig type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AbstractDetailController.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManagerInterface\:\:getRepository\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Controller/AbstractDetailController.php
+
+		-
+			message: '#^Call to method getPublicUrl\(\) on an unknown class Symfony\\Component\\Mercure\\HubInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Call to method setCookie\(\) on an unknown class Symfony\\Component\\Mercure\\Authorization\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Class Symfony\\Component\\Mercure\\Authorization not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Class Symfony\\Component\\Mercure\\HubInterface not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Controller\\AbstractGridController\:\:isAssoc\(\) has parameter \$value with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Controller\\AbstractGridController\:\:mercureAuthorization\(\) has invalid return type Symfony\\Component\\Mercure\\Authorization\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Controller\\AbstractGridController\:\:mercureHub\(\) has invalid return type Symfony\\Component\\Mercure\\HubInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Controller\\AbstractGridController\:\:\$resolvedConfig type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Controller\\AbstractGridController\:\:\$resolvedRealtime type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AbstractGridController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\Mapping\\ClassMetadata\<object\>\:\:getSingleIdentifierFieldName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:createQueryBuilder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Call to method isTokenValid\(\) on an unknown class Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Instanceof between Fedale\\GridviewBundle\\Contract\\ColumnInterface and Fedale\\GridviewBundle\\Contract\\ColumnInterface will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 3
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Instantiated class Symfony\\Component\\Security\\Csrf\\CsrfToken not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:applyBatch\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:bulkDelete\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:createBatchForm\(\) has parameter \$columns with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:createForm\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderBatchForm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderBulkDeleteConfirm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderDeleteConfirm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderForm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderFormPage\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderInlineEditor\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:renderInlineForm\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:saveInline\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Parameter \$csrfTokenManager of method Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:__construct\(\) has invalid type Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Crud\\GridCrudHandler\:\:\$csrfTokenManager has unknown class Symfony\\Component\\Security\\Csrf\\CsrfTokenManagerInterface as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManagerInterface\:\:getRepository\(\)$#'
+			identifier: argument.templateType
+			count: 2
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\Persistence\\ObjectManager\:\:getClassMetadata\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Crud/GridCrudHandler.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:getData\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:setDefaultParams\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:setSearchFields\(\) has parameter \$searchFields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^PHPDoc tag @return with type Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider is not subtype of native type static\(Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\)\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:\$defaultParams type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:\$models has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\AbstractDataProvider\:\:\$searchFields type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/AbstractDataProvider.php
+
+		-
+			message: '#^Instanceof between Doctrine\\ORM\\QueryBuilder and Doctrine\\ORM\\QueryBuilder will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:applyGlobalSearch\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getAllData\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getData\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getParams\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getTotalCount\(\) has parameter \$criteria with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:prepareModels\(\) has parameter \$models with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:setDefaultParams\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:\$ormMetadata has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:\$paginator has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:\$params type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManagerInterface\:\:getRepository\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/DataProvider/EntityDataProvider.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Export\\CsvExporter\:\:export\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Export/CsvExporter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Export\\ExcelExporter\:\:export\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Export/ExcelExporter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Export\\ExporterInterface\:\:export\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Export/ExporterInterface.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Export\\JsonExporter\:\:export\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Export/JsonExporter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Export\\PdfExporter\:\:export\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Export/PdfExporter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\FedaleGridviewBundle\:\:loadExtension\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/FedaleGridviewBundle.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\BooleanFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/Applier/BooleanFilterApplier.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\ChoiceFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/Applier/ChoiceFilterApplier.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\DateFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/Applier/DateFilterApplier.php
+
+		-
+			message: '#^Binary operation "\+" between string and 0 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Filter/Applier/NumberFilterApplier.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\NumberFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/Applier/NumberFilterApplier.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\TextFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/Applier/TextFilterApplier.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\FilterDefaultNormalizer\:\:normalize\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/FilterDefaultNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Filter\\FilterDefaultNormalizer\:\:normalizeChoice\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Filter/FilterDefaultNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\Control\\ControlResolver\:\:normalizeUnique\(\) has parameter \$control with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/Control/ControlResolver.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\Control\\ControlResolver\:\:normalizeUnique\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/Control/ControlResolver.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\Control\\ControlResolver\:\:resolve\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 4
+			path: src/Form/Control/ControlResolver.php
+
+		-
+			message: '#^Instanceof between Fedale\\GridviewBundle\\Contract\\ColumnInterface and Fedale\\GridviewBundle\\Contract\\ColumnInterface will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 3
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\GridFormBuilder\:\:build\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\GridFormBuilder\:\:buildBatchForm\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Offset ''modes'' on array\{type\: string, required\: bool, options\: array\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Offset ''options'' on array\{type\: string, required\: bool, options\: array\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Offset ''unique'' on array\{type\: string, required\: bool, options\: array\}\|null on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Form/GridFormBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:addFilter\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:addFilter\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:andFilterWhere\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:applyFilters\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:between\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:default\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:endWith\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:eq\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:getCriteria\(\) has invalid return type Fedale\\GridviewBundle\\Form\\Criteria\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:getFilters\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:getModelType\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:getOperators\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:iStartWith\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:ieq\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:ilike\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:inOp\(\) has parameter \$param with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:ineq\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:isOperator\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:isOperator\(\) has parameter \$token with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:like\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:neq\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:notIlike\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:notLike\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:orFilterWhere\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:search\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:searchWithOperator\(\) has parameter \$param with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:setCriteria\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:setFormFactory\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchForm\:\:startWith\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Parameter \$criteria of method Fedale\\GridviewBundle\\Form\\SearchForm\:\:setCriteria\(\) has invalid type Fedale\\GridviewBundle\\Form\\Criteria\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$criteria has unknown class Fedale\\GridviewBundle\\Form\\Criteria as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$filters with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$modelType \(Symfony\\Component\\Form\\Form\) does not accept Symfony\\Component\\Form\\FormInterface\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$requestStack is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Form/SearchForm.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchModel\:\:search\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchModel.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchModel\:\:setDataProvider\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchModel.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Form\\SearchModel\:\:setRequest\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Form/SearchModel.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchModel\:\:\$dataProvider is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Form/SearchModel.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchModel\:\:\$request is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Form/SearchModel.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailView\:\:getAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailView\:\:getOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailView\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailView\:\:setOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\DetailView\:\:\$attr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\DetailView\:\:\$columnFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\DetailView\:\:\$options type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailView.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailViewBuilder\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailViewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\DetailViewBuilder\:\:setOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailViewBuilder.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\DetailViewBuilder\:\:\$runtimeAttributes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailViewBuilder.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\DetailViewBuilder\:\:\$runtimeOptions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/DetailViewBuilder.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Doctrine\\ORM\\EntityManagerInterface\:\:getRepository\(\)$#'
+			identifier: argument.templateType
+			count: 2
+			path: src/Grid/DoctrineChildRowResolver.php
+
+		-
+			message: '#^Call to an undefined method Fedale\\GridviewBundle\\Contract\\ColumnInterface\:\:setSortable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:getColumns\(\) return type with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:getDefaultFilterParams\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:getExportRows\(\) return type has no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:getIndexColumns\(\) return type with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:getOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:parseLayout\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:recordProfile\(\) has parameter \$models with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:recordProfile\(\) has parameter \$pagination with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:renderGrid\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:setDataProviderOptions\(\) has parameter \$dataProviderOptions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\Gridview\:\:setOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$attr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$columns with generic class Doctrine\\Common\\Collections\\ArrayCollection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$containerAttr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$dataProviderOptions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$defaultFilterParams type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$filterAttr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$headerAttr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$options type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$rowAttr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\Gridview\:\:\$rowOptions has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to method Symfony\\Component\\HttpFoundation\\ParameterBag\:\:all\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Grid/Gridview.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:mergeAttributes\(\) has parameter \$runtime with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:mergeAttributes\(\) has parameter \$yaml with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:mergeAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setAttributes\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setColumns\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setDataProvider\(\) has parameter \$dataProviderOptions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:setSearchModel\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:\$runtimeAttributes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:\$runtimeOptions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:\$searchModel is unused\.$#'
+			identifier: property.unused
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:__construct\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeAttributeLayer\(\) has parameter \$base with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeAttributeLayer\(\) has parameter \$layer with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeAttributeLayer\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeDetailAttributeLayer\(\) has parameter \$base with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeDetailAttributeLayer\(\) has parameter \$layer with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeDetailAttributeLayer\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeLayout\(\) has parameter \$layers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:mergeLayout\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveDetailAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveDetailOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:getFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:withPage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:withPageSize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:withSort\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:withView\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:\$filters type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\State\\GridviewUrlState\:\:\$routeParams type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Grid/State/GridviewUrlState.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\I18n\\GridviewI18nCatalog\:\:__construct\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/I18n/GridviewI18nCatalog.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:buildColumnPlans\(\) has parameter \$metadata with generic class Doctrine\\ORM\\Mapping\\ClassMetadata but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:buildColumnPlans\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:columnsArrayFor\(\) has parameter \$plans with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:columnsArrayFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:describeFields\(\) has parameter \$metadata with generic class Doctrine\\ORM\\Mapping\\ClassMetadata but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForScalarField\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForScalarField\(\) has parameter \$metadata with generic class Doctrine\\ORM\\Mapping\\ClassMetadata but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForScalarField\(\) has parameter \$override with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForScalarField\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToManyAssociation\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToManyAssociation\(\) has parameter \$override with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToManyAssociation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToOneAssociation\(\) has parameter \$field with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToOneAssociation\(\) has parameter \$override with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:planForToOneAssociation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:relationDisplayField\(\) has parameter \$targetMetadata with generic class Doctrine\\ORM\\Mapping\\ClassMetadata but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:searchFieldsFor\(\) has parameter \$plans with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Parameter \#1 \$targetMetadata of method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:relationDisplayField\(\) expects Doctrine\\ORM\\Mapping\\ClassMetadata, Doctrine\\Persistence\\Mapping\\ClassMetadata given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Maker/DoctrineTypeMapper.php
+
+		-
+			message: '#^Parameter \#1 \$metadata of method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:describeFields\(\) expects Doctrine\\ORM\\Mapping\\ClassMetadata, array\|Doctrine\\Persistence\\Mapping\\ClassMetadata given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Maker/MakeGridCrud.php
+
+		-
+			message: '#^Parameter \#3 \$metadata of method Fedale\\GridviewBundle\\Maker\\DoctrineTypeMapper\:\:buildColumnPlans\(\) expects Doctrine\\ORM\\Mapping\\ClassMetadata, array\|Doctrine\\Persistence\\Mapping\\ClassMetadata given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Maker/MakeGridCrud.php
+
+		-
+			message: '#^Variable \$alias might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$class_name might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$columns_php might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$entity_class_name might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$entity_full_class_name might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$namespace might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$page_size might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$route_name_prefix might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$route_prefix might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$search_fields_php might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$sort_default_php might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Variable \$sort_map_php might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Maker/Resources/skeleton/crud/Controller.tpl.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\Util\\PhpArrayPrinter\:\:export\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/Util/PhpArrayPrinter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Maker\\Util\\PhpArrayPrinter\:\:tryInline\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Maker/Util/PhpArrayPrinter.php
+
+		-
+			message: '#^Call to method publish\(\) on an unknown class Symfony\\Component\\Mercure\\HubInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Mercure/GridviewMercurePublisher.php
+
+		-
+			message: '#^Instantiated class Symfony\\Component\\Mercure\\Update not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Mercure/GridviewMercurePublisher.php
+
+		-
+			message: '#^Parameter \$hub of method Fedale\\GridviewBundle\\Mercure\\GridviewMercurePublisher\:\:__construct\(\) has invalid type Symfony\\Component\\Mercure\\HubInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Mercure/GridviewMercurePublisher.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Mercure\\GridviewMercurePublisher\:\:\$hub has unknown class Symfony\\Component\\Mercure\\HubInterface as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Mercure/GridviewMercurePublisher.php
+
+		-
+			message: '#^Call to function is_numeric\(\) with float\|int will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Pagination/Pagination.php
+
+		-
+			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: src/Pagination/Pagination.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: src/Pagination/Pagination.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Pagination\\Pagination\:\:setAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Pagination/Pagination.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Pagination\\Pagination\:\:\$attributes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Pagination/Pagination.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Profiler\\GridviewDataCollector\:\:getTemplate\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Profiler/GridviewDataCollector.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Row\\Cell\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Row/Cell.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Row\\Cell\:\:getKey\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Row/Cell.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Row\\Cell\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Row/Cell.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Row\\Row\:\:setAttr\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Row/Row.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Row\\Row\:\:setAttr\(\) has parameter \$replace with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Row/Row.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Row\\Row\:\:\$attr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Row/Row.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Row\\Row\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Row/Row.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:__construct\(\) has parameter \$defaultContext with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:withLazyGuards\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:withLazyGuards\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:getEnvironment\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:getSearchForm\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:setAttr\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:setAttr\(\) has parameter \$replace with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:setDataProvider\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:setRequest\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:setSearchForm\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Service\\GridviewService\:\:\$attr type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/GridviewService.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:createLink\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:fetchAttributesOrder\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:fetchOrders\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:getAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:normalizeFields\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:normalizeFields\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:parseSortQueryParams\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:prepareQuerySortParams\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:prepareSortAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:setAttributeOrders\(\) has parameter \$attributeOrders with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:setAttributes\(\) has parameter \$sortAttributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Sort\\Sort\:\:setDefaultSort\(\) has parameter \$defaultSort with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$sortParam$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^PHPDoc tag @return with type \$this\(Fedale\\GridviewBundle\\Sort\\Sort\) is incompatible with native type string\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^PHPDoc tag @return with type Fedale\\GridviewBundle\\Sort\\Sort is not subtype of native type static\(Fedale\\GridviewBundle\\Sort\\Sort\)\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^PHPDoc tag @throws with type Fedale\\GridviewBundle\\Sort\\SortException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 2
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Sort\\Sort\:\:\$attributeOrders type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Sort\\Sort\:\:\$attributes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Property Fedale\\GridviewBundle\\Sort\\Sort\:\:\$defaultSort type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Sort/Sort.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Twig\\OptionsExtension\:\:includeToken\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Twig/OptionsExtension.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Twig\\OptionsExtension\:\:renderChildren\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Twig/OptionsExtension.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Twig\\OptionsExtension\:\:renderOptions\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Twig/OptionsExtension.php

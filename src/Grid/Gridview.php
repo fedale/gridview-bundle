@@ -25,6 +25,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 
+/**
+ * @phpstan-import-type ColumnSpec from \Fedale\GridviewBundle\Column\ColumnFactory
+ */
 class Gridview implements GridviewInterface
 {
     private ArrayCollection $columns;
@@ -398,6 +401,9 @@ class Gridview implements GridviewInterface
         return $this;
     }
 
+    /**
+     * @param array<int, string|ColumnSpec> $columns
+     */
     public function setColumns(array $columns): static
     {
         foreach ($columns as $key => $spec) {

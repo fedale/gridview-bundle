@@ -10,6 +10,8 @@ use Fedale\GridviewBundle\Service\GridviewService;
  * Stateful, single-use fluent builder for {@see DetailView}, mirroring
  * {@see GridviewBuilder}. Obtain one per request from
  * {@see GridviewBuilderFactory::createDetailViewBuilder()}.
+ *
+ * @phpstan-import-type ColumnSpec from \Fedale\GridviewBundle\Column\ColumnFactory
  */
 class DetailViewBuilder implements DetailViewBuilderInterface
 {
@@ -65,6 +67,8 @@ class DetailViewBuilder implements DetailViewBuilderInterface
      * array), instantiated through the ColumnFactory. Unlike
      * {@see Gridview::setColumns()} it wires NO filters/sort/searchForm: a detail
      * view only renders cells.
+     *
+     * @param array<int, string|ColumnSpec> $columns
      */
     public function setColumns(array $columns): static
     {

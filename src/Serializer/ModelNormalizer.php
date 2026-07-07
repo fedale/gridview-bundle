@@ -15,16 +15,25 @@ class ModelNormalizer implements NormalizerInterface, NormalizerAwareInterface
     // public function __construct(private ObjectNormalizer $normalizer)
     // {}
     
-    public function normalize(mixed $object, ?string $format = null, array $context = [])
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
-        $data = $this->normalizer->normalize($object, $format, $context);
+        return $this->normalizer->normalize($object, $format, $context);
     }
-    public function supportsNormalization(mixed $data, ?string $format = null): bool
+
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return false;
     }
 
-    public function setNormalizer(NormalizerInterface $normalizer)
+    /**
+     * @return array<string, bool|null>
+     */
+    public function getSupportedTypes(?string $format): array
+    {
+        return [];
+    }
+
+    public function setNormalizer(NormalizerInterface $normalizer): void
     {
         $this->normalizer = $normalizer;
     }

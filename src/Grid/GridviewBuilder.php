@@ -7,6 +7,9 @@ use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
 
+/**
+ * @phpstan-import-type ColumnSpec from \Fedale\GridviewBundle\Column\ColumnFactory
+ */
 class GridviewBuilder implements GridviewBuilderInterface
 {
     private SearchModelInterface $searchModel;
@@ -39,6 +42,9 @@ class GridviewBuilder implements GridviewBuilderInterface
         return $this;
     }
 
+    /**
+     * @param array<int, string|ColumnSpec> $columns
+     */
     public function setColumns(array $columns)
     {
         $this->gridview->setColumns($columns);
