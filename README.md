@@ -1,206 +1,264 @@
 # fedale/gridview-bundle
 
-A Gridview component for the Symfony framework, inspired by Yii 2 GridView.
-Main inspirations:
-- https://www.yiiframework.com/doc/api/2.0/yii-grid-gridview
-- https://github.com/kartik-v/yii2-grid
-- https://github.com/AlexyAV/AVGridBundle
-- https://github.com/APY/APYDataGridBundle
-- https://github.com/tinustester/symfony-gridview-bundle
+> **Application-grade data grids for Symfony.**
+>
+> Build searchable, sortable, editable data grids anywhere in your application — without adopting an admin framework.
 
-## Installation
+Gridview is an **embeddable data-grid platform** for Symfony.
+
+It brings together everything expected from a modern business grid—filtering, sorting, CRUD, export, real-time updates and internationalization—while remaining just another component of your application.
+
+Unlike an admin generator, Gridview never takes ownership of your pages.
+
+It integrates into the application you already have.
+
+---
+
+## Why Gridview exists
+
+Symfony developers generally face two very different options.
+
+On one side there are **admin frameworks**, such as EasyAdmin, designed to build complete administration panels.
+
+On the other there are lightweight datagrid libraries that simply render a Doctrine query as an HTML table.
+
+Both solve their own problem well.
+
+Gridview exists for the space between them.
+
+It provides a fully featured data grid that can be embedded into **any Symfony page**, whether that's a customer portal, an ERP, a CRM, a reporting dashboard or a traditional back office.
+
+Instead of generating an application, it enhances one.
+
+---
+
+## Philosophy
+
+Gridview follows a simple principle:
+
+> **Your application owns the page.
+> Gridview owns the data grid.**
+
+Layouts remain yours.
+
+Navigation remains yours.
+
+Security remains yours.
+
+Controllers remain yours.
+
+Gridview focuses on one responsibility: presenting and manipulating structured data.
+
+This separation keeps the bundle flexible enough to integrate into existing applications instead of forcing applications to adapt to the bundle.
+
+---
+
+## At a glance
+
+✔ Embeddable anywhere
+
+✔ CRUD-ready
+
+✔ Search & filtering
+
+✔ Multi-column sorting
+
+✔ Pagination
+
+✔ Batch actions
+
+✔ Export (CSV, Excel, PDF)
+
+✔ Mercure real-time updates
+
+✔ Client-side internationalization
+
+✔ Theme support
+
+✔ Twig-first rendering
+
+✔ Doctrine and custom data providers
+
+---
+
+## Is Gridview the right tool?
+
+| Your goal                                             | Recommended solution |
+| ----------------------------------------------------- | -------------------- |
+| Build a complete `/admin` backend                     | EasyAdmin            |
+| Render a lightweight Doctrine table                   | kibatic/datagrid     |
+| Embed a rich data grid inside an existing application | **fedale/gridview**  |
+
+These tools are complementary rather than direct competitors.
+
+Gridview deliberately occupies the middle ground: richer than a simple datagrid library, more reusable than an admin framework.
+
+---
+
+## Typical applications
+
+Gridview is particularly suited to software where the grid is **part of the interface**, not the whole interface.
+
+Examples include:
+
+* customer portals
+* ERP systems
+* CRM software
+* SaaS dashboards
+* reporting tools
+* intranet applications
+* logistics software
+* healthcare systems
+* educational platforms
+* embedded administration pages
+
+If your application has its own identity and simply needs powerful data management, Gridview was designed for that scenario.
+
+---
+
+# Installation
 
 ```bash
 composer require fedale/gridview-bundle
 ```
 
-Requires PHP >= 8.1 and Symfony >= 6.4. The bundle is auto-registered via Symfony
-Flex; otherwise add `Fedale\GridviewBundle\FedaleGridviewBundle` to `config/bundles.php`.
+Requirements:
 
-## Usage
+* PHP 8.1+
+* Symfony 6.4+
 
-First of all, this gridview is not automagic: if you are searching something magical like EasyAdmin gridview this project is not for you. You have, at least, configure a Fedale\GridviewBundle\DataProviderInterface and an array of columns to display.
+Symfony Flex automatically enables the bundle.
 
-With an Entity having these properties:
-- id
-- code
-- username 
-you can dsplay a grid having these columns configuring this array:
+---
 
+# A first grid
+
+Every Gridview starts with two concepts:
+
+* **where the data comes from**
+* **how that data should be presented**
+
+```php
 $columns = [
     'id',
     'code',
-    'username'
+    'username',
 ];
 
 $dataProvider = [
-    // 'queryBuilder' => $queryBuilder,
-    'model' => \App\Entity\Customer\Customer::class,
+    'model' => Customer::class,
 ];
 
-$gridview = $this->createGridviewBuilder()
-->setDataProvider($dataProvider)
-->setColumns($columns)
-->renderGridview();
+$grid = $this->createGridviewBuilder()
+    ->setDataProvider($dataProvider)
+    ->setColumns($columns)
+    ->renderGridview();
 
-return $gridview->renderGrid('@FedaleGridview/gridview/index.html.twig', []);
-
-For each you can set further configurations, passing each of them as array. In that case you can configure 'attribute', 'filter' (i.e. a query filter, that it needs a searchModel first), 'value' an anonymous function to return specific value, 'twigFilter' that will be applied to value of cell, 'visibile' 'boolean', 'label' (header of the column).
-
-Try to change array $columns in this way:
-$columns = [
-    'id',
-    [
-        'attribute' => 'code',
-        'value' => function (array $data, string $key, ColumnInterface $column) {
-            return '<strong>' . $data['code'] . '</strong>';
-        },
-        'twigFilter' => 'raw'
-    ],
-    [
-        'attribute' =>'username',
-        'twigFilter' => 'reverse'
-    ]    
-];
-
-In $dataProvider you can also set 'pagination' and 'sort' parameters.
-
-The 'sort' option is a sub-array: 'map' holds the sortable attribute
-definitions, 'default' the initial order and 'multiSort' toggles multi-column
-sorting.
-
-// be careful that the map keys must have the same name as columns
-$sortAttributes = [
-    'id' => [
-        'asc' => ['c.id' => Sort::ASC],
-        'desc' => ['c.id' => Sort::DESC],
-        'default' => Sort::DESC,
-    ],
-    'code' => [
-        'asc' => ['c.code' => Sort::ASC],
-        'desc' => ['c.code' => Sort::DESC],
-        'default' => Sort::DESC,
-    ],
-];
-
-$sort = [
-    'map' => $sortAttributes,
-    // 'multiSort' => true,
-    // 'default'   => ['code' => 'desc'],
-];
-
-and Gridview becomes sortable by 'id' and 'code' columns!
-
-The 'pagination' option sets the default page size and, optionally, a list of
-selectable page sizes rendered as a footer selector ('pageSizeOptions'):
-$paginationAttributes = [
-    'defaultPageSize' => 25,
-    'pageSizeOptions' => [25, 50, 100],
-    // 'maxPageSize'  => 100,
-];
-
-
-
-
-
-But the only thing you have to do is to set a config arrays. 
-// Order matters! Try to switch setColumns() / setFilterModel()
-        $gridview = $this->createGridviewBuilder()
-            ->setSearchModel($this->customerSearchModel)
-            ->setDataProvider($dataProvider)
-            ->setColumns($columns)
-            ->setAttributes([
-                'class' => 'table table-dark',
-                'row' => [
-                    'class' => 'row-class'
-                ],
-                'header' => [
-                    'class' => 'row-header'
-                ],
-                'container' => [
-                    'class' => 'row-container',
-                    'data-type' => 'my-custom-type'
-                ]
-            ])
-            ->renderGridview();
-        ;
-
-where $this->customerSearchModel is a child of Fedale\GridviewBundle\Service\SearchModel
-$dataProvider represents a way and how to get data from a source like a database
-$dataProvider = [
-            // 'queryBuilder' => $queryBuilder,
-            'model' => \App\Entity\Customer\Customer::class,
-            'pagination' => $paginationAttributes,
-            'sort' => $sort
-        ];
-
-Let's try with one entity.
-
-
-How to define relations between entitites?
-
-->setColumns($columns)  is the place where you set columns from different entities. $columns is an array where each item has these keys: 
-attribute: the name of columnn
-value: is the value to display, you can use a closure 
-filter: filter to use, like 'text' or 'select'
-twigFilter: one of twig filter 
-active: boolean | array | closure — where the column is rendered. `true` (default) everywhere; `false` nowhere (access-control kill-switch: no cell, filter, export or form field); an array gives per-context control with `{inIndex, inShow, inCreate, inUpdate}` (omitted keys default to `true`). A column inactive in `index` only is still registered — filterable, exportable and editable in Create/Update forms — but produces no table cell and no "Columns" toggle entry. A closure may return any of these. See docs for `active` vs `visible`
-visible: boolean — show/hide a registered column (CSS only; stays in DOM/data)
-label: 
-
-### Rendering a cell from a Twig template
-
-A `value` (or `renderer`) closure receives the column as its last argument, and
-the column exposes `renderTemplate(string $name, array $context = []): string` —
-the grid's own Twig environment, so a cell can be rendered from a template
-instead of building HTML inline. Wrap the result in a `Twig\Markup` so it is not
-re-escaped:
-
-```php
-use Fedale\GridviewBundle\Column\DataColumn;
-use Twig\Markup;
-
-[
-    'attribute' => 'postCount',
-    'label' => 'tag.posts',
-    'value' => fn(array $data, int $index, DataColumn $column): Markup => new Markup(
-        $column->renderTemplate('gridview/tag/_posts_popularity.html.twig', [
-            'count' => (int) ($data['postCount'] ?? 0),
-            'published' => (int) ($data['publishedCount'] ?? 0),
-        ]),
-        'UTF-8'
-    ),
-],
+return $grid->renderGrid(
+    '@FedaleGridview/gridview/index.html.twig'
+);
 ```
 
-This keeps the cell markup in a template and avoids injecting Twig into the
-controller.
+This produces a working grid.
 
-## Internationalization (i18n)
+From there you progressively add sorting, searching, pagination, custom rendering, CRUD operations, exports and everything else your application requires.
 
-The grid supports **instant, client-side language switching** — changing language
-rewrites every label in place with no server roundtrip and no page reload.
+---
 
-Translations stay in Symfony YAML (the single source of truth); the bundle ships
-the full catalog of every enabled locale to the browser and a small headless
-runtime (`window.GridviewI18n`) swaps the text. Two domains are used:
-`GridviewBundle` for the built-in chrome and a configurable `Gridview` domain for
-your column labels.
+# Architecture
 
-Any existing language switcher can drive the grid — via a DOM event
-(`gridview:set-locale`), the `window.GridviewI18n.setLocale()` API, or by
-observing `<html lang>` — so you never need two switchers. A built-in switcher is
-available too (opt-in).
+Gridview is intentionally composed of small, independent building blocks.
 
-```yaml
-# config/packages/gridview.yaml
-fedale_gridview:
-    i18n:
-        locales: [en, it]
-        default: en
-        client_domain: Gridview
-```
+| Component    | Responsibility                     |
+| ------------ | ---------------------------------- |
+| DataProvider | Retrieves data from any source     |
+| SearchModel  | Handles filtering                  |
+| Column       | Defines presentation and behaviour |
+| Renderer     | Produces HTML                      |
+| Control      | Handles editing                    |
+| Export       | Generates downloadable files       |
+| Theme        | Controls presentation              |
+| Translator   | Client-side localization           |
 
-See [Internationalization (i18n)](docs/i18n.md)
-for the full guide (external switchers, server-side persistence, tagging your own
-templates, dynamic JS strings).
+Each layer can be customized independently.
+
+---
+
+# Core features
+
+## Data
+
+* Doctrine ORM support
+* custom DataProviders
+* server-side filtering
+* multi-column sorting
+* pagination
+* batch operations
+
+## Rendering
+
+* Twig templates
+* custom cell renderers
+* reusable templates
+* responsive layouts
+* dark mode
+* multiple themes
+
+## Editing
+
+* CRUD
+* inline editing
+* detail views
+* context-aware visibility
+* reusable controls
+
+## Integration
+
+* Symfony Forms
+* Twig
+* Translation component
+* Mercure
+* Maker commands
+
+---
+
+# Design principles
+
+Gridview intentionally favors **explicit configuration** over hidden conventions.
+
+Almost every aspect of the grid is configurable.
+
+Columns describe presentation.
+
+Controls describe editing.
+
+Filters describe searching.
+
+Because these concerns stay separate, applications remain predictable and easier to extend over time.
+
+---
+
+# Documentation
+
+Detailed documentation is available for:
+
+* Data Providers
+* Search Models
+* Column types
+* Controls
+* Filters
+* Export
+* Themes
+* Internationalization
+* Mercure integration
+* Maker commands
+
+See the **docs/** directory.
+
+---
+
+# Inspiration
+
+Gridview was inspired by the Yii2 GridView ecosystem, particularly Kartik's GridView, while embracing modern Symfony practices.
+
+The goal is to provide Symfony applications with an embeddable, framework-native data-grid platform that integrates naturally with Twig, Forms, Translation and the rest of the Symfony ecosystem.
