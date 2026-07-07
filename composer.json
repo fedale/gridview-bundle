@@ -1,8 +1,15 @@
 {
     "name": "fedale/gridview-bundle",
-    "description": "Gridview in Yii2 style inside your Symfony projects",
+    "description": "A reusable, application-grade data-grid component for Symfony.",
     "type": "symfony-bundle",
-    "keywords": ["symfony", "bundle", "gridview", "datagrid", "grid", "crud"],
+    "keywords": [
+        "symfony",
+        "bundle",
+        "gridview",
+        "datagrid",
+        "grid",
+        "crud"
+    ],
     "license": "MIT",
     "authors": [
         {
