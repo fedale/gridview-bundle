@@ -3,9 +3,11 @@
 namespace Fedale\GridviewBundle\Grid;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Fedale\GridviewBundle\Column\AbstractColumn;
 use Fedale\GridviewBundle\Column\CheckboxColumn;
 use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Column\DataColumn;
+use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildCountResolverInterface;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
@@ -42,6 +44,15 @@ class Gridview implements GridviewInterface
 
     /** @var array<int, ColumnInterface>|null */
     private ?array $childColumns = null;
+
+    /**
+     * Resolved footer summaries, keyed by the same column key the table sections
+     * use (`attribute` or `col<index>`), each already rendered to a string/Markup.
+     * Empty when no column declares a footer. Populated by renderGrid().
+     *
+     * @var array<string, \Twig\Markup|string>|null
+     */
+    private ?array $footerSummaries = null;
 
     protected ?string $key = null;
     protected ?string $id = null;
@@ -258,6 +269,76 @@ class Gridview implements GridviewInterface
         }
 
         return $this->childColumns;
+    }
+
+    /**
+     * Per-column footer summaries for the current render, keyed by column key
+     * (`attribute` or `col<index>`) — the same key the table footer template uses
+     * to place each cell. Empty until renderGrid() has fetched the page data.
+     *
+     * @return array<string, \Twig\Markup|string>
+     */
+    public function getFooterSummaries(): array
+    {
+        return $this->footerSummaries ?? [];
+    }
+
+    /**
+     * Resolve every column's footer cell. Dataset-scope aggregates are batched
+     * into a single provider query (when the provider supports it); everything
+     * else — page scope, custom closures, literal labels, or aggregates that
+     * can't be expressed in the query — is resolved from the current page's rows.
+     *
+     * @param iterable<Row> $models
+     */
+    private function computeFooterSummaries(iterable $models): void
+    {
+        $columns = [];
+        foreach ($this->getIndexColumns() as $i => $column) {
+            if ($column instanceof AbstractColumn && $column->hasFooter()) {
+                $columns[$column->getAttribute() ?? ('col' . $i)] = $column;
+            }
+        }
+
+        if ($columns === []) {
+            $this->footerSummaries = [];
+
+            return;
+        }
+
+        $rows = \is_array($models) ? $models : iterator_to_array($models, false);
+
+        // Batch every dataset-scope aggregate into one provider query.
+        $aggregates = [];
+        $aliasByKey = [];
+        if ($this->dataProvider instanceof AggregatableInterface) {
+            $rootAlias   = $this->dataProvider->getRootAlias();
+            $expressions = [];
+            foreach ($columns as $key => $column) {
+                if (!$column instanceof DataColumn) {
+                    continue;
+                }
+                $expr = $column->footerDatasetExpression($rootAlias);
+                if ($expr === null) {
+                    continue;
+                }
+                $alias = 'gvagg_' . \count($expressions);
+                $expressions[$alias] = $expr;
+                $aliasByKey[$key]    = $alias;
+            }
+
+            if ($expressions !== []) {
+                $aggregates = $this->dataProvider->aggregate($expressions);
+            }
+        }
+
+        $summaries = [];
+        foreach ($columns as $key => $column) {
+            $datasetValue = isset($aliasByKey[$key]) ? ($aggregates[$aliasByKey[$key]] ?? null) : null;
+            $summaries[$key] = $column->renderFooter($datasetValue, $rows);
+        }
+
+        $this->footerSummaries = $summaries;
     }
 
     public function getDataProvider(): DataProviderInterface
@@ -875,6 +956,7 @@ class Gridview implements GridviewInterface
         }
 
         $models = $this->dataProvider->getData();
+        $this->computeFooterSummaries($models);
         if ($this->isGrouped()) {
             $this->applyGrouping($models);
         }

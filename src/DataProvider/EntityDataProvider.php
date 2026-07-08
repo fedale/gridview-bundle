@@ -8,6 +8,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
 use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
 use Fedale\GridviewBundle\Contract\ScopeVerifiableInterface;
@@ -16,7 +17,7 @@ use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Event\RowEvent;
 
-class EntityDataProvider extends AbstractDataProvider implements GroupingCapableInterface, ScopeVerifiableInterface
+class EntityDataProvider extends AbstractDataProvider implements AggregatableInterface, GroupingCapableInterface, ScopeVerifiableInterface
 {
     protected QueryBuilder $queryBuilder;
 
@@ -166,6 +167,46 @@ class EntityDataProvider extends AbstractDataProvider implements GroupingCapable
             ->setMaxResults(1);
 
         return $qb->getQuery()->getOneOrNullResult() !== null;
+    }
+
+    public function getRootAlias(): string
+    {
+        return isset($this->queryBuilder)
+            ? ($this->queryBuilder->getRootAliases()[0] ?? $this->alias)
+            : $this->alias;
+    }
+
+    /**
+     * Aggregate over the whole filtered dataset in a single query: clones the
+     * prepared query builder (so it inherits the exact WHERE/JOIN of the list),
+     * drops pagination and ordering, and selects every requested expression at
+     * once. Returns the scalar row keyed by the caller's aliases.
+     *
+     * @param array<string, string> $expressions
+     *
+     * @return array<string, int|float|string|null>
+     */
+    public function aggregate(array $expressions): array
+    {
+        if ($expressions === [] || !isset($this->queryBuilder)) {
+            return [];
+        }
+
+        $qb = (clone $this->queryBuilder)
+            ->setFirstResult(null)
+            ->setMaxResults(null)
+            ->resetDQLPart('orderBy');
+
+        $select = [];
+        foreach ($expressions as $alias => $expr) {
+            $select[] = sprintf('%s AS %s', $expr, $alias);
+        }
+        $qb->select(implode(', ', $select));
+
+        /** @var array<string, int|float|string|null> $row */
+        $row = $qb->getQuery()->getSingleResult();
+
+        return $row;
     }
 
     public function getData()

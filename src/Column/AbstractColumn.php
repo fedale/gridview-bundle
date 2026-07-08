@@ -65,6 +65,17 @@ abstract class AbstractColumn implements ColumnInterface
     /** Inline-editing config: false, true, or ['trigger' => 'click'|'dblclick']. */
     protected bool|array $editable = false;
 
+    /**
+     * Normalized footer-summary spec, or null when the column has no footer cell.
+     * On the base column only the literal forms apply: ['text' => string] renders
+     * a static label (e.g. "Total") in the footer cell — handy on a structural
+     * column such as checkbox — and ['callable' => \Closure] renders custom HTML.
+     * {@see \Fedale\GridviewBundle\Column\DataColumn} adds the aggregate forms.
+     *
+     * @var array<string, mixed>|null
+     */
+    protected ?array $footer = null;
+
     protected $value;
 
     public function __construct(
@@ -334,6 +345,61 @@ abstract class AbstractColumn implements ColumnInterface
     public function setEditable(bool|array $editable): void
     {
         $this->editable = $editable;
+    }
+
+    /**
+     * Configure the footer-summary cell. On the base column a string is a literal
+     * label and a closure renders custom HTML; an array carries the same under
+     * ['text' => ...] / ['callable' => ...]. Subclasses widen this (see DataColumn).
+     *
+     * @param string|array<string, mixed>|\Closure $footer
+     */
+    public function setFooter($footer): void
+    {
+        if ($footer instanceof \Closure) {
+            $this->footer = ['callable' => $footer];
+
+            return;
+        }
+
+        if (\is_string($footer)) {
+            $this->footer = ['text' => $footer];
+
+            return;
+        }
+
+        $this->footer = $footer;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getFooter(): ?array
+    {
+        return $this->footer;
+    }
+
+    public function hasFooter(): bool
+    {
+        return $this->footer !== null;
+    }
+
+    /**
+     * Render this column's footer-summary cell. On the base column that is either
+     * a custom closure `($datasetValue, $rows, $column)` or the literal `text`.
+     * DataColumn overrides this to format aggregate values through the column type.
+     *
+     * @param iterable<\Fedale\GridviewBundle\Row\Row> $rows current page rows
+     */
+    public function renderFooter(mixed $datasetValue, iterable $rows): mixed
+    {
+        if ($this->footer === null) {
+            return '';
+        }
+
+        if (isset($this->footer['callable']) && \is_callable($this->footer['callable'])) {
+            return ($this->footer['callable'])($datasetValue, $rows, $this);
+        }
+
+        return $this->footer['text'] ?? '';
     }
 
     /**

@@ -1,4 +1,19 @@
 <tfoot>
+    {% set footer_summaries = gridview.footerSummaries %}
+    {% if footer_summaries is not empty %}
+        {# Per-column summary row: one cell per index column, aligned with the
+           header/filter rows (including the grouping and responsive control
+           columns). A column with no footer renders an empty cell. #}
+        <tr class="gv-tfoot-summary-row">
+            {% if gridview.isGrouped %}<td class="gv-group-ctrl" aria-hidden="true"></td>{% endif %}
+            {% if gridview.options.behavior.responsive|default(false) %}<td class="gv-resp-ctrl" aria-hidden="true"></td>{% endif %}
+            {% for column in gridview.indexColumns %}
+                {% set col_key = column.attribute|default('col' ~ loop.index0) %}
+                <td data-col="{{ loop.index0 }}" data-col-key="{{ col_key }}" class="gv-tfoot-cell"{% if not column.isVisible() %} style="display:none"{% endif %}>{{ footer_summaries[col_key]|default('') }}</td>
+            {% endfor %}
+        </tr>
+    {% endif %}
+
     {% set tfoot_tokens = gridview.parseLayout('tfoot') %}
     {% if tfoot_tokens is empty %}
         {# Default footer: total-results summary ("<N> results") on the left,

@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Column;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
 use Fedale\GridviewBundle\Filter\FilterClearNormalizer;
 use Fedale\GridviewBundle\Grid\Gridview;
+use Twig\Markup;
 use \Closure;
 
 class DataColumn extends AbstractColumn
@@ -315,5 +316,188 @@ class DataColumn extends AbstractColumn
     public function getOptions(): array
     {
         return $this->options ?? [];
+    }
+
+    /**
+     * Configure the footer summary. Accepts, in addition to the base literal
+     * forms (a label string or a closure):
+     *   - an aggregate name ('sum', 'avg', 'min', 'max', 'count', 'countDistinct')
+     *     or a {@see FooterAggregate};
+     *   - an array with `agg` (aggregate) or `expr` (raw DQL, e.g.
+     *     'SUM(e.qty * e.price)'), plus `scope` ('dataset' default, or 'page'),
+     *     `format` (overrides merged over the column format), and `label`.
+     * A bare string that is not a known aggregate name is treated as a literal.
+     *
+     * @param string|array<string, mixed>|\Closure|FooterAggregate $footer
+     */
+    public function setFooter($footer): void
+    {
+        if ($footer instanceof Closure) {
+            $this->footer = ['callable' => $footer];
+
+            return;
+        }
+
+        if ($footer instanceof FooterAggregate) {
+            $this->footer = ['agg' => $footer, 'scope' => 'dataset'];
+
+            return;
+        }
+
+        if (\is_string($footer)) {
+            $agg = FooterAggregate::tryFrom($footer);
+            $this->footer = $agg !== null
+                ? ['agg' => $agg, 'scope' => 'dataset']
+                : ['text' => $footer];
+
+            return;
+        }
+
+        $spec = $footer;
+
+        if (isset($spec['callable']) && $spec['callable'] instanceof Closure) {
+            $this->footer = ['callable' => $spec['callable']];
+
+            return;
+        }
+
+        if (\array_key_exists('agg', $spec)) {
+            $spec['agg'] = $spec['agg'] instanceof FooterAggregate
+                ? $spec['agg']
+                : FooterAggregate::from($spec['agg']);
+        }
+
+        // Aggregates and raw expressions default to the dataset scope; a plain
+        // label array is scope-agnostic.
+        $spec['scope'] ??= (isset($spec['agg']) || isset($spec['expr'])) ? 'dataset' : 'page';
+
+        $this->footer = $spec;
+    }
+
+    /**
+     * The DQL aggregate expression to batch into the provider's dataset query, or
+     * null when this footer can't be computed that way (literal/custom footer,
+     * page scope, or an aggregate over a non-scalar/relation attribute — those
+     * fall back to page-scope aggregation). A raw `expr` is passed through as-is.
+     */
+    public function footerDatasetExpression(string $rootAlias): ?string
+    {
+        $spec = $this->footer;
+        if ($spec === null || isset($spec['callable']) || isset($spec['text'])) {
+            return null;
+        }
+
+        if (($spec['scope'] ?? 'dataset') !== 'dataset') {
+            return null;
+        }
+
+        if (isset($spec['expr'])) {
+            return $spec['expr'];
+        }
+
+        if (!isset($spec['agg'])) {
+            return null;
+        }
+
+        // Only a plain scalar attribute on the query root can be qualified into a
+        // valid aggregate here; dotted relation paths need a join we don't build.
+        $attribute = $this->attribute;
+        if ($attribute === '' || \str_contains($attribute, '.')) {
+            return null;
+        }
+
+        return $spec['agg']->toDql($rootAlias . '.' . $attribute);
+    }
+
+    /**
+     * Render the footer summary cell. $datasetValue is the pre-computed dataset
+     * aggregate (from the provider's batched query) when available, else null —
+     * in which case the value is reduced from the current page's rows.
+     *
+     * @param iterable<\Fedale\GridviewBundle\Row\Row> $rows
+     */
+    public function renderFooter(mixed $datasetValue, iterable $rows): mixed
+    {
+        $spec = $this->footer;
+        if ($spec === null) {
+            return '';
+        }
+
+        if (isset($spec['callable']) && \is_callable($spec['callable'])) {
+            return ($spec['callable'])($datasetValue, $rows, $this);
+        }
+
+        if (isset($spec['text'])) {
+            return $spec['text'];
+        }
+
+        $agg = $spec['agg'] ?? null;
+
+        $raw = $datasetValue;
+        if ($raw === null) {
+            // Page scope, or a dataset aggregate that couldn't be batched (relation
+            // path / non-aggregatable provider): reduce over the current page.
+            $raw = $agg?->reduce($this->footerPageValues($rows));
+        }
+
+        if ($raw === null) {
+            return '';
+        }
+
+        // A count is a plain integer, not a domain value — never money/percent.
+        if ($agg !== null && $agg->isCount()) {
+            return new Markup('<span class="gv-num">' . (int) $raw . '</span>', 'UTF-8');
+        }
+
+        return $this->formatFooterValue($raw, $spec);
+    }
+
+    /**
+     * Numeric raw values of this column across the given page rows, for page-scope
+     * aggregation. Mirrors the render pipeline's stage-1 extraction and keeps only
+     * numeric values.
+     *
+     * @param iterable<\Fedale\GridviewBundle\Row\Row> $rows
+     *
+     * @return array<int, int|float>
+     */
+    private function footerPageValues(iterable $rows): array
+    {
+        $values = [];
+        foreach ($rows as $row) {
+            $data = $row->data;
+
+            $value = $this->valueGetter !== null
+                ? ($this->valueGetter)($data, 0, $this)
+                : ($this->columnType !== null
+                    ? $this->columnType->getRawValue($data, $this)
+                    : $this->defaultRawValue($data));
+
+            if (\is_numeric($value)) {
+                $values[] = $value + 0;
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * Format an aggregated numeric value through the column type (so a currency
+     * total looks like the body cells), honoring an optional `format` override in
+     * the footer spec.
+     *
+     * @param array<string, mixed> $spec
+     */
+    private function formatFooterValue(int|float $raw, array $spec): mixed
+    {
+        $type = $this->columnType;
+        if ($type === null) {
+            return (string) $raw;
+        }
+
+        $options = \array_merge($type->getDefaultOptions(), $this->format, $spec['format'] ?? []);
+        $display = $type->format($raw, $options, $this);
+
+        return $type->render($display, $options, $this);
     }
 }

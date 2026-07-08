@@ -226,6 +226,17 @@
         // border-top: 2px solid var(--gv-table-border);
         border-style: none;
     }
+
+    // Per-column summary row: separated from the body by a top border and set
+    // in a slightly heavier weight. Numeric cells stay right-aligned through
+    // the column type's own .gv-num wrapper.
+    tfoot .gv-tfoot-summary-row>td {
+        padding: .45rem .6rem;
+        font-size: var(--gv-input-font-size);
+        font-weight: 600;
+        color: var(--gv-color-text);
+        border-block-start: 2px solid var(--gv-table-border);
+    }
 }
 
 // ── Header cell layout (label left, icons pinned far right) ────────
