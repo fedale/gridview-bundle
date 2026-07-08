@@ -13,9 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class GridviewDataCollector extends AbstractDataCollector
 {
-    public function __construct(private readonly GridviewProfileRegistry $registry)
-    {
-    }
+    public function __construct(private readonly GridviewProfileRegistry $registry) {}
 
     public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
@@ -55,6 +53,6 @@ final class GridviewDataCollector extends AbstractDataCollector
 
     public static function getTemplate(): ?string
     {
-        return '@FedaleGridview/Collector/gridview.html.twig';
+        return '@FedaleGridview/collector/gridview.html.twig';
     }
 }
