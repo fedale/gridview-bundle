@@ -48,6 +48,20 @@ class PaginationTest extends TestCase
         $this->assertSame(25, $pagination->getPageSize());
     }
 
+    public function testMaxPageSizeNeverContradictsPageSizeOptions(): void
+    {
+        // maxPageSize is left at its 50 default, but 100 is explicitly offered as a
+        // pageSizeOptions choice — it must not be clamped back down, or the
+        // selector would silently "snap back" to 50 when the user picks it.
+        $pagination = $this->createPagination(Request::create('/customers?per-page=100'));
+        $pagination->setAttributes([
+            'defaultPageSize' => 25,
+            'pageSizeOptions' => [25, 50, 100],
+        ]);
+
+        $this->assertSame(100, $pagination->getPageSize());
+    }
+
     public function testWithoutOptionsAnyRequestedSizeIsClampedToMax(): void
     {
         // No pageSizeOptions: the legacy behaviour (clamp to maxPageSize) applies.

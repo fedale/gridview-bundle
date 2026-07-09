@@ -100,6 +100,15 @@ class Pagination implements PaginationInterface
         $this->defaultPageSize  = $attributes['defaultPageSize'] ?? $this->defaultPageSize;
         $this->maxPageSize  = $attributes['maxPageSize'] ?? $this->maxPageSize;
         $this->pageSizeOptions  = $attributes['pageSizeOptions'] ?? $this->pageSizeOptions;
+
+        // A pageSizeOptions value above maxPageSize would pass the pageSizeOptions
+        // check in getPageSize() only to be silently clamped back down in
+        // setPageSize() — the selector would show the picked size "snap back" to
+        // maxPageSize. maxPageSize is a safety cap, not meant to contradict the
+        // sizes explicitly offered to the user, so it never sits below them.
+        if ($this->pageSizeOptions !== []) {
+            $this->maxPageSize = max($this->maxPageSize, max($this->pageSizeOptions));
+        }
     }
 
     /**
