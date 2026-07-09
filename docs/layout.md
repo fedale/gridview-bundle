@@ -52,7 +52,7 @@ header:   "{heading} {toolbar}"                  ← chrome band; {heading} rend
 toolbar:  "{globalSearch} {filterSubmit}"        ← CRUD controllers default to
                                                    "{addButton} {globalSearch} {spacer} {savedSearch} {columnVisibility} {export}"
 dataview: null                                   ← null → table strategy: "{thead} {filter} {tbody} {tfoot}"
-footer:   "{pagination}"
+footer:   "{resultsSummary} {pagination} {pageSize}"
 tfoot:    ""
 ```
 
@@ -82,6 +82,7 @@ are internals of the table strategy, not top-level tokens.
 | `{globalSearch}` | `sections/globalSearch.html.twig` | Global search input |
 | `{filterSubmit}` | `sections/filterSubmit.html.twig` | Filter submit button — visible only when `useTurbo: false` |
 | `{pagination}` | `sections/pagination.html.twig` | Page navigation |
+| `{resultsSummary}` | `sections/resultsSummary.html.twig` | Total-results text (e.g. "1-20 of 128"), outside the table; skipped in infinite-scroll mode (which shows its own count) |
 | `{addButton}` | `sections/addButton.html.twig` | "Add" link (requires `addRoute`, or `crud.addUrl` in a CRUD controller) |
 | `{columnVisibility}` | `sections/columnVisibility.html.twig` | Column show/hide dropdown |
 | `{export}` | `sections/export.html.twig` | Export menu (requires `options.export = { url, formats }`; auto-wired in CRUD controllers) |
@@ -376,6 +377,10 @@ the `{thead}`/`{filter}`/`{tbody}`/`{tfoot}`/`{empty}` tokens are table-strategy
 internals and never exist as top-level tokens on list/card.
 
 ### Hiding thead / tfoot without editing layout
+
+The results-count text lives in the `footer` region (`{resultsSummary}`), not in `{tfoot}` —
+by default `tfoot` layout is `""`, so no `<tfoot>` is rendered at all. `{tfoot}` is only for
+custom tabular footer content (e.g. column totals) via `display.layout.tfoot`.
 
 Two boolean options control whether `{thead}` and `{tfoot}` are included when the `dataview`
 layout is computed automatically (i.e. when `dataview` is `null`):

@@ -111,8 +111,9 @@ $dataProvider = [
 values; only the listed sizes are honoured (a request for any other size falls back to
 `defaultPageSize`). Omit the key to hide the selector entirely.
 
-The `{pagination}` token in the footer layout renders the page navigation links.
-To remove pagination entirely, omit the token from the footer layout:
+The `{pagination}` token in the footer layout renders the page navigation links; its
+sibling `{resultsSummary}` renders the total-results text (e.g. "1-20 of 128"), also
+outside the table. To remove pagination entirely, omit the token from the footer layout:
 
 ```php
 ->setOptions(['display' => ['layout' => ['footer' => '']]])

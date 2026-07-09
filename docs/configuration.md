@@ -20,7 +20,7 @@ fedale_gridview:
       layout:
         shell:    "{header} {dataview} {footer}"
         toolbar:  "{globalSearch} {filterSubmit}"
-        footer:   "{pagination}"
+        footer:   "{resultsSummary} {pagination} {pageSize}"
     behavior:
       useTurbo: true
     attributes:

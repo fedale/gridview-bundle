@@ -216,8 +216,9 @@
         background: var(--gv-tr-hover-bg);
     }
 
-    // Default footer summary ("<N> results"): muted, left-aligned, separated
-    // from the body by a top border.
+    // Custom tfoot content (e.g. column totals) set via `display.layout.tfoot`.
+    // The default results-count summary no longer uses this — it renders
+    // outside the table via .gv-results-summary in the footer region.
     tfoot .gv-tfoot-summary {
         padding: .4rem .6rem;
         text-align: left;
@@ -521,6 +522,44 @@
     padding: var(--gv-toolbar-padding);
 }
 
+// ── Footer ───────────────────────────────────────────────────────
+// {resultsSummary}/{pagination}/{pageSize} render unwrapped (no width on the
+// tokens), so the ~20/60/20 split is purely CSS: the two side blocks keep a
+// fixed basis, the pagination nav (or the infinite-scroll status bar, when
+// that mode is active) grows to fill what's left and centres its content.
+// Targeted by class rather than position, so it still holds up when a block
+// collapses to nothing (e.g. a single page → no {pagination} markup at all).
+
+[data-gridview] .gv-region--footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem 1rem;
+    padding-top: .75rem;
+
+    .gv-results-summary {
+        flex: 0 0 20%;
+    }
+
+    .gv-pagination-nav,
+    .gv-infinite {
+        flex: 1 1 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .gv-page-size {
+        flex: 0 0 20%;
+        // Pushed to the far right regardless of what precedes it — the
+        // pagination-nav/infinite block already fills the gap when present,
+        // but on a single page (no pagination markup at all) nothing else
+        // grows to close that gap.
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
 // ── Global search ─────────────────────────────────────────────────
 
 [data-gridview] .gv-global-search {
@@ -576,6 +615,11 @@
     font-style: italic;
 }
 
+[data-gridview] .gv-results-summary {
+    font-size: var(--gv-input-font-size);
+    color: var(--gv-color-text-muted);
+}
+
 // ── Pagination ────────────────────────────────────────────────────
 
 [data-gridview] .gv-pagination {
@@ -584,7 +628,7 @@
     justify-content: center;
     gap: .25rem;
     list-style: none;
-    margin: .75rem 0 0;
+    margin: 0;
     padding: 0;
 
     .gv-page-item {

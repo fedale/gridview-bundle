@@ -1,16 +1,8 @@
-<tfoot>
-    {% set tfoot_tokens = gridview.parseLayout('tfoot') %}
-    {% if tfoot_tokens is empty %}
-        {# Default footer: total-results summary ("<N> results") on the left,
-           N being the current (filtered) query count. Spans the full row,
-           including the responsive control column when present. #}
-        {% set _footCols = gridview.indexColumns|length + (gridview.options.behavior.responsive|default(false) ? 1 : 0) %}
-        <tr>
-            <td class="gv-tfoot-summary" colspan="{{ _footCols }}">
-                {{ 'grid.results'|trans({'%count%': pagination.totalCount}, 'GridviewBundle') }}
-            </td>
-        </tr>
-    {% else %}
+{% set tfoot_tokens = gridview.parseLayout('tfoot') %}
+{% if tfoot_tokens is not empty %}
+    {# Custom tfoot content only — the default results-count summary now
+       lives in the footer region ({resultsSummary}), outside the table. #}
+    <tfoot>
         <tr>
             <td colspan="{{ gridview.indexColumns|length }}">
                 {% for token in tfoot_tokens %}
@@ -18,5 +10,5 @@
                 {% endfor %}
             </td>
         </tr>
-    {% endif %}
-</tfoot>
+    </tfoot>
+{% endif %}

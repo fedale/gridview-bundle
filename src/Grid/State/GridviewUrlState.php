@@ -123,6 +123,10 @@ class GridviewUrlState
     {
         return $this->filters;
     }
+    public function hasFilters(): bool
+    {
+        return $this->filters !== [];
+    }
     public function getSort(): ?string
     {
         return $this->sort;

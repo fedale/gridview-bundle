@@ -1,0 +1,20 @@
+{# Results-count text ("<first>-<last> of <count> results"), rendered as a
+   sibling of {pagination} in the footer region rather than inside the table.
+   Wording lives entirely in the translation catalog (grid.results /
+   grid.results.filtered / grid.results.empty) — swap those to change the
+   copy, or override display.layout.templates.resultsSummary for a
+   structurally different widget. Skipped in infinite-scroll mode, which
+   already shows its own count next to the load-more button. #}
+{% if gridview.options.behavior.pagination.mode|default('numeric') != 'infinite' %}
+    <div class="gv-results-summary">
+        {% if pagination.totalCount == 0 %}
+            {{ 'grid.results.empty'|trans({}, 'GridviewBundle') }}
+        {% else %}
+            {{ (gridview.urlState.hasFilters() ? 'grid.results.filtered' : 'grid.results')|trans({
+                '%first%': pagination.offset + 1,
+                '%last%':  min(pagination.offset + pagination.pageSize, pagination.totalCount),
+                '%count%': pagination.totalCount,
+            }, 'GridviewBundle') }}
+        {% endif %}
+    </div>
+{% endif %}

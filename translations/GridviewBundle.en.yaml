@@ -68,7 +68,9 @@ filter.clear: "Clear filter"
 search.placeholder: "Search…"
 
 grid.index_title: "Index"
-grid.results: "%count% results"
+grid.results: "%first%-%last% of %count% results"
+grid.results.filtered: "%first%-%last% of %count% results (filtered)"
+grid.results.empty: "0 results"
 grid.restriction: "You are not seeing all records — some are hidden by your access permissions."
 
 # Config-default strings (source-as-key): localize the bundle defaults while

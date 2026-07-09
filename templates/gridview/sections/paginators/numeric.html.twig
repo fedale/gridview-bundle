@@ -35,7 +35,7 @@
     {% set _pLink = gridview.cls('pagination.link') %}
     {% set _pActive = gridview.cls('pagination.active') %}
     {% set _pDisabled = gridview.cls('pagination.disabled') %}
-    <nav aria-label="{{ 'pagination.aria'|trans({}, 'GridviewBundle') }}">
+    <nav class="gv-pagination-nav" aria-label="{{ 'pagination.aria'|trans({}, 'GridviewBundle') }}">
         <ul class="{{ gridview.cls('pagination') }}">
             {# Prima pagina #}
             <li class="{{ _pItem }} gv-page-first{{ _currentPage <= 1 ? ' ' ~ _pDisabled : '' }}">
