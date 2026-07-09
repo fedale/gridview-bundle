@@ -10,12 +10,10 @@ class FilterChoiceType extends AbstractType
 {
     public function configureOptions(OptionsResolver $resolver): void
     {
+        // No sensible generic default exists — the caller (column `filter.options.choices`)
+        // must supply the real choice list, e.g. from a backing PHP enum.
         $resolver->setDefaults([
-            'choices' => [
-                'Standard Shipping' => 'standard',
-                'Expedited Shipping' => 'expedited',
-                'Priority Shipping' => 'priority',
-            ],
+            'choices' => [],
         ]);
     }
 
