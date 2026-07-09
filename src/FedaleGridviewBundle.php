@@ -235,6 +235,20 @@ class FedaleGridviewBundle extends AbstractBundle
             ->scalarNode('addRoute')->defaultNull()->end()
             ->end()
             ->end()
+            // DataProvider-level pagination — page size and its selectable
+            // options. Distinct from `behavior.pagination` above, which is the
+            // paginator UI (mode/pageSelect); these feed Pagination::setAttributes()
+            // and default to that class's own hardcoded fallbacks (20/[]/50), so
+            // leaving this section unset changes nothing. A controller's own
+            // dataConfig()['pagination'] still wins over this bundle-wide default.
+            ->arrayNode('pagination')
+            ->addDefaultsIfNotSet()
+            ->children()
+            ->integerNode('defaultPageSize')->defaultValue(20)->end()
+            ->arrayNode('pageSizeOptions')->integerPrototype()->end()->defaultValue([])->end()
+            ->integerNode('maxPageSize')->defaultValue(50)->end()
+            ->end()
+            ->end()
             ->arrayNode('attributes')
             ->addDefaultsIfNotSet()
             ->children()
@@ -343,6 +357,16 @@ class FedaleGridviewBundle extends AbstractBundle
             ->arrayNode('integration')
             ->children()
             ->scalarNode('addRoute')->end()
+            ->end()
+            ->end()
+            // Per-grid override of the DataProvider-level pagination defaults
+            // (see `defaults.pagination` above). A controller's own
+            // dataConfig()['pagination'] still takes final precedence.
+            ->arrayNode('pagination')
+            ->children()
+            ->integerNode('defaultPageSize')->end()
+            ->arrayNode('pageSizeOptions')->integerPrototype()->end()->end()
+            ->integerNode('maxPageSize')->end()
             ->end()
             ->end()
             ->arrayNode('attributes')

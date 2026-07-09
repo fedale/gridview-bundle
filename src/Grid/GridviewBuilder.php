@@ -20,6 +20,8 @@ class GridviewBuilder implements GridviewBuilderInterface
 
     private array $runtimeAttributes = [];
 
+    private array $runtimeDataProviderOptions = [];
+
     public function __construct(
         private GridviewService $gridviewService,
         private GridviewConfigRegistry $configRegistry,
@@ -34,6 +36,7 @@ class GridviewBuilder implements GridviewBuilderInterface
         $this->gridview = new Gridview($this->gridviewService, $this->columnFactory);
         $this->runtimeOptions = [];
         $this->runtimeAttributes = [];
+        $this->runtimeDataProviderOptions = [];
     }
 
     public function setId(string $id): static
@@ -61,7 +64,11 @@ class GridviewBuilder implements GridviewBuilderInterface
 
     public function setDataProvider(array $dataProviderOptions): GridviewBuilderInterface
     {
-        $this->gridview->setDataProviderOptions($dataProviderOptions);
+        // Buffered rather than pushed straight to the Gridview: `pagination`
+        // still needs to be merged with the YAML-resolved bundle/per-grid
+        // defaults, which requires the id — only known once renderGridview()
+        // runs.
+        $this->runtimeDataProviderOptions = $dataProviderOptions;
 
         return $this;
     }
@@ -86,6 +93,20 @@ class GridviewBuilder implements GridviewBuilderInterface
 
         $yamlOptions    = $this->configRegistry->resolveOptions($id);
         $yamlAttributes = $this->configRegistry->resolveAttributes($id);
+
+        // The controller's own dataConfig()['pagination'] (defaultPageSize/
+        // pageSizeOptions/maxPageSize) wins per-key over the YAML-resolved
+        // bundle/per-grid defaults — same precedence as display/behavior below.
+        // Guarded on setDataProvider() having actually been called: Gridview
+        // treats a null dataProviderOptions as "no data provider at all" and
+        // skips initialization entirely, a distinction an unconditional push
+        // here would erase.
+        if ($this->runtimeDataProviderOptions !== []) {
+            $paginationDefaults = $this->configRegistry->resolveDataProviderPagination($id);
+            $dataProviderOptions = $this->runtimeDataProviderOptions;
+            $dataProviderOptions['pagination'] = array_replace($paginationDefaults, $dataProviderOptions['pagination'] ?? []);
+            $this->gridview->setDataProviderOptions($dataProviderOptions);
+        }
 
         // Merge group-by-group (display/behavior/integration), not with a single
         // top-level array_replace: the latter would let a runtime override of

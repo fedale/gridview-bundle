@@ -89,6 +89,20 @@ class GridviewConfigRegistry
     ];
 
     /**
+     * DataProvider-level pagination defaults — page size and its selectable
+     * options. Distinct from `BEHAVIOR_DEFAULTS['pagination']`, which is the
+     * paginator *UI* (mode/pageSelect/pageSelectThreshold): these three feed
+     * {@see \Fedale\GridviewBundle\Pagination\Pagination::setAttributes()}
+     * instead, and mirror that class's own hardcoded fallbacks so leaving
+     * this section unset changes nothing.
+     */
+    private const DATA_PAGINATION_DEFAULTS = [
+        'defaultPageSize' => 20,
+        'pageSizeOptions' => [],
+        'maxPageSize'     => 50,
+    ];
+
+    /**
      * Detail-view defaults. Deliberately disjoint from the grid defaults above: a detail
      * has no pagination/realtime/global-search nor a table layout — only the few
      * knobs that make sense for a key/value record view.
@@ -182,6 +196,23 @@ class GridviewConfigRegistry
             }
         }
         return $base;
+    }
+
+    /**
+     * DataProvider pagination defaults (defaultPageSize/pageSizeOptions/
+     * maxPageSize), bundle-wide then per-grid. A controller's own
+     * `dataConfig()['pagination']` wins over both — merged on top of this in
+     * {@see \Fedale\GridviewBundle\Grid\GridviewBuilder::renderGridview()}.
+     */
+    public function resolveDataProviderPagination(?string $id): array
+    {
+        $resolved = array_replace(self::DATA_PAGINATION_DEFAULTS, $this->config['defaults']['pagination'] ?? []);
+
+        if ($id !== null && isset($this->config['gridviews'][$id]['pagination'])) {
+            $resolved = array_replace($resolved, $this->config['gridviews'][$id]['pagination']);
+        }
+
+        return $resolved;
     }
 
     /**
