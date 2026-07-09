@@ -109,7 +109,28 @@ $dataProvider = [
 `pageSizeOptions` is an optional array of ints sitting next to `defaultPageSize` and
 `maxPageSize`. When set, the footer renders a page-size `<select>` offering exactly those
 values; only the listed sizes are honoured (a request for any other size falls back to
-`defaultPageSize`). Omit the key to hide the selector entirely.
+`defaultPageSize`). Omit the key to hide the selector entirely. `maxPageSize` (default 50)
+never sits below the largest `pageSizeOptions` value — it's a safety cap on hand-crafted
+query strings, not meant to silently override a size you explicitly offer in the selector.
+
+These three keys can also be set once for every grid, in `config/packages/gridview.yaml`,
+instead of repeating them in each controller's `dataConfig()`:
+
+```yaml
+fedale_gridview:
+    defaults:
+        pagination:
+            defaultPageSize: 25
+            pageSizeOptions: [25, 50, 100]
+            maxPageSize: 100
+    gridviews:
+        customer_list:
+            pagination:
+                pageSizeOptions: [10, 25, 50]   # override for this grid only
+```
+
+A controller's own `dataConfig()['pagination']` still wins per-key over both the
+per-grid and the bundle-wide default.
 
 The `{pagination}` token in the footer layout renders the page navigation links; its
 sibling `{resultsSummary}` renders the total-results text (e.g. "1-20 of 128"), also

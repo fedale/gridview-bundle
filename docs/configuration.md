@@ -132,6 +132,21 @@ How the grid wires into routes and CRUD actions.
 | `export.url` / `export.formats` | `string` / `array` | — | Runtime only | Export endpoint URL and the available format list; derived by `AbstractGridController::buildGridview()` from the exporter registry |
 | `crud` | `array` | `[]` | Runtime only | CRUD wiring URLs only (`addUrl`, `bulkDeleteUrl`, `bulkUpdateUrl`, `inlineUrl`) — assembled by `AbstractCrudGridController::crudOptions()`, request-derived so it's never in the YAML schema. The presentation mode and template live in `behavior.crudMode` / `display.crudTemplate` above, and the modal/page title reuses `display.title` — see [CRUD](crud.md) |
 
+### Pagination
+
+DataProvider-level pagination — page size and its selectable options. Distinct from
+`behavior.pagination.*` above, which is the paginator *UI* (mode/pageSelect); these feed
+`Pagination::setAttributes()` and default to that class's own hardcoded fallbacks, so
+leaving this section unset changes nothing. A controller's own `dataConfig()['pagination']`
+still wins per-key over both the per-grid and bundle-wide YAML value — see
+[Pagination](sorting-pagination.md#pagination).
+
+| Option | Type | Default | Set via | Description |
+|--------|------|---------|---------|-------------|
+| `defaultPageSize` | `int` | `20` | YAML + `dataConfig()` | Items per page when the request doesn't specify one |
+| `pageSizeOptions` | `int[]` | `[]` | YAML + `dataConfig()` | Selectable page sizes; renders the footer `{pageSize}` selector when non-empty. Empty = no selector |
+| `maxPageSize` | `int` | `50` | YAML + `dataConfig()` | Safety cap on the requested page size; auto-raised to the largest `pageSizeOptions` value so it never contradicts the selector |
+
 ## Detail-view presets
 
 Single-record [DetailViews](detail-view.md#detailview-single-record) use their own YAML sections
@@ -168,3 +183,7 @@ $this->createGridviewBuilder()
 2. `fedale_gridview.defaults` (YAML)
 3. `fedale_gridview.gridviews.<id>` (YAML)
 4. `setOptions()` / `setAttributes()` calls (runtime)
+
+`defaults.pagination` / `gridviews.<id>.pagination` follow the same tiering, but the
+runtime override is a controller's own `dataConfig()['pagination']` (see
+[Pagination](sorting-pagination.md#pagination)) rather than `setOptions()`.
