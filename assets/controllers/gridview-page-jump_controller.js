@@ -11,7 +11,23 @@ export default class extends Controller {
         if (!url) return;
 
         if (this.turboValue && window.Turbo) {
-            window.Turbo.visit(url, { action: 'advance' });
+            // A synthesized <a> click inside the frame, not Turbo.visit(): the
+            // pagination links (plain <a data-turbo-action="advance"> rendered
+            // inside the <turbo-frame>) already get the right behavior for free
+            // — frame-scoped content swap *and* a pushed history entry — because
+            // that's Turbo's native click-handling path. Turbo.visit() driven
+            // from JS doesn't reliably reproduce both halves of that (a global
+            // visit replaces the whole document, losing anything set outside the
+            // frame like a client-set dark theme attribute; visit({frame}) swaps
+            // the frame but doesn't push history), so reuse the real path
+            // instead of re-guessing its behavior here.
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('data-turbo-action', 'advance');
+            link.hidden = true;
+            (this.element.closest('turbo-frame') || document.body).appendChild(link);
+            link.click();
+            link.remove();
         } else {
             window.location.href = url;
         }
