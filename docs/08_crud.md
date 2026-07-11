@@ -81,7 +81,7 @@ type if that name doubles as a control type (`text`, `number`, `date`, `boolean`
 
 > **`media` control = file upload.** It is *unmapped*: the bundle receives the upload, your
 > app stores it and populates the entity through an `upload` callable in the control spec.
-> See [The `media` type — file uploads](columns.md#the-media-type--file-uploads).
+> See [The `media` type — file uploads](02_columns.md#the-media-type--file-uploads).
 
 ### Validation: required & unique
 
@@ -233,7 +233,7 @@ Two things to know:
   `index / show / new / create / edit / update`). The `{show}` button auto-wires
   to `routeName('show')` when that route exists (guarded by `routeExists()`).
   The route itself is **not** on the CRUD controller — it ships on
-  `AbstractDetailController` (see [DetailView](detail-view.md)), a separate
+  `AbstractDetailController` (see [DetailView](09_detail-view.md)), a separate
   controller because a detail page shares only the columns, not the list
   machinery. Give the detail controller the **same name prefix** as the grid
   (`gridview_user_`) and the `{show}` button lights up with zero extra code. To
@@ -319,7 +319,7 @@ app.register('gridview-crud', GridviewCrudController);
 ### Presentation mode: modal / page / custom
 
 `form.mode` (set in the controller's `viewConfig()`, or via the YAML `behavior.crudMode`
-default — see [Configuration](configuration.md#behavior)) chooses how the form is presented:
+default — see [Configuration](11_configuration.md#behavior)) chooses how the form is presented:
 
 | Mode | Buttons | Form endpoint | Submit |
 |------|---------|---------------|--------|
@@ -558,7 +558,7 @@ They live in `Fedale\GridviewBundle\Controller`:
   `inline/{id}/{field}`.
 - **`AbstractDetailController`** — read-only single-record "show" (`show/{id}`)
   that reuses the same `buildColumns()` to render a key/value table. See
-  [DetailView](detail-view.md#detailview-single-record).
+  [DetailView](09_detail-view.md#detailview-single-record).
 
 > **Extending `AbstractCrudGridController` is necessary but not sufficient.** It
 > registers the CRUD *routes/actions*, but the modal opens from a button you still
@@ -617,7 +617,7 @@ config needed.
 | `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
 | `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
 | `filterFormName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
-| `actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](columns.md#default-action-buttons-auto-wired)) |
+| `actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](02_columns.md#default-action-buttons-auto-wired)) |
 
 ### Read-only example
 

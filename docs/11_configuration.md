@@ -86,14 +86,14 @@ What the grid looks like: text, chrome, and which template renders it.
 |--------|------|---------|---------|-------------|
 | `caption` | `string\|null` | `null` | YAML + runtime | Optional `<caption>` text for the table |
 | `title` | `string\|null` | `null` | YAML + runtime | Grid title text rendered by the `{heading}` block (`{heading}` collapses when empty); also the CRUD modal/page heading |
-| `theme` | `string` | `'default'` | YAML (`gridviews.<id>` only) | Per-grid framework theme override; the global default is the top-level `theme` key, not `defaults.display.theme` — see [Theming](theming.md) |
+| `theme` | `string` | `'default'` | YAML (`gridviews.<id>` only) | Per-grid framework theme override; the global default is the top-level `theme` key, not `defaults.display.theme` — see [Theming](06_theming.md) |
 | `renderer` | `array` | `['default' => 'table', 'map' => []]` | YAML + runtime (defaults only) | Data-renderer config: `default` picks the active strategy → `sections/dataview/{renderer}.html.twig`; `map` keys are the available renderers (values are per-renderer option bags) and drive the runtime `{viewSwitcher}` (shown automatically when `map` has more than one entry). Built-in: `table`, `list`, `card`. `gridviews.<id>.renderer` only accepts a scalar shorthand — you can't set a per-grid `map` from YAML |
 | `emptyText` | `string` | `'No records found'` | YAML + runtime | Text shown when there are no data rows |
 | `showThead` | `bool` | `true` | YAML + runtime | Include `{thead}` in the auto-computed table layout |
 | `showTfoot` | `bool` | `true` | YAML + runtime | Include `{tfoot}` in the auto-computed table layout |
 | `addLabel` | `string` | `'Add'` | YAML + runtime | Label for the `{addButton}` link |
-| `crudTemplate` | `string\|null` | `null` | YAML + runtime | Full-page CRUD wrapper template (`page`/`custom` mode); PHP `viewConfig()['template']['page']` wins when set, else this YAML default, else the bundle's own page template — see [CRUD](crud.md) |
-| `layout` | `array` | see [Layout](layout.md) | YAML + runtime | Layout token strings (`shell`, `header`, `toolbar`, `dataview`, `footer`, `tfoot`), plus the `templates` / `slots` / `attrs` sub-maps for overrides and inline content |
+| `crudTemplate` | `string\|null` | `null` | YAML + runtime | Full-page CRUD wrapper template (`page`/`custom` mode); PHP `viewConfig()['template']['page']` wins when set, else this YAML default, else the bundle's own page template — see [CRUD](08_crud.md) |
+| `layout` | `array` | see [Layout](05_layout.md) | YAML + runtime | Layout token strings (`shell`, `header`, `toolbar`, `dataview`, `footer`, `tfoot`), plus the `templates` / `slots` / `attrs` sub-maps for overrides and inline content |
 
 ### Behavior
 
@@ -105,20 +105,20 @@ How the grid reacts to input: search, filters, pagination, real-time, responsive
 | `globalSearch` | `string[]` | `[]` | YAML + runtime | DQL fields searched by the global search input |
 | `formName` | `string` | `'fedaleForm'` | YAML (`defaults` only) | Name of the filter form; change this to support multiple grids with filters on the same page. No per-grid override — set it in `viewConfig()['options']['behavior']` instead |
 | `maxQueryLength` | `int` | `4000` | YAML + runtime | Safety cap on the generated DQL/SQL query length |
-| `crudMode` | `'modal'\|'page'\|'custom'` | `'modal'` | YAML + runtime | How the CRUD form is presented; PHP `viewConfig()['form']['mode']` wins when set, else this YAML default, else `'modal'` — see [CRUD](crud.md) |
+| `crudMode` | `'modal'\|'page'\|'custom'` | `'modal'` | YAML + runtime | How the CRUD form is presented; PHP `viewConfig()['form']['mode']` wins when set, else this YAML default, else `'modal'` — see [CRUD](08_crud.md) |
 | `filterControls.inHeader` | `bool` | `true` | YAML + runtime | Render the per-column filters in the header (funnel icon + filter row) |
 | `filterControls.inlineClear` | `bool` | `false` | YAML + runtime | Show an inline "clear" affordance on filtered columns |
-| `filterControls.clear` | `mixed\|null` | `null` | YAML (`defaults` only) | Default clear-affordance mode(s) for columns that don't set their own `filter.clear` — see [Filtering](filtering.md) |
+| `filterControls.clear` | `mixed\|null` | `null` | YAML (`defaults` only) | Default clear-affordance mode(s) for columns that don't set their own `filter.clear` — see [Filtering](04_filtering.md) |
 | `filterControls.autoBar` | `bool\|null` | `null` | YAML + runtime | Auto-populate the `{filterBar}` for non-table renderers; `null` derives it from the active renderer |
 | `filterControls.choiceControlsThreshold` | `int` | `20` | YAML + runtime | Hides the search/select-all toolbar on choice filters below this option count |
 | `pagination.mode` | `string` | `'numeric'` | YAML + runtime | Paginator strategy key (registry name); host apps can register their own via `PaginatorStrategyInterface` |
 | `pagination.pageSelect` | `bool` | `true` | YAML + runtime | Show the jump-to-page `<select>` in the pagination |
 | `pagination.pageSelectThreshold` | `int` | `10` | YAML + runtime | Minimum page count before the `<select>` appears |
 | `pagination.options` | `array` | — | YAML + runtime | Free-form extra options for a custom paginator strategy (e.g. `infiniteRootMargin`) |
-| `realtime.enabled` | `bool` | `false` | YAML + runtime | Enable real-time updates over Mercure (see [Real-time updates](real-time.md#real-time-updates-mercure)) |
+| `realtime.enabled` | `bool` | `false` | YAML + runtime | Enable real-time updates over Mercure (see [Real-time updates](13_real-time.md#real-time-updates-mercure)) |
 | `realtime.topicPrefix` | `string` | `'gridview/'` | YAML + runtime | Prefix for the per-grid Mercure topic (`<prefix><id>`) |
 | `reorderColumns` | `bool` | `false` | Runtime only | Enable drag-and-drop column reordering on the header; not in the YAML schema, set via `setOptions()` / `viewConfig()['options']` |
-| `responsive` | `bool` | `false` | Runtime only | Collapse low-priority columns into a detail row on narrow screens (see [Responsive](layout.md#responsive-column-collapse)); not in the YAML schema |
+| `responsive` | `bool` | `false` | Runtime only | Collapse low-priority columns into a detail row on narrow screens (see [Responsive](05_layout.md#responsive-column-collapse)); not in the YAML schema |
 | `restriction` | `bool\|string` | `false` | YAML + runtime | Shows the `{restrictionNotice}` banner when the list is filtered by permissions; a string overrides the default message |
 
 ### Integration
@@ -130,7 +130,7 @@ How the grid wires into routes and CRUD actions.
 | `addRoute` | `string\|null` | `null` | YAML + runtime | Route name for the `{addButton}` token |
 | `routeName` | `string\|null` | `null` | Runtime only | List route used for sort/pagination/filter links instead of the current `_route`; the CRUD controller sets this automatically, so you rarely need to. Not in the YAML schema |
 | `export.url` / `export.formats` | `string` / `array` | — | Runtime only | Export endpoint URL and the available format list; derived by `AbstractGridController::buildGridview()` from the exporter registry |
-| `crud` | `array` | `[]` | Runtime only | CRUD wiring URLs only (`addUrl`, `bulkDeleteUrl`, `bulkUpdateUrl`, `inlineUrl`) — assembled by `AbstractCrudGridController::crudOptions()`, request-derived so it's never in the YAML schema. The presentation mode and template live in `behavior.crudMode` / `display.crudTemplate` above, and the modal/page title reuses `display.title` — see [CRUD](crud.md) |
+| `crud` | `array` | `[]` | Runtime only | CRUD wiring URLs only (`addUrl`, `bulkDeleteUrl`, `bulkUpdateUrl`, `inlineUrl`) — assembled by `AbstractCrudGridController::crudOptions()`, request-derived so it's never in the YAML schema. The presentation mode and template live in `behavior.crudMode` / `display.crudTemplate` above, and the modal/page title reuses `display.title` — see [CRUD](08_crud.md) |
 
 ### Pagination
 
@@ -139,7 +139,7 @@ DataProvider-level pagination — page size and its selectable options. Distinct
 `Pagination::setAttributes()` and default to that class's own hardcoded fallbacks, so
 leaving this section unset changes nothing. A controller's own `dataConfig()['pagination']`
 still wins per-key over both the per-grid and bundle-wide YAML value — see
-[Pagination](sorting-pagination.md#pagination).
+[Pagination](03_sorting-pagination.md#pagination).
 
 | Option | Type | Default | Set via | Description |
 |--------|------|---------|---------|-------------|
@@ -149,9 +149,9 @@ still wins per-key over both the per-grid and bundle-wide YAML value — see
 
 ## Detail-view presets
 
-Single-record [DetailViews](detail-view.md#detailview-single-record) use their own YAML sections
+Single-record [DetailViews](09_detail-view.md#detailview-single-record) use their own YAML sections
 — `defaults.detailview` and `detailviews.<id>` — kept separate from `gridviews` so
-grid-only keys never leak in. See [DetailView → YAML configuration](detail-view.md#yaml-configuration).
+grid-only keys never leak in. See [DetailView → YAML configuration](09_detail-view.md#yaml-configuration).
 
 ## Multiple grids with filters on the same page
 
@@ -186,4 +186,4 @@ $this->createGridviewBuilder()
 
 `defaults.pagination` / `gridviews.<id>.pagination` follow the same tiering, but the
 runtime override is a controller's own `dataConfig()['pagination']` (see
-[Pagination](sorting-pagination.md#pagination)) rather than `setOptions()`.
+[Pagination](03_sorting-pagination.md#pagination)) rather than `setOptions()`.

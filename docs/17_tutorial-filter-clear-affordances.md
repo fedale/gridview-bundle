@@ -254,5 +254,5 @@ This lets you set a grid-wide style and override only the exceptions:
 
 - Read the [Filtering & Search section](index.md#filtering--search) for the full API reference
 - See the **CategoryController** in `gridview-demo` for a working example with chips
-- Combine with the [custom filter modal tutorial](tutorial-custom-filter-modal.md) if you
+- Combine with the [custom filter modal tutorial](16_tutorial-custom-filter-modal.md) if you
   want a completely custom filter UI alongside standard columns

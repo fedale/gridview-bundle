@@ -164,7 +164,7 @@ which are never mirrored.
 ## Clearing a single column's filter — `filter.clear`
 
 Each column decides **how** its active filter can be removed via the `clear` key of
-its `filter` spec. → **[Tutorial: Filter clear affordances](tutorial-filter-clear-affordances.md)**
+its `filter` spec. → **[Tutorial: Filter clear affordances](17_tutorial-filter-clear-affordances.md)**
 
 The available affordances (modes) are:
 
@@ -694,7 +694,7 @@ repository, or build the pre-filtered `QueryBuilder` in the controller — where
 > has already sliced the current page, and the total count is computed at the DB
 > level — so dropping rows there would leave short or empty pages and a wrong
 > total. Row events are for **styling and value overrides**; query conditions are
-> for **visibility**. See [Listening to row events](extending.md#listening-to-row-events).
+> for **visibility**. See [Listening to row events](14_extending.md#listening-to-row-events).
 
 ### Telling the user the list is restricted
 
@@ -764,10 +764,10 @@ appears in the toolbar so the user can submit the form manually.
 
 > 💡 **Want a fully custom filter UI?** The filterBar and header filters are just one UI
 > over a query layer that's decoupled from presentation. See the step-by-step tutorial
-> **[Filter clear affordances](tutorial-filter-clear-affordances.md)** — choose how to remove
+> **[Filter clear affordances](17_tutorial-filter-clear-affordances.md)** — choose how to remove
 > filters (funnel icon, inline ✕, external chip, or custom icons). Grid-level defaults and
 > per-column overrides.
 
-> **[A custom, EasyAdmin-style filter modal](tutorial-custom-filter-modal.md)** — a
+> **[A custom, EasyAdmin-style filter modal](16_tutorial-custom-filter-modal.md)** — a
 > Filter button + modal with comparison operators and a reset, built entirely in the
 > client app with no bundle changes.

@@ -115,14 +115,14 @@ autocomplete + validation + inline docs on the YAML side.
 **Prereq (verify first):** confirm the YAML config surface and where it is loaded.
 `src/DependencyInjection/Configuration.php` currently does **not** describe a grid
 `columns` tree (it holds unrelated nodes), so map the real YAML entry against
-`docs/configuration.md` before writing the schema — do not assume the semantic DI
+`docs/11_configuration.md` before writing the schema — do not assume the semantic DI
 config is the source.
 
 **New files**
 
 - `resources/schema/gridview.schema.json` — columns, types (enum sourced from
   Phase 1), pagination, sort, filter, per-region attributes.
-- Document the opt-in header in `docs/configuration.md`:
+- Document the opt-in header in `docs/11_configuration.md`:
   `# yaml-language-server: $schema=vendor/fedale/gridview-bundle/resources/schema/gridview.schema.json`.
 
 **Risk:** only helps YAML authors, not the PHP array API; schema must track the

@@ -7,11 +7,11 @@ Claude Code (o un nuovo collaboratore), eventualmente su un altro account.
 
 Sull'altro account deve esserci il repo `repara` con dentro `FedaleGridviewBundle/` e la
 cartella `app/`. Clonando/sincronizzando il repo, la roadmap è già presente in
-`FedaleGridviewBundle/docs/ROADMAP-wt-crud-parity.md`. **Non serve il progetto `wt-crud`.**
+`FedaleGridviewBundle/docs/internal/ROADMAP-wt-crud-parity.md`. **Non serve il progetto `wt-crud`.**
 
 ## Messaggio iniziale da dare a Claude (copia-incolla)
 
-> Leggi `FedaleGridviewBundle/docs/ROADMAP-wt-crud-parity.md`: è una roadmap autosufficiente
+> Leggi `FedaleGridviewBundle/docs/internal/ROADMAP-wt-crud-parity.md`: è una roadmap autosufficiente
 > per portare il bundle FedaleGridView verso una griglia CRUD avanzata, in Symfony/Twig +
 > Hotwired. Stiamo lavorando sullo stesso repo `repara` citato nel documento. Non hai bisogno
 > del progetto `wt-crud`: le specifiche delle feature sono già dentro il documento.

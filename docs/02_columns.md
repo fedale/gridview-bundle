@@ -49,12 +49,12 @@ $columns = [
 | `twigFilter` | `string\|null` | `null` | Any Twig filter applied to the rendered value (e.g. `raw`, `upper`, `date('d/m/Y')`) |
 | `active` | `bool\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
 | `visible` | `bool\|Closure` | `true` | Whether a (registered) column is shown; `false` columns are still rendered in the DOM and data — just hidden with CSS and toggleable via the UI. To remove a column entirely, use `active` instead |
-| `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it. The optional `clear` key chooses the clear affordance(s) — funnel icon, inline ✕ or external chip (see [Clearing a single column's filter](filtering.md#clearing-a-single-columns-filter--filterclear)) |
+| `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it. The optional `clear` key chooses the clear affordance(s) — funnel icon, inline ✕ or external chip (see [Clearing a single column's filter](04_filtering.md#clearing-a-single-columns-filter--filterclear)) |
 | `sortable` | `bool` | `true` | Whether clicking the header sorts the grid |
 | `filterable` | `bool` | `true` | Whether the column shows a filter input |
 | `filterBar` | `bool` | `false` | Render this column's filter in the `{filterBar}` section instead of inline in the header row |
 | `headerMirror` | `bool` | `false` | Only with `filterBar: true` (text/number filters): also render a synced "mirror" input in the column header. Off by default → the filter lives **only** in the filterBar |
-| `priority` | `int` | `0` | [Responsive](layout.md#responsive-column-collapse) collapse priority (needs the `responsive` grid option). `0` pins the column; a higher number collapses *first* on narrow screens |
+| `priority` | `int` | `0` | [Responsive](05_layout.md#responsive-column-collapse) collapse priority (needs the `responsive` grid option). `0` pins the column; a higher number collapses *first* on narrow screens |
 
 ### `active` vs `visible` — access control
 
@@ -92,7 +92,7 @@ The root `type` of a column has **two flavours**:
 
 1. **Data types** — describe the *kind of data* the column holds. They render via
    `DataColumn` and, crucially, set the **default filter type** (see
-   [Inheriting the filter type from the column](filtering.md#inheriting-the-filter-type-from-the-column)).
+   [Inheriting the filter type from the column](04_filtering.md#inheriting-the-filter-type-from-the-column)).
    When `type` is omitted it defaults to **`text`**.
 2. **Structural types** — dedicated column classes for non-data concerns (selection,
    numbering, actions).

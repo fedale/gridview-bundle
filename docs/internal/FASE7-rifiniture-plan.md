@@ -319,7 +319,7 @@ basta che la classe sia un servizio (autowiring di default) e usarla:
 
 **Verifica (in A.5):** registrare un `MoneyType extends CurrencyType` nell'app e usarlo in una
 colonna senza modifiche al bundle → rendering/filtro corretti. Documentare il pattern in
-[index.md](index.md) (sezione "Custom column types").
+[index.md](../index.md) (sezione "Custom column types").
 
 ---
 
@@ -344,7 +344,7 @@ dark mode automatica + manuale, commento d'uso per Bootstrap/Tailwind/custom. En
    - `.gv-list { margin: 0; padding-left: 1.1em; }`
    - `.gv-rating` (stelle), `.gv-badge`/`.gv-badge--*` (chip stati con `--gv-badge-*`), `.gv-progress`.
    - relativi token `--gv-img-*`, `--gv-badge-*`, `--gv-rating-color`, ecc.
-3. **Documentare** i punti di override theme: sezione "Theming" in [index.md](index.md) con le 3
+3. **Documentare** i punti di override theme: sezione "Theming" in [index.md](../index.md) con le 3
    ricette (Bootstrap5 / Tailwind / custom) e l'elenco completo dei token `--gv-*`.
 4. *(Opzionale)* toggle tema dedicato `data-gv-theme` documentato come alternativa a `data-bs-theme`
    per app non-Bootstrap (lo scss lo supporta già).
@@ -454,8 +454,8 @@ A, B, C sono comunque **indipendenti** e committabili separatamente.
 - [app/src/Controller/Gridview/UserController.php](../../app/src/Controller/Gridview/UserController.php) — colonne currency/select/rating/email/image/list per test end-to-end.
 
 **Docs**
-- [docs/index.md](index.md) — "Column types" (catalogo + gerarchia + pipeline), "Theming", "i18n".
-- [docs/ROADMAP-wt-crud-parity.md](ROADMAP-wt-crud-parity.md) — marcare Fase 7 ✅ a fine lavori.
+- [docs/index.md](../index.md) — "Column types" (catalogo + gerarchia + pipeline), "Theming", "i18n".
+- [docs/internal/ROADMAP-wt-crud-parity.md](ROADMAP-wt-crud-parity.md) — marcare Fase 7 ✅ a fine lavori.
 
 ---
 

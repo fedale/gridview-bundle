@@ -3,7 +3,7 @@
    lives outside the dataview and is unaffected. #}
 {% set listOpts = gridview.rendererOptions('list') %}
 {# Per-item template: override with `renderer.map.list.template` for a custom layout
-   (see docs/layout.md). It receives gridview, row, rowIndex, columns and can
+   (see docs/05_layout.md). It receives gridview, row, rowIndex, columns and can
    reuse sections/dataview/_cell.html.twig. #}
 {% set listItem = listOpts.template|default('@FedaleGridview/gridview/sections/dataview/list/_item.html.twig') %}
 <ul class="gv-list" data-gv="{{ gridview.key }}">

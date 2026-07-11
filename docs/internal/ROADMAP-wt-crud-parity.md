@@ -176,7 +176,7 @@ Spec originali (riferimento):
 > - Servizi bundle: `GridFormBuilder`, `GridCrudHandler` (+ `existsWithValue`, `deleteTokenId`),
 >   `CrudButton`. Opzione `routeName` per i link sort/paginazione sotto POST CRUD.
 > - Reference: `app/src/Controller/Gridview/UserController.php`. Doc: sezione "CRUD forms" in
->   [index.md](index.md).
+>   [index.md](../index.md).
 
 Spec originali (riferimento):
 - TwigComponent + Turbo Frame `modal`: riusare il pattern di
@@ -245,9 +245,9 @@ Spec originali (riferimento):
 >   closure e `twigFilter` invariati. Compositi (fullName/address/phone) progettati ma rimandati.
 > - **B — theming:** token/classi `--gv-*` per i nuovi tipi (`.gv-num/.gv-img/.gv-list/.gv-rating/
 >   .gv-badge/.gv-json`), light/dark; audit CDN (nessuna dipendenza). Docs "Theming" in
->   [index.md](index.md).
+>   [index.md](../index.md).
 > - **C — i18n:** UI chrome tradotta via dominio `GridviewBundle` (it/en); boolean glifo neutro.
->   Docs "Internationalization" in [index.md](index.md).
+>   Docs "Internationalization" in [index.md](../index.md).
 
 Spec originali (riferimento):
 - Nuovi tipi colonna per parità: `number`, `date`, `image`, `html`, `list` (estendendo

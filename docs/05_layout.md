@@ -75,7 +75,7 @@ are internals of the table strategy, not top-level tokens.
 | `{viewSwitcher}` | block (`sections/viewSwitcher.html.twig`) | Runtime renderer switch; collapses unless `renderer.map` has more than one entry (see [Switching views at runtime](#switching-views-at-runtime)) |
 | `{thead}` | table-strategy internal (`sections/dataview/table/thead.html.twig`) | Column header row |
 | `{filter}` | table-strategy internal (`sections/dataview/table/filter.html.twig`) | Column filter inputs row (header) |
-| `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](filtering.md#the-filterbar--placing-filters-anywhere)) |
+| `{filterBar}` | `sections/filterBar.html.twig` | Filters of columns with `filterBar: true`; placeable anywhere, even outside the grid (see [The filterBar](04_filtering.md#the-filterbar--placing-filters-anywhere)) |
 | `{tbody}` | table-strategy internal (`sections/dataview/table/tbody.html.twig`) | Data rows |
 | `{tfoot}` | table-strategy internal (`sections/dataview/table/tfoot.html.twig`) | Table footer row |
 | `{empty}` | table-strategy internal (`sections/dataview/table/empty.html.twig`) | "No records found" row |
@@ -221,7 +221,7 @@ Any region or table-internal name is accepted (`shell`, `header`,
 `_region.html.twig` wrapper emits them automatically; a dedicated region template
 emits them via `{{ gridview.regionAttr(region)|options }}`.
 
-The legacy [`setAttributes()`](theming.md#attributes--styling) bag still works and maps onto
+The legacy [`setAttributes()`](06_theming.md#attributes--styling) bag still works and maps onto
 the same regions (`container → shell`, the table `class` → `dataview`,
 `header → header`, `filter`, `row`); `layout.attrs[T]` overrides it per key.
 
@@ -434,7 +434,7 @@ protected function buildColumns(): array
 }
 ```
 
-`responsive` is a runtime-only option (see [Configuration](configuration.md#behavior)) — enable it
+`responsive` is a runtime-only option (see [Configuration](11_configuration.md#behavior)) — enable it
 per grid via `viewConfig()['options']['behavior']['responsive']`, not YAML:
 
 ```php
@@ -467,13 +467,13 @@ the responsive wrapper falls back to **horizontal scrolling**.
 - The recalculation runs on a `ResizeObserver` watching the grid container, so it reacts
   to window resizes and layout changes, not just the initial load.
 - Collapsing uses a CSS class (`gv-resp-collapsed`), independent of the inline
-  `display` style used by [column visibility](javascript.md#gridview-visibility): the two never fight.
+  `display` style used by [column visibility](12_javascript.md#gridview-visibility): the two never fight.
   A column the user has manually hidden is skipped — it is neither collapsed nor shown in
   the detail row.
 - The detail row reads its label/value pairs straight from the hidden `<th>`/`<td>`
   cells, so column types, formatters and HTML render exactly as in the table.
 - Open detail rows close on recalculation (e.g. when the window is resized).
 
-The markup is driven by the [`gridview-responsive`](javascript.md#gridview-responsive) Stimulus
+The markup is driven by the [`gridview-responsive`](12_javascript.md#gridview-responsive) Stimulus
 controller and styled through the `--gv-*` tokens, so it follows light/dark mode and any
-[token overrides](theming.md#overriding-tokens) automatically.
+[token overrides](06_theming.md#overriding-tokens) automatically.

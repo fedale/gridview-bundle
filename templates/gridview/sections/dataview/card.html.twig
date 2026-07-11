@@ -5,7 +5,7 @@
    outside the dataview and is unaffected. #}
 {% set cardOpts = gridview.rendererOptions('card') %}
 {# Per-item template: override with `renderer.map.card.template` to lay the card out
-   however you like (see docs/layout.md). It receives gridview, row, rowIndex,
+   however you like (see docs/05_layout.md). It receives gridview, row, rowIndex,
    columns and titleField, and can reuse sections/dataview/_cell.html.twig. #}
 {% set cardItem = cardOpts.template|default('@FedaleGridview/gridview/sections/dataview/card/_item.html.twig') %}
 {% set cardStyle %}

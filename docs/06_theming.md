@@ -176,6 +176,6 @@ HTML attributes for the table and its surrounding elements are set via `setAttri
 | `row` | `row` | Every `<tr>` in the tbody |
 
 This bag is shorthand for the most common targets; under the hood it feeds the same
-per-region attribute map as [`layout.attrs[T]`](layout.md#per-region-html-attributes), which
+per-region attribute map as [`layout.attrs[T]`](05_layout.md#per-region-html-attributes), which
 can attach attributes to **any** region or table-internal (e.g. `thead`, `toolbar`,
 `header`) and overrides the bag per key.

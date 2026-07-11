@@ -110,4 +110,4 @@ Tag the subscriber with `kernel.event_subscriber` or rely on Symfony's autoconfi
 > current page, while the total count is computed at the DB level — so skipping a
 > row here would leave short or empty pages and a wrong total. To make entire rows
 > visible only to some users, filter in the query instead — see
-> [Hiding rows by permission](filtering.md#hiding-rows-by-permission-filter-in-the-query).
+> [Hiding rows by permission](04_filtering.md#hiding-rows-by-permission-filter-in-the-query).

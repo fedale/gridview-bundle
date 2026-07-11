@@ -17,7 +17,7 @@ The entry point is always a `GridviewBuilder` chain called from a controller act
 ## Quick Start
 
 The recommended way to expose a grid is to extend one of the bundle's
-[controller base classes](crud.md#controller-base-classes): you declare the entity, the
+[controller base classes](08_crud.md#controller-base-classes): you declare the entity, the
 columns and the data-provider config, and the `index` / `export` actions (plus
 their routes) come for free. No constructor, no manual builder wiring.
 
@@ -61,13 +61,13 @@ That's it: the single `#[Route]` prefix yields `gridview_customer_index` and
 `gridview_customer_export`, and the grid id defaults to the entity short name
 (`customer`). For write operations (`new`, `update`, `delete`, bulk, inline, …)
 extend `AbstractCrudGridController` instead — see
-[Controller base classes](crud.md#controller-base-classes).
+[Controller base classes](08_crud.md#controller-base-classes).
 
 ### 2. The index template
 
 `index` renders the template named by the `indexTemplate` config key, which
 defaults to `gridview/with_sidebar.html.twig` (a host-app template). Point it at
-the bundle's bare layout, or your own, via [`viewConfig()`](crud.md#the-viewconfig-array):
+the bundle's bare layout, or your own, via [`viewConfig()`](08_crud.md#the-viewconfig-array):
 
 ```php
 protected function viewConfig(): array
@@ -83,7 +83,7 @@ Turbo-Frame request arrives, the bundle automatically switches to the internal
 > **Lower-level API.** Under the hood these controllers drive a `GridviewBuilder`
 > obtained from `GridviewBuilderFactory`. You can use that builder directly from a
 > plain controller when you need a fully custom action — the
-> [Full Example](full-example.md#full-example) shows the manual `createGridviewBuilder()` chain,
+> [Full Example](15_full-example.md#full-example) shows the manual `createGridviewBuilder()` chain,
 > and most sections below illustrate options through it.
 
 ---
@@ -92,7 +92,7 @@ Turbo-Frame request arrives, the bundle automatically switches to the internal
 
 The `dataProvider` array is passed to `setDataProvider()` and controls *where* data comes from,
 *how many* rows to show, and *how* they can be sorted. In a controller this is exactly the array
-returned by [`dataConfig()`](crud.md#what-a-subclass-implements); the builder calls `setDataProvider()` with it
+returned by [`dataConfig()`](08_crud.md#what-a-subclass-implements); the builder calls `setDataProvider()` with it
 for you.
 
 ```php
@@ -106,5 +106,5 @@ $dataProvider = [
 | Key | Type | Description |
 |-----|------|-------------|
 | `model` | `string` | Fully-qualified entity class name |
-| `pagination` | `array` | Pagination options — `defaultPageSize`, `maxPageSize`, and the optional `pageSizeOptions` selector (see [Pagination](sorting-pagination.md#pagination)) |
-| `sort` | `array` | Grouped sort config: `map` (the attribute → ORDER BY fields map), `default` (initial ordering when no `?sort=` is present) and `multiSort` (allow ordering by several attributes at once). See [Sorting](sorting-pagination.md#sorting). |
+| `pagination` | `array` | Pagination options — `defaultPageSize`, `maxPageSize`, and the optional `pageSizeOptions` selector (see [Pagination](03_sorting-pagination.md#pagination)) |
+| `sort` | `array` | Grouped sort config: `map` (the attribute → ORDER BY fields map), `default` (initial ordering when no `?sort=` is present) and `multiSort` (allow ordering by several attributes at once). See [Sorting](03_sorting-pagination.md#sorting). |

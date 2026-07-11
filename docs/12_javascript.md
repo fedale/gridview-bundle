@@ -101,7 +101,7 @@ connect. No template actions — it binds native drag events on the header.
 Collapses the least important columns into an expandable detail row when the table
 overflows its container, and restores them when it fits again. Enabled by the
 `responsive => true` grid option; columns opt in with a `priority > 0`. Pure client-side
-(every cell is already in the DOM) — see [Responsive (column collapse)](layout.md#responsive-column-collapse)
+(every cell is already in the DOM) — see [Responsive (column collapse)](05_layout.md#responsive-column-collapse)
 for the full behaviour and `priority` semantics.
 
 **Connects to:** the `.gv-resp-wrap` table wrapper and the per-row `.gv-resp-toggle`

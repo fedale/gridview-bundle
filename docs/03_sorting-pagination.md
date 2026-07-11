@@ -185,4 +185,4 @@ For long lists a `<select>` lets the user jump directly to any page. It is contr
 ```
 
 Each `<option>` value is the fully-built page URL, so navigation needs no client-side query
-rebuilding — see the [`gridview-page-jump`](javascript.md#gridview-page-jump) controller.
+rebuilding — see the [`gridview-page-jump`](12_javascript.md#gridview-page-jump) controller.
