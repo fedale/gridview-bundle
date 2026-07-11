@@ -40,7 +40,24 @@ class GridviewUrlState
         $formData = $request->query->all($formName);
         $state->globalSearch = $formData['_q'] ?? null;
         unset($formData['_q'], $formData['save'], $formData['_token']);
-        $state->filters = array_filter($formData, fn($v) => $v !== null && $v !== '');
+        // Range/relation filters submit as nested arrays (e.g. publishedAt[from|to]).
+        // An array with only blank values (all fields left empty) must count as
+        // "not set", same as a blank scalar — otherwise hasFilters() stays true
+        // forever just because those inputs are always present in the query string.
+        $isBlank = static function ($value) use (&$isBlank): bool {
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    if (!$isBlank($item)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return $value === null || $value === '';
+        };
+        $state->filters = array_filter($formData, fn($v) => !$isBlank($v));
 
         $state->sort = $request->query->get($sortParam) ?: null;
         $state->page = max(1, (int) $request->query->get($pageParam, 1));
