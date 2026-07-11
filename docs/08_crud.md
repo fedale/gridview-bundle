@@ -113,8 +113,8 @@ Constraints are declared on the control and expanded by the bundle (they also st
   // else: fall through to renderForm() with the error
   ```
 
-Required fields are marked with a red asterisk after the label (the Bootstrap form theme adds a
-`required` class; the bundle styles `.gv-crud-form label.required::after`).
+Required fields are marked with a red asterisk after the label — Symfony's form layout already adds
+a `required` class to the `<label>`; the bundle styles it via `.gv-crud-form label.required::after`.
 
 ### Live validation (Stimulus, optional)
 
@@ -345,6 +345,38 @@ return $isXhr
 
 `CrudButton::edit($url, $mode)` / the `{addButton}` token render the modal trigger only when
 `mode === 'modal'`; otherwise a plain navigation link.
+
+### Form theme (`form.theme`)
+
+By default every CRUD form renders through the bundle's own form theme
+(`@FedaleGridview/form/gv_form_theme.html.twig`) — it just adds `gv-*` class hooks (`gv-form-row`,
+`gv-form-label`, `gv-form-control`, `gv-form-help`, `gv-form-errors`) on top of Symfony's stock
+`form_div_layout.html.twig` blocks, giving fields sane spacing/typography with no CSS-framework
+dependency (consistent with the rest of the bundle — see [CSS theming](11_configuration.md)).
+
+Override it per grid from the controller's `viewConfig()` — there is **no YAML path** for this key:
+
+```php
+protected function viewConfig(): array
+{
+    return [
+        'form' => ['theme' => ['bootstrap_5_layout.html.twig']], // or your own theme(s)
+        // 'form' => ['theme' => null], // opt out entirely, fall back to raw Symfony
+    ];
+}
+```
+
+Accepts anything Twig's `{% form_theme %}` tag does — a single template path or an array of paths
+(the last one wins per block, same as Symfony's own theme stacking).
+
+> **Already set a project-wide `twig: form_themes: [...]`?** That global config normally applies to
+> every form in the app, gridview's CRUD forms included — *unless* something applies an explicit
+> per-form `{% form_theme %}` tag, which always wins for that form. Since `form.theme` defaults to
+> the bundle's own theme (not `null`), it does exactly that: it silently overrides your project-wide
+> choice for gridview's CRUD forms specifically. If you want them to keep following your global
+> theme instead, set `'form' => ['theme' => null]` in that controller's `viewConfig()` — the gate in
+> `_form_layout.html.twig` only applies a theme when `form.theme` is truthy, so `null` falls straight
+> through to your app's own `twig.form_themes`.
 
 ### Overriding the form layout with a Twig view
 

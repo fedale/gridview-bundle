@@ -34,7 +34,11 @@ abstract class AbstractCrudGridController extends AbstractGridController
      *  - labels.add:     "add" toolbar button + new/clone page title (null → `{id}.add`)
      *  - labels.edit:    edit-form page title (null → fall back to `labels.heading`)
      *  - form.mode:      'modal' | 'page' | 'custom' — how/where the form is shown
-     *  - form.theme:     Symfony form theme(s) for the CRUD form (null = default)
+     *  - form.theme:     Symfony form theme(s) for the CRUD form. Defaults to the
+     *                    bundle's own gv_form_theme.html.twig (gv-* row/label/control
+     *                    hooks, no CSS-framework dependency); override in a
+     *                    controller's viewConfig() — e.g. ['bootstrap_5_layout.html.twig']
+     *                    — there is no YAML path for this key
      *  - form.view:      custom form layout; null = automatic rendering
      *  - form.actions:   header/inline action buttons in a token layout. See
      *                    resolveFormActions(). `placement` 'header' drops the
@@ -54,7 +58,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
                 // then the built-in 'modal' default — see actionLayout() for the
                 // same PHP-then-YAML-then-built-in resolution pattern.
                 'mode'       => null,
-                'theme'      => null,
+                'theme'      => '@FedaleGridview/form/gv_form_theme.html.twig',
                 'view'       => null,
                 'actions'    => ['placement' => 'inline', 'layout' => null, 'buttons' => null],
                 'filterName' => 'fedaleForm',

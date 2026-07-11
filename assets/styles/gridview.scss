@@ -1028,6 +1028,55 @@ turbo-frame[busy]>[data-gridview] {
     gap: 2px;
 }
 
+// ── CRUD form — field row spacing (gv_form_theme.html.twig hooks) ──
+// Classes come from the bundle's own default form theme (templates/form/
+// gv_form_theme.html.twig), applied unless a host overrides `form.theme`.
+.gv-form-row {
+    margin-bottom: 1.1rem;
+
+    &--actions {
+        margin-top: .35rem;
+        margin-bottom: 0;
+    }
+
+    // Checkbox/radio rows: lay the control before its label, inline.
+    &--check {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: .5rem;
+
+        .gv-form-label {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.gv-form-label {
+    display: block;
+    margin-bottom: .35rem;
+    font-size: .875rem;
+    font-weight: 500;
+}
+
+.gv-form-help {
+    display: block;
+    margin-top: .3rem;
+    font-size: .8rem;
+    color: var(--gv-color-text-muted);
+}
+
+.gv-form-errors {
+    margin-top: .3rem;
+}
+
+.gv-form-error {
+    display: block;
+    color: var(--gv-danger-color);
+    font-size: .85em;
+}
+
 // ── CRUD form — mark required fields with an asterisk after the label ──
 
 .gv-crud-form label.required::after {
@@ -1613,7 +1662,7 @@ turbo-frame[busy]>[data-gridview] {
 
 [data-gridview] .gv-modal__dialog {
     width: 100%;
-    max-width: 800px;
+    max-width: 800px; // Fallback when no size modifier class is applied (e.g. a host override of _modal.html.twig).
     margin: auto;
     background: var(--gv-color-bg);
     color: var(--gv-color-text);
@@ -1621,6 +1670,13 @@ turbo-frame[busy]>[data-gridview] {
     border-radius: var(--gv-radius);
     box-shadow: var(--gv-dropdown-shadow);
 }
+
+// Size variants driven by the form's field count (Gridview::crudModalSizeClass()):
+// more fields in the add/edit form get a wider dialog instead of one fixed width.
+[data-gridview] .gv-modal__dialog--sm { max-width: 480px; }
+[data-gridview] .gv-modal__dialog--md { max-width: 800px; }
+[data-gridview] .gv-modal__dialog--lg { max-width: 1100px; }
+[data-gridview] .gv-modal__dialog--xl { max-width: 95vw; }
 
 [data-gridview] .gv-modal__header {
     display: flex;

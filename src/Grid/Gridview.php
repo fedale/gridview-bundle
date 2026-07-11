@@ -208,6 +208,29 @@ class Gridview implements GridviewInterface
     }
 
     /**
+     * Size-variant class for the CRUD modal dialog (`modal.dialog.sm|md|lg|xl`),
+     * chosen from the number of columns active in `create`/`update` — the
+     * fields the add/edit form actually renders. Resolved once here (rather
+     * than per add/edit/clone request) because `_modal.html.twig` renders the
+     * modal shell a single time per grid, shared by every CRUD request for it.
+     */
+    public function crudModalSizeClass(): string
+    {
+        $fieldCount = $this->columns
+            ->filter(static fn (ColumnInterface $c) => $c->isActiveIn('create') || $c->isActiveIn('update'))
+            ->count();
+
+        $size = match (true) {
+            $fieldCount <= 4  => 'sm',
+            $fieldCount <= 8  => 'md',
+            $fieldCount <= 14 => 'lg',
+            default           => 'xl',
+        };
+
+        return $this->cls('modal.dialog.' . $size);
+    }
+
+    /**
      * Resolved grouping configuration, built once from the `behavior.grouping`
      * option and the grid's entity (the parent class the relation hangs off).
      */
@@ -679,7 +702,7 @@ class Gridview implements GridviewInterface
         // layout. Additive and idempotent — a token already present (with or
         // without an inline width) is left untouched, and each of these collapses
         // to nothing when not applicable, so the toolbar stays stable across a
-        // runtime view switch (see docs/layout.md "Dinamica dei token").
+        // runtime view switch (see docs/05_layout.md "Dinamica dei token").
         if ($section === 'toolbar' && \count($this->getRenderers()) > 1) {
             foreach (['viewSwitcher', 'sortBar', 'filterBar'] as $token) {
                 if (str_contains($layout, '{' . $token . '}') || str_contains($layout, '{' . $token . ' ')) {

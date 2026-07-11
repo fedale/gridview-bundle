@@ -35,6 +35,10 @@ class ThemeRegistry
             'pagination.link'     => 'gv-page-link',
             'pagination.active'   => 'gv-active',
             'pagination.disabled' => 'gv-disabled',
+            'modal.dialog.sm'     => 'gv-modal__dialog--sm',
+            'modal.dialog.md'     => 'gv-modal__dialog--md',
+            'modal.dialog.lg'     => 'gv-modal__dialog--lg',
+            'modal.dialog.xl'     => 'gv-modal__dialog--xl',
         ],
         'bootstrap5' => [
             'btn'                 => 'btn btn-sm btn-secondary',

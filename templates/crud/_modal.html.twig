@@ -7,7 +7,7 @@
 <div class="gv-modal" tabindex="-1" aria-hidden="true"
      data-gridview-crud-target="modal"
      data-action="click->gridview-crud#backdropClose">
-    <div class="gv-modal__dialog" role="dialog" aria-modal="true">
+    <div class="gv-modal__dialog {{ gridview.crudModalSizeClass() }}" role="dialog" aria-modal="true">
         <div class="gv-modal__header">
             {%- set _crudTitle = gridview.options.display.title|default('') -%}
             <h2 class="gv-modal__title"{% if _crudTitle is not empty %} {{ gv_i18n(_crudTitle) }}{% endif %}>{{ _crudTitle is not empty and gv_client_label(_crudTitle) ? gv_client_text(_crudTitle) : _crudTitle }}</h2>

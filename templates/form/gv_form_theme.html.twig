@@ -1,0 +1,59 @@
+{#
+  Bundle's own default form theme: adds gv-* class hooks (row/label/control/
+  help/errors) to Symfony's stock form_div_layout.html.twig blocks so the CRUD
+  form gets proper spacing/typography without depending on Bootstrap/Tailwind.
+  Applied automatically unless a host overrides `form.theme` in its grid
+  controller's viewConfig() (see AbstractCrudGridController::defaultConfig()).
+#}
+{% use 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set row_class = 'gv-form-row' -%}
+    {%- if 'checkbox' in block_prefixes or 'radio' in block_prefixes -%}
+        {%- set row_class = row_class ~ ' gv-form-row--check' -%}
+    {%- endif -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' ' ~ row_class)|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_row %}
+
+{%- block button_row -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' gv-form-row gv-form-row--actions')|trim}) -%}
+    {{- parent() -}}
+{%- endblock button_row %}
+
+{%- block form_label -%}
+    {%- set label_attr = label_attr|merge({class: (label_attr.class|default('') ~ ' gv-form-label')|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_label %}
+
+{%- block form_widget_simple -%}
+    {%- if type is not defined or type != 'hidden' -%}
+        {%- set attr = attr|merge({class: (attr.class|default('') ~ ' gv-form-control')|trim}) -%}
+    {%- endif -%}
+    {{- parent() -}}
+{%- endblock form_widget_simple %}
+
+{%- block textarea_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' gv-form-control')|trim}) -%}
+    {{- parent() -}}
+{%- endblock textarea_widget %}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: (attr.class|default('') ~ ' gv-form-control')|trim}) -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed %}
+
+{%- block form_help -%}
+    {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' gv-form-help')|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_help %}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+    <div class="gv-form-errors">
+        {%- for error in errors -%}
+            <span class="gv-form-error">{{ error.message }}</span>
+        {%- endfor -%}
+    </div>
+    {%- endif -%}
+{%- endblock form_errors %}
