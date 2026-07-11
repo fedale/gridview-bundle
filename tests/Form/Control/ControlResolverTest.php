@@ -35,14 +35,11 @@ class ControlResolverTest extends TestCase
 
     public static function inheritableTypes(): array
     {
-        return [['email'], ['url'], ['percent'], ['datetime']];
-    }
-
-    public function testCurrencyDisplayTypeFallsBackToTextNotCurrencyControl(): void
-    {
-        // `currency` display = formatted amount; its write twin is `money`, not the
-        // CurrencyType code picker. So it must NOT inherit to a `currency` control.
-        $this->assertSame('text', $this->resolver->resolve(true, 'currency')['type']);
+        return [
+            ['email'], ['url'], ['percent'], ['datetime'], ['time'],
+            ['money'], ['currency'], ['color'], ['country'], ['language'],
+            ['locale'], ['timezone'], ['hidden'], ['tel'],
+        ];
     }
 
     public function testEnumControlRequiresClass(): void

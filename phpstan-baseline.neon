@@ -367,6 +367,12 @@ parameters:
 			path: src/Column/Type/BooleanType.php
 
 		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColorType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/ColorType.php
+
+		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\ColumnTypeInterface\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -397,6 +403,18 @@ parameters:
 			path: src/Column/Type/ColumnTypeRegistry.php
 
 		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\CountryType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/CountryType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\CountryType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/CountryType.php
+
+		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\CurrencyType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -421,12 +439,6 @@ parameters:
 			path: src/Column/Type/DateType.php
 
 		-
-			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\DatetimeType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Column/Type/DatetimeType.php
-
-		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\HtmlType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -445,6 +457,18 @@ parameters:
 			path: src/Column/Type/JsonType.php
 
 		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LanguageType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/LanguageType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LanguageType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/LanguageType.php
+
+		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LinkType\:\:render\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -461,6 +485,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Column/Type/ListType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LocaleType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/LocaleType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\LocaleType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/LocaleType.php
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MediaType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
@@ -497,6 +533,18 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: src/Column/Type/MediaType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MoneyType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MoneyType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MoneyType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/MoneyType.php
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\MultiSelectType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
@@ -563,6 +611,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Column/Type/SelectType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\TimezoneType\:\:format\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/TimezoneType.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\TimezoneType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Column/Type/TimezoneType.php
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\Type\\UrlType\:\:getDefaultOptions\(\) return type has no value type specified in iterable type array\.$#'
@@ -1867,6 +1927,12 @@ parameters:
 			path: src/Grid/GridviewBuilder.php
 
 		-
+			message: '#^Property Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:\$runtimeDataProviderOptions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewBuilder.php
+
+		-
 			message: '#^Property Fedale\\GridviewBundle\\Grid\\GridviewBuilder\:\:\$runtimeOptions type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1934,6 +2000,12 @@ parameters:
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveAttributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Grid/GridviewConfigRegistry.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Grid\\GridviewConfigRegistry\:\:resolveDataProviderPagination\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Grid/GridviewConfigRegistry.php
@@ -2335,7 +2407,49 @@ parameters:
 			path: src/Row/Row.php
 
 		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\AccessorPrefixNameConverter\:\:denormalize\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/AccessorPrefixNameConverter.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\AccessorPrefixNameConverter\:\:normalize\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/AccessorPrefixNameConverter.php
+
+		-
 			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:__construct\(\) has parameter \$defaultContext with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:getSupportedTypes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:normalize\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:normalize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:normalize\(\) return type with generic class ArrayObject does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\LazyAwareObjectNormalizer\:\:supportsNormalization\(\) has parameter \$context with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Serializer/LazyAwareObjectNormalizer.php
@@ -2351,6 +2465,36 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Symfony\\Component\\Serializer\\Normalizer\\AbstractObjectNormalizer\:\:supportsNormalization\(\) invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Serializer/LazyAwareObjectNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\ModelNormalizer\:\:normalize\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/ModelNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\ModelNormalizer\:\:normalize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/ModelNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\ModelNormalizer\:\:normalize\(\) return type with generic class ArrayObject does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Serializer/ModelNormalizer.php
+
+		-
+			message: '#^Method Fedale\\GridviewBundle\\Serializer\\ModelNormalizer\:\:supportsNormalization\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Serializer/ModelNormalizer.php
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Service\\GridviewService\:\:getEnvironment\(\) has no return type specified\.$#'

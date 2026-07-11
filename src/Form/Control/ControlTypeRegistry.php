@@ -22,6 +22,7 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
@@ -49,6 +50,7 @@ class ControlTypeRegistry
         'html'     => TextareaType::class,
         'email'    => EmailType::class,
         'url'      => UrlType::class,
+        'tel'      => TelType::class,
         'password' => PasswordType::class,
         'color'    => ColorType::class,
         // Numeric-family

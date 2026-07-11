@@ -16,13 +16,17 @@ class ControlResolver
     /**
      * Data types whose name doubles as a control type, so a column declaring a
      * `control` without an explicit `type` inherits its display data type
-     * (e.g. `type => 'email'` → EmailType control). `currency` is deliberately
-     * absent: as a display type it formats an amount, whose write-side twin is
-     * the `money` control (MoneyType), not the `currency` code picker.
+     * (e.g. `type => 'email'` → EmailType control). `money` and `currency` are
+     * both listed on purpose, each pointing at its own matching control (the
+     * MoneyType amount editor vs. the CurrencyType code picker) — see
+     * {@see \Fedale\GridviewBundle\Column\Type\MoneyType} /
+     * {@see \Fedale\GridviewBundle\Column\Type\CurrencyType}.
      */
     private const INHERITABLE = [
         'text', 'number', 'date', 'boolean', 'relation', 'choice',
-        'email', 'url', 'percent', 'datetime',
+        'email', 'url', 'percent', 'datetime', 'time',
+        'money', 'currency', 'color', 'country', 'language', 'locale',
+        'timezone', 'hidden', 'tel',
     ];
 
     /**

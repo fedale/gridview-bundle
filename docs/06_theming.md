@@ -140,10 +140,13 @@ backdrop): `--gv-info-bg`, `--gv-info-color`, `--gv-info-border`,
 | `--gv-badge-radius` / `--gv-badge-padding` / `--gv-badge-font-size` | `badge` shape | pill |
 | `--gv-json-bg` / `--gv-json-color` / `--gv-json-border` | `json` (`.gv-json`) | subtle box |
 
-`number`/`currency`/`percent` cells carry `.gv-num` (right-aligned, tabular
-figures); `list`/`array` carry `.gv-list`. Per-value badge colours can also be
-passed inline from the column config (`format.colors: {VALUE: '#0a0'}`), which
-emit a `gv-badge--<value>` modifier class for finer CSS targeting.
+`number`/`money`/`percent` cells carry `.gv-num` (right-aligned, tabular
+figures) — `currency` (the ISO code, not an amount) does not; `list`/`array`
+carry `.gv-list`. `color` cells prefix a `.gv-color-swatch` before the value,
+and a `media` column with `format.shape: 'circle'` adds `.gv-img-circle` for a
+round crop (e.g. avatars). Per-value badge colours can also be passed inline
+from the column config (`format.colors: {VALUE: '#0a0'}`), which emit a
+`gv-badge--<value>` modifier class for finer CSS targeting.
 
 > After changing the SCSS, rebuild assets: `cd app && yarn encore dev`
 > (or `yarn watch`).

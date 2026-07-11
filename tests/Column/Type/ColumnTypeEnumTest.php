@@ -69,6 +69,32 @@ class ColumnTypeEnumTest extends TestCase
         $this->assertSame('choice', $nested->getFilter()['type']);
     }
 
+    /**
+     * End-to-end guard through the real ColumnFactory pipeline (not just the
+     * isolated ControlResolver unit): `control: true` on these display types
+     * must resolve to a control of the *same* name, not silently fall back to a
+     * parent type's control (e.g. `percent` used to resolve to a plain `number`
+     * control, and `datetime` to a plain `date` control, because their
+     * inferControlType() wasn't overridden).
+     *
+     * @dataProvider selfNamedControlTypes
+     */
+    public function testDisplayTypeInheritsSameNameControlThroughFactory(string $type): void
+    {
+        $column = $this->firstColumn(['attribute' => 'x', 'type' => $type, 'control' => true]);
+
+        $this->assertSame($type, $column->getControl()['type']);
+    }
+
+    public static function selfNamedControlTypes(): array
+    {
+        return [
+            ['email'], ['url'], ['tel'], ['percent'], ['datetime'], ['time'],
+            ['money'], ['currency'], ['color'], ['country'], ['language'],
+            ['locale'], ['timezone'], ['hidden'],
+        ];
+    }
+
     /** @return string[] canonical (non-alias) data type names from the registry */
     private function registryDataTypeNames(): array
     {

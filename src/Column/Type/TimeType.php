@@ -2,12 +2,12 @@
 
 namespace Fedale\GridviewBundle\Column\Type;
 
-/** Date with time — a DateType defaulting to a date+time pattern/style. */
-class DatetimeType extends DateType
+/** Time only (no date) — a DateType defaulting to a time-only pattern/style. */
+class TimeType extends DateType
 {
     public function getName(): string
     {
-        return 'datetime';
+        return 'time';
     }
 
     public function getParent(): ?string
@@ -17,16 +17,16 @@ class DatetimeType extends DateType
 
     protected function intlStyles(): array
     {
-        return [\IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT];
+        return [\IntlDateFormatter::NONE, \IntlDateFormatter::SHORT];
     }
 
     protected function noIntlPattern(): string
     {
-        return 'd/m/Y H:i';
+        return 'H:i';
     }
 
     public function inferControlType(): ?string
     {
-        return 'datetime';
+        return 'time';
     }
 }

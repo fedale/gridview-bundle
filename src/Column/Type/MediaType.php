@@ -16,7 +16,9 @@ use Fedale\GridviewBundle\Contract\ColumnInterface;
  *    telling extension;
  *  - `imageExtensions`: extensions treated as images in 'auto' mode;
  *  - `alt`, `width`, `height`, `fallback`: image rendering (as the old ImageType);
- *  - `downloadLabel`: link text for non-image files (defaults to the basename).
+ *  - `downloadLabel`: link text for non-image files (defaults to the basename);
+ *  - `shape`: 'square' (default) or 'circle' — a round crop, e.g. for avatars
+ *    (mirrors EasyAdmin's `AvatarField`, which is otherwise just a styled image).
  *
  * The write side (upload button) is a separate `media` control type mapped to a
  * Symfony FileType; see ControlTypeRegistry and AbstractColumn::buildControl().
@@ -44,6 +46,7 @@ class MediaType extends AbstractColumnType
             'downloadLabel'   => null,
             'mimeType'        => null,
             'imageExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'avif'],
+            'shape'           => 'square',
         ];
     }
 
@@ -103,9 +106,12 @@ class MediaType extends AbstractColumnType
             }
         }
 
+        $class = ($options['shape'] ?? 'square') === 'circle' ? 'gv-img gv-img-circle' : 'gv-img';
+
         return $this->markup(sprintf(
-            '<img src="%s" class="gv-img" loading="lazy" alt="%s"%s>',
+            '<img src="%s" class="%s" loading="lazy" alt="%s"%s>',
             $this->esc($src),
+            $class,
             $this->esc($options['alt'] ?? ''),
             $attrs
         ));

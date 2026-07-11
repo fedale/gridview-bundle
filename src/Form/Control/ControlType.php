@@ -16,6 +16,7 @@ enum ControlType: string
     case Html = 'html';
     case Email = 'email';
     case Url = 'url';
+    case Tel = 'tel';
     case Password = 'password';
     case Color = 'color';
     case Number = 'number';

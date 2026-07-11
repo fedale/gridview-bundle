@@ -37,6 +37,7 @@ entity, a normalised URL…) with no custom code.
 | `html` | `TextareaType` | |
 | `email` | `EmailType` | `<input type="email">` + validation |
 | `url` | `UrlType` | normalises the URL on submit |
+| `tel` | `TelType` | `<input type="tel">` |
 | `password` | `PasswordType` | |
 | `color` | `ColorType` | native colour picker |
 | `number` | `NumberType` | |
@@ -60,20 +61,25 @@ entity, a normalised URL…) with no custom code.
 $columns = [
     ['attribute' => 'email',    'type' => 'email'],   // display + control both EmailType (inherited)
     ['attribute' => 'website',  'control' => 'url'],
-    ['attribute' => 'price',    'type' => 'currency',  // display formats the amount…
-     'control' => ['type' => 'money', 'options' => ['currency' => 'EUR']]], // …write side is MoneyType
+    ['attribute' => 'price',    'type' => 'money',     // display formats the amount…
+     'control' => true],                               // …auto-inherits the money control (MoneyType)
+    ['attribute' => 'currency', 'type' => 'currency',   // display shows "Euro (EUR)"…
+     'control' => true],                               // …auto-inherits the currency control (code picker)
     ['attribute' => 'priority', 'control' => ['type' => 'enum', 'options' => ['class' => Priority::class]]],
 ];
 ```
 
 When a column declares a `control` *without* an explicit `type`, it inherits the column's display data
 type if that name doubles as a control type (`text`, `number`, `date`, `boolean`, `relation`, `choice`,
-`email`, `url`, `percent`, `datetime`) — otherwise it falls back to `text`.
+`email`, `url`, `tel`, `percent`, `datetime`, `time`, `money`, `currency`, `color`, `country`, `language`,
+`locale`, `timezone`, `hidden`) — otherwise it falls back to `text`.
 
 > **`money` ≠ `currency`.** `money` (MoneyType) edits an **amount**; `currency` (CurrencyType) is a
 > picker of ISO currency **codes** (EUR/USD/…). Kept as separate entries on purpose — mirroring
-> Symfony's own naming — so the display type `currency` (a formatted amount) does **not** auto-inherit
-> a `currency` control; pair it with an explicit `money` control instead.
+> Symfony's own naming (and EasyAdmin's `MoneyField`/`CurrencyField` split). Each has its own display
+> type of the same name, so both auto-inherit correctly: `type: 'money'` → `money` control, `type:
+> 'currency'` → `currency` control. Use an explicit `control` to mix them (e.g. a `money` display paired
+> with a `currency` control that edits a sibling ISO-code property).
 
 > **Filter ≠ control.** A `relation` *filter* uses scalar ids (ChoiceType); a `relation` *control*
 > uses `EntityType` and binds managed entities. They are separate registry entries on purpose.

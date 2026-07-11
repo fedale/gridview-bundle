@@ -2,12 +2,12 @@
 
 namespace Fedale\GridviewBundle\Column\Type;
 
-/** Email address — a mailto: link. */
-class EmailType extends LinkType
+/** Telephone number — a tel: link. Mirrors EasyAdmin's `TelephoneField`. */
+class TelType extends LinkType
 {
     public function getName(): string
     {
-        return 'email';
+        return 'tel';
     }
 
     public function getParent(): ?string
@@ -17,11 +17,11 @@ class EmailType extends LinkType
 
     protected function hrefFor(string $value): string
     {
-        return 'mailto:' . $value;
+        return 'tel:' . \preg_replace('/\s+/', '', $value);
     }
 
     public function inferControlType(): ?string
     {
-        return 'email';
+        return 'tel';
     }
 }

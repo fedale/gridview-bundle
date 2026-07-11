@@ -1309,6 +1309,23 @@ turbo-frame[busy]>[data-gridview] {
     object-fit: cover;
 }
 
+// Media rendered with shape: 'circle' (e.g. avatars) — round crop, square box.
+[data-gridview] .gv-img-circle {
+    width: var(--gv-img-max-h, 40px);
+    border-radius: 50%;
+}
+
+// Colour swatch preceding the raw value.
+[data-gridview] .gv-color-swatch {
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    border-radius: 3px;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
 // Media download link (non-image files: pdf, doc, …)
 [data-gridview] .gv-file {
     display: inline-flex;

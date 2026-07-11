@@ -24,17 +24,26 @@ enum ColumnType: string
     case Email = 'email';
     case Media = 'media';
     case Number = 'number';
+    case Money = 'money';
     case Currency = 'currency';
     case Percent = 'percent';
     case Boolean = 'boolean';
     case Date = 'date';
     case Datetime = 'datetime';
+    case Time = 'time';
     case Select = 'select';
     case MultiSelect = 'multiSelect';
     case Rating = 'rating';
     case Badge = 'badge';
     case List = 'list';
     case Relation = 'relation';
+    case Color = 'color';
+    case Country = 'country';
+    case Language = 'language';
+    case Locale = 'locale';
+    case Timezone = 'timezone';
+    case Tel = 'tel';
+    case Hidden = 'hidden';
 
     // Structural columns (not data types).
     case Action = 'action';

@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
@@ -57,6 +58,7 @@ class ControlTypeRegistryTest extends TestCase
             'locale'   => ['locale', LocaleType::class],
             'timezone' => ['timezone', TimezoneType::class],
             'currency' => ['currency', CurrencyType::class],
+            'tel'      => ['tel', TelType::class],
         ];
     }
 

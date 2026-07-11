@@ -5,18 +5,16 @@ namespace Fedale\GridviewBundle\Column\Type;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 
 /**
- * ISO currency code (EUR, USD, GBP, …) — the value itself *is* the currency,
- * as opposed to {@see MoneyType} which formats an amount. Mirrors Symfony's own
- * `CurrencyType` (a code picker) and EasyAdmin's `CurrencyField`. Renders the
- * bare code by default; the display name in the current/`options.locale` locale
- * is used instead when `ext-intl` plus the optional `symfony/intl` component are
- * available (`options.showName`, default true, degrades silently otherwise).
+ * ISO 639-1 language code (en, it, fr, …) — renders the localized language name
+ * via the optional `symfony/intl` component, falling back to the bare code when
+ * it is not installed. Mirrors EasyAdmin's `LanguageField` / Symfony's
+ * `LanguageType` control.
  */
-class CurrencyType extends AbstractColumnType
+class LanguageType extends AbstractColumnType
 {
     public function getName(): string
     {
-        return 'currency';
+        return 'language';
     }
 
     public function getDefaultOptions(): array
@@ -30,15 +28,13 @@ class CurrencyType extends AbstractColumnType
             return '';
         }
 
-        $code = \strtoupper((string) $value);
+        $code = (string) $value;
 
         if (($options['showName'] ?? true) && $this->intlAvailable()) {
             $locale = (string) ($options['locale'] ?? \Locale::getDefault());
 
             try {
-                $name = \Symfony\Component\Intl\Currencies::getName($code, $locale);
-
-                return sprintf('%s (%s)', $name, $code);
+                return \Symfony\Component\Intl\Languages::getName($code, $locale);
             } catch (\Exception) {
                 // Unknown code: fall through to the bare code below.
             }
@@ -50,7 +46,7 @@ class CurrencyType extends AbstractColumnType
     /** Overridable so tests can force the no-symfony/intl fallback branch deterministically. */
     protected function intlAvailable(): bool
     {
-        return \class_exists(\Symfony\Component\Intl\Currencies::class);
+        return \class_exists(\Symfony\Component\Intl\Languages::class);
     }
 
     public function inferFilterType(): ?string
@@ -60,6 +56,6 @@ class CurrencyType extends AbstractColumnType
 
     public function inferControlType(): ?string
     {
-        return 'currency';
+        return 'language';
     }
 }

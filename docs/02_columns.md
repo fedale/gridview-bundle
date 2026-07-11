@@ -118,20 +118,29 @@ $columns = [
 | `json` | Raw value | `text` |
 | `boolean` | `✓` / `✗` for truthy / falsy values | `boolean` |
 | `number` | Raw value | `number` |
-| `currency` | Number formatted as currency (see `format` options) | `number` |
+| `money` | Number formatted as a currency **amount** (see `format` options); write-side twin is the `money` control | `number` |
+| `currency` | The ISO currency **code** itself (EUR, USD, …), optionally with its localized name (see `format` options); write-side twin is the `currency` control — distinct from `money`, mirroring Symfony's/EasyAdmin's own split | `text` |
 | `percent` | Number formatted as a percentage | `number` |
 | `rating` | Numeric rating | `number` |
 | `date` | Raw value (format it with `twigFilter`) | `date` |
 | `datetime` | Raw value | `date` |
+| `time` | Raw value, time only (no date) | `date` |
 | `link` | `<a>` link | `text` |
 | `url` | `<a>` link to the value | `text` |
 | `email` | `mailto:` link | `text` |
+| `tel` | `tel:` link | `text` |
 | `select` | Raw value mapped through choices (alias `choice`) | `choice` |
 | `multiSelect` | Multiple selected choices | `choice` |
 | `badge` | Value rendered as a styled badge | `text` |
 | `list` | Array rendered as a list | `text` |
 | `relation` | Raw value (use `value`/`valueGetter` to render the related label) | `relation` |
 | `media` | Inline `<img>` for images, otherwise a download link (see [The `media` type](#the-media-type--file-uploads)) | — (none) |
+| `color` | A colour swatch next to the raw hex value | `text` |
+| `country` | ISO country code rendered with a flag + localized name (see `format` options) | `text` |
+| `language` | ISO language code rendered with its localized name | `text` |
+| `locale` | Locale code rendered with its localized display name | `text` |
+| `timezone` | IANA timezone id with its current UTC offset (see `format` options) | `text` |
+| `hidden` | Raw value, passthrough — its purpose is auto-wiring the `hidden` control; combine with `visible: false` | — (none) |
 | `data` | Raw value (legacy alias of `text`) | `text` |
 
 **Structural types** (dedicated classes):

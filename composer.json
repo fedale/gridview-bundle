@@ -33,11 +33,14 @@
         "symfony/translation": "^6.4 || ^7.0 || ^8.0",
         "symfony/twig-bundle": "^6.4 || ^7.0 || ^8.0",
         "twig/twig": "^3.0",
-        "phpstan/phpstan": "^2.0"
+        "phpstan/phpstan": "^2.0",
+        "symfony/intl": "^8.1"
     },
     "suggest": {
         "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",
-        "symfony/maker-bundle": "Enables the make:gv:crud scaffolding command. Install it in your app with: composer require --dev symfony/maker-bundle"
+        "symfony/maker-bundle": "Enables the make:gv:crud scaffolding command. Install it in your app with: composer require --dev symfony/maker-bundle",
+        "ext-intl": "Enables full ICU-based locale-aware number/date/currency formatting; a reduced fallback is used without it.",
+        "symfony/intl": "Enables localized names for the country/language/locale/currency column types; the bare ISO code is shown without it."
     },
     "autoload": {
         "psr-4": {

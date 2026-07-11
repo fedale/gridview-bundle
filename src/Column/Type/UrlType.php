@@ -19,4 +19,9 @@ class UrlType extends LinkType
     {
         return ['target' => '_blank', 'rel' => 'noopener noreferrer'];
     }
+
+    public function inferControlType(): ?string
+    {
+        return 'url';
+    }
 }
