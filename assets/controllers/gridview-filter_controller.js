@@ -20,8 +20,16 @@ export default class extends Controller {
                 let resubmit = false;
                 if (frame.dataset.gvTypedValue !== undefined
                     && el.value !== frame.dataset.gvTypedValue) {
+                    // The server value (already trimmed/normalized) differs from
+                    // the raw typed value. Re-apply the typed value so trailing
+                    // whitespace and caret are preserved, but only re-run the
+                    // filter if the *meaningful* term actually changed. Comparing
+                    // raw values would loop forever: the server trims the input,
+                    // so its value can never equal a typed value with trailing
+                    // whitespace (see gvTypedValue snapshot in _snapshotTyping).
+                    const serverValue = el.value;
                     el.value = frame.dataset.gvTypedValue;
-                    resubmit = true;
+                    resubmit = frame.dataset.gvTypedValue.trim() !== serverValue;
                 }
 
                 el.focus();
