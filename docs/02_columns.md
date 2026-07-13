@@ -154,6 +154,85 @@ $columns = [
 > A `value` closure always wins over the data type's built-in rendering — set
 > `type: 'boolean'` for the ✓/✗ default, or supply your own `value` to override it.
 
+## Footer summaries
+
+Any column can render a **summary cell** in the table footer through the `footer`
+key. On a numeric column this is typically an aggregate — a total, an average,
+the minimum or maximum — and on a structural column (for example `checkbox`) it
+can be a plain label placed next to the numbers.
+
+```php
+$columns = [
+    ['type' => 'checkbox', 'footer' => 'Total'],
+    ['attribute' => 'name'],
+    ['attribute' => 'qty',   'type' => 'number',   'footer' => 'sum'],
+    ['attribute' => 'price', 'type' => 'currency', 'footer' => ['agg' => 'avg']],
+];
+```
+
+The aggregate value is formatted through the column's own `type`, so a `currency`
+total looks like the body cells (symbol, decimals, thousands separator).
+
+### Aggregate functions
+
+Pass an aggregate name as a string, or a `FooterAggregate` case:
+
+| Name | Aggregates |
+|------|------------|
+| `sum` | Total of the column values |
+| `avg` | Average |
+| `min` | Smallest value |
+| `max` | Largest value |
+| `count` | Number of rows (rendered as a plain integer) |
+| `countDistinct` | Number of distinct values |
+
+### Scope — filtered dataset vs current page
+
+By default an aggregate is computed over the **whole filtered dataset**, not just
+the rows on the current page — one extra aggregate query, so `sum` on a paginated
+grid is the total of every matching row. Set the scope to `page` to reduce over
+the current page's rows only (no extra query):
+
+```php
+['attribute' => 'qty', 'type' => 'number', 'footer' => ['agg' => 'sum', 'scope' => 'page']],
+```
+
+Dataset scope needs a data provider that can aggregate (the Doctrine
+`EntityDataProvider` does) and a plain scalar attribute on the query root. An
+aggregate over a relation path (`order.qty`) or an unsupported provider falls
+back to page scope automatically.
+
+### Raw expressions
+
+For a computed aggregate, give a raw DQL `expr` — it runs in the dataset query:
+
+```php
+['attribute' => 'total', 'type' => 'currency',
+ 'footer' => ['expr' => 'SUM(e.qty * e.price)', 'scope' => 'dataset']],
+```
+
+The `e` alias is the query root. Raw expressions and `sum` over joined,
+row-multiplying relations can be inflated by the join; use `scope: 'page'` or a
+tailored `expr` when that matters.
+
+### Literal label or custom cell
+
+A string that is not an aggregate name is rendered as a **literal label** — this
+is how you write "Total" (or "SOMMA") in the footer cell of the `checkbox`
+column. For full control, pass a closure `($datasetValue, $rows, $column)` that
+returns a string or `Twig\Markup`:
+
+```php
+['attribute' => 'status',
+ 'footer' => fn ($value, $rows, $column) => new \Twig\Markup(
+     sprintf('<strong>%d</strong> rows', count($rows)),
+     'UTF-8',
+ )],
+```
+
+Footer cells are rendered only when at least one column declares a `footer`;
+otherwise the footer keeps its default "N results" line.
+
 ## The `media` type — file uploads
 
 The `media` type handles **binary files** (images, PDFs, SVGs, …). It has two sides:
