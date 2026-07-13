@@ -197,6 +197,56 @@ for the Security contract), pass Symfony's field `getter`/`setter` through `cont
 > without snapshotting first — for a `multiple` relation they are the same object.
 > The symptom is subtle: the edit appears to work but the relation is saved empty.
 
+### Scaffolding a controller with `make:gridview:crud`
+
+Generate a full CRUD grid controller for a Doctrine entity straight from its
+metadata:
+
+```bash
+$ php bin/console make:gridview:crud Post
+```
+
+The wizard derives the columns, filters, controls and sort map from the entity
+and writes `App\Controller\Gridview\PostController`. Common options:
+
+| Option | Purpose |
+|--------|---------|
+| `--controller-class` | Controller class name (default `<Entity>Controller`) |
+| `--route-prefix` | Route path prefix (default `/gridview/<plural>`) |
+| `--fields` | Comma-separated fields to expose as columns |
+| `--sort` | Default sort field (prefix `-` for descending) |
+| `--page-size` | Default page size (default `20`) |
+| `--checkbox` | Add a row-selection checkbox column |
+| `--advanced` | Ask the extra per-column / sort / page-size questions |
+
+To keep the scaffold clean, the maker **refuses to overwrite** an existing
+controller — pick a different name, or use the update mode below.
+
+#### Updating an existing controller: `--set-footer`
+
+Re-run the maker on a controller you already generated to set its **layout
+footer region** — the `{footer}` area below the grid (results summary,
+pagination, page-size selector):
+
+```bash
+$ php bin/console make:gridview:crud --controller-class=PostController --set-footer
+```
+
+Passing `--set-footer` switches the maker into update mode: instead of
+scaffolding, it targets the existing controller and adds a `viewConfig()` method
+setting `options.display.layout.footer`. Omit the value to use the bundle
+default (`{resultsSummary} {pagination} {pageSize}`), or pass your own tokens:
+
+```bash
+$ php bin/console make:gridview:crud --controller-class=PostController --set-footer='{pagination}'
+```
+
+The edit is done in place with the same AST tooling Symfony's own makers use, so
+the rest of the file is untouched. One safety limit: automatic editing only
+applies when the controller doesn't already define an active `viewConfig()`. If
+it does, the maker leaves your hand-written config alone and prints the
+`'footer' => '...'` snippet to paste under `options.display.layout` yourself.
+
 ### Wiring the routes (host app owns them)
 
 > **Shortcut:** most apps don't need to write these actions by hand — extend
