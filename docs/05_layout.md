@@ -118,25 +118,34 @@ columns, use `{spacer}` when you want left/right grouping with elastic space bet
 
 ### Customising the layout at runtime
 
-Pass a `layout` key inside `setOptions()`:
+Pass a `layout` key inside `viewConfig()`, under `options.display`:
 
 ```php
-->setOptions([
-    'display' => [
-        'title'    => 'Customers',     // text rendered by {heading}
-        'layout'   => [
-            'shell'    => '{header} {dataview} {footer}',
-            'header'   => '{heading} {toolbar}',
-            'toolbar'  => '{addButton} {globalSearch} {columnVisibility}',
-            'footer'   => '{pagination}',
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'title'  => 'Customers',       // text rendered by {heading}
+                'layout' => [
+                    'shell'   => '{header} {dataview} {footer}',
+                    'header'  => '{heading} {toolbar}',
+                    'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+                    'footer'  => '{pagination}',
+                ],
+                'addLabel' => 'New Customer',
+            ],
+            'integration' => [
+                'addRoute' => 'customer_create',
+            ],
         ],
-        'addLabel' => 'New Customer',
-    ],
-    'integration' => [
-        'addRoute' => 'customer_create',
-    ],
-])
+    ];
+}
 ```
+
+> The array under `options` is exactly what the raw `GridviewBuilder` takes via
+> `setOptions()` — see [How your configuration reaches the grid](08_crud.md#how-your-configuration-reaches-the-grid).
+> Every example below shows the same `viewConfig()` form.
 
 ### Adding a title
 
@@ -146,15 +155,20 @@ block, so place it in whichever region you like — the default puts it at the s
 of `header` (`{heading} {toolbar}`):
 
 ```php
-->setOptions([
-    'display' => [
-        'title'  => 'Customers',
-        'layout' => [
-            'header'  => '{heading} {toolbar}',
-            'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'title'  => 'Customers',
+                'layout' => [
+                    'header'  => '{heading} {toolbar}',
+                    'toolbar' => '{addButton} {globalSearch} {columnVisibility}',
+                ],
+            ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 To change how the title looks, override the `heading` block template
@@ -165,16 +179,21 @@ To change how the title looks, override the `heading` block template
 Point a token to a custom Twig template:
 
 ```php
-->setOptions([
-    'display' => [
-        'layout' => [
-            'templates' => [
-                'header' => '@App/gridview/custom_header.html.twig',
-                'empty'  => '@App/gridview/no_results.html.twig',
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => [
+                    'templates' => [
+                        'header' => '@App/gridview/custom_header.html.twig',
+                        'empty'  => '@App/gridview/no_results.html.twig',
+                    ],
+                ],
             ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 ### Inline slots
@@ -182,16 +201,21 @@ Point a token to a custom Twig template:
 For small snippets that do not justify a separate template file, use **slots**:
 
 ```php
-->setOptions([
-    'display' => [
-        'layout' => [
-            'toolbar' => '{addButton} {recordCount}',
-            'slots'   => [
-                'recordCount' => '<span class="badge bg-secondary">{{ models|length }} records</span>',
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => [
+                    'toolbar' => '{addButton} {recordCount}',
+                    'slots'   => [
+                        'recordCount' => '<span class="badge bg-secondary">{{ models|length }} records</span>',
+                    ],
+                ],
             ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 Slot content is rendered as a Twig template with full access to the grid context
@@ -203,17 +227,22 @@ Every region wrapper applies the attributes returned by `gridview.regionAttr(nam
 Set them per region under `layout.attrs`:
 
 ```php
-->setOptions([
-    'display' => [
-        'layout' => [
-            'attrs' => [
-                'shell' => ['data-analytics' => 'customers-grid'],
-                'thead' => ['class' => 'sticky-top'],
-                'toolbar' => ['data-testid' => 'toolbar'],
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => [
+                    'attrs' => [
+                        'shell'   => ['data-analytics' => 'customers-grid'],
+                        'thead'   => ['class' => 'sticky-top'],
+                        'toolbar' => ['data-testid' => 'toolbar'],
+                    ],
+                ],
             ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 Any region or table-internal name is accepted (`shell`, `header`,
@@ -237,7 +266,11 @@ strategy template `sections/dataview/{renderer}.html.twig`. Three renderers ship
 | `card` | responsive CSS-grid of `<article class="gv-card">` boxes | `sections/dataview/card/{_item,empty}.html.twig` |
 
 ```php
-->setOptions(['display' => ['renderer' => ['default' => 'card']]])   // 'table' (default) | 'list' | 'card'
+protected function viewConfig(): array
+{
+    // 'table' (default) | 'list' | 'card'
+    return ['options' => ['display' => ['renderer' => ['default' => 'card']]]];
+}
 ```
 
 An unknown renderer falls back to `table`. To add your own, drop a
@@ -256,20 +289,25 @@ so the column count adapts to the container width (down to one column on mobile)
 Tune it per grid with the card entry in `renderer.map`:
 
 ```php
-->setOptions([
-    'display' => [
-        'renderer' => [
-            'default' => 'card',
-            'map' => [
-                'card' => [
-                    'min'        => '18rem',   // → --gv-card-min (min card width)
-                    'gap'        => '1rem',    // → --gv-card-gap
-                    'titleField' => 'name',    // column rendered as the card title (no label)
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'renderer' => [
+                    'default' => 'card',
+                    'map' => [
+                        'card' => [
+                            'min'        => '18rem',   // → --gv-card-min (min card width)
+                            'gap'        => '1rem',    // → --gv-card-gap
+                            'titleField' => 'name',    // column rendered as the card title (no label)
+                        ],
+                    ],
                 ],
             ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 #### Custom item template (full control over the layout)
@@ -281,14 +319,19 @@ point `renderer.map.card.template` (or `renderer.map.list.template`) at your own
 Twig template for the item:
 
 ```php
-->setOptions([
-    'display' => [
-        'renderer' => [
-            'default' => 'card',
-            'map' => ['card' => ['template' => 'gridview/category_card.html.twig']],
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'renderer' => [
+                    'default' => 'card',
+                    'map' => ['card' => ['template' => 'gridview/category_card.html.twig']],
+                ],
+            ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 The item template receives a stable context: **`gridview`**, **`row`**,
@@ -333,18 +376,23 @@ sort/filter/pagination; it defaults to `renderer.default`. A single map entry (o
 an empty map) gives a fixed single-view grid — the default, no switcher.
 
 ```php
-->setOptions([
-    'display' => [
-        'renderer' => [
-            'default' => 'table',   // initial view
-            'map' => [              // views offered by the switcher, in this order
-                'table' => [],
-                'card'  => [],
-                'list'  => [],
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'renderer' => [
+                    'default' => 'table',   // initial view
+                    'map' => [              // views offered by the switcher, in this order
+                        'table' => [],
+                        'card'  => [],
+                        'list'  => [],
+                    ],
+                ],
             ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 The layout stays a stable **superset**: switching only swaps the `{dataview}`
@@ -386,12 +434,17 @@ Two boolean options control whether `{thead}` and `{tfoot}` are included when th
 layout is computed automatically (i.e. when `dataview` is `null`):
 
 ```php
-->setOptions([
-    'display' => [
-        'showThead' => true,   // default
-        'showTfoot' => false,  // removes tfoot from the table
-    ],
-])
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'showThead' => true,   // default
+                'showTfoot' => false,  // removes tfoot from the table
+            ],
+        ],
+    ];
+}
 ```
 
 ---

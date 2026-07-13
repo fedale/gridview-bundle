@@ -65,14 +65,14 @@ extend `AbstractCrudGridController` instead — see
 
 ### 2. The index template
 
-`index` renders the template named by the `indexTemplate` config key, which
+`index` renders the template named by the `template.index` config key, which
 defaults to `gridview/with_sidebar.html.twig` (a host-app template). Point it at
 the bundle's bare layout, or your own, via [`viewConfig()`](08_crud.md#the-viewconfig-array):
 
 ```php
 protected function viewConfig(): array
 {
-    return ['indexTemplate' => '@FedaleGridview/gridview/index.html.twig'];
+    return ['template' => ['index' => '@FedaleGridview/gridview/index.html.twig']];
 }
 ```
 
@@ -81,10 +81,11 @@ Turbo-Frame request arrives, the bundle automatically switches to the internal
 `_grid.html.twig` partial so only the table content is reloaded.
 
 > **Lower-level API.** Under the hood these controllers drive a `GridviewBuilder`
-> obtained from `GridviewBuilderFactory`. You can use that builder directly from a
-> plain controller when you need a fully custom action — the
-> [Full Example](15_full-example.md#full-example) shows the manual `createGridviewBuilder()` chain,
-> and most sections below illustrate options through it.
+> obtained from `GridviewBuilderFactory`. This guide teaches the controller hooks
+> (`viewConfig()` / `dataConfig()` / `buildColumns()`) throughout; the raw builder is
+> shown once, in the [Full Example](15_full-example.md#full-example), for fully custom
+> actions with no abstract base. The two carry the same payload — see
+> [How your configuration reaches the grid](08_crud.md#how-your-configuration-reaches-the-grid).
 
 ---
 

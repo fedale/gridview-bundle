@@ -137,7 +137,10 @@ sibling `{resultsSummary}` renders the total-results text (e.g. "1-20 of 128"), 
 outside the table. To remove pagination entirely, omit the token from the footer layout:
 
 ```php
-->setOptions(['display' => ['layout' => ['footer' => '']]])
+protected function viewConfig(): array
+{
+    return ['options' => ['display' => ['layout' => ['footer' => '']]]];
+}
 ```
 
 ### Navigation UI
@@ -178,10 +181,16 @@ For long lists a `<select>` lets the user jump directly to any page. It is contr
 
 ```php
 // Disable the select for this grid
-->setOptions(['behavior' => ['pagination' => ['pageSelect' => false]]])
+protected function viewConfig(): array
+{
+    return ['options' => ['behavior' => ['pagination' => ['pageSelect' => false]]]];
+}
 
 // Or only show it from 20 pages up
-->setOptions(['behavior' => ['pagination' => ['pageSelectThreshold' => 20]]])
+protected function viewConfig(): array
+{
+    return ['options' => ['behavior' => ['pagination' => ['pageSelectThreshold' => 20]]]];
+}
 ```
 
 Each `<option>` value is the fully-built page URL, so navigation needs no client-side query

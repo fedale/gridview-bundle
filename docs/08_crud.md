@@ -260,16 +260,26 @@ by one shared generic controller, gridview keeps the routes on your own
 controller subclass so per-action overrides and security stay trivially yours.
 
 The bundle ships the services; the app provides thin actions that delegate to
-`GridCrudHandlerInterface`. Build the grid once (shared by index + form + delete) and set
-`routeName` so sort/pagination/filter links stay pinned to the list route even while a CRUD POST is
-rendering the refreshed grid:
+`GridCrudHandlerInterface`. `AbstractCrudGridController` builds the grid once (shared
+by index + form + delete) and **auto-wires** `integration.routeName` to the list route
+(so sort/pagination/filter links stay pinned even while a CRUD POST re-renders the grid),
+along with the CRUD URLs and the export menu — a subclass sets none of these. You
+typically only customise the layout, through `viewConfig()`:
 
 ```php
-->setOptions([
-    'routeName' => 'gridview_user_index',
-    'crud'   => ['title' => 'User', 'addUrl' => $this->generateUrl('gridview_user_create')],
-    'layout' => ['shell' => '{toolbar} {header} {dataview} {footer}', 'toolbar' => '{addButton}'],
-])
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => [
+                    'shell'   => '{toolbar} {header} {dataview} {footer}',
+                    'toolbar' => '{addButton}',
+                ],
+            ],
+        ],
+    ];
+}
 ```
 
 Use semantic routes — `new` / `update/{id}` / `clone/{id}` — each delegating to one private handler
@@ -438,15 +448,21 @@ the EM) when the row is still referenced elsewhere — no 500.
 ### Bulk actions (selection + batch update)
 
 With a `checkbox` column the `gridview-selection` controller tracks the selection across pages
-(sessionStorage, with an all-records mode). Add the `{bulkBar}` layout token and the bulk URLs to
-`crud` to get a bulk action bar (count + buttons) that opens the CRUD modal with the selected ids:
+(sessionStorage, with an all-records mode). The bulk delete/update URLs are **auto-wired** by
+`AbstractCrudGridController`, so you only add the `{bulkBar}` layout token to get a bulk action bar
+(count + buttons) that opens the CRUD modal with the selected ids:
 
 ```php
-'crud' => [
-    'bulkDeleteUrl' => $this->generateUrl('gridview_user_bulk_delete'),
-    'bulkUpdateUrl' => $this->generateUrl('gridview_user_bulk_update'),
-],
-'layout' => ['shell' => '{header} {bulkBar} {dataview} {footer}'],
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => ['shell' => '{header} {bulkBar} {dataview} {footer}'],
+            ],
+        ],
+    ];
+}
 ```
 
 > Insert `{bulkBar}` into the **existing** shell tree — do not add `{toolbar}` alongside `{header}`.
@@ -456,18 +472,22 @@ With a `checkbox` column the `gridview-selection` controller tracks the selectio
 
 **Choosing which bulk buttons show** — by default both built-ins (`update`, `delete`) render when
 their auto-derived URL exists. To restrict the set, or add your own action, use the `bulkActions`
-map under `crud` (a `viewConfig().options.crud` here is deep-merged over the auto-derived URLs, so
-you set only this key — the URLs/title are preserved):
+map under `integration.crud` (`viewConfig().options.integration.crud` is deep-merged over the
+auto-derived URLs, so you set only this key — the URLs/title are preserved):
 
 ```php
-'crud' => [
-    'bulkActions' => [
-        'delete' => true,                  // built-in: url + label + variant auto
-        // 'update' omitted → not rendered  (keeps only Delete)
-        'archive' => [                      // custom action
-            'url'     => $this->generateUrl('gridview_user_bulk_archive'),
-            'label'   => 'bulk.archive',    // GridviewBundle translation key
-            'variant' => 'danger',          // '' (base) | 'primary' | 'danger'
+'options' => [
+    'integration' => [
+        'crud' => [
+            'bulkActions' => [
+                'delete' => true,                  // built-in: url + label + variant auto
+                // 'update' omitted → not rendered  (keeps only Delete)
+                'archive' => [                      // custom action
+                    'url'     => $this->generateUrl('gridview_user_bulk_archive'),
+                    'label'   => 'bulk.archive',    // GridviewBundle translation key
+                    'variant' => 'danger',          // '' (base) | 'primary' | 'danger'
+                ],
+            ],
         ],
     ],
 ],
@@ -540,31 +560,10 @@ submits it via fetch (OK button or Enter), and swaps in the new value with a ✓
 ['attribute' => 'type',   'editable' => true, 'type' => 'relation', 'control' => ['options' => [...]]],
 ```
 
-Set the base URL in `crud.inlineUrl`; the controller appends `/{id}/{field}`. One endpoint serves
-both GET (editor) and POST (save), and **must only edit columns flagged editable**:
-
-```php
-'crud' => ['inlineUrl' => $this->generateUrl('gridview_user_index') . '/inline'],
-
-#[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'],
-        requirements: ['id' => '\d+', 'field' => '[a-zA-Z_]+'])]
-public function inline(Request $request, int $id, string $field): Response
-{
-    $entity = $repo->find($id) ?? throw $this->createNotFoundException();
-    $column = null;
-    foreach ($this->buildGridview()->getColumns() as $c) {
-        if ($c->getAttribute() === $field && $c->isEditable()) { $column = $c; break; }
-    }
-    if ($column === null) { throw $this->createNotFoundException(); }   // editable-only
-
-    $action = $this->generateUrl('gridview_user_inline', ['id' => $id, 'field' => $field]);
-    if ($request->isMethod('GET')) {
-        return new Response($crud->renderInlineEditor(User::class, $column, $entity, $action));
-    }
-    $r = $crud->saveInline(User::class, $column, $entity, $request, $action); // ['ok','body']
-    return new Response($r['body'], $r['ok'] ? 200 : 422);
-}
-```
+There's no route or config to add: `AbstractCrudGridController` already ships the
+`/inline/{id}/{field}` endpoint and auto-wires `integration.crud.inlineUrl` to it.
+One endpoint serves both GET (the editor) and POST (the save), and edits **only**
+columns flagged `editable` — marking the columns (above) is all a subclass does.
 
 The new cell display after save is produced by the handler's value stringifier (scalar / DateTime /
 `getName()` / collection-join), so relations show their label.
@@ -634,6 +633,25 @@ subclass needs **no constructor** unless it has extra dependencies of its own.
 | `beforeSave(FormInterface, string $mode): void` | no (CRUD) | Hook before persist (e.g. password hashing) |
 | `onClone(object $clone): void` | no (CRUD) | Extra mutation of a clone (unique fields are cleared automatically) |
 
+### How your configuration reaches the grid
+
+Whichever base you extend, the controller feeds your hooks into a `GridviewBuilder`.
+Each hook maps one-to-one onto a builder method, so the two styles hold the **same**
+payload:
+
+| In a controller (hook) | Shape you return | Builder method it feeds | Builder shape |
+|------------------------|------------------|-------------------------|---------------|
+| `getDataClass()` / `viewConfig()['id']` | FQCN / id string | `setId()` | id string |
+| `buildColumns()` | list of column specs | `setColumns()` | same list |
+| `dataConfig()` | `['model', 'alias', 'pagination', 'searchFields', 'sort']` | `setDataProvider()` | same array |
+| `viewConfig()['options']` | `['display' => …, 'behavior' => …, 'integration' => …]` | `setOptions()` | **identical** array |
+| `viewConfig()['attributes']` | attributes bag | `setAttributes()` | same array |
+
+The value of `viewConfig()`'s `options` key is exactly what `setOptions()` takes.
+Moving a snippet between a controller and a raw builder ([Full Example](15_full-example.md#full-example))
+only means adding or removing that outer `options` wrapper — the grouped
+`display` / `behavior` / `integration` payload is the same on both sides.
+
 ### The `viewConfig()` array
 
 `viewConfig()` returns only the keys you want to change; they are merged over the
@@ -641,21 +659,30 @@ defaults. The live-uniqueness whitelist (`exists`) and the clear-on-clone fields
 are **derived automatically** from the columns flagged `control.unique` — no extra
 config needed.
 
+Keys are **nested**, and `config()` reads them by dotted path (`template.index`,
+`labels.heading`, …) — a flat top-level key the code never reads (e.g.
+`indexTemplate`) is silently ignored. A `viewConfig()` need only list the keys it
+changes; associative sub-arrays are deep-merged, so setting one sub-key keeps the
+rest of its group.
+
 | Key | Default | Applies to | Description |
 |-----|---------|------------|-------------|
 | `id` | entity short name (`User`→`user`) | both | Grid id + YAML config lookup |
-| `indexTemplate` | `gridview/with_sidebar.html.twig` | both | Template rendered by `index` |
-| `exportFilename` | `null` → falls back to `id` | both | Export file name (no extension) |
-| `exportFormats` | `null` → all registered | both | Allow-list di key exporter (es. `['csv','pdf']`); fissa anche l'ordine del menu |
+| `template.index` | `gridview/with_sidebar.html.twig` | both | Template rendered by `index` |
+| `export.filename` | `null` → falls back to `id` | both | Export file name (no extension) |
+| `export.formats` | `null` → all registered | both | Allow-list of exporter keys (e.g. `['csv', 'pdf']`); also fixes the menu order |
 | `attributes` | `['class' => 'table']` | both | Table-level HTML attributes |
-| `options` | `[]` | both | Extra builder options (layout, `reorderColumns`, …) |
-| `title` | `''` | CRUD | Modal / page title |
-| `mode` | `'modal'` | CRUD | `'modal'` \| `'page'` \| `'custom'` |
-| `formView` | `null` | CRUD | Custom form layout (null = auto) |
-| `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
-| `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
-| `filterFormName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
-| `actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](02_columns.md#default-action-buttons-auto-wired)) |
+| `options` | `[]` | both | Builder options, grouped `display` / `behavior` / `integration` (see the mapping table above) |
+| `labels.heading` | `null` → `{id}.label` | CRUD | Modal / page title (becomes `display.title`) |
+| `labels.add` | `null` → `{id}.add` | CRUD | Label of the add toolbar button |
+| `labels.edit` | `null` → `labels.heading` | CRUD | Edit form title |
+| `form.mode` | `null` → `'modal'` | CRUD | `'modal'` \| `'page'` \| `'custom'` |
+| `form.view` | `null` | CRUD | Custom form layout (null = auto) |
+| `form.theme` | gridview form theme | CRUD | Form theme template |
+| `form.actions` | inline | CRUD | Form action buttons: `placement` / `layout` / `buttons` |
+| `form.filterName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
+| `template.page` | `null` | CRUD | Full-page wrapper for page/custom mode |
+| `options.actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](02_columns.md#default-action-buttons-auto-wired)) |
 
 ### Read-only example
 
@@ -697,10 +724,9 @@ class UserController extends AbstractCrudGridController
     protected function viewConfig(): array
     {
         return [
-            'title'    => 'User',
-            'addLabel' => 'New user',
-            'formView' => 'gridview/user/_form.html.twig',
-            'options'  => ['display' => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']]],
+            'labels'  => ['heading' => 'User', 'add' => 'New user'],
+            'form'    => ['view' => 'gridview/user/_form.html.twig'],
+            'options' => ['display' => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']]],
         ];
     }
 

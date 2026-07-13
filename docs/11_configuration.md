@@ -156,7 +156,11 @@ grid-only keys never leak in. See [DetailView → YAML configuration](09_detail-
 ## Multiple grids with filters on the same page
 
 When you render two grids that both have column filters, each must use a unique `formName`
-so their filter query parameters do not collide:
+so their filter query parameters do not collide. Two grids in one action is exactly the
+case for the raw `GridviewBuilder` — a controller's `viewConfig()` hooks describe a single
+grid, so here you build each one by hand (the array passed to `setOptions()` is the same
+one a controller would nest under `viewConfig()['options']`, see
+[How your configuration reaches the grid](08_crud.md#how-your-configuration-reaches-the-grid)):
 
 ```php
 // First grid
