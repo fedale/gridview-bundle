@@ -3,8 +3,9 @@
 {% block title %}{{ 'grid.index_title'|trans({}, 'GridviewBundle') }}{% endblock %}
 
 {% block body %}
-<h1>{{ 'grid.index_title'|trans({}, 'GridviewBundle') }}</h1>
+{# The grid's own {header}/{heading} renders the title (options.display.title);
+   no separate page <h1> here, to avoid a duplicate heading. #}
 {% include '@FedaleGridview/gridview/_grid.html.twig'
-   with {'gridview': gridview, 'columns': columns, 'models': models,
-         'pagination': pagination, 'form': form is defined ? form : null} %}
+with {'gridview': gridview, 'columns': columns, 'models': models,
+'pagination': pagination, 'form': form is defined ? form : null} %}
 {% endblock %}
