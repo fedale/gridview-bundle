@@ -261,13 +261,18 @@ final class DoctrineTypeMapper
 
     /**
      * The `buildColumns()`-ready array: one entry per plan (only the non-null
-     * keys are emitted), plus the trailing action column.
+     * keys are emitted), plus the trailing action column. When `$withCheckbox`
+     * is set, a leading structural checkbox column enables row selection.
      *
      * @param list<array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}> $plans
      */
-    public function columnsArrayFor(array $plans): array
+    public function columnsArrayFor(array $plans, bool $withCheckbox = false): array
     {
         $columns = [];
+
+        if ($withCheckbox) {
+            $columns[] = ['type' => 'checkbox'];
+        }
 
         foreach ($plans as $plan) {
             $column = ['attribute' => $plan['attribute'], 'label' => $plan['label']];
