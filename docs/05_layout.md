@@ -88,6 +88,10 @@ are internals of the table strategy, not top-level tokens.
 | `{export}` | `sections/export.html.twig` | Export menu (requires `options.export = { url, formats }`; auto-wired in CRUD controllers) |
 | `{spacer}` | `sections/spacer.html.twig` | Elastic gap — see [Spacing tokens](#spacing-tokens) |
 
+![Layout tokens](media/gridview_layout_tokens.png)
+
+*A possible representation of how the tokens are arranged.*
+
 ### Spacing tokens
 
 Two mechanisms control how the controls in a layout section share the horizontal space.
