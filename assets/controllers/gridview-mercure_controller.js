@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import i18n from '../i18n.js';
 
 /**
  * Real-time grid updates via Mercure (SSE).
@@ -66,7 +67,7 @@ export default class extends Controller {
             gv.prepend(banner);
         }
         banner.textContent = gv.dataset.gvRealtimeMessage
-            ?? 'I dati sono stati aggiornati da un altro utente.';
+            ?? i18n.t('realtime.updated');
         banner.hidden = false;
 
         clearTimeout(this._noticeTimer);

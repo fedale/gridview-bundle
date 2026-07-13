@@ -38,6 +38,9 @@ selection.menu: "Menu selezione"
 selection.select_all: "Seleziona tutti"
 selection.select_visible: "Seleziona visibili"
 selection.deselect: "Deseleziona"
+selection.invert: "Inverti"
+selection.n_selected: "%count% selezionato/i"
+selection.all: "Tutti"
 selection.save: "Salva selezione…"
 selection.save_title: "Salva selezione"
 selection.label: "selezione"
@@ -46,6 +49,7 @@ selection.none_to_save: "Nessuna riga selezionata da salvare."
 selection.too_large: "Selezione troppo grande da salvare (max 5000)."
 
 field.name: "Nome"
+field.value_in_use: "Valore già in uso."
 
 crud.cancel: "Annulla"
 crud.confirm: "Conferma"
@@ -65,6 +69,11 @@ inline.saved: "Salvato"
 
 filter.reset: "Reset filtri"
 filter.clear: "Rimuovi filtro"
+filter.query_too_long: "La query URL supera il limite consentito (%size% / %limit% byte)."
+filter.reduce_fields: "Riduci la selezione in: %fields%."
+filter.reduce_generic: "Riduci il numero di valori selezionati nei filtri e riprova."
+filter.field_values: '"%name%" (%count% valori)'
+filter.comm_error: "Si è verificato un errore di comunicazione con il server. Riprova."
 search.placeholder: "Cerca…"
 
 grid.index_title: "Elenco"
@@ -72,6 +81,11 @@ grid.results: "%first%-%last% di %count% risultati"
 grid.results.filtered: "%first%-%last% di %count% risultati (filtrati)"
 grid.results.empty: "0 risultati"
 grid.restriction: "Non stai visualizzando tutti i record — alcuni sono nascosti dai tuoi permessi di accesso."
+
+realtime.updated: "I dati sono stati aggiornati da un altro utente."
+
+responsive.show_details: "Mostra dettagli"
+grouping.toggle: "Mostra/nascondi record correlati"
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.

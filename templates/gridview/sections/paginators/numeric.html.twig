@@ -3,23 +3,23 @@
 {% set _currentPage  = gridview.urlState.page %}
 {% set turboAction   = gridview.options.behavior.useTurbo ? 'advance' : null %}
 
-{# Quante pagine numeriche mostrare per lato rispetto a quella corrente. #}
+{# How many numeric pages to show on each side of the current one. #}
 {% set _window       = 2 %}
 
-{# Select "vai a pagina": on/off e da quante pagine in su mostrarla. #}
+{# "Go to page" select: on/off and from how many pages up to show it. #}
 {% set _showSelect   = gridview.options.behavior.pagination.pageSelect %}
 {% set _selectAfter  = gridview.options.behavior.pagination.pageSelectThreshold %}
 
 {% if _lastPage > 1 %}
-    {# Normalizza la pagina corrente nell'intervallo valido. #}
+    {# Clamp the current page to the valid range. #}
     {% set _currentPage = max(1, min(_currentPage, _lastPage)) %}
 
-    {# Finestra scorrevole di pagine numeriche attorno alla corrente. #}
+    {# Sliding window of numeric pages around the current one. #}
     {% set _maxButtons = _window * 2 + 1 %}
     {% set _start      = max(1, _currentPage - _window) %}
     {% set _end        = min(_lastPage, _currentPage + _window) %}
 
-    {# Mantiene un numero costante di bottoni anche vicino agli estremi. #}
+    {# Keep a constant number of buttons even near the edges. #}
     {% if _end - _start + 1 < _maxButtons %}
         {% if _start == 1 %}
             {% set _end = min(_lastPage, _start + _maxButtons - 1) %}
@@ -37,7 +37,7 @@
     {% set _pDisabled = gridview.cls('pagination.disabled') %}
     <nav class="gv-pagination-nav" aria-label="{{ 'pagination.aria'|trans({}, 'GridviewBundle') }}">
         <ul class="{{ gridview.cls('pagination') }}">
-            {# Prima pagina #}
+            {# First page #}
             <li class="{{ _pItem }} gv-page-first{{ _currentPage <= 1 ? ' ' ~ _pDisabled : '' }}">
                 <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(1)) }}"
@@ -46,7 +46,7 @@
                    aria-label="{{ 'pagination.first'|trans({}, 'GridviewBundle') }}">&laquo;</a>
             </li>
 
-            {# Pagina precedente #}
+            {# Previous page #}
             <li class="{{ _pItem }} gv-page-prev{{ _currentPage <= 1 ? ' ' ~ _pDisabled : '' }}">
                 <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_currentPage - 1)) }}"
@@ -55,14 +55,14 @@
                    aria-label="{{ 'pagination.previous'|trans({}, 'GridviewBundle') }}">&lsaquo;</a>
             </li>
 
-            {# Ellissi iniziale #}
+            {# Leading ellipsis #}
             {% if _start > 1 %}
                 <li class="{{ _pItem }} gv-page-ellipsis {{ _pDisabled }}">
                     <span class="{{ _pLink }}">&hellip;</span>
                 </li>
             {% endif %}
 
-            {# Pagine numeriche #}
+            {# Numeric pages #}
             {% for i in _start.._end %}
                 <li class="{{ _pItem }} gv-page-number{{ i == _currentPage ? ' ' ~ _pActive : '' }}">
                     <a class="{{ _pLink }}"
@@ -72,14 +72,14 @@
                 </li>
             {% endfor %}
 
-            {# Ellissi finale #}
+            {# Trailing ellipsis #}
             {% if _end < _lastPage %}
                 <li class="{{ _pItem }} gv-page-ellipsis {{ _pDisabled }}">
                     <span class="{{ _pLink }}">&hellip;</span>
                 </li>
             {% endif %}
 
-            {# Pagina successiva #}
+            {# Next page #}
             <li class="{{ _pItem }} gv-page-next{{ _currentPage >= _lastPage ? ' ' ~ _pDisabled : '' }}">
                 <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_currentPage + 1)) }}"
@@ -88,7 +88,7 @@
                    aria-label="{{ 'pagination.next'|trans({}, 'GridviewBundle') }}">&rsaquo;</a>
             </li>
 
-            {# Ultima pagina #}
+            {# Last page #}
             <li class="{{ _pItem }} gv-page-last{{ _currentPage >= _lastPage ? ' ' ~ _pDisabled : '' }}">
                 <a class="{{ _pLink }}"
                    href="{{ path(_currentRoute, gridview.urlState.withPage(_lastPage)) }}"
@@ -97,7 +97,7 @@
                    aria-label="{{ 'pagination.last'|trans({}, 'GridviewBundle') }}">&raquo;</a>
             </li>
 
-            {# Select "vai a pagina" per liste molto lunghe #}
+            {# "Go to page" select for very long lists #}
             {% if _showSelect and _lastPage >= _selectAfter %}
                 <li class="{{ _pItem }} gv-page-jump"
                     data-controller="gridview-page-jump"

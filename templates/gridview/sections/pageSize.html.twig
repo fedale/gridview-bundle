@@ -1,7 +1,7 @@
-{# Selettore della dimensione-pagina: renderizzato solo quando il DataProvider
-   dichiara `pagination.pageSizeOptions`. Riusa il controller Stimulus generico
-   gridview-page-jump: ogni <option> ha come valore l'URL completo (con `per-page`
-   aggiornato e pagina azzerata), così non serve ricostruire la query lato JS. #}
+{# Page-size selector: rendered only when the DataProvider declares
+   `pagination.pageSizeOptions`. Reuses the generic gridview-page-jump Stimulus
+   controller: each <option>'s value is the full URL (with `per-page` updated and
+   the page reset), so there's no need to rebuild the query on the JS side. #}
 {% if pagination.pageSizeOptions is not empty %}
     {% set _currentRoute = app.request.attributes.get('_route') %}
     {% set turboAction   = gridview.options.behavior.useTurbo %}

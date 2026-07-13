@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import i18n from '../i18n.js';
 
 export default class extends Controller {
     static values = { delay: { type: Number, default: 300 } };
@@ -224,11 +225,11 @@ export default class extends Controller {
                 const heavy = Object.entries(fieldCounts)
                     .filter(([, n]) => n > 5)
                     .sort(([, a], [, b]) => b - a)
-                    .map(([name, n]) => `"${name}" (${n} valori)`);
-                let msg = `La query URL supera il limite consentito (${qs.length} / ${limit} byte).`;
-                msg += heavy.length > 0
-                    ? ` Riduci la selezione in: ${heavy.join(', ')}.`
-                    : ' Riduci il numero di valori selezionati nei filtri e riprova.';
+                    .map(([name, n]) => i18n.t('filter.field_values', { name, count: n }));
+                let msg = i18n.t('filter.query_too_long', { size: qs.length, limit });
+                msg += ' ' + (heavy.length > 0
+                    ? i18n.t('filter.reduce_fields', { fields: heavy.join(', ') })
+                    : i18n.t('filter.reduce_generic'));
                 this._showError(msg);
                 return;
             }
@@ -267,7 +268,7 @@ export default class extends Controller {
         if (!gv) return;
         const msg = message
             ?? gv.dataset.gvErrorMessage
-            ?? 'Si è verificato un errore di comunicazione con il server. Riprova.';
+            ?? i18n.t('filter.comm_error');
 
         let banner = gv.querySelector(':scope > .gv-error-banner');
         if (!banner) {

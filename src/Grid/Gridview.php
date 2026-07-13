@@ -783,7 +783,7 @@ class Gridview implements GridviewInterface
         // layout. Additive and idempotent — a token already present (with or
         // without an inline width) is left untouched, and each of these collapses
         // to nothing when not applicable, so the toolbar stays stable across a
-        // runtime view switch (see docs/05_layout.md "Dinamica dei token").
+        // runtime view switch (see docs/05_layout.md "Token dynamics per renderer").
         if ($section === 'toolbar' && \count($this->getRenderers()) > 1) {
             foreach (['viewSwitcher', 'sortBar', 'filterBar'] as $token) {
                 if (str_contains($layout, '{' . $token . '}') || str_contains($layout, '{' . $token . ' ')) {

@@ -1,8 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 
-// Salta direttamente alla pagina selezionata nella <select>.
-// Il valore di ogni <option> è l'URL della pagina, così non serve
-// ricostruire la query string lato JS.
+// Jump directly to the page selected in the <select>.
+// Each <option>'s value is the page URL, so there's no need to
+// rebuild the query string on the JS side.
 export default class extends Controller {
     static values = { turbo: Boolean };
 

@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import i18n from '../i18n.js';
 
 export default class extends Controller {
     static values = {
@@ -155,9 +156,9 @@ export default class extends Controller {
             const actions = document.createElement('div');
             actions.className = 'gv-multi-actions';
             [
-                ['Seleziona visibili', () => this._selectVisible(select, trigger)],
-                ['Deseleziona',        () => this._setAll(false, select, trigger)],
-                ['Inverti',            () => this._invertAll(select, trigger)],
+                [i18n.t('selection.select_visible'), () => this._selectVisible(select, trigger)],
+                [i18n.t('selection.deselect'),       () => this._setAll(false, select, trigger)],
+                [i18n.t('selection.invert'),         () => this._invertAll(select, trigger)],
             ].forEach(([label, handler]) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -275,7 +276,7 @@ export default class extends Controller {
 
     _updateLabel(trigger, select) {
         const selected = [...select.options].filter(o => o.selected && o.value);
-        const label = selected.length > 0 ? `${selected.length} selezionato/i` : 'Tutti';
+        const label = selected.length > 0 ? i18n.t('selection.n_selected', { count: selected.length }) : i18n.t('selection.all');
         // Update text node only, preserving the caret span
         const caret = trigger.querySelector('.gv-multi-caret');
         trigger.textContent = label;
