@@ -34,7 +34,8 @@
         "symfony/twig-bundle": "^6.4 || ^7.0 || ^8.0",
         "twig/twig": "^3.0",
         "phpstan/phpstan": "^2.0",
-        "symfony/intl": "^8.1"
+        "symfony/intl": "^8.1",
+        "friendsofphp/php-cs-fixer": "^3.0"
     },
     "suggest": {
         "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",
@@ -54,7 +55,9 @@
     },
     "scripts": {
         "phpstan": "phpstan analyse",
-        "test": "phpunit"
+        "test": "phpunit",
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix"
     },
     "extra": {
         "branch-alias": {
