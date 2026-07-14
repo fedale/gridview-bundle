@@ -32,7 +32,7 @@ class EntityDataProviderDefaultsTest extends TestCase
             $this->createMock(EventDispatcherInterface::class),
             $em,
             $requestStack,
-            new RowSerializerFactory()
+            new RowSerializerFactory($em)
         );
     }
 

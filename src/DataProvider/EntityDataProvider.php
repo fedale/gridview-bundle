@@ -39,6 +39,15 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
 
     private ?ChildRowResolverInterface $childResolver = null;
 
+    /**
+     * To-one associations to fetch-join into the fallback QueryBuilder, so the
+     * columns that read them render without a lazy load per row (N+1). Only
+     * applies when the repository has no search() of its own.
+     *
+     * @var string[]
+     */
+    private array $eagerRelations = [];
+
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private EntityManagerInterface $entityManager,
@@ -63,6 +72,17 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
     public function setSearchForm(SearchFormInterface $searchForm): void
     {
         $this->searchForm = $searchForm;
+    }
+
+    /**
+     * Declare to-one associations to fetch-join, so columns that read them are
+     * hydrated in the list query instead of triggering one lazy load per row.
+     *
+     * @param string[] $relations root-level association names (e.g. 'author')
+     */
+    public function setEagerRelations(array $relations): void
+    {
+        $this->eagerRelations = $relations;
     }
 
     private function populateParams(): void
@@ -123,12 +143,38 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
 
         $qb = $repository->createQueryBuilder($this->alias);
 
+        $this->applyEagerRelations($qb);
+
         if ($this->searchFields !== [] && $this->searchForm !== null) {
             $this->filterPath = 'searchFields';
             $this->searchForm->applyFilters($qb, $this->params, $this->searchFields);
         }
 
         $this->queryBuilder = $qb;
+    }
+
+    /**
+     * Fetch-join the declared to-one associations onto the list query. Each
+     * relation is left-joined and added to the SELECT so it is hydrated with
+     * the parent rows; an alias already present in the query is skipped, so
+     * re-declaring a relation the query already joins is harmless.
+     */
+    private function applyEagerRelations(QueryBuilder $qb): void
+    {
+        if ($this->eagerRelations === []) {
+            return;
+        }
+
+        $existing = $qb->getAllAliases();
+        foreach ($this->eagerRelations as $relation) {
+            $joinAlias = 'gv_' . str_replace('.', '_', $relation);
+            if (\in_array($joinAlias, $existing, true)) {
+                continue;
+            }
+
+            $qb->leftJoin($this->alias . '.' . $relation, $joinAlias)->addSelect($joinAlias);
+            $existing[] = $joinAlias;
+        }
     }
 
     public function applyGlobalSearch(array $fields, string $term): void

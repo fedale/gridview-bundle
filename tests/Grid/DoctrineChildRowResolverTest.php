@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Tests\Grid;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\ObjectRepository;
 use Fedale\GridviewBundle\Grid\DoctrineChildRowResolver;
 use Fedale\GridviewBundle\Grid\GroupingConfig;
@@ -28,11 +29,15 @@ class DoctrineChildRowResolverTest extends TestCase
         $metadata = $this->createMock(ClassMetadata::class);
         $metadata->method('getAssociationNames')->willReturn([]);
 
+        $metadataFactory = $this->createMock(ClassMetadataFactory::class);
+        $metadataFactory->method('isTransient')->willReturn(true);
+
         $em = $this->createMock(EntityManagerInterface::class);
         $em->method('getRepository')->willReturn($repository);
         $em->method('getClassMetadata')->willReturn($metadata);
+        $em->method('getMetadataFactory')->willReturn($metadataFactory);
 
-        return new DoctrineChildRowResolver($em, new RowSerializerFactory());
+        return new DoctrineChildRowResolver($em, new RowSerializerFactory($em));
     }
 
     public function testResolveForParentReturnsOneRowPerRelatedRecord(): void

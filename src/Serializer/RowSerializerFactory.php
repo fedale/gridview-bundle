@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Serializer;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -15,6 +16,11 @@ use Symfony\Component\Serializer\Serializer;
  */
 class RowSerializerFactory
 {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+    ) {
+    }
+
     /**
      * @param string[] $ignoredAttributes entity attributes to skip when normalizing
      */
@@ -38,7 +44,7 @@ class RowSerializerFactory
             // The name converter keeps serialized row keys aligned with the
             // entity's field names, so a column configured with a Doctrine field
             // whose getter carries an `is`/`has`/`can` prefix still resolves.
-            new LazyAwareObjectNormalizer(null, new AccessorPrefixNameConverter(), null, null, null, null, $defaultContext),
+            new LazyAwareObjectNormalizer($this->entityManager, null, new AccessorPrefixNameConverter(), null, null, null, null, $defaultContext),
         ];
 
         return new Serializer($normalizers);

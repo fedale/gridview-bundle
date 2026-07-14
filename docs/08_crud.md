@@ -693,7 +693,7 @@ payload:
 |------------------------|------------------|-------------------------|---------------|
 | `getDataClass()` / `viewConfig()['id']` | FQCN / id string | `setId()` | id string |
 | `buildColumns()` | list of column specs | `setColumns()` | same list |
-| `dataConfig()` | `['model', 'alias', 'pagination', 'searchFields', 'sort']` | `setDataProvider()` | same array |
+| `dataConfig()` | `['model', 'alias', 'pagination', 'searchFields', 'sort', 'eager']` | `setDataProvider()` | same array |
 | `viewConfig()['options']` | `['display' => …, 'behavior' => …, 'integration' => …]` | `setOptions()` | **identical** array |
 | `viewConfig()['attributes']` | attributes bag | `setAttributes()` | same array |
 
@@ -701,6 +701,30 @@ The value of `viewConfig()`'s `options` key is exactly what `setOptions()` takes
 Moving a snippet between a controller and a raw builder ([Full Example](15_full-example.md#full-example))
 only means adding or removing that outer `options` wrapper — the grouped
 `display` / `behavior` / `integration` payload is the same on both sides.
+
+### Eager-loading relations (`eager`)
+
+Rows are normalized to arrays without ever triggering Doctrine lazy-loading: an
+association that the list query didn't fetch is serialized as `null`, not loaded.
+So when a column reads a relation (e.g. `author` or `category`), fetch-join it up
+front — otherwise the column is empty, and relying on lazy-loading would issue one
+query per row (a classic N+1).
+
+The `eager` key lists the to-one associations to fetch-join into the list query:
+
+    protected function dataConfig(): array
+    {
+        return [
+            'model' => Post::class,
+            'eager' => ['author', 'category'],
+            // ...
+        ];
+    }
+
+Each name is left-joined and added to the SELECT, so the relation is hydrated with
+its parent row in the **same** query. Names are root-level associations of the grid
+entity. This applies to the built-in query builder; a repository that provides its
+own `search()` owns its joins instead (add the `leftJoin()`/`addSelect()` there).
 
 ### The `viewConfig()` array
 

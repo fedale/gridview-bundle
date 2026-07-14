@@ -458,6 +458,9 @@ class Gridview implements GridviewInterface
         if (!empty($this->dataProviderOptions['searchFields'])) {
             $this->dataProvider->setSearchFields($this->dataProviderOptions['searchFields']);
         }
+        if (!empty($this->dataProviderOptions['eager']) && method_exists($this->dataProvider, 'setEagerRelations')) {
+            $this->dataProvider->setEagerRelations($this->dataProviderOptions['eager']);
+        }
 
         $this->dataProvider->prepareModels($this->dataProviderOptions['model']);
 
