@@ -35,11 +35,12 @@ abstract class AbstractCrudGridController extends AbstractGridController
      *  - labels.add:     "add" toolbar button + new/clone page title (null → `{id}.add`)
      *  - labels.edit:    edit-form page title (null → fall back to `labels.heading`)
      *  - form.mode:      'modal' | 'page' | 'custom' — how/where the form is shown
-     *  - form.theme:     Symfony form theme(s) for the CRUD form. Defaults to the
-     *                    bundle's own gv_form_theme.html.twig (gv-* row/label/control
-     *                    hooks, no CSS-framework dependency); override in a
-     *                    controller's viewConfig() — e.g. ['bootstrap_5_layout.html.twig']
-     *                    — there is no YAML path for this key
+     *  - form.theme:     Symfony form theme(s) for the CRUD form. PHP viewConfig
+     *                    wins, else YAML `behavior.formTheme`, else the bundle's
+     *                    own gv_form_theme.html.twig (gv-* row/label/control hooks,
+     *                    no CSS-framework dependency). Override per controller — e.g.
+     *                    ['bootstrap_5_layout.html.twig'] — or once for all grids in
+     *                    YAML (see resolvedFormTheme())
      *  - form.view:      custom form layout; null = automatic rendering
      *  - form.actions:   header/inline action buttons in a token layout. See
      *                    resolveFormActions(). `placement` 'header' drops the
@@ -64,7 +65,9 @@ abstract class AbstractCrudGridController extends AbstractGridController
                 // then the built-in 'modal' default — see actionLayout() for the
                 // same PHP-then-YAML-then-built-in resolution pattern.
                 'mode'       => null,
-                'theme'      => '@FedaleGridview/form/gv_form_theme.html.twig',
+                // null falls through to YAML `behavior.formTheme` in
+                // resolvedFormTheme(), then the built-in gv_form_theme.
+                'theme'      => null,
                 'view'       => null,
                 'actions'    => ['placement' => 'inline', 'layout' => null, 'buttons' => null],
                 'filterName' => 'fedaleForm',
@@ -354,6 +357,40 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return \is_string($yaml) && $yaml !== '' ? $yaml : 'modal';
     }
 
+    /**
+     * Resolved CRUD form theme(s), a template name or a list of them. Priority,
+     * most specific first: PHP `form.theme`, then YAML `behavior.formTheme`, then
+     * the bundle's built-in gv_form_theme. At either level `false` is an explicit
+     * opt-out — it returns null so the form falls through to the app's global
+     * `twig.form_themes` — while null/unset means "inherit the next level". Guards
+     * the container lookup like {@see resolvedCrudMode()}.
+     *
+     * @return string|list<string>|null
+     */
+    private function resolvedFormTheme(): string|array|null
+    {
+        $configured = $this->config('form.theme');
+        if (false === $configured) {
+            return null;
+        }
+        if ((\is_string($configured) && $configured !== '') || (\is_array($configured) && $configured !== [])) {
+            return $configured;
+        }
+
+        $yaml = isset($this->container) && $this->container->has(GridviewConfigRegistry::class)
+            ? $this->container->get(GridviewConfigRegistry::class)->resolveOptions($this->config('id'))['behavior']['formTheme'] ?? null
+            : null;
+
+        if (false === $yaml) {
+            return null;
+        }
+        if ((\is_string($yaml) && $yaml !== '') || (\is_array($yaml) && $yaml !== [])) {
+            return $yaml;
+        }
+
+        return '@FedaleGridview/form/gv_form_theme.html.twig';
+    }
+
     /** Resolved default action-token layout: PHP config wins, else YAML, else the built-in default. */
     private function actionLayout(): string
     {
@@ -451,8 +488,9 @@ abstract class AbstractCrudGridController extends AbstractGridController
             'action' => $request->getRequestUri(),
             'mode' => $mode,
             // Symfony form theme(s) applied to the rendered CRUD form (e.g.
-            // ['bootstrap_5_layout.html.twig']); null = default form theme.
-            'formTheme' => $this->config('form.theme'),
+            // ['bootstrap_5_layout.html.twig']): PHP viewConfig, else YAML, else
+            // the bundle's gv_form_theme.
+            'formTheme' => $this->resolvedFormTheme(),
             'validate' => [
                 'checkUrl' => $this->generateUrl($this->routeName(GridAction::Exists)),
                 'unique' => $uniqueFields,

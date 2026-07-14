@@ -426,14 +426,25 @@ By default every CRUD form renders through the bundle's own form theme
 `form_div_layout.html.twig` blocks, giving fields sane spacing/typography with no CSS-framework
 dependency (consistent with the rest of the bundle — see [CSS theming](11_configuration.md)).
 
-Override it per grid from the controller's `viewConfig()` — there is **no YAML path** for this key:
+The theme is resolved most-specific-first: the controller's `viewConfig()` wins, then the YAML
+`behavior.formTheme`, then the built-in gv theme. So a Bootstrap app can switch **every** CRUD form
+to Symfony's Bootstrap 5 theme once, with no per-controller code:
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    defaults:
+        behavior:
+            formTheme: 'bootstrap_5_layout.html.twig'   # string or a list of themes
+```
+
+Override it per grid from the controller's `viewConfig()` (this wins over the YAML default):
 
 ```php
 protected function viewConfig(): array
 {
     return [
         'form' => ['theme' => ['bootstrap_5_layout.html.twig']], // or your own theme(s)
-        // 'form' => ['theme' => null], // opt out entirely, fall back to raw Symfony
     ];
 }
 ```
@@ -441,14 +452,14 @@ protected function viewConfig(): array
 Accepts anything Twig's `{% form_theme %}` tag does — a single template path or an array of paths
 (the last one wins per block, same as Symfony's own theme stacking).
 
-> **Already set a project-wide `twig: form_themes: [...]`?** That global config normally applies to
-> every form in the app, gridview's CRUD forms included — *unless* something applies an explicit
-> per-form `{% form_theme %}` tag, which always wins for that form. Since `form.theme` defaults to
-> the bundle's own theme (not `null`), it does exactly that: it silently overrides your project-wide
-> choice for gridview's CRUD forms specifically. If you want them to keep following your global
-> theme instead, set `'form' => ['theme' => null]` in that controller's `viewConfig()` — the gate in
-> `_form_layout.html.twig` only applies a theme when `form.theme` is truthy, so `null` falls straight
-> through to your app's own `twig.form_themes`.
+> **Already set a project-wide `twig: form_themes: [...]`?** By default gridview applies its own
+> theme with an explicit per-form `{% form_theme %}` tag, which always wins for that form — so it
+> silently overrides your project-wide choice for gridview's CRUD forms. To let a grid follow your
+> global theme instead, set `form.theme` (or the YAML `behavior.formTheme`) to **`false`**: that is
+> an explicit opt-out, so no per-form theme is applied and the form falls straight through to your
+> app's own `twig.form_themes`. A `null` (or unset) value means "inherit the next level", **not**
+> "opt out": `viewConfig()` null falls to the YAML default, and a null YAML value falls to the gv
+> theme.
 
 ### Overriding the form layout with a Twig view
 
@@ -466,6 +477,31 @@ replaced by that attribute's generated widget; CSRF and any unplaced fields are 
     <div class="col-12">{ groups }</div>
 </div>
 ```
+
+The tokens compose with the [form theme](#form-theme-formtheme): each `{ attribute }` is rendered
+through the resolved theme, so with the Bootstrap 5 theme the widgets inside your layout pick up
+`.form-control`/`.form-select` while your wrapper markup uses the framework's grid/cards. This is how
+you reproduce an EasyAdmin-style two-column form with grouped fieldsets:
+
+```twig
+{# templates/gridview/post_form.html.twig #}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Content</div>
+            <div class="card-body">{ title }{ slug }{ content }{ summary }{ featuredImage }</div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Meta</div>
+            <div class="card-body">{ status }{ isFeatured }{ author }{ category }</div>
+        </div>
+    </div>
+</div>
+```
+
+The view applies in every presentation mode (modal, page, custom).
 
 > Tokens are plain text replaced after Twig renders (no `template_from_string`), so a custom layout
 > cannot inject Twig code. Use a **file** template, not an inline string. A control with **no token**
@@ -758,7 +794,7 @@ rest of its group.
 | `labels.edit` | `null` → `labels.heading` | CRUD | Edit form title |
 | `form.mode` | `null` → `'modal'` | CRUD | `'modal'` \| `'page'` \| `'custom'` |
 | `form.view` | `null` | CRUD | Custom form layout (null = auto) |
-| `form.theme` | gridview form theme | CRUD | Form theme template |
+| `form.theme` | `null` → YAML `behavior.formTheme` → gv theme | CRUD | Form theme(s); `false` opts out to the app's global themes |
 | `form.actions` | inline | CRUD | Form action buttons: `placement` / `layout` / `buttons` |
 | `form.filterName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
 | `template.page` | `null` | CRUD | Full-page wrapper for page/custom mode |
