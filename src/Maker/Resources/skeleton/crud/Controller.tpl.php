@@ -35,8 +35,10 @@ class <?= $class_name; ?> extends AbstractCrudGridController
     //         'template' => [
     //             // List page layout; '@FedaleGridview/gridview/index.html.twig' renders standalone.
     //             'index' => 'gridview/with_sidebar.html.twig',
-    //             // Full-page wrapper for the 'page'/'custom' form modes; null = bundle default.
-    //             'page' => null,
+    //             // Full-page wrapper for 'page'/'custom' modes; defaults to the app
+    //             // shell 'gridview/crud_page.html.twig'. Use the bare bundle wrapper
+    //             // '@FedaleGridview/crud/page.html.twig' for no chrome.
+    //             'page' => 'gridview/crud_page.html.twig',
     //         ],
     //         'form' => [
     //             // How the add/edit form is shown: 'modal' | 'page' | 'custom' (null = built-in default).

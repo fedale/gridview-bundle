@@ -45,7 +45,12 @@ abstract class AbstractCrudGridController extends AbstractGridController
      *                    resolveFormActions(). `placement` 'header' drops the
      *                    in-form submit; `layout` orders the named `buttons`.
      *  - form.filterName: query key of the filter form (for "all" bulk ids)
-     *  - template.page:  full-page wrapper for page/custom; null = bundle default
+     *  - template.page:  full-page wrapper for page/custom. Defaults to the app
+     *                    shell `gridview/crud_page.html.twig`, mirroring
+     *                    `template.index`'s `gridview/with_sidebar.html.twig`, so
+     *                    the form page inherits the app chrome out of the box.
+     *                    Set it to `@FedaleGridview/crud/page.html.twig` for the
+     *                    bundle's bare wrapper (extends base.html.twig, no chrome)
      *
      * The action-column token layout lives in `options.actionLayout` (null = fall
      * back to YAML `gridviews.<id>.options.actionLayout`, then the built-in default).
@@ -64,7 +69,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
                 'actions'    => ['placement' => 'inline', 'layout' => null, 'buttons' => null],
                 'filterName' => 'fedaleForm',
             ],
-            'template' => ['page' => null],
+            'template' => ['page' => 'gridview/crud_page.html.twig'],
         ]);
     }
 
@@ -85,10 +90,14 @@ abstract class AbstractCrudGridController extends AbstractGridController
     // ---- hooks ---------------------------------------------------------
 
     /** Runs on a valid submitted add/edit/clone form, before persistence (e.g. password hashing). */
-    protected function beforeSave(FormInterface $form, string $mode): void {}
+    protected function beforeSave(FormInterface $form, string $mode): void
+    {
+    }
 
     /** Extra mutation of a freshly cloned entity (unique fields are already cleared). */
-    protected function onClone(object $clone): void {}
+    protected function onClone(object $clone): void
+    {
+    }
 
     // ---- actions: add / edit / clone -----------------------------------
 
@@ -568,6 +577,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
      * live-uniqueness whitelist and the clear-on-clone behavior.
      *
      * @param iterable<\Fedale\GridviewBundle\Contract\ColumnInterface> $columns
+     *
      * @return string[]
      */
     protected function uniqueFields(iterable $columns): array
