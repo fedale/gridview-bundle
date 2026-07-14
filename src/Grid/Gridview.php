@@ -455,8 +455,11 @@ class Gridview implements GridviewInterface
         if (!empty($this->dataProviderOptions['alias'])) {
             $this->dataProvider->setAlias($this->dataProviderOptions['alias']);
         }
-        if (!empty($this->dataProviderOptions['searchFields'])) {
-            $this->dataProvider->setSearchFields($this->dataProviderOptions['searchFields']);
+        // Declarative filter map, mirroring `sort`: an attribute-keyed `search.map`
+        // (its twin is `sort.map`).
+        $searchMap = $this->dataProviderOptions['search']['map'] ?? [];
+        if (!empty($searchMap)) {
+            $this->dataProvider->setSearchFields($searchMap);
         }
         if (!empty($this->dataProviderOptions['eager']) && method_exists($this->dataProvider, 'setEagerRelations')) {
             $this->dataProvider->setEagerRelations($this->dataProviderOptions['eager']);

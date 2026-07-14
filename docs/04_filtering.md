@@ -624,6 +624,26 @@ applier options (e.g. `['date', 'c.createdAt', ['end_of_day' => false]]`).
 Map keys are the **submitted param names**, i.e. the column attribute with dots replaced
 by underscores (`t.name` → `t_name`).
 
+**Declarative alternative (no repository `search()`):** for entities whose
+repository does not implement `search()`, pass the same map through
+`dataConfig()` under `search.map` — parallel to `sort.map`:
+
+```php
+'search' => [
+    'map' => [
+        'code'  => ['text', 'c.code'],
+        'email' => ['text', 'c.email'],
+    ],
+],
+'sort' => [
+    'map'     => ['code' => ['asc' => ['c.code'], 'desc' => ['c.code']]],
+    'default' => ['code' => 'asc'],
+],
+```
+
+The flat `'searchFields' => [...]` key is the legacy alias of `search.map` and
+still works.
+
 **Built-in types:** `text`, `boolean`, `date`, `number`, `choice`, `relation`.
 
 **Semantics:**

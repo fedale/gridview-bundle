@@ -217,7 +217,13 @@ and writes `App\Controller\Gridview\PostController`. Common options:
 | `--sort` | Default sort field (prefix `-` for descending) |
 | `--page-size` | Default page size (default `20`) |
 | `--checkbox` | Add a row-selection checkbox column |
+| `--fluent` | Scaffold `buildColumns()` with the fluent builders (`MoneyColumn::new(...)`) instead of array specs |
 | `--advanced` | Ask the extra per-column / sort / page-size questions |
+
+With `--fluent` the generated `buildColumns()` uses the typed column builders and
+the controller imports the `Fedale\GridviewBundle\Column\Config\*` classes it
+needs. Without it, the maker emits the array-spec form. Both produce the same
+grid — see [Columns](02_columns.md) for the two styles.
 
 To keep the scaffold clean, the maker **refuses to overwrite** an existing
 controller — pick a different name, or use the update mode below.
@@ -693,7 +699,7 @@ payload:
 |------------------------|------------------|-------------------------|---------------|
 | `getDataClass()` / `viewConfig()['id']` | FQCN / id string | `setId()` | id string |
 | `buildColumns()` | list of column specs | `setColumns()` | same list |
-| `dataConfig()` | `['model', 'alias', 'pagination', 'searchFields', 'sort', 'eager']` | `setDataProvider()` | same array |
+| `dataConfig()` | `['model', 'alias', 'pagination', 'search', 'sort', 'eager']` | `setDataProvider()` | same array |
 | `viewConfig()['options']` | `['display' => …, 'behavior' => …, 'integration' => …]` | `setOptions()` | **identical** array |
 | `viewConfig()['attributes']` | attributes bag | `setAttributes()` | same array |
 

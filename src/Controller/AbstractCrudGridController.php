@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Controller;
 
+use Fedale\GridviewBundle\Column\Config\ColumnConfigInterface;
 use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
 use Fedale\GridviewBundle\Crud\CrudButton;
 use Fedale\GridviewBundle\Grid\GridviewConfigRegistry;
@@ -259,6 +260,16 @@ abstract class AbstractCrudGridController extends AbstractGridController
     {
         $columns = $this->buildColumns();
         $buttons = null;
+
+        // Fluent builders are normalized to their array spec first, so the
+        // action auto-wiring below sees an `ActionColumn::new()` the same way it
+        // sees a `['type' => 'action']` literal.
+        foreach ($columns as &$spec) {
+            if ($spec instanceof ColumnConfigInterface) {
+                $spec = $spec->toArray();
+            }
+        }
+        unset($spec);
 
         foreach ($columns as &$spec) {
             if (!\is_array($spec) || ($spec['type'] ?? null) !== 'action' || \array_key_exists('buttons', $spec)) {

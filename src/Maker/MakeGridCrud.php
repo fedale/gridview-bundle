@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Maker;
 
+use Fedale\GridviewBundle\Maker\Util\FluentColumnPrinter;
 use Fedale\GridviewBundle\Maker\Util\PhpArrayPrinter;
 use Fedale\GridviewBundle\Maker\Util\ViewConfigFooterInjector;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
@@ -67,6 +68,7 @@ final class MakeGridCrud extends AbstractMaker
             ->addOption('page-size', null, InputOption::VALUE_OPTIONAL, 'Default page size (default: 20)')
             ->addOption('alias', null, InputOption::VALUE_OPTIONAL, 'Query-builder root alias for the sort/search DQL (default: e)')
             ->addOption('checkbox', null, InputOption::VALUE_NONE, 'Add a row-selection checkbox column')
+            ->addOption('fluent', null, InputOption::VALUE_NONE, 'Scaffold buildColumns() with the fluent column builders (e.g. MoneyColumn::new(...)) instead of array specs')
             ->addOption('advanced', null, InputOption::VALUE_NONE, 'Ask the extra questions skipped by default (per-column labels/sort/filter/form, default sort, page size)')
             // Update mode: passing this switches the maker from scaffolding a new
             // controller to setting the layout footer region of an existing one.
@@ -248,6 +250,16 @@ final class MakeGridCrud extends AbstractMaker
 
         $searchFields = $mapper->searchFieldsFor($plans, $alias);
 
+        $withCheckbox = (bool) $input->getOption('checkbox');
+        if ($input->getOption('fluent')) {
+            $printed = (new FluentColumnPrinter())->print($plans, $withCheckbox, 2);
+            $columnsPhp = $printed['code'];
+            $columnImports = $printed['imports'];
+        } else {
+            $columnsPhp = PhpArrayPrinter::export($mapper->columnsArrayFor($plans, $withCheckbox), 2);
+            $columnImports = [];
+        }
+
         $variables = [
             // 'namespace' and 'class_name' are auto-derived and injected by
             // Generator::generateClass() itself from the target class name.
@@ -260,8 +272,10 @@ final class MakeGridCrud extends AbstractMaker
             'page_size' => $pageSize,
             'sort_map_php' => PhpArrayPrinter::export($mapper->sortMapFor($plans, $alias), 4),
             'sort_default_php' => \sprintf("['%s' => '%s']", $sortField, $sortDirection),
-            'columns_php' => PhpArrayPrinter::export($mapper->columnsArrayFor($plans, (bool) $input->getOption('checkbox')), 2),
-            'search_fields_php' => $searchFields !== [] ? PhpArrayPrinter::export($searchFields, 3) : null,
+            'columns_php' => $columnsPhp,
+            'column_imports' => $columnImports,
+            // Emitted as `search.map`, mirroring `sort.map` below.
+            'search_php' => $searchFields !== [] ? PhpArrayPrinter::export(['map' => $searchFields], 3) : null,
         ];
 
         $generator->generateController(

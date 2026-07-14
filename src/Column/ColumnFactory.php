@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Column;
 
+use Fedale\GridviewBundle\Column\Config\ColumnConfigInterface;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Form\Control\ControlResolver;
@@ -65,8 +66,12 @@ class ColumnFactory
         $this->registry[$type] = $columnClass;
     }
 
-    public function create(array|string $spec, Gridview $gridview, int|string $key): ColumnInterface
+    public function create(ColumnConfigInterface|array|string $spec, Gridview $gridview, int|string $key): ColumnInterface
     {
+        if ($spec instanceof ColumnConfigInterface) {
+            $spec = $spec->toArray();
+        }
+
         if (\is_string($spec)) {
             return $this->createFromString($spec, $gridview);
         }

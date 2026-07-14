@@ -3,6 +3,9 @@
 namespace <?= $namespace; ?>;
 
 use <?= $entity_full_class_name; ?>;
+<?php foreach (($column_imports ?? []) as $column_import): ?>
+use <?= $column_import; ?>;
+<?php endforeach; ?>
 use Fedale\GridviewBundle\Controller\AbstractCrudGridController;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -59,12 +62,14 @@ class <?= $class_name; ?> extends AbstractCrudGridController
 <?php if ($alias !== null): ?>
             'alias' => '<?= $alias; ?>',
 <?php else: ?>
-            // 'alias' defaults to 'e' (matching the DQL used in 'searchFields'
-            // and 'sort' below). Set it only to change the query-builder alias.
+            // 'alias' defaults to 'e' (matching the DQL used in 'search' and
+            // 'sort' below). Set it only to change the query-builder alias.
 <?php endif; ?>
             'pagination' => ['defaultPageSize' => <?= $page_size; ?>],
-<?php if ($search_fields_php !== null): ?>
-            'searchFields' => <?= $search_fields_php; ?>,
+<?php if ($search_php !== null): ?>
+            // Declarative filter map (query-side). Mirrors 'sort' below: both are
+            // an attribute-keyed 'map'.
+            'search' => <?= $search_php; ?>,
 <?php endif; ?>
             'sort' => [
                 'map' => <?= $sort_map_php; ?>,
