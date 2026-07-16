@@ -62,7 +62,11 @@ class CsvExporter implements ExporterInterface
         if (\is_array($value)) {
             return implode(', ', array_map(fn ($v) => $this->flatten($v), $value));
         }
-        if (\is_scalar($value)) {
+        // A column type's render() (e.g. NumberType/MoneyType/PercentType) wraps
+        // its output in a Twig\Markup for HTML escaping purposes; is_scalar() is
+        // false for it (it's an object), so without this branch every such
+        // column silently exported as an empty cell.
+        if (\is_scalar($value) || $value instanceof \Stringable) {
             return trim(strip_tags((string) $value));
         }
 
