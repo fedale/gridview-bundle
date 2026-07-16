@@ -9,17 +9,17 @@ Office Open XML file), **PDF** (`pdf`, a paginated Helvetica table) and **JSON**
 **extensible** — implement `ExporterInterface` and the service is auto-registered (no config),
 appearing in the export menu and selectable via `?format=<key>`.
 
-| Format | `?format=` | Estensione | Note |
+| Format | `?format=` | Extension | Notes |
 | --- | --- | --- | --- |
-| CSV | `csv` | `.csv` | UTF-8 con BOM (Excel apre l'UTF-8 correttamente); valori HTML appiattiti a testo |
-| Excel | `xlsx` | `.xlsx` | File Office Open XML reale (via `ZipArchive`), riga di intestazione in grassetto, celle numeriche dove il valore è numerico. Senza l'estensione `zip` ripiega su CSV |
-| PDF | `pdf` | `.pdf` | PDF minimale scritto a mano (A4 orizzontale, font core Helvetica), tabella paginata con troncamento delle colonne. Per report complessi usa un exporter host-app (dompdf, wkhtmltopdf, …) |
-| JSON | `json` | `.json` | Array di oggetti, una chiave per attributo di colonna (fallback alla label) |
+| CSV | `csv` | `.csv` | UTF-8 with BOM (so Excel reads the UTF-8 correctly); HTML values flattened to text |
+| Excel | `xlsx` | `.xlsx` | A real Office Open XML file (via `ZipArchive`), bold header row, numeric cells where the value is numeric. Without the `zip` extension it falls back to CSV |
+| PDF | `pdf` | `.pdf` | A minimal hand-written PDF (A4 landscape, Helvetica core font), paginated table with column truncation. For complex reports use a host-app exporter (dompdf, wkhtmltopdf, …) |
+| JSON | `json` | `.json` | Array of objects, one key per column attribute (falling back to the label) |
 
-Tutti i valori delle celle vengono **appiattiti a testo semplice** (HTML rimosso), coerentemente
-fra i formati: una colonna currency viene esportata con la sua stringa renderizzata.
+All cell values are **flattened to plain text** (HTML stripped), consistently across
+formats: a currency column is exported with its rendered string.
 
-Per aggiungere un formato basta una classe che implementa `ExporterInterface`:
+To add a format, all you need is a class implementing `ExporterInterface`:
 
 ```php
 // app/src/Export/XmlExporter.php
@@ -31,37 +31,26 @@ class XmlExporter implements \Fedale\GridviewBundle\Export\ExporterInterface
 }
 ```
 
-Wire it: add the `{export}` token and pass the menu (`url` + `formats` from the registry); the export
-action delegates to the chosen exporter:
+Wire it: there's nothing to register. The exporter is auto-discovered, so it shows
+up in the menu on its own, and `AbstractGridController` already ships the `/export`
+action and auto-wires the menu URL and format list (`integration.export`). You only
+need the `{export}` token in your toolbar — CRUD grids include it by default:
 
 ```php
-->setOptions([
-    'export' => [
-        'url'     => $this->generateUrl('gridview_user_export'),
-        'formats' => array_map(fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
-                               array_values($exporters->all())),  // GridExporterRegistry
-    ],
-    'layout' => ['toolbar' => '{addButton} {export}'],
-])
-
-#[Route('/export', name: 'export', methods: ['GET'])]
-public function export(Request $request, GridExporterRegistry $exporters): Response
+protected function viewConfig(): array
 {
-    $format = (string) $request->query->get('format', 'csv');
-    if (!$exporters->has($format)) { throw $this->createNotFoundException(); }
-    $g = $this->buildGridview();
-    return $exporters->get($format)->export($g->getExportRows(), $g->getExportColumns(), ['filename' => 'utenti']);
+    return ['options' => ['display' => ['layout' => ['toolbar' => '{addButton} {export}']]]];
 }
 ```
 
 The `{export}` link carries the current querystring, so the download reflects the active filters.
 Mark columns with `exportable => true` to restrict the export to a subset.
 
-### Limitare i formati per-griglia
+### Limiting the formats per grid
 
-Di default ogni griglia offre **tutti** gli exporter registrati. Per limitarli a una griglia
-specifica (e fissarne anche l'ordine nel menu) imposta la config `exportFormats` nel controller con
-una allow-list di key — le chiavi sconosciute vengono ignorate, `null` significa "tutti":
+By default every grid offers **all** registered exporters. To limit them for a specific
+grid (and also fix their order in the menu), set the `export.formats` config in the
+controller with an allow-list of keys — unknown keys are ignored, and `null` means "all":
 
 ```php
 final class CustomerController extends AbstractGridController
@@ -69,17 +58,17 @@ final class CustomerController extends AbstractGridController
     protected function viewConfig(): array
     {
         return [
-            'exportFormats' => ['csv', 'pdf'],  // solo CSV e PDF, in quest'ordine
+            'export' => ['formats' => ['csv', 'pdf']],  // CSV and PDF only, in this order
         ];
     }
 }
 ```
 
-L'allow-list vale sia per il **menu** sia per la **action** `export`: un formato escluso non è
-raggiungibile nemmeno forzando `?format=<key>` a mano (risponde 404).
+The allow-list applies to both the **menu** and the `export` **action**: an excluded
+format isn't reachable even by forcing `?format=<key>` by hand (it returns a 404).
 
-Per logiche più dinamiche (es. formati diversi per utente/ruolo) sovrascrivi direttamente
-`exportFormats()`, che ritorna la lista ordinata di `ExporterInterface`:
+For more dynamic logic (e.g. different formats per user/role), override
+`exportFormats()` directly, which returns the ordered list of `ExporterInterface`:
 
 ```php
 protected function exportFormats(): array
@@ -87,13 +76,14 @@ protected function exportFormats(): array
     $all = $this->exporters()->all();              // ['csv' => …, 'xlsx' => …, 'pdf' => …, 'json' => …]
 
     return $this->isGranted('ROLE_ADMIN')
-        ? array_values($all)                        // admin: tutti
-        : array_values(array_intersect_key($all, array_flip(['csv'])));  // altri: solo CSV
+        ? array_values($all)                        // admin: all of them
+        : array_values(array_intersect_key($all, array_flip(['csv'])));  // others: CSV only
 }
 ```
 
-Se invece monti il menu a mano (controller custom, fuori da `AbstractGridController`), filtra tu
-l'array `formats` passato nelle `options.export` con lo stesso criterio.
+If instead you build the menu by hand (a custom controller, outside
+`AbstractGridController`), filter the `formats` array passed in `options.integration.export`
+yourself with the same criterion.
 
 ## Saved searches & selections
 
@@ -113,7 +103,7 @@ window.gridviewPreferenceProvider = {
 `gridview-saved-search` controller saves `window.location.search` under a name and re-applies it
 with `Turbo.visit`. Bucket `searches`, items `{ name, query }`.
 
-**Saved selections** — with a `checkbox` column the header dropdown gains *Salva selezione…* and a
+**Saved selections** — with a `checkbox` column the header dropdown gains *Save selection…* and a
 list of saved sets. `gridview-selection` stores the selected ids (bucket `selections`,
 `{ name, ids }`, max 5000) and reloads them into the selection on demand.
 
@@ -121,7 +111,8 @@ Both are scoped by `window.location.pathname` and need no new backend endpoints.
 
 **Naming** — instead of `window.prompt`, a small built-in modal (`assets/prompt-modal.js`, a
 Promise-based `promptModal({title, label, value})`) collects the name, pre-filled with a sensible
-default: `ricerca <date> (<n>)` for searches (n = next index) and `selezione <date> (<n>)` for
+default built from the translated label prefix, the localized date and an index —
+`<saved.label> <date> (<n>)` for searches (n = next index) and `<selection.label> <date> (<n>)` for
 selections (n = number of selected rows). Enter confirms, Escape / backdrop cancels.
 
 **Column reorder** — set `reorderColumns => true` to make toggleable column headers draggable

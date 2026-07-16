@@ -106,6 +106,7 @@ How the grid reacts to input: search, filters, pagination, real-time, responsive
 | `formName` | `string` | `'fedaleForm'` | YAML (`defaults` only) | Name of the filter form; change this to support multiple grids with filters on the same page. No per-grid override — set it in `viewConfig()['options']['behavior']` instead |
 | `maxQueryLength` | `int` | `4000` | YAML + runtime | Safety cap on the generated DQL/SQL query length |
 | `crudMode` | `'modal'\|'page'\|'custom'` | `'modal'` | YAML + runtime | How the CRUD form is presented; PHP `viewConfig()['form']['mode']` wins when set, else this YAML default, else `'modal'` — see [CRUD](08_crud.md) |
+| `formTheme` | `string\|string[]\|false\|null` | `null` | YAML + runtime | Symfony form theme(s) for the CRUD form; PHP `viewConfig()['form']['theme']` wins, else this YAML default, else the bundle's gv theme. `false` opts out to the app's global `twig.form_themes` — see [CRUD](08_crud.md) |
 | `filterControls.inHeader` | `bool` | `true` | YAML + runtime | Render the per-column filters in the header (funnel icon + filter row) |
 | `filterControls.inlineClear` | `bool` | `false` | YAML + runtime | Show an inline "clear" affordance on filtered columns |
 | `filterControls.clear` | `mixed\|null` | `null` | YAML (`defaults` only) | Default clear-affordance mode(s) for columns that don't set their own `filter.clear` — see [Filtering](04_filtering.md) |
@@ -156,7 +157,11 @@ grid-only keys never leak in. See [DetailView → YAML configuration](09_detail-
 ## Multiple grids with filters on the same page
 
 When you render two grids that both have column filters, each must use a unique `formName`
-so their filter query parameters do not collide:
+so their filter query parameters do not collide. Two grids in one action is exactly the
+case for the raw `GridviewBuilder` — a controller's `viewConfig()` hooks describe a single
+grid, so here you build each one by hand (the array passed to `setOptions()` is the same
+one a controller would nest under `viewConfig()['options']`, see
+[How your configuration reaches the grid](08_crud.md#how-your-configuration-reaches-the-grid)):
 
 ```php
 // First grid

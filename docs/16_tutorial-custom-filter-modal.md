@@ -63,7 +63,9 @@ and make sure `{filterBar}` is not in the layout — see
 ```php
 // viewConfig() — drop the header region entirely for this grid
 'options' => [
-    'layout' => ['shell' => '{dataview} {footer}'],
+    'display' => [
+        'layout' => ['shell' => '{dataview} {footer}'],
+    ],
 ],
 ```
 

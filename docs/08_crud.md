@@ -197,6 +197,62 @@ for the Security contract), pass Symfony's field `getter`/`setter` through `cont
 > without snapshotting first — for a `multiple` relation they are the same object.
 > The symptom is subtle: the edit appears to work but the relation is saved empty.
 
+### Scaffolding a controller with `make:gridview:crud`
+
+Generate a full CRUD grid controller for a Doctrine entity straight from its
+metadata:
+
+```bash
+$ php bin/console make:gridview:crud Post
+```
+
+The wizard derives the columns, filters, controls and sort map from the entity
+and writes `App\Controller\Gridview\PostController`. Common options:
+
+| Option | Purpose |
+|--------|---------|
+| `--controller-class` | Controller class name (default `<Entity>Controller`) |
+| `--route-prefix` | Route path prefix (default `/gridview/<plural>`) |
+| `--fields` | Comma-separated fields to expose as columns |
+| `--sort` | Default sort field (prefix `-` for descending) |
+| `--page-size` | Default page size (default `20`) |
+| `--checkbox` | Add a row-selection checkbox column |
+| `--fluent` | Scaffold `buildColumns()` with the fluent builders (`MoneyColumn::new(...)`) instead of array specs |
+| `--advanced` | Ask the extra per-column / sort / page-size questions |
+
+With `--fluent` the generated `buildColumns()` uses the typed column builders and
+the controller imports the `Fedale\GridviewBundle\Column\Config\*` classes it
+needs. Without it, the maker emits the array-spec form. Both produce the same
+grid — see [Columns](02_columns.md) for the two styles.
+
+To keep the scaffold clean, the maker **refuses to overwrite** an existing
+controller — pick a different name, or use the update mode below.
+
+#### Updating an existing controller: `--set-footer`
+
+Re-run the maker on a controller you already generated to set its **layout
+footer region** — the `{footer}` area below the grid (results summary,
+pagination, page-size selector):
+
+```bash
+$ php bin/console make:gridview:crud --controller-class=PostController --set-footer
+```
+
+Passing `--set-footer` switches the maker into update mode: instead of
+scaffolding, it targets the existing controller and adds a `viewConfig()` method
+setting `options.display.layout.footer`. Omit the value to use the bundle
+default (`{resultsSummary} {pagination} {pageSize}`), or pass your own tokens:
+
+```bash
+$ php bin/console make:gridview:crud --controller-class=PostController --set-footer='{pagination}'
+```
+
+The edit is done in place with the same AST tooling Symfony's own makers use, so
+the rest of the file is untouched. One safety limit: automatic editing only
+applies when the controller doesn't already define an active `viewConfig()`. If
+it does, the maker leaves your hand-written config alone and prints the
+`'footer' => '...'` snippet to paste under `options.display.layout` yourself.
+
 ### Wiring the routes (host app owns them)
 
 > **Shortcut:** most apps don't need to write these actions by hand — extend
@@ -260,16 +316,26 @@ by one shared generic controller, gridview keeps the routes on your own
 controller subclass so per-action overrides and security stay trivially yours.
 
 The bundle ships the services; the app provides thin actions that delegate to
-`GridCrudHandlerInterface`. Build the grid once (shared by index + form + delete) and set
-`routeName` so sort/pagination/filter links stay pinned to the list route even while a CRUD POST is
-rendering the refreshed grid:
+`GridCrudHandlerInterface`. `AbstractCrudGridController` builds the grid once (shared
+by index + form + delete) and **auto-wires** `integration.routeName` to the list route
+(so sort/pagination/filter links stay pinned even while a CRUD POST re-renders the grid),
+along with the CRUD URLs and the export menu — a subclass sets none of these. You
+typically only customise the layout, through `viewConfig()`:
 
 ```php
-->setOptions([
-    'routeName' => 'gridview_user_index',
-    'crud'   => ['title' => 'User', 'addUrl' => $this->generateUrl('gridview_user_create')],
-    'layout' => ['shell' => '{toolbar} {header} {dataview} {footer}', 'toolbar' => '{addButton}'],
-])
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => [
+                    'shell'   => '{toolbar} {header} {dataview} {footer}',
+                    'toolbar' => '{addButton}',
+                ],
+            ],
+        ],
+    ];
+}
 ```
 
 Use semantic routes — `new` / `update/{id}` / `clone/{id}` — each delegating to one private handler
@@ -360,14 +426,25 @@ By default every CRUD form renders through the bundle's own form theme
 `form_div_layout.html.twig` blocks, giving fields sane spacing/typography with no CSS-framework
 dependency (consistent with the rest of the bundle — see [CSS theming](11_configuration.md)).
 
-Override it per grid from the controller's `viewConfig()` — there is **no YAML path** for this key:
+The theme is resolved most-specific-first: the controller's `viewConfig()` wins, then the YAML
+`behavior.formTheme`, then the built-in gv theme. So a Bootstrap app can switch **every** CRUD form
+to Symfony's Bootstrap 5 theme once, with no per-controller code:
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    defaults:
+        behavior:
+            formTheme: 'bootstrap_5_layout.html.twig'   # string or a list of themes
+```
+
+Override it per grid from the controller's `viewConfig()` (this wins over the YAML default):
 
 ```php
 protected function viewConfig(): array
 {
     return [
         'form' => ['theme' => ['bootstrap_5_layout.html.twig']], // or your own theme(s)
-        // 'form' => ['theme' => null], // opt out entirely, fall back to raw Symfony
     ];
 }
 ```
@@ -375,14 +452,14 @@ protected function viewConfig(): array
 Accepts anything Twig's `{% form_theme %}` tag does — a single template path or an array of paths
 (the last one wins per block, same as Symfony's own theme stacking).
 
-> **Already set a project-wide `twig: form_themes: [...]`?** That global config normally applies to
-> every form in the app, gridview's CRUD forms included — *unless* something applies an explicit
-> per-form `{% form_theme %}` tag, which always wins for that form. Since `form.theme` defaults to
-> the bundle's own theme (not `null`), it does exactly that: it silently overrides your project-wide
-> choice for gridview's CRUD forms specifically. If you want them to keep following your global
-> theme instead, set `'form' => ['theme' => null]` in that controller's `viewConfig()` — the gate in
-> `_form_layout.html.twig` only applies a theme when `form.theme` is truthy, so `null` falls straight
-> through to your app's own `twig.form_themes`.
+> **Already set a project-wide `twig: form_themes: [...]`?** By default gridview applies its own
+> theme with an explicit per-form `{% form_theme %}` tag, which always wins for that form — so it
+> silently overrides your project-wide choice for gridview's CRUD forms. To let a grid follow your
+> global theme instead, set `form.theme` (or the YAML `behavior.formTheme`) to **`false`**: that is
+> an explicit opt-out, so no per-form theme is applied and the form falls straight through to your
+> app's own `twig.form_themes`. A `null` (or unset) value means "inherit the next level", **not**
+> "opt out": `viewConfig()` null falls to the YAML default, and a null YAML value falls to the gv
+> theme.
 
 ### Overriding the form layout with a Twig view
 
@@ -400,6 +477,31 @@ replaced by that attribute's generated widget; CSRF and any unplaced fields are 
     <div class="col-12">{ groups }</div>
 </div>
 ```
+
+The tokens compose with the [form theme](#form-theme-formtheme): each `{ attribute }` is rendered
+through the resolved theme, so with the Bootstrap 5 theme the widgets inside your layout pick up
+`.form-control`/`.form-select` while your wrapper markup uses the framework's grid/cards. This is how
+you reproduce an EasyAdmin-style two-column form with grouped fieldsets:
+
+```twig
+{# templates/gridview/post_form.html.twig #}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Content</div>
+            <div class="card-body">{ title }{ slug }{ content }{ summary }{ featuredImage }</div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Meta</div>
+            <div class="card-body">{ status }{ isFeatured }{ author }{ category }</div>
+        </div>
+    </div>
+</div>
+```
+
+The view applies in every presentation mode (modal, page, custom).
 
 > Tokens are plain text replaced after Twig renders (no `template_from_string`), so a custom layout
 > cannot inject Twig code. Use a **file** template, not an inline string. A control with **no token**
@@ -438,15 +540,21 @@ the EM) when the row is still referenced elsewhere — no 500.
 ### Bulk actions (selection + batch update)
 
 With a `checkbox` column the `gridview-selection` controller tracks the selection across pages
-(sessionStorage, with an all-records mode). Add the `{bulkBar}` layout token and the bulk URLs to
-`crud` to get a bulk action bar (count + buttons) that opens the CRUD modal with the selected ids:
+(sessionStorage, with an all-records mode). The bulk delete/update URLs are **auto-wired** by
+`AbstractCrudGridController`, so you only add the `{bulkBar}` layout token to get a bulk action bar
+(count + buttons) that opens the CRUD modal with the selected ids:
 
 ```php
-'crud' => [
-    'bulkDeleteUrl' => $this->generateUrl('gridview_user_bulk_delete'),
-    'bulkUpdateUrl' => $this->generateUrl('gridview_user_bulk_update'),
-],
-'layout' => ['shell' => '{header} {bulkBar} {dataview} {footer}'],
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'display' => [
+                'layout' => ['shell' => '{header} {bulkBar} {dataview} {footer}'],
+            ],
+        ],
+    ];
+}
 ```
 
 > Insert `{bulkBar}` into the **existing** shell tree — do not add `{toolbar}` alongside `{header}`.
@@ -456,18 +564,22 @@ With a `checkbox` column the `gridview-selection` controller tracks the selectio
 
 **Choosing which bulk buttons show** — by default both built-ins (`update`, `delete`) render when
 their auto-derived URL exists. To restrict the set, or add your own action, use the `bulkActions`
-map under `crud` (a `viewConfig().options.crud` here is deep-merged over the auto-derived URLs, so
-you set only this key — the URLs/title are preserved):
+map under `integration.crud` (`viewConfig().options.integration.crud` is deep-merged over the
+auto-derived URLs, so you set only this key — the URLs/title are preserved):
 
 ```php
-'crud' => [
-    'bulkActions' => [
-        'delete' => true,                  // built-in: url + label + variant auto
-        // 'update' omitted → not rendered  (keeps only Delete)
-        'archive' => [                      // custom action
-            'url'     => $this->generateUrl('gridview_user_bulk_archive'),
-            'label'   => 'bulk.archive',    // GridviewBundle translation key
-            'variant' => 'danger',          // '' (base) | 'primary' | 'danger'
+'options' => [
+    'integration' => [
+        'crud' => [
+            'bulkActions' => [
+                'delete' => true,                  // built-in: url + label + variant auto
+                // 'update' omitted → not rendered  (keeps only Delete)
+                'archive' => [                      // custom action
+                    'url'     => $this->generateUrl('gridview_user_bulk_archive'),
+                    'label'   => 'bulk.archive',    // GridviewBundle translation key
+                    'variant' => 'danger',          // '' (base) | 'primary' | 'danger'
+                ],
+            ],
         ],
     ],
 ],
@@ -540,31 +652,10 @@ submits it via fetch (OK button or Enter), and swaps in the new value with a ✓
 ['attribute' => 'type',   'editable' => true, 'type' => 'relation', 'control' => ['options' => [...]]],
 ```
 
-Set the base URL in `crud.inlineUrl`; the controller appends `/{id}/{field}`. One endpoint serves
-both GET (editor) and POST (save), and **must only edit columns flagged editable**:
-
-```php
-'crud' => ['inlineUrl' => $this->generateUrl('gridview_user_index') . '/inline'],
-
-#[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'],
-        requirements: ['id' => '\d+', 'field' => '[a-zA-Z_]+'])]
-public function inline(Request $request, int $id, string $field): Response
-{
-    $entity = $repo->find($id) ?? throw $this->createNotFoundException();
-    $column = null;
-    foreach ($this->buildGridview()->getColumns() as $c) {
-        if ($c->getAttribute() === $field && $c->isEditable()) { $column = $c; break; }
-    }
-    if ($column === null) { throw $this->createNotFoundException(); }   // editable-only
-
-    $action = $this->generateUrl('gridview_user_inline', ['id' => $id, 'field' => $field]);
-    if ($request->isMethod('GET')) {
-        return new Response($crud->renderInlineEditor(User::class, $column, $entity, $action));
-    }
-    $r = $crud->saveInline(User::class, $column, $entity, $request, $action); // ['ok','body']
-    return new Response($r['body'], $r['ok'] ? 200 : 422);
-}
-```
+There's no route or config to add: `AbstractCrudGridController` already ships the
+`/inline/{id}/{field}` endpoint and auto-wires `integration.crud.inlineUrl` to it.
+One endpoint serves both GET (the editor) and POST (the save), and edits **only**
+columns flagged `editable` — marking the columns (above) is all a subclass does.
 
 The new cell display after save is produced by the handler's value stringifier (scalar / DateTime /
 `getName()` / collection-join), so relations show their label.
@@ -634,6 +725,49 @@ subclass needs **no constructor** unless it has extra dependencies of its own.
 | `beforeSave(FormInterface, string $mode): void` | no (CRUD) | Hook before persist (e.g. password hashing) |
 | `onClone(object $clone): void` | no (CRUD) | Extra mutation of a clone (unique fields are cleared automatically) |
 
+### How your configuration reaches the grid
+
+Whichever base you extend, the controller feeds your hooks into a `GridviewBuilder`.
+Each hook maps one-to-one onto a builder method, so the two styles hold the **same**
+payload:
+
+| In a controller (hook) | Shape you return | Builder method it feeds | Builder shape |
+|------------------------|------------------|-------------------------|---------------|
+| `getDataClass()` / `viewConfig()['id']` | FQCN / id string | `setId()` | id string |
+| `buildColumns()` | list of column specs | `setColumns()` | same list |
+| `dataConfig()` | `['model', 'alias', 'pagination', 'search', 'sort', 'eager']` | `setDataProvider()` | same array |
+| `viewConfig()['options']` | `['display' => …, 'behavior' => …, 'integration' => …]` | `setOptions()` | **identical** array |
+| `viewConfig()['attributes']` | attributes bag | `setAttributes()` | same array |
+
+The value of `viewConfig()`'s `options` key is exactly what `setOptions()` takes.
+Moving a snippet between a controller and a raw builder ([Full Example](15_full-example.md#full-example))
+only means adding or removing that outer `options` wrapper — the grouped
+`display` / `behavior` / `integration` payload is the same on both sides.
+
+### Eager-loading relations (`eager`)
+
+Rows are normalized to arrays without ever triggering Doctrine lazy-loading: an
+association that the list query didn't fetch is serialized as `null`, not loaded.
+So when a column reads a relation (e.g. `author` or `category`), fetch-join it up
+front — otherwise the column is empty, and relying on lazy-loading would issue one
+query per row (a classic N+1).
+
+The `eager` key lists the to-one associations to fetch-join into the list query:
+
+    protected function dataConfig(): array
+    {
+        return [
+            'model' => Post::class,
+            'eager' => ['author', 'category'],
+            // ...
+        ];
+    }
+
+Each name is left-joined and added to the SELECT, so the relation is hydrated with
+its parent row in the **same** query. Names are root-level associations of the grid
+entity. This applies to the built-in query builder; a repository that provides its
+own `search()` owns its joins instead (add the `leftJoin()`/`addSelect()` there).
+
 ### The `viewConfig()` array
 
 `viewConfig()` returns only the keys you want to change; they are merged over the
@@ -641,21 +775,30 @@ defaults. The live-uniqueness whitelist (`exists`) and the clear-on-clone fields
 are **derived automatically** from the columns flagged `control.unique` — no extra
 config needed.
 
+Keys are **nested**, and `config()` reads them by dotted path (`template.index`,
+`labels.heading`, …) — a flat top-level key the code never reads (e.g.
+`indexTemplate`) is silently ignored. A `viewConfig()` need only list the keys it
+changes; associative sub-arrays are deep-merged, so setting one sub-key keeps the
+rest of its group.
+
 | Key | Default | Applies to | Description |
 |-----|---------|------------|-------------|
 | `id` | entity short name (`User`→`user`) | both | Grid id + YAML config lookup |
-| `indexTemplate` | `gridview/with_sidebar.html.twig` | both | Template rendered by `index` |
-| `exportFilename` | `null` → falls back to `id` | both | Export file name (no extension) |
-| `exportFormats` | `null` → all registered | both | Allow-list di key exporter (es. `['csv','pdf']`); fissa anche l'ordine del menu |
+| `template.index` | `gridview/with_sidebar.html.twig` | both | Template rendered by `index` |
+| `export.filename` | `null` → falls back to `id` | both | Export file name (no extension) |
+| `export.formats` | `null` → all registered | both | Allow-list of exporter keys (e.g. `['csv', 'pdf']`); also fixes the menu order |
 | `attributes` | `['class' => 'table']` | both | Table-level HTML attributes |
-| `options` | `[]` | both | Extra builder options (layout, `reorderColumns`, …) |
-| `title` | `''` | CRUD | Modal / page title |
-| `mode` | `'modal'` | CRUD | `'modal'` \| `'page'` \| `'custom'` |
-| `formView` | `null` | CRUD | Custom form layout (null = auto) |
-| `pageTemplate` | `null` | CRUD | Full-page wrapper for page/custom mode |
-| `addLabel` | `'New'` | CRUD | Label of the add toolbar button |
-| `filterFormName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
-| `actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](02_columns.md#default-action-buttons-auto-wired)) |
+| `options` | `[]` | both | Builder options, grouped `display` / `behavior` / `integration` (see the mapping table above) |
+| `labels.heading` | `null` → `{id}.label` | CRUD | Modal / page title (becomes `display.title`) |
+| `labels.add` | `null` → `{id}.add` | CRUD | Label of the add toolbar button |
+| `labels.edit` | `null` → `labels.heading` | CRUD | Edit form title |
+| `form.mode` | `null` → `'modal'` | CRUD | `'modal'` \| `'page'` \| `'custom'` |
+| `form.view` | `null` | CRUD | Custom form layout (null = auto) |
+| `form.theme` | `null` → YAML `behavior.formTheme` → gv theme | CRUD | Form theme(s); `false` opts out to the app's global themes |
+| `form.actions` | inline | CRUD | Form action buttons: `placement` / `layout` / `buttons` |
+| `form.filterName` | `'fedaleForm'` | CRUD | Query key of the filter form (for "all" bulk ids) |
+| `template.page` | `null` | CRUD | Full-page wrapper for page/custom mode |
+| `options.actionLayout` | `null` → `'{show} {edit} {delete}'` | CRUD | Token layout auto-wired into a bare `action` column (see [Default action buttons](02_columns.md#default-action-buttons-auto-wired)) |
 
 ### Read-only example
 
@@ -697,10 +840,9 @@ class UserController extends AbstractCrudGridController
     protected function viewConfig(): array
     {
         return [
-            'title'    => 'User',
-            'addLabel' => 'New user',
-            'formView' => 'gridview/user/_form.html.twig',
-            'options'  => ['display' => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']]],
+            'labels'  => ['heading' => 'User', 'add' => 'New user'],
+            'form'    => ['view' => 'gridview/user/_form.html.twig'],
+            'options' => ['display' => ['layout' => ['toolbar' => '{addButton} {savedSearch} {export}']]],
         ];
     }
 

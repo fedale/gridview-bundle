@@ -2,8 +2,8 @@
 
 namespace Fedale\GridviewBundle\Serializer;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
-use Doctrine\Persistence\Proxy;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
@@ -24,11 +24,20 @@ use Symfony\Component\Serializer\SerializerInterface;
  * relation (a classic N+1).
  *
  * This normalizer skips associations that are not already initialized:
- * uninitialized {@see PersistentCollection} and uninitialized Doctrine
- * proxies are normalized to null instead of being loaded (the key is kept,
- * only the value becomes null). The contract becomes explicit: if a column
- * needs a relation, the repository's query must fetch-join it; anything else
- * is intentionally not serialized.
+ * uninitialized {@see PersistentCollection} and uninitialized to-one
+ * associations are normalized to null instead of being loaded (the key is
+ * kept, only the value becomes null). The contract becomes explicit: if a
+ * column needs a relation, the query must fetch-join it (see the data
+ * provider's `eager` option); anything else is intentionally not serialized.
+ *
+ * Doctrine ORM 3 hydrates uninitialized to-one associations as lazy ghost
+ * objects: real instances of the entity class that are *not* instances of
+ * {@see \Doctrine\Persistence\Proxy}. Sniffing the value type therefore misses
+ * them, so initialization state is resolved through the EntityManager
+ * ({@see EntityManagerInterface::isUninitializedObject()}), which also covers
+ * classic proxies. Associations are discovered from the class metadata rather
+ * than from the property value, so the guard applies whether or not the
+ * relation was already loaded.
  *
  * Symfony 8 made {@see ObjectNormalizer} final, so this can no longer extend it
  * to override getAttributeValue(). It now decorates an inner ObjectNormalizer
@@ -41,6 +50,7 @@ class LazyAwareObjectNormalizer implements NormalizerInterface, SerializerAwareI
     private ObjectNormalizer $inner;
 
     public function __construct(
+        private EntityManagerInterface $entityManager,
         ?ClassMetadataFactoryInterface $classMetadataFactory = null,
         ?NameConverterInterface $nameConverter = null,
         ?PropertyAccessorInterface $propertyAccessor = null,
@@ -85,23 +95,22 @@ class LazyAwareObjectNormalizer implements NormalizerInterface, SerializerAwareI
     }
 
     /**
-     * Adds a {@see lazyGuard()} callback for every property that currently holds
-     * a Doctrine relation (initialized or not). Reading the property value does
-     * not initialize it, so this scan is side-effect free.
+     * Adds a {@see lazyGuard()} callback for every Doctrine association of the
+     * object's class. Associations are read from the class metadata (not from
+     * the property values), so the guard is registered whether or not the
+     * relation is already loaded; the callback then decides per value. A
+     * non-entity object (no metadata) is left untouched.
      */
     private function withLazyGuards(object $object, array $context): array
     {
+        if ($this->entityManager->getMetadataFactory()->isTransient($object::class)) {
+            return $context;
+        }
+
         $callbacks = $context[AbstractNormalizer::CALLBACKS] ?? [];
 
-        foreach ((new \ReflectionObject($object))->getProperties() as $property) {
-            if (!$property->isInitialized($object)) {
-                continue;
-            }
-
-            $value = $property->getValue($object);
-            if ($value instanceof PersistentCollection || $value instanceof Proxy) {
-                $callbacks[$property->getName()] ??= self::lazyGuard(...);
-            }
+        foreach ($this->entityManager->getClassMetadata($object::class)->getAssociationNames() as $name) {
+            $callbacks[$name] ??= $this->lazyGuard(...);
         }
 
         if ($callbacks !== []) {
@@ -112,13 +121,15 @@ class LazyAwareObjectNormalizer implements NormalizerInterface, SerializerAwareI
     }
 
     /** Returns null for an uninitialized relation, the value untouched otherwise. */
-    private static function lazyGuard(mixed $value): mixed
+    private function lazyGuard(mixed $value): mixed
     {
         if ($value instanceof PersistentCollection && !$value->isInitialized()) {
             return null;
         }
 
-        if ($value instanceof Proxy && !$value->__isInitialized()) {
+        // ORM 3 lazy ghosts are not Proxy instances, so ask the EntityManager;
+        // it also reports classic (pre-lazy-ghost) proxies as uninitialized.
+        if (\is_object($value) && $this->entityManager->isUninitializedObject($value)) {
             return null;
         }
 

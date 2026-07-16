@@ -35,7 +35,10 @@ final class CrudButton
      */
     public static function show(string $url, string $title = 'crud.show'): string
     {
-        return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), self::ICON_VIEW);
+        // The grid lives inside a <turbo-frame>; a plain link would navigate the
+        // frame and, finding no matching frame in the detail page, Turbo renders
+        // "Content missing". data-turbo-frame="_top" forces a full-page visit.
+        return sprintf('<a href="%s" data-turbo-frame="_top" %s>%s</a>', self::esc($url), self::titleAttrs($title), self::ICON_VIEW);
     }
 
     /**
@@ -80,7 +83,11 @@ final class CrudButton
             );
         }
 
-        return sprintf('<a href="%s" %s>%s</a>', self::esc($url), self::titleAttrs($title), $icon);
+        // page/custom mode: a full-page navigation. The grid is wrapped in a
+        // <turbo-frame>, so break out of it (data-turbo-frame="_top") — otherwise
+        // Turbo tries to swap the form page into the frame, finds no matching
+        // frame and renders "Content missing".
+        return sprintf('<a href="%s" data-turbo-frame="_top" %s>%s</a>', self::esc($url), self::titleAttrs($title), $icon);
     }
 
     /**

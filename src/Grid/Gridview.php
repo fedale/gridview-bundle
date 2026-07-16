@@ -455,8 +455,14 @@ class Gridview implements GridviewInterface
         if (!empty($this->dataProviderOptions['alias'])) {
             $this->dataProvider->setAlias($this->dataProviderOptions['alias']);
         }
-        if (!empty($this->dataProviderOptions['searchFields'])) {
-            $this->dataProvider->setSearchFields($this->dataProviderOptions['searchFields']);
+        // Declarative filter map, mirroring `sort`: an attribute-keyed `search.map`
+        // (its twin is `sort.map`).
+        $searchMap = $this->dataProviderOptions['search']['map'] ?? [];
+        if (!empty($searchMap)) {
+            $this->dataProvider->setSearchFields($searchMap);
+        }
+        if (!empty($this->dataProviderOptions['eager']) && method_exists($this->dataProvider, 'setEagerRelations')) {
+            $this->dataProvider->setEagerRelations($this->dataProviderOptions['eager']);
         }
 
         $this->dataProvider->prepareModels($this->dataProviderOptions['model']);
@@ -783,7 +789,7 @@ class Gridview implements GridviewInterface
         // layout. Additive and idempotent — a token already present (with or
         // without an inline width) is left untouched, and each of these collapses
         // to nothing when not applicable, so the toolbar stays stable across a
-        // runtime view switch (see docs/05_layout.md "Dinamica dei token").
+        // runtime view switch (see docs/05_layout.md "Token dynamics per renderer").
         if ($section === 'toolbar' && \count($this->getRenderers()) > 1) {
             foreach (['viewSwitcher', 'sortBar', 'filterBar'] as $token) {
                 if (str_contains($layout, '{' . $token . '}') || str_contains($layout, '{' . $token . ' ')) {

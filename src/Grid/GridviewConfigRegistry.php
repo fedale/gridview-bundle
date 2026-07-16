@@ -61,6 +61,9 @@ class GridviewConfigRegistry
         'maxQueryLength' => 4000,
         // 'modal' | 'page' | 'custom'; bridged from viewConfig()['form']['mode'].
         'crudMode'       => 'modal',
+        // Symfony form theme(s) for the CRUD form; bridged from
+        // viewConfig()['form']['theme']. null → the bundle's gv_form_theme.
+        'formTheme'      => null,
         'filterControls' => [
             'inHeader'                => true,
             'inlineClear'             => false,
@@ -117,7 +120,9 @@ class GridviewConfigRegistry
         'class' => 'table table-bordered',
     ];
 
-    public function __construct(private array $config) {}
+    public function __construct(private array $config)
+    {
+    }
 
     public function resolveOptions(?string $id): array
     {
@@ -169,6 +174,7 @@ class GridviewConfigRegistry
                 }
             }
         }
+
         return $result;
     }
 
@@ -195,6 +201,7 @@ class GridviewConfigRegistry
                 $base[$key] = array_replace($base[$key] ?? [], $layer[$key]);
             }
         }
+
         return $base;
     }
 

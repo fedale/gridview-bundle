@@ -13,7 +13,7 @@ class GridviewUrlState
     private ?int    $pageSize     = null;
     private ?string $view         = null;
 
-    /** Parametri della rotta corrente (es. {id}), necessari per rigenerarne l'URL. */
+    /** Current route parameters (e.g. {id}), needed to regenerate its URL. */
     private array   $routeParams  = [];
 
     private string $formName      = 'fedaleForm';
@@ -66,14 +66,14 @@ class GridviewUrlState
         $requestedSize = (int) $request->query->get($pageSizeParam, 0);
         $state->pageSize = $requestedSize > 0 ? $requestedSize : null;
 
-        // Parametri di rotta (es. {id}) necessari a path() per rigenerare l'URL corrente.
+        // Route parameters (e.g. {id}) that path() needs to regenerate the current URL.
         $routeParams = $request->attributes->get('_route_params', []);
         $state->routeParams = is_array($routeParams) ? $routeParams : [];
 
         return $state;
     }
 
-    /** Tutti i parametri correnti come array (per Symfony path()) */
+    /** All current parameters as an array (for Symfony path()) */
     public function toArray(): array
     {
         $params = $this->routeParams;
@@ -103,7 +103,7 @@ class GridviewUrlState
         return $params;
     }
 
-    /** Parametri per un link di sort — resetta la pagina */
+    /** Parameters for a sort link — resets the page */
     public function withSort(string $sortValue): array
     {
         return array_merge($this->toArray(), [
@@ -112,13 +112,13 @@ class GridviewUrlState
         ]);
     }
 
-    /** Parametri per un link di pagina — mantiene sort e filtri */
+    /** Parameters for a page link — keeps sort and filters */
     public function withPage(int $page): array
     {
         return array_merge($this->toArray(), [$this->pageParam => $page]);
     }
 
-    /** Parametri per il selettore di dimensione-pagina — resetta la pagina */
+    /** Parameters for the page-size selector — resets the page */
     public function withPageSize(int $size): array
     {
         return array_merge($this->toArray(), [
@@ -127,7 +127,7 @@ class GridviewUrlState
         ]);
     }
 
-    /** Parametri per il cambio vista (renderer) — mantiene sort/filtri, resetta la pagina */
+    /** Parameters for the view (renderer) switch — keeps sort/filters, resets the page */
     public function withView(string $view): array
     {
         return array_merge($this->toArray(), [

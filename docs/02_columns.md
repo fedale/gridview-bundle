@@ -1,6 +1,94 @@
 # Columns
 
-Each item in the `$columns` array can be a **string shorthand** or a **full array definition**.
+Each item in the `$columns` array can be a **fluent builder**, a **string
+shorthand** or a **full array definition**. All three produce the same column
+spec, so you can mix them freely in one `buildColumns()`.
+
+## Fluent builder API
+
+The fluent builders give you IDE autocomplete, go-to-definition and static
+analysis: one class per column type in the `Fedale\GridviewBundle\Column\Config`
+namespace, each created with `::new()` and configured with chained methods. This
+is the recommended way to declare columns.
+
+```php
+use Fedale\GridviewBundle\Column\Config\ActionColumn;
+use Fedale\GridviewBundle\Column\Config\BooleanColumn;
+use Fedale\GridviewBundle\Column\Config\CheckboxColumn;
+use Fedale\GridviewBundle\Column\Config\MoneyColumn;
+use Fedale\GridviewBundle\Column\Config\NumberColumn;
+use Fedale\GridviewBundle\Column\Config\RelationColumn;
+use Fedale\GridviewBundle\Column\Config\SelectColumn;
+use Fedale\GridviewBundle\Column\Config\TextColumn;
+
+protected function buildColumns(): array
+{
+    return [
+        CheckboxColumn::new(),
+        NumberColumn::new('id')->label('Id')->sortable()->filterNumber(),
+        TextColumn::new('title')->label('Title')->sortable()
+            ->filterText()->required(),
+        MoneyColumn::new('price')->currency('EUR')->decimals(2)->sortable(),
+        SelectColumn::new('status')->label('Status')->sortable()
+            ->enum(PostStatus::class, required: true),
+        BooleanColumn::new('isFeatured')->label('Is featured')->sortable()
+            ->filterBoolean()->required(),
+        RelationColumn::new('author')->label('Author')->relation(User::class),
+        ActionColumn::new()->label(false),
+    ];
+}
+```
+
+### Shared methods
+
+Every builder inherits these from `AbstractColumnConfig`:
+
+| Method | Maps to spec key |
+|--------|------------------|
+| `label(string\|bool)` | `label` |
+| `sortable(bool = true)` / `notSortable()` | `sortable` |
+| `visible(bool\|Closure)` | `visible` |
+| `active(bool\|array\|Closure)` | `active` |
+| `priority(int)` | `priority` |
+| `exportable(bool = true)` | `exportable` |
+| `editable(bool\|array = true)` | `editable` |
+| `batchUpdate(bool = true)` | `batchUpdate` |
+| `showInDeleteConfirm(bool\|array = true)` | `showInDeleteConfirm` |
+| `footer(string\|array\|Closure)` | `footer` |
+| `value` / `valueGetter` / `formatter` / `renderer` | the pipeline overrides |
+| `format(array)` | `format` (merged) |
+| `filter(bool\|string\|array\|FilterType)` | `filter` |
+| `filterText(bool $trim = true)`, `filterNumber()`, `filterBoolean()`, `filterDate()`, `filterChoice()`, `filterRelation()` | `filter` shortcuts |
+| `control(bool\|string\|array\|ControlType)` | `control` |
+| `required(bool = true)` | `control.required` (creates the control if absent) |
+| `onlyOnIndex()`, `onlyOnShow()`, `onlyOnForm()`, `onlyOnCreate()`, `onlyOnUpdate()` | `active` (restrict to one context) |
+| `hideOnIndex()`, `hideOnShow()`, `hideOnForm()`, `hideOnCreate()`, `hideOnUpdate()` | `active` (hide from one context) |
+
+Anything without a dedicated shortcut still accepts the raw array — e.g.
+`->filter(['type' => 'text', 'options' => ['trim' => false]])` or
+`->control(['type' => 'integer', 'required' => true])` — so the builders never
+remove capability.
+
+### Type-specific sugar
+
+| Builder | Extra methods |
+|---------|---------------|
+| `MoneyColumn` | `currency(string)`, `decimals(int)` |
+| `NumberColumn`, `PercentColumn` | `decimals(int)` |
+| `DateColumn`, `DatetimeColumn`, `TimeColumn` | `pattern(string)` |
+| `BooleanColumn` | `labels(string $true, string $false)` |
+| `SelectColumn`, `MultiSelectColumn` | `enumClass(string)`, `enum(string $class, bool $required = false)`, `choices(array)` |
+| `RelationColumn` | `targetClass(string)`, `choiceLabel(string)`, `relation(string $class, ?string $choiceLabel = null, bool $required = false)` |
+
+`RelationColumn::relation()` derives the relation filter, the relation control
+and a default display closure (`$data['author']['name'] ?? $data['author']['id']`)
+in one call; pass your own `->value(...)` to override the closure.
+
+There is one builder for every column type (`TextColumn`, `UuidColumn`,
+`HtmlColumn`, `JsonColumn`, `BadgeColumn`, `ColorColumn`, `CountryColumn`, …) plus
+the structural `ActionColumn`, `CheckboxColumn` and `SerialColumn`. The maker can
+scaffold this style for you with `make:gridview:crud --fluent`
+(see [CRUD](08_crud.md)).
 
 ## String shorthand
 
@@ -47,7 +135,7 @@ $columns = [
 | `renderer` | `Closure\|null` | `null` | Stage-3 cell renderer `($displayValue, $data, $column)`; overrides the type's `render` step. Return a `Twig\Markup` for raw HTML |
 | `format` | `array` | `[]` | Per-column options passed to the data type's pipeline stages (e.g. `['decimals' => 2]` for `number`/`currency`) |
 | `twigFilter` | `string\|null` | `null` | Any Twig filter applied to the rendered value (e.g. `raw`, `upper`, `date('d/m/Y')`) |
-| `active` | `bool\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
+| `active` | `bool\|array\|Closure` | `true` | Whether the column is registered on the grid **at all**. An inactive (`false`) column is dropped before any wiring: no header, body cell, filter, export entry or CRUD form field — as if it were never declared. Use it for access control (deciding *who* may see a column). An **array** narrows this per context — `['inIndex' => bool, 'inShow' => bool, 'inCreate' => bool, 'inUpdate' => bool]`, omitted keys default to `true` — so a column can be dropped from just the grid, the detail view, or one of the CRUD forms (see [Per-context visibility](#per-context-visibility-onlyon--hideon)). Contrast with `visible`, which keeps the column but hides it. A closure is evaluated once at build time |
 | `visible` | `bool\|Closure` | `true` | Whether a (registered) column is shown; `false` columns are still rendered in the DOM and data — just hidden with CSS and toggleable via the UI. To remove a column entirely, use `active` instead |
 | `filter` | `array\|bool\|null` | `null` | Column filter definition (requires a `SearchModel`). `true` enables a filter whose type is inherited from the column `type`; an array may set its own `type` to override it. The optional `clear` key chooses the clear affordance(s) — funnel icon, inline ✕ or external chip (see [Clearing a single column's filter](04_filtering.md#clearing-a-single-columns-filter--filterclear)) |
 | `sortable` | `bool` | `true` | Whether clicking the header sorts the grid |
@@ -85,6 +173,66 @@ protected function buildColumns(): array
 
 Because inactive columns never reach the CRUD form, a user who cannot see a
 column also cannot edit its value through the grid's add/update form.
+
+### Per-context visibility (`onlyOn*` / `hideOn*`)
+
+The same `active` switch drives **where** a column appears across the four
+contexts the bundle renders: `index` (the grid table), `show` (the detail view),
+`create` and `update` (the CRUD forms). Instead of writing the `active` array by
+hand, the fluent builders expose one shortcut per case — the equivalent of
+EasyAdmin's `onlyOnIndex()` / `onlyOnDetail()` / `onlyOnForms()`, but named after
+this bundle's own contexts and with a per-form pair EasyAdmin doesn't have
+(`create` vs `update`):
+
+| Method | Column appears in |
+|--------|-------------------|
+| `onlyOnIndex()` | the grid table only |
+| `onlyOnShow()` | the detail view only |
+| `onlyOnForm()` | both CRUD forms (create + update) |
+| `onlyOnCreate()` | the create form only |
+| `onlyOnUpdate()` | the update (edit) form only |
+| `hideOnIndex()` | everywhere except the grid table |
+| `hideOnShow()` | everywhere except the detail view |
+| `hideOnForm()` | everywhere except the CRUD forms |
+| `hideOnCreate()` | everywhere except the create form |
+| `hideOnUpdate()` | everywhere except the update form |
+
+This is the right tool for fields you don't want in the grid but do want in the
+form — long text, a slug, an image upload — without falling back to
+`visible(false)` (which keeps the field in the DOM and data, just hidden). A blog
+post that shows a rich-text editor in the form and the rendered HTML on the
+detail page:
+
+```php
+use Fedale\GridviewBundle\Column\Config\HtmlColumn;
+use Fedale\GridviewBundle\Column\Config\MediaColumn;
+use Fedale\GridviewBundle\Column\Config\RichTextColumn;
+use Fedale\GridviewBundle\Column\Config\TextColumn;
+
+protected function buildColumns(): array
+{
+    return [
+        TextColumn::new('title')->label('Title')->sortable()->required(),
+
+        // Editor in the create/update form; rendered HTML on the detail page.
+        RichTextColumn::new('content')->label('Content')->onlyOnForm(),
+        HtmlColumn::new('content')->label('Content')->onlyOnShow(),
+
+        // Slug and upload belong in the forms, never in the grid.
+        TextColumn::new('slug')->label('Slug')->onlyOnForm(),
+        MediaColumn::new('featuredImage')->label('Image')->onlyOnForm(),
+
+        // A read-only counter that makes sense only on the detail page.
+        NumberColumn::new('viewCount')->label('Views')->onlyOnShow(),
+    ];
+}
+```
+
+Two columns can share the same `attribute` (as `content` does above): one active
+in the form, the other on the detail page. `onlyOnForm()`/`hideOnForm()` cover
+both create and update at once; reach for `onlyOnCreate()`/`onlyOnUpdate()` (or
+the finer `control.modes` key) only when a field must differ between adding and
+editing.
 
 ## Column types
 

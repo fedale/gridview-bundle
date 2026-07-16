@@ -75,6 +75,35 @@ Or register directly via `ColumnFactory::register()`:
 $columnFactory->register('status_badge', StatusBadgeColumn::class);
 ```
 
+### An optional fluent builder for your type
+
+The built-in [fluent builders](02_columns.md#fluent-builder-api) are plain
+classes that assemble the column spec, so you can ship one for a custom type too.
+Extend `AbstractColumnConfig`, return your type from `columnType()` (or set
+`$this->spec['type']` when the type has no `ColumnType` case), and add any
+type-specific sugar:
+
+```php
+use Fedale\GridviewBundle\Column\Config\AbstractColumnConfig;
+
+class StatusBadgeColumn extends AbstractColumnConfig
+{
+    protected static function columnType(): ColumnType
+    {
+        return ColumnType::Badge;
+    }
+
+    public function palette(string $name): static
+    {
+        return $this->format(['palette' => $name]);
+    }
+}
+```
+
+`StatusBadgeColumn::new('status')->palette('traffic')` then works anywhere an
+array spec does, because `ColumnFactory::create()` accepts any
+`ColumnConfigInterface`.
+
 ## Creating a custom data provider
 
 The default `DataProviderInterface` implementation, `EntityDataProvider`, reads from Doctrine.

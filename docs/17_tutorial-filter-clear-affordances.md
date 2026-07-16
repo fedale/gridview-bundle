@@ -27,10 +27,14 @@ protected function viewConfig(): array
 {
     return [
         'options' => [
-            // All columns use 'chip' clear mode by default
-            'filterControls' => ['clear' => 'chip'],
-            // Place the chips in the layout (opt-in; not in the default layout)
-            'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+            'behavior' => [
+                // All columns use 'chip' clear mode by default
+                'filterControls' => ['clear' => 'chip'],
+            ],
+            'display' => [
+                // Place the chips in the layout (opt-in; not in the default layout)
+                'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+            ],
         ],
     ];
 }
@@ -112,8 +116,12 @@ the button.
 Enable it globally (legacy style):
 
 ```php
-'filterControls' => [
-    'inlineClear' => true,  // all columns show ✕ inside their inputs by default
+'options' => [
+    'behavior' => [
+        'filterControls' => [
+            'inlineClear' => true,  // all columns show ✕ inside their inputs by default
+        ],
+    ],
 ],
 ```
 
@@ -134,8 +142,8 @@ Or per-column to override the grid-level default:
 
 ```php
 'options' => [
-    'filterControls' => ['clear' => 'chip'],
-    'layout'         => ['header' => '{heading} {toolbar} {filterChips}'],
+    'behavior' => ['filterControls' => ['clear' => 'chip']],
+    'display'  => ['layout' => ['header' => '{heading} {toolbar} {filterChips}']],
 ],
 ```
 
@@ -146,8 +154,8 @@ is applied.
 
 ```php
 'options' => [
-    'filterControls' => ['clear' => ['header', 'chip']],
-    'layout'         => ['header' => '{heading} {toolbar} {filterChips}'],
+    'behavior' => ['filterControls' => ['clear' => ['header', 'chip']]],
+    'display'  => ['layout' => ['header' => '{heading} {toolbar} {filterChips}']],
 ],
 ```
 
@@ -190,17 +198,19 @@ The funnel is replaced with your domain icon, making the filter feel more integr
 The `{filterChips}` token is opt-in and can go anywhere in the layout:
 
 ```php
+// (all under options.display)
+
 // Under the toolbar (most common)
-'layout' => ['header' => '{heading} {toolbar} {filterChips}'],
+'display' => ['layout' => ['header' => '{heading} {toolbar} {filterChips}']],
 
 // Or in a custom region (between toolbar and grid)
-'layout' => [
-    'shell'     => '{header} {dataview} {footer}',
-    'header'    => '{heading} {toolbar} {filterChips}',
-],
+'display' => ['layout' => [
+    'shell'  => '{header} {dataview} {footer}',
+    'header' => '{heading} {toolbar} {filterChips}',
+]],
 
 // Or even in the footer
-'layout' => ['footer' => '{filterChips} {pagination}'],
+'display' => ['layout' => ['footer' => '{filterChips} {pagination}']],
 ```
 
 Chips render **only when filters are active**; an empty chips section collapses to
@@ -234,7 +244,7 @@ This lets you set a grid-wide style and override only the exceptions:
 
 ```php
 'options' => [
-    'filterControls' => ['clear' => 'chip'],  // grid default: chip mode
+    'behavior' => ['filterControls' => ['clear' => 'chip']],  // grid default: chip mode
 ],
 
 // buildColumns():

@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import i18n from '../i18n.js';
 
 /**
  * Live client-side validation for generated CRUD forms (progressive enhancement
@@ -86,7 +87,7 @@ export default class extends Controller {
             .then((data) => {
                 if (data && data.exists) {
                     el.dataset.gvUniqueError = '1';
-                    this._show(el, 'Valore già in uso.');
+                    this._show(el, i18n.t('field.value_in_use'));
                 } else {
                     delete el.dataset.gvUniqueError;
                     if (el.checkValidity()) this._clear(el);

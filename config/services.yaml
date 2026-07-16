@@ -201,6 +201,8 @@ services:
     # rows) and the child-row resolver (grouped rows) for identical row data.
     fedale_gridview.row_serializer_factory:
         class: Fedale\GridviewBundle\Serializer\RowSerializerFactory
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
     Fedale\GridviewBundle\Serializer\RowSerializerFactory: '@fedale_gridview.row_serializer_factory'
 
     # Resolves grouped child rows by navigating a Doctrine association on the

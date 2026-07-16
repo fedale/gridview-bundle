@@ -27,7 +27,7 @@ class EntityDataProviderAggregateTest extends TestCase
             $this->createMock(EventDispatcherInterface::class),
             $em,
             $requestStack,
-            new RowSerializerFactory()
+            new RowSerializerFactory($em)
         );
         $provider->setQueryBuilder(
             (new QueryBuilder($em))->select('e')->from('App\Entity\Order', 'e')

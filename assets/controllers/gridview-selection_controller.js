@@ -41,8 +41,8 @@ export default class extends Controller {
         sessionStorage.setItem(this._key, JSON.stringify([...set]));
     }
 
-    // Ripristina le checkbox della pagina corrente.
-    // In all-mode tutte le righe sono selezionate a prescindere dal Set.
+    // Restore the checkboxes of the current page.
+    // In all-mode every row is selected regardless of the Set.
     _restore() {
         if (this._isAllMode()) {
             this.checkboxTargets.forEach(cb => { cb.checked = true; });
@@ -52,13 +52,13 @@ export default class extends Controller {
         }
     }
 
-    // Checkbox singola riga — esce dall'all-mode (stile Gmail)
+    // Single-row checkbox — leaves all-mode (Gmail style)
     toggle(event) {
         const wasAllMode = this._isAllMode();
         sessionStorage.removeItem(this._allKey);
         const sel = this._load();
         if (wasAllMode) {
-            // Popola il Set con tutte le visibili già selezionate come punto di partenza
+            // Seed the Set with all the visible rows already checked as a starting point
             this.checkboxTargets.forEach(cb => { if (cb.checked) sel.add(cb.value); });
         }
         event.target.checked ? sel.add(event.target.value) : sel.delete(event.target.value);
@@ -66,7 +66,7 @@ export default class extends Controller {
         this._syncHeader();
     }
 
-    // Checkbox header: seleziona/deseleziona tutte le righe visibili (esce dall'all-mode)
+    // Header checkbox: select/deselect all visible rows (leaves all-mode)
     togglePage(event) {
         sessionStorage.removeItem(this._allKey);
         const sel = this._load();
@@ -78,7 +78,7 @@ export default class extends Controller {
         this._syncHeader();
     }
 
-    // Caret → "Seleziona visibili": aggiunge la pagina corrente, esce dall'all-mode
+    // Caret → "Select visible": adds the current page, leaves all-mode
     selectVisible() {
         sessionStorage.removeItem(this._allKey);
         const sel = this._load();
@@ -87,14 +87,14 @@ export default class extends Controller {
         this._syncHeader();
     }
 
-    // Caret → "Seleziona tutti i record": all-mode — ogni pagina caricata mostra tutte le checkbox selezionate
+    // Caret → "Select all records": all-mode — every loaded page shows all checkboxes selected
     selectAll() {
         sessionStorage.setItem(this._allKey, '1');
         this.checkboxTargets.forEach(cb => { cb.checked = true; });
         this._syncHeader();
     }
 
-    // Caret → "Deseleziona": azzera tutto
+    // Caret → "Deselect": clears everything
     deselectAll() {
         sessionStorage.removeItem(this._key);
         sessionStorage.removeItem(this._allKey);
@@ -102,7 +102,7 @@ export default class extends Controller {
         this._syncHeader();
     }
 
-    // Sincronizza la checkbox header
+    // Sync the header checkbox
     _syncHeader() {
         this._syncBulkBar();
         if (!this.hasHeaderCheckboxTarget) return;
@@ -112,7 +112,7 @@ export default class extends Controller {
         this.headerCheckboxTarget.indeterminate = checked > 0 && checked < total;
     }
 
-    // Mostra/nasconde la barra azioni bulk e aggiorna il conteggio.
+    // Show/hide the bulk actions bar and update the count.
     _syncBulkBar() {
         if (!this.hasBulkBarTarget) return;
         const allMode = this._isAllMode();
@@ -125,7 +125,7 @@ export default class extends Controller {
         }
     }
 
-    // ── Selezioni salvate (provider persistente, scope per-rotta) ──────
+    // ── Saved selections (persistent provider, per-route scope) ──────
 
     async saveSelection() {
         const ids = [...this._load()];
@@ -139,7 +139,7 @@ export default class extends Controller {
         }
 
         const items = preferenceProvider().load(this._scope, 'selections');
-        // N = numero di righe selezionate.
+        // N = number of selected rows.
         const proposed = `${i18n.t('selection.label')} ${new Date().toLocaleDateString(i18n.getLocale())} (${ids.length})`;
         const name = await promptModal({ title: i18n.t('selection.save_title'), label: i18n.t('field.name'), value: proposed });
         if (!name) return;
@@ -196,8 +196,8 @@ export default class extends Controller {
         return d.innerHTML;
     }
 
-    // Azione bulk: costruisce l'URL con gli id selezionati (o all-mode + filtri
-    // correnti) e chiede al controller gridview-crud di aprire il modale.
+    // Bulk action: builds the URL with the selected ids (or all-mode + current
+    // filters) and asks the gridview-crud controller to open the modal.
     bulk(event) {
         const base = event.params.url;
         if (!base) return;

@@ -2,6 +2,8 @@
 
 namespace Fedale\GridviewBundle\Tests\Serializer;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Fedale\GridviewBundle\Serializer\AccessorPrefixNameConverter;
 use Fedale\GridviewBundle\Serializer\LazyAwareObjectNormalizer;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +43,12 @@ class AccessorPrefixNameConverterTest extends TestCase
 
     public function testSerializedRowUsesTheDoctrineFieldName(): void
     {
-        $normalizer = new LazyAwareObjectNormalizer(null, new AccessorPrefixNameConverter());
+        $metadataFactory = $this->createMock(ClassMetadataFactory::class);
+        $metadataFactory->method('isTransient')->willReturn(true);
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('getMetadataFactory')->willReturn($metadataFactory);
+
+        $normalizer = new LazyAwareObjectNormalizer($em, null, new AccessorPrefixNameConverter());
         new Serializer([$normalizer]);
 
         $data = $normalizer->normalize(new PrefixedModel());

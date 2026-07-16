@@ -402,7 +402,10 @@ The grid-level default lives in `options.behavior.filterControls.choiceControlsT
 
 ```php
 // Raise the threshold for the whole grid (controls appear only from 30 options up)
-->setOptions(['behavior' => ['filterControls' => ['choiceControlsThreshold' => 30]]])
+protected function viewConfig(): array
+{
+    return ['options' => ['behavior' => ['filterControls' => ['choiceControlsThreshold' => 30]]]];
+}
 
 // …or per column, overriding the grid default
 'filter' => ['type' => 'relation', 'options' => [
@@ -621,6 +624,26 @@ applier options (e.g. `['date', 'c.createdAt', ['end_of_day' => false]]`).
 Map keys are the **submitted param names**, i.e. the column attribute with dots replaced
 by underscores (`t.name` → `t_name`).
 
+**Declarative alternative (no repository `search()`):** for entities whose
+repository does not implement `search()`, pass the same map through
+`dataConfig()` under `search.map` — parallel to `sort.map`:
+
+```php
+'search' => [
+    'map' => [
+        'code'  => ['text', 'c.code'],
+        'email' => ['text', 'c.email'],
+    ],
+],
+'sort' => [
+    'map'     => ['code' => ['asc' => ['c.code'], 'desc' => ['c.code']]],
+    'default' => ['code' => 'asc'],
+],
+```
+
+The flat `'searchFields' => [...]` key is the legacy alias of `search.map` and
+still works.
+
 **Built-in types:** `text`, `boolean`, `date`, `number`, `choice`, `relation`.
 
 **Semantics:**
@@ -744,16 +767,21 @@ Global search adds a single text input that queries multiple fields at once.
 Declare the DQL fields to search and add the `{globalSearch}` token to the toolbar layout:
 
 ```php
-->setOptions([
-    'behavior' => [
-        'globalSearch' => ['c.name', 'c.email', 'c.code'],
-    ],
-    'display' => [
-        'layout' => [
-            'toolbar' => '{globalSearch}',
+protected function viewConfig(): array
+{
+    return [
+        'options' => [
+            'behavior' => [
+                'globalSearch' => ['c.name', 'c.email', 'c.code'],
+            ],
+            'display' => [
+                'layout' => [
+                    'toolbar' => '{globalSearch}',
+                ],
+            ],
         ],
-    ],
-])
+    ];
+}
 ```
 
 The search field auto-submits with a 300 ms debounce via the `gridview-filter` Stimulus

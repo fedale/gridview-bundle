@@ -7,16 +7,16 @@ use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Export\ExporterInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 /**
- * Gridview Bundle
+ * Gridview Bundle.
  */
 class FedaleGridviewBundle extends AbstractBundle
 {
-    //protected string $extensionAlias = 'gridview'; 
+    // protected string $extensionAlias = 'gridview';
 
     public function loadExtension(array $config, ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void
     {
@@ -208,6 +208,10 @@ class FedaleGridviewBundle extends AbstractBundle
             // `viewConfig()['form']['mode']` — see
             // AbstractCrudGridController::crudOptions().
             ->scalarNode('crudMode')->defaultValue('modal')->end()
+            // Symfony form theme(s) for the CRUD form: a template name or a list
+            // of them. null → the bundle's gv_form_theme. Bridged from
+            // `viewConfig()['form']['theme']` — see AbstractCrudGridController.
+            ->variableNode('formTheme')->defaultNull()->end()
             ->arrayNode('filterControls')
             ->addDefaultsIfNotSet()
             ->children()

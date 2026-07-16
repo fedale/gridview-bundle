@@ -26,6 +26,13 @@ $detail = $factory->createDetailViewBuilder()
 return $detail->render();               // → Response (Twig key/value table)
 ```
 
+> **Note.** A `DetailView` has its own small, **flat** option set (e.g. `onlyVisible`)
+> — it does *not* use the grid's grouped `display` / `behavior` / `integration`
+> payload (see [How your configuration reaches the grid](08_crud.md#how-your-configuration-reaches-the-grid)),
+> because a single-record view has no toolbar, layout or integration concerns.
+> In `AbstractDetailController` these options are passed through unchanged from
+> `viewConfig()['options']`.
+
 The factory method mirrors `createGridviewBuilder()`:
 
 ```php

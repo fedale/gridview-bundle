@@ -1,8 +1,8 @@
-{# Sezione infinite scroll: rimpiazza il token {pagination} quando
-   options.pagination.mode == 'infinite'. Stato (pagina/ultima/URL prossima) sui
-   data-*; il controller Stimulus li rilegge dal DOM ad ogni loadMore, così segue
-   il nodo ricreato dal turbo-stream replace. Funziona anche senza JS grazie al
-   bottone "Carica altri". #}
+{# Infinite scroll section: replaces the {pagination} token when
+   options.pagination.mode == 'infinite'. State (page/last/next URL) lives on the
+   data-*; the Stimulus controller re-reads it from the DOM on every loadMore, so it
+   follows the node recreated by the turbo-stream replace. It also works without JS
+   thanks to the "Load more" button. #}
 {% set _currentRoute = app.request.attributes.get('_route') %}
 {% set _lastPage     = pagination.pageCount %}
 {% set _page         = max(1, min(gridview.urlState.page, _lastPage > 0 ? _lastPage : 1)) %}

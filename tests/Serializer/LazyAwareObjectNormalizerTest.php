@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Tests\Serializer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Proxy;
 use Fedale\GridviewBundle\Serializer\LazyAwareObjectNormalizer;
@@ -15,7 +16,27 @@ class LazyAwareObjectNormalizerTest extends TestCase
 {
     private function normalizer(): LazyAwareObjectNormalizer
     {
-        $normalizer = new LazyAwareObjectNormalizer();
+        // Treat NormalizableModel as a mapped entity whose 'collection' and
+        // 'proxy' properties are Doctrine associations, so the guard registers
+        // a callback for them (associations are read from the metadata).
+        $metadata = $this->createMock(ClassMetadata::class);
+        $metadata->method('getAssociationNames')->willReturn(['collection', 'proxy', 'ghost']);
+
+        $metadataFactory = $this->createMock(ClassMetadataFactory::class);
+        $metadataFactory->method('isTransient')->willReturn(false);
+
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('getMetadataFactory')->willReturn($metadataFactory);
+        $em->method('getClassMetadata')->willReturn($metadata);
+        // ORM 3 lazy ghosts are not Proxy instances; the guard resolves the
+        // initialization state through the EntityManager, which also reports
+        // classic proxies as uninitialized.
+        $em->method('isUninitializedObject')->willReturnCallback(
+            static fn (object $value): bool => $value instanceof LazyGhostStub
+                || ($value instanceof Proxy && !$value->__isInitialized())
+        );
+
+        $normalizer = new LazyAwareObjectNormalizer($em);
         // ObjectNormalizer needs a serializer to recurse into nested objects/collections.
         new Serializer([$normalizer]);
 
@@ -88,6 +109,34 @@ class LazyAwareObjectNormalizerTest extends TestCase
 
         $this->assertNull($data['proxy'], 'Uninitialized proxy must not be loaded.');
     }
+
+    public function testUninitializedLazyGhostIsSkipped(): void
+    {
+        // ORM 3 hydrates an uninitialized to-one as a lazy ghost: a real
+        // instance of the entity class that is NOT a Proxy. The guard must
+        // still skip it, resolving its state through the EntityManager.
+        $entity = new NormalizableModel();
+        $entity->setGhost(new LazyGhostStub());
+
+        $data = $this->normalizer()->normalize($entity);
+
+        $this->assertNull($data['ghost'], 'Uninitialized lazy ghost must not be loaded.');
+    }
+}
+
+/** A stand-in for an uninitialized ORM 3 lazy ghost: a plain, non-Proxy object. */
+class LazyGhostStub
+{
+    public bool $loaded = false;
+
+    public function getLoaded(): bool
+    {
+        // Reading any getter would initialize a real lazy ghost; if the guard
+        // fails and the serializer walks into this, the flag flips.
+        $this->loaded = true;
+
+        return $this->loaded;
+    }
 }
 
 class NormalizableModel
@@ -97,6 +146,8 @@ class NormalizableModel
     private mixed $collection = null;
 
     private mixed $proxy = null;
+
+    private mixed $ghost = null;
 
     public function getName(): string
     {
@@ -133,5 +184,15 @@ class NormalizableModel
     public function setProxy(mixed $proxy): void
     {
         $this->proxy = $proxy;
+    }
+
+    public function getGhost(): mixed
+    {
+        return $this->ghost;
+    }
+
+    public function setGhost(mixed $ghost): void
+    {
+        $this->ghost = $ghost;
     }
 }
