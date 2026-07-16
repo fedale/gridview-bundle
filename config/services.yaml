@@ -153,6 +153,7 @@ services:
             - '@fedale_gridview.config_registry'
             - '@fedale_gridview.column_factory'
             - '@fedale_gridview.theme_registry'
+            - !tagged_locator { tag: fedale_gridview.data_provider }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
     Fedale\GridviewBundle\Contract\GridviewBuilderInterface: '@fedale_gridview.gridview_builder'
 
@@ -188,6 +189,12 @@ services:
             - '@fedale_gridview.config_registry'
             - '@fedale_gridview.column_factory'
             - '@fedale_gridview.theme_registry'
+            # Indexed-by-service-id locator of every DataProviderInterface
+            # implementation (built-in EntityDataProvider + any autoconfigured
+            # host-app provider), used by GridviewBuilder to resolve
+            # `defaults.dataProvider` / `gridviews.<id>.dataProvider` without
+            # eagerly instantiating every provider.
+            - !tagged_locator { tag: fedale_gridview.data_provider }
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
     # Builds the entity-to-row serializer, shared by the data provider (parent
@@ -218,6 +225,12 @@ services:
             - [setSearchModel, ['@fedale_gridview.search_model']]
             - [setSearchForm, ['@fedale_gridview.search_form']]
             - [setChildResolver, ['@fedale_gridview.child_row_resolver']]
+        # Not autoconfigured (explicit `class:`/`arguments:` above), so the tag is
+        # added by hand — lets it be selected explicitly via `dataProvider:
+        # fedale_gridview.entity_data_provider`, though it's already the default
+        # when `dataProvider` is left unset.
+        tags:
+            - { name: fedale_gridview.data_provider }
     Fedale\GridviewBundle\Contract\DataProviderInterface: '@fedale_gridview.entity_data_provider'
 
     fedale_gridview.sort:

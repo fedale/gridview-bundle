@@ -34,6 +34,7 @@ class GridviewLayoutEngineTest extends TestCase
             new GridviewConfigRegistry($config),
             new ColumnFactory(),
             new ThemeRegistry([]),
+            new \Symfony\Component\DependencyInjection\ServiceLocator([]),
         );
 
         return $builder->renderGridview();

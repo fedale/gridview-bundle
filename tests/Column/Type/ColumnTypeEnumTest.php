@@ -115,6 +115,7 @@ class ColumnTypeEnumTest extends TestCase
             new GridviewConfigRegistry([]),
             new ColumnFactory(),
             new ThemeRegistry([]),
+            new \Symfony\Component\DependencyInjection\ServiceLocator([]),
         ))
             ->setColumns([$spec])
             ->renderGridview();

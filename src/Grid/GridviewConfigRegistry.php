@@ -216,6 +216,24 @@ class GridviewConfigRegistry
     }
 
     /**
+     * Service id of the DataProviderInterface implementation to use for this
+     * grid, or null to keep the bundle's default (Doctrine-backed) provider.
+     * `gridviews.<id>.dataProvider` overrides `defaults.dataProvider`; the
+     * resolved id is looked up in fedale_gridview.data_provider_locator by
+     * {@see \Fedale\GridviewBundle\Grid\GridviewBuilder::renderGridview()}.
+     */
+    public function resolveDataProvider(?string $id): ?string
+    {
+        $resolved = $this->config['defaults']['dataProvider'] ?? null;
+
+        if ($id !== null && isset($this->config['gridviews'][$id]['dataProvider'])) {
+            $resolved = $this->config['gridviews'][$id]['dataProvider'];
+        }
+
+        return $resolved;
+    }
+
+    /**
      * Options for a DetailView. Sibling of {@see resolveOptions()} but it reads
      * the dedicated `defaults.detailview` / `detailviews.<id>` sections — never
      * the grid-only `gridviews.<id>`, whose pagination/realtime/layout keys are

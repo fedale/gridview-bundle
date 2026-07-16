@@ -75,6 +75,188 @@ Or register directly via `ColumnFactory::register()`:
 $columnFactory->register('status_badge', StatusBadgeColumn::class);
 ```
 
+## Creating a custom data provider
+
+The default `DataProviderInterface` implementation, `EntityDataProvider`, reads from Doctrine.
+To back a grid with something else — an HTTP API, a CLI tool's output, anything iterable — write
+your own implementation and select it **per grid, from config**: `gridviews.<id>.dataProvider:
+<service id>` (or `defaults.dataProvider` for every grid in the app). Every other grid keeps the
+bundle's default (Doctrine-backed) provider untouched.
+
+1. Extend `AbstractDataProvider`, which already implements the boilerplate setters
+   (`setDefaultParams`, `setAlias`, `setSearchFields`, `setIgnoredAttributes`,
+   `setPagination`/`getPagination`, `setSort`/`getSort`). You only need to implement:
+   `prepareModels()`, `setFormName()`, `getData()`, `getAllData()`, `applyGlobalSearch()`.
+
+```php
+// src/DataProvider/HttpApiDataProvider.php
+namespace App\DataProvider;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Fedale\GridviewBundle\DataProvider\AbstractDataProvider;
+use Fedale\GridviewBundle\Event\RowEvent;
+use Fedale\GridviewBundle\Row\Row;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+final class HttpApiDataProvider extends AbstractDataProvider
+{
+    private string $resource;
+    private ?string $searchTerm = null;
+
+    public function __construct(
+        private readonly HttpClientInterface $httpClient,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly string $baseUri,
+    ) {}
+
+    public function prepareModels(string|array $models): void
+    {
+        $this->resource = is_string($models) ? $models : ($models['resource'] ?? '');
+    }
+
+    public function setFormName(string $formName): void
+    {
+        // No-op unless you build a filter form keyed under this param.
+    }
+
+    public function applyGlobalSearch(array $fields, string $term): void
+    {
+        $this->searchTerm = $term;
+    }
+
+    public function getData()
+    {
+        // IMPORTANT: set totalCount before reading getOffset(). Pagination::
+        // getCurrentPage() clamps the requested page against the page count on
+        // its first call and caches the result — reading the offset first
+        // clamps against a stale totalCount of 0 and yields a negative offset
+        // on any page beyond the first. EntityDataProvider does the same:
+        // it runs getTotalCount() before setFirstResult()/setMaxResults().
+        $this->pagination->setTotalCount($this->fetchTotalCount());
+
+        $limit  = $this->pagination->getPageSize() ?? 10;
+        $offset = $this->pagination->getOffset();
+
+        $payload = $this->fetch($limit, $offset);
+        $this->models = $this->buildRows($payload['items'] ?? [], $limit, $offset);
+
+        return $this->models;
+    }
+
+    public function getAllData()
+    {
+        $payload = $this->fetch(0, 0); // 0 = "no limit", if your API supports it
+        return $this->buildRows($payload['items'] ?? [], 0, 0);
+    }
+
+    private function fetchTotalCount(): int
+    {
+        return (int) ($this->fetch(1, 0)['total'] ?? 0);
+    }
+
+    private function buildRows(array $items, int $pageSize, int $offset): ArrayCollection
+    {
+        $rows = new ArrayCollection();
+        foreach ($items as $key => $item) {
+            $row = new Row($key, $pageSize, $offset);
+            $row->data = $item;
+
+            $event = new RowEvent();
+            $event->row = $row;
+            $this->eventDispatcher->dispatch($event, RowEvent::BEFORE_ROW);
+            $rows->add($row);
+            $this->eventDispatcher->dispatch($event, RowEvent::AFTER_ROW);
+        }
+        return $rows;
+    }
+
+    private function fetch(int $limit, int $offset): array
+    {
+        $query = ['limit' => $limit, 'offset' => $offset];
+        if ($this->searchTerm) {
+            $query['q'] = $this->searchTerm;
+        }
+        foreach ($this->getSort()->fetchOrders() as $field => $direction) {
+            $query['sortBy'] = $field;
+            $query['order'] = $direction;
+            break; // single-field sort, adapt if your API supports multi-sort
+        }
+
+        return $this->httpClient
+            ->request('GET', $this->baseUri . '/' . $this->resource, ['query' => $query])
+            ->toArray();
+    }
+}
+```
+
+2. Wire `setSort`/`setPagination` explicitly — they're setter injection, not constructor args, so
+   plain autowiring won't call them. Mirror the bundle's own wiring of
+   `fedale_gridview.entity_data_provider` in `vendor/fedale/gridview-bundle/config/services.yaml`:
+
+```yaml
+# config/services.yaml
+services:
+    App\DataProvider\HttpApiDataProvider:
+        arguments:
+            $baseUri: 'https://api.example.com'
+        calls:
+            - [setSort, ['@fedale_gridview.sort']]
+            - [setPagination, ['@fedale_gridview.pagination']]
+```
+
+   A class implementing `DataProviderInterface` is auto-tagged `fedale_gridview.data_provider` as
+   soon as it's autoconfigured (the default for any app service under Symfony's `services.yaml`
+   `App\` resource) — no manual tag needed, just the `calls:` above.
+
+3. Select it for one grid via `gridviews.<id>.dataProvider`, or for every grid via
+   `defaults.dataProvider`. The id is the grid's own id — `strtolower((new
+   ReflectionClass($this->getDataClass()))->getShortName())` unless a controller overrides it via
+   `viewConfig()['id']` (see `AbstractGridController::defaultConfig()`):
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    gridviews:
+        customer: # id of the grid backed by App\Model\Customer
+            dataProvider: App\DataProvider\HttpApiDataProvider
+```
+
+   No controller code is needed: `GridviewBuilder::renderGridview()` resolves the configured
+   service id through a locator of every tagged `DataProviderInterface` implementation and swaps
+   it in before the grid renders. An unknown/mistyped service id throws `InvalidArgumentException`
+   at render time, naming the grid id and the id it couldn't resolve.
+
+> **Read-only.** `GridCrudHandlerInterface` (add/edit/delete/batch/inline) is hardwired to
+> Doctrine's `EntityManagerInterface` — there is no pluggable write path today. Extend
+> `AbstractGridController`, not `AbstractCrudGridController`, for a non-Doctrine data source.
+
+### Alternative: swapping the provider at runtime
+
+`gridviews.<id>.dataProvider` is a *static* choice, resolved once from config. For a provider
+picked dynamically per request (a feature flag, a per-tenant setting, an A/B test), override
+`buildGridview()` in that one controller instead — same effect, decided in PHP instead of YAML:
+
+```php
+use Fedale\GridviewBundle\Grid\Gridview;
+
+class ApiBackedController extends AbstractGridController
+{
+    protected function buildGridview(): Gridview
+    {
+        $gridview = parent::buildGridview();
+        $gridview->setDataProvider($this->container->get(HttpApiDataProvider::class));
+
+        return $gridview;
+    }
+
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [HttpApiDataProvider::class]);
+    }
+}
+```
+
 ## Listening to row events
 
 `RowEvent` is dispatched twice for every data row — before and after it is added to the

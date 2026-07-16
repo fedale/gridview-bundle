@@ -27,6 +27,7 @@ class GridviewThemeTest extends TestCase
             new GridviewConfigRegistry($config),
             new ColumnFactory(),
             new ThemeRegistry($customThemes),
+            new \Symfony\Component\DependencyInjection\ServiceLocator([]),
         );
     }
 

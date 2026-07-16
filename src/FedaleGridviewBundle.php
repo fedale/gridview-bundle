@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle;
 
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
+use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Export\ExporterInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -40,6 +41,15 @@ class FedaleGridviewBundle extends AbstractBundle
         // `options.pagination.mode`. Reusing a built-in name overrides it.
         $containerBuilder->registerForAutoconfiguration(PaginatorStrategyInterface::class)
             ->addTag('fedale_gridview.paginator_strategy');
+
+        // Any host-app DataProviderInterface service is auto-tagged and made
+        // resolvable by service id via the tagged_locator injected into
+        // GridviewBuilder/GridviewBuilderFactory (see config/services.yaml),
+        // selectable per grid via `defaults.dataProvider`
+        // / `gridviews.<id>.dataProvider` — no controller code required to swap a
+        // grid's data source away from the default (Doctrine-backed) provider.
+        $containerBuilder->registerForAutoconfiguration(DataProviderInterface::class)
+            ->addTag('fedale_gridview.data_provider');
 
         // make:gridview:crud is dev-tooling only, guarded so an app without
         // symfony/maker-bundle installed never sees the service defined at all.
@@ -117,6 +127,14 @@ class FedaleGridviewBundle extends AbstractBundle
             ->arrayNode('defaults')
             ->addDefaultsIfNotSet()
             ->children()
+            // Service id of a custom DataProviderInterface implementation used
+            // for every grid; null keeps the bundle's default
+            // (fedale_gridview.entity_data_provider, Doctrine-backed). The
+            // service must implement DataProviderInterface — autoconfigured
+            // host-app services get the required tag automatically, see
+            // FedaleGridviewBundle::loadExtension(). Per-grid
+            // `gridviews.<id>.dataProvider` overrides this.
+            ->scalarNode('dataProvider')->defaultNull()->end()
             // `options:` is dissolved into three siblings, grouped by topic —
             // display (look & text), behavior (interaction), integration
             // (routes/CRUD wiring) — purely for readability; there is no
@@ -276,6 +294,8 @@ class FedaleGridviewBundle extends AbstractBundle
             ->useAttributeAsKey('name')
             ->arrayPrototype()
             ->children()
+            // Overrides `defaults.dataProvider` for this grid only.
+            ->scalarNode('dataProvider')->end()
             ->arrayNode('display')
             ->children()
             ->scalarNode('caption')->end()

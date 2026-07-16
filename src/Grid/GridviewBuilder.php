@@ -6,6 +6,7 @@ use Fedale\GridviewBundle\Contract\GridviewBuilderInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
+use Psr\Container\ContainerInterface;
 
 /**
  * @phpstan-import-type ColumnSpec from \Fedale\GridviewBundle\Column\ColumnFactory
@@ -27,6 +28,7 @@ class GridviewBuilder implements GridviewBuilderInterface
         private GridviewConfigRegistry $configRegistry,
         private ColumnFactory $columnFactory,
         private ThemeRegistry $themeRegistry,
+        private ContainerInterface $dataProviderLocator,
     ) {
         $this->reset();
     }
@@ -106,6 +108,24 @@ class GridviewBuilder implements GridviewBuilderInterface
             $dataProviderOptions = $this->runtimeDataProviderOptions;
             $dataProviderOptions['pagination'] = array_replace($paginationDefaults, $dataProviderOptions['pagination'] ?? []);
             $this->gridview->setDataProviderOptions($dataProviderOptions);
+
+            // Swap the default (Doctrine-backed) provider for a config-declared one,
+            // resolved by service id — no controller code needed. Any service
+            // implementing DataProviderInterface qualifies, built-in or host-app
+            // custom, as long as it's reachable through the locator (autoconfigured
+            // services get the required tag automatically, see
+            // FedaleGridviewBundle::loadExtension()).
+            $dataProviderId = $this->configRegistry->resolveDataProvider($id);
+            if ($dataProviderId !== null) {
+                if (!$this->dataProviderLocator->has($dataProviderId)) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'Gridview "%1$s" is configured with dataProvider "%2$s", but no service with that id implements DataProviderInterface (it must be autoconfigured, or tagged "fedale_gridview.data_provider"). Check "defaults.dataProvider" / "gridviews.%1$s.dataProvider".',
+                        $id,
+                        $dataProviderId,
+                    ));
+                }
+                $this->gridview->setDataProvider($this->dataProviderLocator->get($dataProviderId));
+            }
         }
 
         // Merge group-by-group (display/behavior/integration), not with a single
