@@ -169,6 +169,52 @@ class JsonDataProviderTest extends TestCase
         $this->assertSame([['id' => 3], ['id' => 4]], array_map(static fn (Row $row): array => $row->data, $rows->toArray()));
     }
 
+    public function testClientSidePaginationSortsPlainArrayInMemory(): void
+    {
+        // No totalPath and the endpoint does not sort server-side: the provider
+        // orders the fetched list itself, numerically, with empty values last.
+        $all = [
+            ['id' => 1, 'weight' => 30],
+            ['id' => 2, 'weight' => null],
+            ['id' => 3, 'weight' => 200],
+            ['id' => 4, 'weight' => 5],
+        ];
+        $client = $this->client($all);
+
+        $provider = $this->provider($client, ['weight' => 'asc'], pageSize: 10, offset: 0);
+        $provider->prepareModels(['baseUri' => 'https://api.example.test', 'resource' => 'items']);
+
+        $rows = $provider->getData();
+
+        $this->assertCount(1, $this->requests);
+        $this->assertSame(
+            [4, 1, 3, 2],
+            array_map(static fn (Row $row): int => $row->data['id'], $rows->toArray()),
+        );
+    }
+
+    public function testInMemorySortIsDescendingWithEmptyValuesStillLast(): void
+    {
+        $all = [
+            ['id' => 1, 'weight' => 30],
+            ['id' => 2, 'weight' => null],
+            ['id' => 3, 'weight' => 200],
+            ['id' => 4, 'weight' => 5],
+        ];
+        $client = $this->client($all);
+
+        $provider = $this->provider($client, ['weight' => 'desc'], pageSize: 10, offset: 0);
+        $provider->prepareModels(['baseUri' => 'https://api.example.test', 'resource' => 'items']);
+
+        $rows = $provider->getData();
+
+        // Descending by weight (200, 30, 5), and the empty weight stays last.
+        $this->assertSame(
+            [3, 1, 4, 2],
+            array_map(static fn (Row $row): int => $row->data['id'], $rows->toArray()),
+        );
+    }
+
     public function testDotPathReadsNestedListAndTotal(): void
     {
         $client = $this->client(

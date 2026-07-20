@@ -131,8 +131,9 @@ final class JsonDataProvider extends AbstractDataProvider
         }
 
         // No total path: the endpoint returns a plain list with no server-side
-        // paging, so fetch it once and slice the current page in memory.
-        $all = $this->extractList($this->fetch(null, 0));
+        // paging, so fetch it once, order it in memory (the API ignores the sort
+        // params in this mode) and slice the current page.
+        $all = $this->sortInMemory($this->extractList($this->fetch(null, 0)));
         $this->pagination->setTotalCount(count($all));
 
         $limit = $this->pagination->getPageSize() ?? $this->pagination->getDefaultPageSize();
@@ -153,7 +154,48 @@ final class JsonDataProvider extends AbstractDataProvider
             return $this->buildRows($this->extractList($payload), 0, 0);
         }
 
-        return $this->buildRows($this->extractList($this->fetch(null, 0)), 0, 0);
+        return $this->buildRows($this->sortInMemory($this->extractList($this->fetch(null, 0))), 0, 0);
+    }
+
+    /**
+     * Order a fetched list in memory by the active sort column. Used on the
+     * no-total path only: the endpoint returns the whole list and does not sort
+     * it server-side, so the grid's sort links would otherwise do nothing. The
+     * sort field is read as a plain row key; missing or empty values sort last
+     * in either direction. A no-op when no sort is active.
+     *
+     * @param list<array<string, mixed>> $items
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function sortInMemory(array $items): array
+    {
+        [$field, $direction] = $this->firstSortOrder();
+        if (null === $field) {
+            return $items;
+        }
+
+        $factor = 'desc' === $direction ? -1 : 1;
+
+        usort($items, static function (array $a, array $b) use ($field, $factor): int {
+            $left = $a[$field] ?? null;
+            $right = $b[$field] ?? null;
+
+            $leftEmpty = null === $left || '' === $left;
+            $rightEmpty = null === $right || '' === $right;
+            if ($leftEmpty || $rightEmpty) {
+                // Missing values always sort last, whatever the direction.
+                return $leftEmpty <=> $rightEmpty;
+            }
+
+            $comparison = is_numeric($left) && is_numeric($right)
+                ? ($left + 0) <=> ($right + 0)
+                : strcasecmp((string) $left, (string) $right);
+
+            return $comparison * $factor;
+        });
+
+        return $items;
     }
 
     private function probeTotal(): int
