@@ -9,6 +9,10 @@ services:
             - [setDataProvider, ['@fedale_gridview.entity_data_provider']]
             - [setPaginatorStrategyRegistry, ['@fedale_gridview.paginator_strategy_registry']]
             - [setProfileRegistry, ['@fedale_gridview.profile_registry']]
+            # Optional: absent when the app has no logger. Used to record a
+            # data-provider failure that the grid degrades over (see
+            # Gridview::renderGrid()), so the error stays discoverable in prod.
+            - [setLogger, ['@?logger']]
     Fedale\GridviewBundle\Service\GridviewService: '@fedale_gridview.gridview_service'
 
     # Per-request store of grid render snapshots for the WebProfiler. Disabled

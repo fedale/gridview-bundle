@@ -1,3 +1,10 @@
 <tr>
-    <td colspan="{{ gridview.indexColumns|length }}"><span {{ gv_i18n(gridview.options.display.emptyText) }}>{{ gridview.options.display.emptyText|trans({}, 'GridviewBundle') }}</span></td>
+    <td colspan="{{ gridview.indexColumns|length }}">
+        {% if gridview.dataLoadFailed %}
+            <span class="gv-data-error" role="alert" {{ gv_i18n(gridview.options.display.dataErrorText) }}>{{ gridview.options.display.dataErrorText|trans({}, 'GridviewBundle') }}</span>
+            {% if gridview.dataErrorDetail %}<span class="gv-data-error__detail">{{ gridview.dataErrorDetail }}</span>{% endif %}
+        {% else %}
+            <span {{ gv_i18n(gridview.options.display.emptyText) }}>{{ gridview.options.display.emptyText|trans({}, 'GridviewBundle') }}</span>
+        {% endif %}
+    </td>
 </tr>

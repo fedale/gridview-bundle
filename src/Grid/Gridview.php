@@ -83,6 +83,20 @@ class Gridview implements GridviewInterface
     public ?SearchModelInterface $searchModel = null;
 
     /**
+     * True when {@see renderGrid()} caught a failure while the data provider was
+     * fetching rows (e.g. an HTTP-backed provider whose endpoint is down or
+     * returns 4xx/5xx). The page still renders; the grid body shows an
+     * explanatory message instead of rows. See the empty-state templates.
+     */
+    public bool $dataLoadFailed = false;
+
+    /**
+     * Human-readable detail of the data-load failure, exposed only in debug
+     * (Twig debug mode). Null in production, where a generic message is shown.
+     */
+    public ?string $dataErrorDetail = null;
+
+    /**
      * `display` / `behavior` / `integration` are a readability grouping only —
      * see GridviewConfigRegistry — there is no semantic significance to the
      * split beyond making the tree easier to scan.
@@ -103,6 +117,9 @@ class Gridview implements GridviewInterface
                 'map'     => [],
             ],
             'emptyText' => 'No records found',
+            // Shown in the grid body when the data provider fails to load rows,
+            // in place of the rows. Source-as-key, localized like emptyText.
+            'dataErrorText' => 'The data could not be loaded.',
             'showThead' => true,
             'showTfoot' => true,
             'addLabel' => 'Add',
@@ -160,7 +177,7 @@ class Gridview implements GridviewInterface
 
     public function __construct(
         private GridviewService $gridviewService,
-        private ColumnFactory $columnFactory
+        private ColumnFactory $columnFactory,
     ) {
         $this->columns = new ArrayCollection();
         $this->twig = $this->gridviewService->getEnvironment();
@@ -392,11 +409,17 @@ class Gridview implements GridviewInterface
 
     /**
      * The entity FQCN backing this grid (the data provider `model` option),
-     * used as the data_class for generated CRUD forms. Null when unset.
+     * used as the data_class for generated CRUD forms and grouping. Null when
+     * unset, or when `model` is a non-string provider config array (e.g. the
+     * HTTP endpoint description JsonDataProvider consumes) — such a grid has no
+     * entity class. The `model` option is `string|array` by contract, see
+     * {@see \Fedale\GridviewBundle\Contract\DataProviderInterface::prepareModels()}.
      */
     public function getDataClass(): ?string
     {
-        return $this->dataProviderOptions['model'] ?? null;
+        $model = $this->dataProviderOptions['model'] ?? null;
+
+        return is_string($model) ? $model : null;
     }
 
     /** All rows matching the current filters/sort, unpaginated (for export). */
@@ -717,8 +740,7 @@ class Gridview implements GridviewInterface
 
         return $this->columns
             ->filter(
-                fn($col) =>
-                $col instanceof \Fedale\GridviewBundle\Column\DataColumn
+                fn($col) => $col instanceof \Fedale\GridviewBundle\Column\DataColumn
                     && (
                         $col->filterBar === true
                         || ($autoBar
@@ -984,10 +1006,30 @@ class Gridview implements GridviewInterface
             $strategy->configurePagination($this->dataProvider->getPagination(), $paginationOptions);
         }
 
-        $models = $this->dataProvider->getData();
-        $this->computeFooterSummaries($models);
-        if ($this->isGrouped()) {
-            $this->applyGrouping($models);
+        try {
+            $models = $this->dataProvider->getData();
+            $this->computeFooterSummaries($models);
+            if ($this->isGrouped()) {
+                $this->applyGrouping($models);
+            }
+        } catch (\Throwable $e) {
+            // A grid is a dataview embedded in a host page (menu, sidebar,
+            // layout): a data-source failure must degrade the grid body, not
+            // replace the whole page with an error. Fall back to an empty result
+            // and flag the failure so the template shows an explanatory message.
+            // The exception detail surfaces in the UI only in debug; it is
+            // always logged (when a logger is available) so the failure stays
+            // discoverable in production instead of being swallowed silently.
+            $this->dataLoadFailed = true;
+            $this->dataErrorDetail = $this->twig->isDebug()
+                ? sprintf('%s: %s', (new \ReflectionClass($e))->getShortName(), $e->getMessage())
+                : null;
+            $this->gridviewService->getLogger()?->error('Gridview data provider failed to load rows.', [
+                'grid' => $this->id,
+                'exception' => $e,
+            ]);
+
+            $models = new ArrayCollection();
         }
 
         $parameters = array_merge($parameters, [

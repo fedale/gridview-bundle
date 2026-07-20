@@ -1,10 +1,12 @@
 <?php
+
 namespace Fedale\GridviewBundle\Service;
 
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Form\SearchForm;
 use Fedale\GridviewBundle\Pagination\Strategy\PaginatorStrategyRegistry;
 use Fedale\GridviewBundle\Profiler\GridviewProfileRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
@@ -23,15 +25,28 @@ class GridviewService
 
     private ?GridviewProfileRegistry $profileRegistry = null;
 
-    public function __construct(private Environment $twig)
-    {}
+    private ?LoggerInterface $logger = null;
 
-    public function setSearchForm(SearchForm $searchForm)
+    public function __construct(private Environment $twig)
+    {
+    }
+
+    public function setLogger(?LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
+    }
+
+    public function getLogger(): ?LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function setSearchForm(SearchForm $searchForm): void
     {
         $this->searchForm = $searchForm;
     }
 
-    public function setRequest(RequestStack $requestStack)
+    public function setRequest(RequestStack $requestStack): void
     {
         $this->request = $requestStack->getCurrentRequest();
     }
@@ -51,7 +66,7 @@ class GridviewService
         return $this->twig;
     }
 
-    public function setDataProvider(DataProviderInterface $dataProvider)
+    public function setDataProvider(DataProviderInterface $dataProvider): void
     {
         $this->dataProvider = $dataProvider;
     }
@@ -81,7 +96,7 @@ class GridviewService
         return $this->profileRegistry;
     }
 
-    public function setAttr(string $key, string $value, $replace = false)
+    public function setAttr(string $key, string $value, $replace = false): void
     {
         if (!isset($this->attr[$key])) {
             $this->attr[$key] = $value;

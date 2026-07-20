@@ -90,4 +90,5 @@ grouping.toggle: "Mostra/nascondi record correlati"
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.
 "No records found": "Nessun record trovato"
+"The data could not be loaded.": "Impossibile caricare i dati."
 "Add": "Aggiungi"

@@ -90,4 +90,5 @@ grouping.toggle: "Toggle related records"
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.
 "No records found": "No records found"
+"The data could not be loaded.": "The data could not be loaded."
 "Add": "Add"

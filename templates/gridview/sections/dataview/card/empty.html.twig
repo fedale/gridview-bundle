@@ -1,1 +1,5 @@
-<div class="gv-card gv-cards__empty"><span {{ gv_i18n(gridview.options.display.emptyText) }}>{{ gridview.options.display.emptyText|trans({}, 'GridviewBundle') }}</span></div>
+{% if gridview.dataLoadFailed %}
+    <div class="gv-card gv-cards__empty gv-data-error" role="alert"><span {{ gv_i18n(gridview.options.display.dataErrorText) }}>{{ gridview.options.display.dataErrorText|trans({}, 'GridviewBundle') }}</span>{% if gridview.dataErrorDetail %} <span class="gv-data-error__detail">{{ gridview.dataErrorDetail }}</span>{% endif %}</div>
+{% else %}
+    <div class="gv-card gv-cards__empty"><span {{ gv_i18n(gridview.options.display.emptyText) }}>{{ gridview.options.display.emptyText|trans({}, 'GridviewBundle') }}</span></div>
+{% endif %}
