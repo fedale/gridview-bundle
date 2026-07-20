@@ -35,9 +35,11 @@
         "twig/twig": "^3.0",
         "phpstan/phpstan": "^2.0",
         "symfony/intl": "^8.1",
+        "symfony/http-client": "^6.4 || ^7.0 || ^8.0",
         "friendsofphp/php-cs-fixer": "^3.0"
     },
     "suggest": {
+        "symfony/http-client": "Enables the built-in JsonDataProvider for grids backed by a JSON-over-HTTP endpoint instead of Doctrine",
         "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",
         "symfony/maker-bundle": "Enables the make:gv:crud scaffolding command. Install it in your app with: composer require --dev symfony/maker-bundle",
         "ext-intl": "Enables full ICU-based locale-aware number/date/currency formatting; a reduced fallback is used without it.",

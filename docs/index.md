@@ -42,5 +42,6 @@ guide you need. Every page is self-contained.
   merge precedence.
 - **[JavaScript Controllers](12_javascript.md)** — the Stimulus controllers shipped with the bundle.
 - **[Real-time updates (Mercure)](13_real-time.md)** — signal-based auto-refresh.
-- **[Extending the Bundle](14_extending.md)** — public interfaces, custom columns, and row events.
+- **[Extending the Bundle](14_extending.md)** — public interfaces, custom columns, the built-in
+  `JsonDataProvider` (token-authenticated HTTP grids), custom data providers, and row events.
 - **[Full Example](15_full-example.md)** — a complete controller + template walkthrough.

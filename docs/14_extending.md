@@ -104,7 +104,122 @@ class StatusBadgeColumn extends AbstractColumnConfig
 array spec does, because `ColumnFactory::create()` accepts any
 `ColumnConfigInterface`.
 
+## The built-in JsonDataProvider
+
+Before writing your own, check whether the ready-made `JsonDataProvider` already fits. It backs a
+grid with any JSON-over-HTTP endpoint — including one behind an authorization token — configured
+entirely from the grid's `dataConfig()['model']`, so a plain token-authenticated API needs **no
+provider class at all**.
+
+It needs `symfony/http-client` (an optional dependency of the bundle):
+
+```bash
+$ composer require symfony/http-client
+```
+
+Once installed, the service `Fedale\GridviewBundle\DataProvider\JsonDataProvider` is registered
+automatically. Select it per grid and describe the endpoint in the controller's `dataConfig()`:
+
+```php
+// src/Controller/Gridview/ProductController.php
+namespace App\Controller\Gridview;
+
+use App\Model\Product;
+use Fedale\GridviewBundle\Controller\AbstractGridController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+class ProductController extends AbstractGridController
+{
+    public function __construct(
+        // The token stays out of the codebase: it comes from the environment,
+        // and only the controller composes it into a request header.
+        #[Autowire('%env(INTERNAL_API_TOKEN)%')]
+        private readonly string $apiToken,
+    ) {
+    }
+
+    protected function getDataClass(): string
+    {
+        return Product::class;
+    }
+
+    protected function dataConfig(): array
+    {
+        return [
+            'model' => [
+                'baseUri'   => 'https://api.example.com',
+                'resource'  => 'products',
+                'listPath'  => 'products',   // where the row list lives in the body
+                'totalPath' => 'total',      // where the total count lives
+                'headers'   => ['Authorization' => 'Bearer ' . $this->apiToken],
+            ],
+            'pagination' => ['defaultPageSize' => 20],
+        ];
+    }
+
+    protected function buildColumns(): array
+    {
+        return ['id', 'title', ['attribute' => 'price', 'type' => 'number']];
+    }
+}
+```
+
+Then point the grid at the provider from config — no other wiring needed:
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+    gridviews:
+        product: # id of the grid backed by App\Model\Product
+            dataProvider: Fedale\GridviewBundle\DataProvider\JsonDataProvider
+```
+
+### The `model` keys
+
+Every key lives under `dataConfig()['model']`. Only `baseUri` and `resource` are required.
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `baseUri` | *(required)* | API root, e.g. `https://api.example.com`. |
+| `resource` | *(required)* | Path appended to `baseUri`, e.g. `products`. |
+| `searchResource` | `resource` | Path used instead of `resource` while a global-search term is active (some APIs expose a separate search endpoint). |
+| `listPath` | *(body)* | Dot-path to the row list in the response. Omit when the body is itself a JSON array. |
+| `totalPath` | `null` | Dot-path to the total count. When set, paging is pushed to the API; when omitted, the full list is fetched once and paged in memory. |
+| `headers` | `[]` | Static request headers sent on every call — this is where an `Authorization` token goes. |
+| `query` | `[]` | Static query params sent on every call (e.g. an API key or a fixed filter). |
+| `params` | *(see below)* | Renames the emitted query params. Set any value to `null` to omit that param entirely. |
+
+`params` defaults map the logical name to the query-string name the API expects:
+
+```php
+'params' => [
+    'limit'  => 'limit',   // page size
+    'offset' => 'skip',    // row offset
+    'search' => 'q',       // global-search term
+    'sort'   => 'sortBy',  // sort field
+    'order'  => 'order',   // sort direction (asc/desc)
+],
+```
+
+Dot-paths let you read nested payloads, for example `listPath: data.items` and
+`totalPath: meta.total`. Sorting pushes the grid's first active sort to `sort`/`order`; searching
+pushes the term to `search` (switching to `searchResource` if set).
+
+If the endpoint is unreachable or answers non-2xx (for example a `401` from a wrong or missing
+token), the `HttpClient` call throws. The grid catches that failure so it never takes down the
+host page: the page (menu, sidebar, layout) renders as usual and the grid body shows an
+explanatory message (`display.dataErrorText`, localized) in place of the rows. The exception
+detail is shown only in debug and is logged (when a logger is available) so the failure stays
+discoverable in production. This applies to any `DataProviderInterface`, not just this one.
+
+> **Read-only.** Like every non-Doctrine source, a JSON-backed grid has no write path — extend
+> `AbstractGridController`, not `AbstractCrudGridController`. See the note at the end of the next
+> section.
+
 ## Creating a custom data provider
+
+When `JsonDataProvider` doesn't fit — a non-JSON source, a CLI tool's output, bespoke pagination,
+multi-field sort, POST requests — write your own implementation instead.
 
 The default `DataProviderInterface` implementation, `EntityDataProvider`, reads from Doctrine.
 To back a grid with something else — an HTTP API, a CLI tool's output, anything iterable — write

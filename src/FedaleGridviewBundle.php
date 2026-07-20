@@ -51,6 +51,24 @@ class FedaleGridviewBundle extends AbstractBundle
         $containerBuilder->registerForAutoconfiguration(DataProviderInterface::class)
             ->addTag('fedale_gridview.data_provider');
 
+        // JsonDataProvider is a ready-made HTTP-backed provider, but it needs
+        // symfony/http-client (an optional dependency, see composer.json
+        // "suggest"). Guarded so an app without it never sees the service defined
+        // at all — the container never references @http_client, so it can't fail
+        // to compile. Selected per grid via `dataProvider:
+        // Fedale\GridviewBundle\DataProvider\JsonDataProvider`; the endpoint,
+        // response shape, headers (token) etc. come from the grid's
+        // dataConfig()["model"], so a single shared instance serves every grid.
+        if (class_exists(\Symfony\Component\HttpClient\HttpClient::class)) {
+            $containerBuilder->register(\Fedale\GridviewBundle\DataProvider\JsonDataProvider::class, \Fedale\GridviewBundle\DataProvider\JsonDataProvider::class)
+                ->setArgument('$httpClient', new \Symfony\Component\DependencyInjection\Reference('http_client'))
+                ->setArgument('$eventDispatcher', new \Symfony\Component\DependencyInjection\Reference('event_dispatcher'))
+                ->addMethodCall('setSort', [new \Symfony\Component\DependencyInjection\Reference('fedale_gridview.sort')])
+                ->addMethodCall('setPagination', [new \Symfony\Component\DependencyInjection\Reference('fedale_gridview.pagination')])
+                ->addMethodCall('setSearchModel', [new \Symfony\Component\DependencyInjection\Reference('fedale_gridview.search_model')])
+                ->addTag('fedale_gridview.data_provider');
+        }
+
         // make:gridview:crud is dev-tooling only, guarded so an app without
         // symfony/maker-bundle installed never sees the service defined at all.
         // DoctrineHelper is wired by its MakerBundle service id, not autowired by
