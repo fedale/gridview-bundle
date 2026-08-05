@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 /**
@@ -32,6 +33,12 @@ class RowSerializerFactory
         ];
 
         $normalizers = [
+            // Same class of bug as BackedEnumNormalizer below, one type over: a
+            // Symfony\Component\Uid\Uuid would otherwise fall through to the
+            // object normalizer, which walks its accessors and serializes a
+            // UuidV7 to its inner timestamp — losing the identifier. Registered
+            // first so any Uid becomes its canonical string.
+            new UidNormalizer(),
             new DateTimeNormalizer([
                 DateTimeNormalizer::FORMAT_KEY   => \DateTimeInterface::ATOM,
                 DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone(date_default_timezone_get()),

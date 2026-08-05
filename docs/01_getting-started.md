@@ -57,6 +57,13 @@ class CustomerController extends AbstractGridController
 }
 ```
 
+> **Rows reach callbacks as normalized arrays.** A column `value` (or
+> `formatter`/`renderer`) callback receives the row as an array keyed by the
+> entity's property names, not the entity object. Write `fn(array $data) =>
+> $data['name']`, not `fn(Customer $c) => $c->getName()` — the latter throws a
+> `TypeError` on the first render. Relations are normalized too, so a nested key
+> is itself an array (`$data['country']['code']`).
+
 That's it: the single `#[Route]` prefix yields `gridview_customer_index` and
 `gridview_customer_export`, and the grid id defaults to the entity short name
 (`customer`). For write operations (`new`, `update`, `delete`, bulk, inline, …)
