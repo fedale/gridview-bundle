@@ -170,6 +170,11 @@ class Gridview implements GridviewInterface
             'grouping' => [],
         ],
         'integration' => [
+            // Full route name for the list action, driving the filter form
+            // action plus sort/pagination links. It is the narrow, more powerful
+            // form of routeNames['index']: it takes a complete route name (even
+            // from another prefix), whereas the routeNames map only appends a
+            // suffix to the controller's own prefix. Wins when both are set.
             'routeName' => null,
             'addRoute' => null,
         ],

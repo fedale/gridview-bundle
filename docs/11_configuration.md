@@ -129,7 +129,8 @@ How the grid wires into routes and CRUD actions.
 | Option | Type | Default | Set via | Description |
 |--------|------|---------|---------|-------------|
 | `addRoute` | `string\|null` | `null` | YAML + runtime | Route name for the `{addButton}` token |
-| `routeName` | `string\|null` | `null` | Runtime only | List route used for sort/pagination/filter links instead of the current `_route`; the CRUD controller sets this automatically, so you rarely need to. Not in the YAML schema |
+| `routeName` | `string\|null` | `null` | Runtime only | Full list-route name used for sort/pagination/filter links instead of the current `_route`; the CRUD controller sets this automatically, so you rarely need to. The narrow form of `routeNames['index']` (takes a complete route name, not just a suffix) and wins when both are set. Not in the YAML schema |
+| `routeNames` | `array<string,string>` | `[]` | Runtime only | Per-action route-name suffix overrides, keyed by `GridAction` value (e.g. `['index' => 'list']`); departs from the enum-value convention. Equivalent to overriding `routeNames()`. See [CRUD routing](08_crud.md#departing-from-the-suffix-convention). Not in the YAML schema |
 | `export.url` / `export.formats` | `string` / `array` | — | Runtime only | Export endpoint URL and the available format list; derived by `AbstractGridController::buildGridview()` from the exporter registry |
 | `crud` | `array` | `[]` | Runtime only | CRUD wiring URLs only (`addUrl`, `bulkDeleteUrl`, `bulkUpdateUrl`, `inlineUrl`) — assembled by `AbstractCrudGridController::crudOptions()`, request-derived so it's never in the YAML schema. The presentation mode and template live in `behavior.crudMode` / `display.crudTemplate` above, and the modal/page title reuses `display.title` — see [CRUD](08_crud.md) |
 

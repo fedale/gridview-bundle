@@ -239,6 +239,21 @@ abstract class AbstractGridController extends AbstractController
             );
         }
 
+        // Fail early with a message that names the controller, rather than
+        // letting `path()` throw from inside _grid.html.twig at render time.
+        // The list route drives the filter form action, sort and pagination
+        // links; validate the *resolved* value so a bad explicit override is
+        // caught too, not just the derived default.
+        $listRoute = $options['integration']['routeName'] ?? null;
+        if (\is_string($listRoute) && $listRoute !== '' && !$this->routeExists($listRoute)) {
+            throw new \LogicException(sprintf(
+                '%s: no route named "%s" for GridAction::Index. Declare it, or map '
+                . 'the action with routeNames() / options.integration.routeNames.',
+                static::class,
+                $listRoute,
+            ));
+        }
+
         return $this->builderFactory()->createGridviewBuilder()
             ->setId($this->config('id'))
             ->setSearchModel($this->searchModel())
@@ -250,9 +265,31 @@ abstract class AbstractGridController extends AbstractController
     }
 
     /**
+     * Route-name suffix per action, keyed by {@see GridAction} value. Override
+     * (or set `options.integration.routeNames` in {@see viewConfig()}) to depart
+     * from the convention that a route's suffix equals the action's enum value —
+     * e.g. an app that renamed its list action from `index` to `list`:
+     *
+     *     protected function routeNames(): array
+     *     {
+     *         return [GridAction::Index->value => 'list'];
+     *     }
+     *
+     * The default reads the declarative map from config; an override replaces it
+     * wholesale, so the two sources can never disagree.
+     *
+     * @return array<string, string>
+     */
+    protected function routeNames(): array
+    {
+        return $this->config('options.integration.routeNames') ?? [];
+    }
+
+    /**
      * Route name for an action of THIS controller. The prefix is read once from
      * the concrete class's own `#[Route(name: ...)]` attribute, so subclasses
-     * don't have to declare it twice.
+     * don't have to declare it twice. The action's suffix comes from
+     * {@see routeNames()} when mapped, otherwise the action's own value.
      */
     protected function routeName(GridAction|string $action): string
     {
@@ -269,7 +306,12 @@ abstract class AbstractGridController extends AbstractController
             }
         }
 
-        return $this->routePrefix . ($action instanceof GridAction ? $action->value : $action);
+        // Key by the action's string value: enum values are strings, so this
+        // covers both GridAction cases and the raw-string call sites (show,
+        // redirects, link route tokens) uniformly.
+        $key = $action instanceof GridAction ? $action->value : $action;
+
+        return $this->routePrefix . ($this->routeNames()[$key] ?? $key);
     }
 
     /** Whether a route with this name is registered (guards optional convention routes). */

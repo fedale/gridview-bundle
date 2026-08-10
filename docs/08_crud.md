@@ -315,6 +315,47 @@ Sylius, which registers routes from resource metadata via a route loader served
 by one shared generic controller, gridview keeps the routes on your own
 controller subclass so per-action overrides and security stay trivially yours.
 
+#### Departing from the suffix convention
+
+The convention above is only a default. When your app's routing names an action
+differently — say it calls the list action `list` instead of `index` — tell the
+grid with the **`routeNames()`** map, keyed by `GridAction` value. Only the
+actions you list change; the rest stay conventional:
+
+```php
+use Fedale\GridviewBundle\Routing\GridAction;
+
+protected function routeNames(): array
+{
+    return [GridAction::Index->value => 'list'];
+}
+```
+
+The same map can be set declaratively in `viewConfig()`, so a controller that
+configures everything there doesn't have to override a method:
+
+```php
+protected function viewConfig(): array
+{
+    return ['options' => ['integration' => ['routeNames' => ['index' => 'list']]]];
+}
+```
+
+The method overrides the config wholesale (it replaces, never merges), so the two
+never disagree.
+
+> **`integration.routeName` vs `routeNames`.** The older `integration.routeName`
+> option is the narrow, more powerful form for the **list route only**: it takes
+> a *complete* route name (even from a different prefix), whereas `routeNames`
+> only swaps the suffix appended to this controller's own prefix. It still wins
+> when both are set.
+
+If the resolved list route doesn't exist, the grid now **fails early** with a
+message naming the controller and the missing route (e.g.
+`no route named "gridview_user_index" for GridAction::Index. Declare it, or map
+the action with routeNames()`), instead of a late Twig error from inside the
+bundle's template.
+
 The bundle ships the services; the app provides thin actions that delegate to
 `GridCrudHandlerInterface`. `AbstractCrudGridController` builds the grid once (shared
 by index + form + delete) and **auto-wires** `integration.routeName` to the list route
