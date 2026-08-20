@@ -18,6 +18,7 @@ use Fedale\GridviewBundle\Contract\ScopeVerifiableInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Filter\FilterDefaultNormalizer;
+use Fedale\GridviewBundle\Filter\FilterType;
 use Fedale\GridviewBundle\Grid\State\GridviewUrlState;
 use Fedale\GridviewBundle\Profiler\GridviewProfile;
 use Fedale\GridviewBundle\Row\Row;
@@ -410,6 +411,10 @@ class Gridview implements GridviewInterface
         // filter defaults declared in setColumns() are known regardless of the
         // setDataProvider()/setColumns() call order.
         $this->dataProviderOptions = $dataProviderOptions;
+
+        // First point at which `search.fields` is readable, and still before
+        // initializeDataProvider() consumes the filter defaults.
+        $this->registerSearchFields();
     }
 
     /**
@@ -557,21 +562,10 @@ class Gridview implements GridviewInterface
             }
 
             if (isset($this->searchModel) && $column->isFilterable() && isset($column->filter)) {
-                $options = $column->filter['options'] ?? [];
-                // Consumed at render time by the filter template (emitted as a
-                // Stimulus value), not a Symfony form option — drop it so the
-                // filter type's OptionsResolver doesn't reject it.
-                unset($options['controls_threshold']);
-                if (isset($column->filter['clientOptions'])) {
-                    $options['client_options'] = $column->filter['clientOptions'];
-                }
-                if (array_key_exists('default', $column->filter)) {
-                    $default = FilterDefaultNormalizer::normalize($column->filter['type'], $column->filter['default'], $options);
-                    $options['data'] ??= $default;
-                    // Key mangling must mirror SearchForm::addFilter(), so the
-                    // default param key matches the submitted param key
-                    $this->defaultFilterParams[str_replace('.', '_', $column->getAttribute())] = $default;
-                }
+                $options = $this->buildFilterOptions(
+                    self::filterParamKey((string) $column->getAttribute()),
+                    $column->filter,
+                );
                 $this->searchForm->addFilter($column->getAttribute(), $column->filter['type'], $options);
             }
 
@@ -579,6 +573,115 @@ class Gridview implements GridviewInterface
         }
 
         return $this;
+    }
+
+    /**
+     * The request param key a filter is submitted under: the declared name
+     * (column attribute or `search.fields` key) with dots replaced by
+     * underscores, so `t.name` travels as `fedaleForm[t_name]`.
+     *
+     * Mirrored by {@see \Fedale\GridviewBundle\Contract\SearchFormInterface::addFilter()}
+     * and by the `filter`/`filterBar` templates — change them together.
+     */
+    public static function filterParamKey(string $name): string
+    {
+        return str_replace('.', '_', $name);
+    }
+
+    /**
+     * Normalizes a filter spec — a column's `filter` key or a `search.fields`
+     * entry, which share the same shape — into the options array forwarded to
+     * the Symfony filter type, recording any declared `default` under
+     * $paramKey so the data provider can apply it to a bare request.
+     *
+     * @param array<string, mixed> $filterSpec
+     *
+     * @return array<string, mixed>
+     */
+    private function buildFilterOptions(string $paramKey, array $filterSpec): array
+    {
+        $options = $filterSpec['options'] ?? [];
+
+        // Consumed at render time by the filter template (emitted as a
+        // Stimulus value), not a Symfony form option — drop it so the
+        // filter type's OptionsResolver doesn't reject it.
+        unset($options['controls_threshold']);
+
+        if (isset($filterSpec['clientOptions'])) {
+            $options['client_options'] = $filterSpec['clientOptions'];
+        }
+
+        if (array_key_exists('default', $filterSpec)) {
+            $default = FilterDefaultNormalizer::normalize($filterSpec['type'], $filterSpec['default'], $options);
+            $options['data'] ??= $default;
+            $this->defaultFilterParams[$paramKey] = $default;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Registers the controls declared in `search.fields`: filters that have no
+     * column of their own, typically rendered in a search box detached from the
+     * grid. Its twin `search.map` says how a param becomes SQL; the two are
+     * deliberately separate because they are not 1:1 — a `map` entry with no
+     * field is a filter driven by the URL or by a saved search, and a field
+     * with no `map` entry is applied by the repository's own search().
+     *
+     * Called from setDataProviderOptions() rather than setColumns() for two
+     * reasons: GridviewBuilder only buffers the data provider config and pushes
+     * it in renderGridview(), so $dataProviderOptions is still null while the
+     * columns are built; and this is the last point before
+     * initializeDataProvider() consumes $defaultFilterParams, so a `default`
+     * declared here still reaches the data provider.
+     *
+     * A column always wins over a `search.fields` entry of the same name. The
+     * guard below makes that precedence hold whatever the call order, since
+     * Form::add() replaces rather than rejects — which also makes the migration
+     * path safe: declare the field, deploy, verify, then drop the column.
+     */
+    private function registerSearchFields(): void
+    {
+        if (!isset($this->searchModel)) {
+            return;
+        }
+
+        foreach ($this->dataProviderOptions['search']['fields'] ?? [] as $name => $spec) {
+            $name = (string) $name;
+            $spec = \is_array($spec) ? $spec : ['type' => $spec];
+            $spec['type'] = $this->resolveFilterType($spec['type'] ?? null, $name);
+
+            $paramKey = self::filterParamKey($name);
+            if ($this->searchForm->getModelType()->has($paramKey)) {
+                continue;
+            }
+
+            $this->searchForm->addFilter($name, $spec['type'], $this->buildFilterOptions($paramKey, $spec));
+        }
+    }
+
+    /**
+     * Validates a `search.fields` type up front: addFilter() builds the form
+     * type class name by string concatenation, so an unknown type would
+     * otherwise surface as a "class not found" fatal.
+     */
+    private function resolveFilterType(mixed $type, string $name): string
+    {
+        if ($type instanceof FilterType) {
+            return $type->value;
+        }
+
+        if (\is_string($type) && FilterType::tryFrom($type) !== null) {
+            return $type;
+        }
+
+        throw new \InvalidArgumentException(sprintf(
+            'Gridview "%s": search field "%s" declares filter type "%s", which is unknown. Available types: %s.',
+            $this->getId() ?? '?',
+            $name,
+            \is_scalar($type) ? (string) $type : get_debug_type($type),
+            implode(', ', array_column(FilterType::cases(), 'value')),
+        ));
     }
 
     public function setOptions(array $options): void
@@ -698,7 +801,7 @@ class Gridview implements GridviewInterface
                 continue;
             }
 
-            $field = str_replace('.', '_', (string) $column->getAttribute());
+            $field = self::filterParamKey((string) $column->getAttribute());
             if (!\array_key_exists($field, $applied)) {
                 continue;
             }

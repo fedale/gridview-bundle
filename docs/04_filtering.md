@@ -161,6 +161,51 @@ synced "mirror" input in the column header, so users can type from either place:
 filterBar. It has no effect on non-text/number filters (relation, boolean, date),
 which are never mirrored.
 
+## Hiding a column but keeping its filter
+
+When you build a custom search UI (a modal, a sidebar, a row of clickable chips), you
+need the *field* without the *column*. **Do not declare the column twice** — one for
+display and one for the filter. A column's filter is registered on the search form
+independently of how, or whether, the column renders. Three ways, from most to least
+targeted:
+
+```php
+// 1. Keep the field, render it nowhere: put it in the filterBar, then leave
+//    {filterBar} out of the grid layout. Your own template renders it.
+['attribute' => 'country', 'filter' => ['type' => 'choice'], 'filterBar' => true],
+
+// 2. Hide the column with CSS, keep the filter: `visible` is never consulted
+//    when filters are registered.
+['attribute' => 'country', 'filter' => ['type' => 'choice'], 'visible' => false],
+
+// 3. Drop the column from the index only. `active` is per-context, and a column
+//    active in any one context still contributes its filter.
+['attribute' => 'country', 'filter' => ['type' => 'choice'], 'active' => ['inIndex' => false]],
+```
+
+Remember too that **the filter type is independent of the column type** (see
+[Inheriting the filter type](#inheriting-the-filter-type-from-the-column)): one column
+can display a country name and filter as a `relation` over the country id, with
+`search.map` pointing at the right DQL field. That alone removes most reasons to reach
+for a second column.
+
+Render the field yourself from the form view, anywhere on the page:
+
+```twig
+{# The `form` attribute binds the control to the grid's form wherever it sits #}
+{{ form_widget(form.country, {'attr': {'form': 'gv-form-' ~ gridview.key}}) }}
+```
+
+> **Why the field has to exist at all.** The grid's form is a `GET` form with a bare
+> `action` path, so submitting it **replaces the whole query string** with the
+> serialization of its own fields. A `fedaleForm[country]` param that no field backs is
+> read correctly on arrival — and survives sort, paging and saved searches — but is
+> destroyed the moment the user touches any filter. Anything that must round-trip needs
+> either a form field or a hidden input bound via `form="gv-form-{key}"`.
+
+If the filter has no column at all, declare it with
+[`search.fields`](#column-less-filters--searchfields).
+
 ## Clearing a single column's filter — `filter.clear`
 
 Each column decides **how** its active filter can be removed via the `clear` key of
@@ -641,8 +686,10 @@ repository does not implement `search()`, pass the same map through
 ],
 ```
 
-The flat `'searchFields' => [...]` key is the legacy alias of `search.map` and
-still works.
+> **`search.map` only applies when the repository has no `search()` method.** The two
+> are mutually exclusive paths: as soon as `EntityDataProvider` finds a `search()` on
+> the repository it hands it the raw params and never looks at the map. The
+> WebProfiler panel reports which path ran.
 
 **Built-in types:** `text`, `boolean`, `date`, `number`, `choice`, `relation`.
 
@@ -668,6 +715,55 @@ and register the instance on the `fedale_gridview.filter_applier_registry` servi
 ```php
 $searchForm->getApplierRegistry()->register('money', new MoneyFilterApplier());
 ```
+
+## Column-less filters — `search.fields`
+
+A filter that has **no column of its own** — a facet, a preset, a chip row in a search
+box detached from the grid — is declared under `search.fields`, next to `search.map`:
+
+```php
+'search' => [
+    // how the param becomes SQL
+    'map' => [
+        'country' => ['relation', 'c.id'],
+    ],
+    // which control submits it
+    'fields' => [
+        'country' => [
+            'type'    => 'relation',
+            'options' => ['choices' => $countries, 'multiple' => true],
+            'default' => null,
+        ],
+    ],
+],
+```
+
+A `fields` entry takes the same shape as a column's `filter` spec — `type`, `options`,
+`clientOptions`, `default` — and the shorthand `'country' => 'choice'` or
+`'country' => FilterType::Choice` works for a bare type. Names are mangled like column
+attributes (`t.name` → `fedaleForm[t_name]`). An unknown type throws
+`InvalidArgumentException` listing the available ones.
+
+**`map` and `fields` are deliberately separate, because they are not 1:1:**
+
+| | meaning |
+|---|---|
+| `map` entry, no `fields` entry | a filter driven by the URL or by a saved search — no control is rendered |
+| `fields` entry, no `map` entry | the control is rendered; the repository's own `search()` applies it |
+| both | the usual case: a control that filters |
+
+**A column always wins.** If a column and a `search.fields` entry declare the same name,
+the column's control and its `default` are what survive, whatever the declaration order.
+That makes the migration safe: add the `search.fields` entry, deploy, verify, *then*
+remove the column.
+
+**Nothing renders it for you.** A `search.fields` entry has no column, so neither the
+header row nor `{filterBar}` will show it — that is the point. Render it from the form
+view where you want it, exactly as in [Hiding a column but keeping its
+filter](#hiding-a-column-but-keeping-its-filter).
+
+> A column-less filter cannot produce a chip in `{filterChips}`: chips are resolved from
+> the index columns. Render your own clear affordance instead.
 
 ## Hiding rows by permission (filter in the query)
 
