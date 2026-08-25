@@ -8,7 +8,9 @@
         "gridview",
         "datagrid",
         "grid",
-        "crud"
+        "crud",
+        "symfony-ux",
+        "stimulus"
     ],
     "license": "MIT",
     "authors": [
