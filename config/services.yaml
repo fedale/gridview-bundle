@@ -1,8 +1,15 @@
 services:
+    # ⚠ kernel.reset is load-bearing here too. This service hands Gridview the
+    # request it builds GridviewUrlState from — the renderer, the page, the page
+    # size, the applied filter chips and the Turbo parameters all come from that
+    # state — and it accumulates container attributes across renders. See
+    # GridviewService::reset().
     fedale_gridview.gridview_service:
         class: Fedale\GridviewBundle\Service\GridviewService
         arguments:
             - '@twig'
+        tags:
+            - { name: kernel.reset, method: reset }
         calls:
             - [setSearchForm, ['@fedale_gridview.search_form']]
             - [setRequest, ['@request_stack']]

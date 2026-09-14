@@ -17,7 +17,19 @@ class GridviewService
 
     private SearchForm $searchForm;
 
-    private Request $request;
+    /**
+     * ⚠ The stack, never the Request it currently holds.
+     *
+     * {@see Gridview::renderGrid()} reads the request from here to build
+     * {@see \Fedale\GridviewBundle\Grid\State\GridviewUrlState}, which carries
+     * the renderer (`view`), the page, the page size, the applied filters and
+     * the Turbo parameters (`_rows`, `_children`). A Request captured in the
+     * setter below is the one being served when the container was built, so
+     * under a worker runtime every later request rendered the first request's
+     * view, page and filter chips — while the filters themselves worked,
+     * because the query is built from the data provider's own params.
+     */
+    private ?RequestStack $requestStack = null;
 
     private DataProviderInterface $dataProvider;
 
@@ -48,12 +60,30 @@ class GridviewService
 
     public function setRequest(RequestStack $requestStack): void
     {
-        $this->request = $requestStack->getCurrentRequest();
+        $this->requestStack = $requestStack;
     }
 
-    public function getRequest(): Request
+    /**
+     * The request being served, read afresh on every access.
+     *
+     * Null outside a request — a console command rendering a grid, say — which
+     * the caller has to handle rather than assume away.
+     */
+    public function getRequest(): ?Request
     {
-        return $this->request;
+        return $this->requestStack?->getCurrentRequest();
+    }
+
+    /**
+     * Discards the attributes accumulated while rendering the last grid.
+     *
+     * ⚠ {@see setAttr()} appends with `.=` when a key is already present, so
+     * without this the container's CSS classes grow on every request for the
+     * life of the worker.
+     */
+    public function reset(): void
+    {
+        $this->attr = [];
     }
 
     public function getSearchForm()

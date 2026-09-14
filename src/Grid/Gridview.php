@@ -1079,6 +1079,14 @@ class Gridview implements GridviewInterface
 
         $request = $this->gridviewService->getRequest();
 
+        if ($request === null) {
+            throw new \LogicException(
+                'Gridview::renderGrid() needs the request being served, and none is on the'
+                . ' RequestStack. Rendering a grid outside a request (e.g. from a console'
+                . ' command) is not supported.'
+            );
+        }
+
         // Lazy grouping: a single parent's children, fetched on demand. Handled
         // before pagination/sort/URL-state — the child sub-table doesn't need any
         // of it, and the main grid's own page isn't necessarily involved.
