@@ -10,4 +10,15 @@ interface SearchFormInterface
     public function addGlobalSearch(): void;
     public function getModelType();
     public function applyFilters(QueryBuilder $qb, array $params, array $map): void;
+
+    /**
+     * Binds filter types this grid resolves itself, keyed by type name.
+     *
+     * Consulted before the shared applier registry, so a grid may name a type
+     * that exists nowhere else — or claim a built-in one for itself without
+     * affecting any other grid in the process.
+     *
+     * @param array<string, FilterApplierInterface> $appliers
+     */
+    public function setAppliers(array $appliers): void;
 }

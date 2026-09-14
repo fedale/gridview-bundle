@@ -494,6 +494,15 @@ class Gridview implements GridviewInterface
         if (!empty($searchMap)) {
             $this->dataProvider->setSearchFields($searchMap);
         }
+        // Appliers this grid brings for filter types the shared registry does not
+        // know — a facet resolved by a lookup the query itself cannot join, say.
+        // Declared here rather than registered into the registry from a
+        // controller: see SearchForm::setAppliers() for why that distinction is
+        // load-bearing under a worker runtime.
+        $searchAppliers = $this->dataProviderOptions['search']['appliers'] ?? [];
+        if (!empty($searchAppliers)) {
+            $this->searchForm->setAppliers($searchAppliers);
+        }
         if (!empty($this->dataProviderOptions['eager']) && method_exists($this->dataProvider, 'setEagerRelations')) {
             $this->dataProvider->setEagerRelations($this->dataProviderOptions['eager']);
         }

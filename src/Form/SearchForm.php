@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Form;
 
+use Fedale\GridviewBundle\Contract\FilterApplierInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -33,6 +34,13 @@ class SearchForm implements SearchFormInterface, ResetInterface
     private ?FormInterface $modelType = null;
 
     private ?Criteria $criteria = null;
+
+    /**
+     * Per-grid appliers, keyed by filter type. See {@see setAppliers()}.
+     *
+     * @var array<string, FilterApplierInterface>
+     */
+    private array $appliers = [];
 
     private ArrayCollection $filters;
 
@@ -67,6 +75,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
         $this->criteria = null;
         $this->filters = new ArrayCollection();
         $this->applierRegistry = null;
+        $this->appliers = [];
     }
 
     public function getFilters()
@@ -116,10 +125,31 @@ class SearchForm implements SearchFormInterface, ResetInterface
         foreach ($map as $paramKey => $spec) {
             [$type, $dqlField] = $spec;
 
-            $this->applierRegistry
-                ->get($type)
-                ->apply($qb, $dqlField, $params[$paramKey] ?? null, $spec[2] ?? []);
+            $applier = $this->appliers[$type] ?? $this->applierRegistry->get($type);
+
+            $applier->apply($qb, $dqlField, $params[$paramKey] ?? null, $spec[2] ?? []);
         }
+    }
+
+    /**
+     * Appliers supplied by the grid being rendered, keyed by filter type.
+     *
+     * The way to bind a filter type that only one grid knows how to resolve.
+     * They are consulted before the shared registry in {@see applyFilters()},
+     * so a grid may also override a built-in type for itself alone.
+     *
+     * ⚠ Declare these through the grid's `search.appliers` config rather than
+     * writing into the registry from a controller. The registry is a shared
+     * service: a controller registering into it publishes its appliers to every
+     * other grid in the process, and under a worker runtime they outlive the
+     * request that built them — pinning whatever their closures captured. These
+     * live on the search form instead, which {@see reset()} clears per request.
+     *
+     * @param array<string, FilterApplierInterface> $appliers
+     */
+    public function setAppliers(array $appliers): void
+    {
+        $this->appliers = $appliers;
     }
 
     public function getApplierRegistry(): FilterApplierRegistry
