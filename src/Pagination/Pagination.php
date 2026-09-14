@@ -27,7 +27,7 @@ class Pagination implements PaginationInterface
      * @var string Name of route. If route was not specified then current route
      * will be used.
      */
-    protected string $route;
+    protected ?string $route = null;
 
     /**
      * @var int Total number of items.
@@ -69,18 +69,52 @@ class Pagination implements PaginationInterface
     protected array $attributes = [];
 
     /**
-     * @var Request
+     * @var RequestStack
      */
-    protected Request|null $request;
+    protected RequestStack $requestStack;
 
     /**
      * Pagination constructor.
+     *
+     * ⚠ The RequestStack is kept rather than the Request it currently holds —
+     * see {@see \Fedale\GridviewBundle\Sort\Sort::__construct()}. A captured
+     * Request would pin every later page of the grid to the page number asked
+     * for by whichever request happened to build the container.
      *
      * @param RequestStack $requestStack
      */
     public function __construct(RequestStack $requestStack)
     {
-        $this->request = $requestStack->getCurrentRequest();
+        $this->requestStack = $requestStack;
+    }
+
+    /**
+     * The request being served, read afresh on every access.
+     */
+    protected function request(): ?Request
+    {
+        return $this->requestStack->getCurrentRequest();
+    }
+
+    /**
+     * Discards the paging state of the request just served.
+     *
+     * $currentPage matters most: getCurrentPage() memoises it behind an
+     * isset() guard, so without this every request after the first is served
+     * the first one's page number however the query string reads.
+     */
+    public function reset(): void
+    {
+        $this->currentPage = null;
+        $this->pageSize = null;
+        $this->route = null;
+        $this->totalCount = 0;
+        $this->attributes = [];
+        $this->pageParam = 'page';
+        $this->pageSizeParam = 'per-page';
+        $this->defaultPageSize = 20;
+        $this->maxPageSize = 50;
+        $this->pageSizeOptions = [];
     }
 
     public function setAttributes(array $attributes): static
@@ -137,7 +171,7 @@ class Pagination implements PaginationInterface
     public function getCurrentPage(): int
     {
         if (!isset($this->currentPage)) {
-            $currentPage = (int)$this->request->query->get($this->pageParam, 1) - 1;
+            $currentPage = (int)($this->request()?->query->get($this->pageParam, 1) ?? 1) - 1;
 
             $this->setCurrentPage($currentPage);
         }
@@ -187,10 +221,10 @@ class Pagination implements PaginationInterface
             return $this->pageSize;
         }
 
-        $pageSize = (int)$this->request->query->get(
+        $pageSize = (int)($this->request()?->query->get(
             $this->pageSizeParam,
             $this->defaultPageSize
-        );
+        ) ?? $this->defaultPageSize);
 
         // When a fixed set of page sizes is offered, ignore any value outside it
         // (e.g. a hand-crafted query string) and fall back to the default.
@@ -231,7 +265,7 @@ class Pagination implements PaginationInterface
     public function getRoute(): string
     {
         if (!isset($this->route)) {
-            $this->setRoute($this->request->attributes->all()['_route']);
+            $this->setRoute($this->request()?->attributes->all()['_route'] ?? '');
         }
 
         return $this->route;

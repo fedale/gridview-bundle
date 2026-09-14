@@ -245,25 +245,41 @@ services:
             - [setSearchModel, ['@fedale_gridview.search_model']]
             - [setSearchForm, ['@fedale_gridview.search_form']]
             - [setChildResolver, ['@fedale_gridview.child_row_resolver']]
-        # Not autoconfigured (explicit `class:`/`arguments:` above), so the tag is
-        # added by hand — lets it be selected explicitly via `dataProvider:
-        # fedale_gridview.entity_data_provider`, though it's already the default
-        # when `dataProvider` is left unset.
+        # Not autoconfigured (explicit `class:`/`arguments:` above), so the tags
+        # are added by hand. `fedale_gridview.data_provider` lets it be selected
+        # explicitly via `dataProvider: fedale_gridview.entity_data_provider`,
+        # though it's already the default when `dataProvider` is left unset.
+        #
+        # ⚠ kernel.reset is load-bearing: this service holds the QueryBuilder,
+        # the Paginator and the hydrated rows of the request it last served.
+        # Under a worker runtime those are handed to the next request, which
+        # shows the previous request's rows under a correct result count —
+        # getTotalCount() rebuilds its Paginator every time. See reset().
         tags:
             - { name: fedale_gridview.data_provider }
+            - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Contract\DataProviderInterface: '@fedale_gridview.entity_data_provider'
 
+    # Holds the sort attributes declared by whichever grid rendered last, so it
+    # is per-request state like the search form. See Sort::reset().
     fedale_gridview.sort:
         class: Fedale\GridviewBundle\Sort\Sort
         arguments:
             - '@request_stack'
             - '@router.default'
+        tags:
+            - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Contract\SortInterface: '@fedale_gridview.sort'
 
+    # ⚠ getCurrentPage() memoises the page number behind an isset() guard, so
+    # without the reset every request after the first is served the first one's
+    # page whatever its query string says. See Pagination::reset().
     fedale_gridview.pagination:
         class: Fedale\GridviewBundle\Pagination\Pagination
         arguments:
             - '@request_stack'
+        tags:
+            - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Contract\PaginationInterface: '@fedale_gridview.pagination'
 
     fedale_gridview.row_subscriber:

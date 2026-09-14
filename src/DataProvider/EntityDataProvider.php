@@ -19,13 +19,19 @@ use Fedale\GridviewBundle\Event\RowEvent;
 
 class EntityDataProvider extends AbstractDataProvider implements AggregatableInterface, GroupingCapableInterface, ScopeVerifiableInterface
 {
-    protected QueryBuilder $queryBuilder;
+    /**
+     * Nullable, and assigned rather than unset by {@see reset()}: an unset
+     * typed property throws on the next read instead of being rebuilt, and
+     * PHP 8.4 property hooks make unset() on a non-nullable property a static
+     * error in the first place.
+     */
+    protected ?QueryBuilder $queryBuilder = null;
 
     protected $ormMetadata;
 
     private $paginator;
 
-    private int $totalRows;
+    private ?int $totalRows = null;
 
     private array $params;
 
@@ -55,6 +61,39 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
         private RowSerializerFactory $serializerFactory,
     ) {
         $this->models = new ArrayCollection();
+        $this->populateParams();
+    }
+
+    /**
+     * Discards everything built for the request just served.
+     *
+     * ⚠ Without this the grid serves stale rows under any runtime that keeps
+     * the container alive across requests — FrankenPHP worker mode,
+     * RoadRunner, Swoole — and does it in a way that reads as a data bug
+     * rather than a caching one: $queryBuilder, $paginator and $models are
+     * held from the previous request while getTotalCount() rebuilds its
+     * Paginator every time, so the grid shows the wrong rows under a correct
+     * result count.
+     *
+     * The params are re-read rather than merely cleared, so a provider used
+     * without the grid's own setFormName() call still sees the current query
+     * string.
+     */
+    public function reset(): void
+    {
+        $this->queryBuilder = null;
+        $this->totalRows = null;
+        $this->ormMetadata = null;
+        $this->paginator = null;
+        $this->models = new ArrayCollection();
+        $this->filterPath = 'none';
+        $this->formName = 'fedaleForm';
+        $this->eagerRelations = [];
+        $this->searchFields = [];
+        $this->defaultParams = [];
+        $this->ignoredAttributes = [];
+        $this->alias = 'e';
+
         $this->populateParams();
     }
 

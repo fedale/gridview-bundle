@@ -75,9 +75,9 @@ class Sort implements SortInterface
     protected string $separator = ',';
 
     /**
-     * @var Request
+     * @var RequestStack
      */
-    protected Request|null $request;
+    protected RequestStack $requestStack;
 
     /**
      * @var RouterInterface
@@ -88,13 +88,45 @@ class Sort implements SortInterface
     /**
      * Sort constructor.
      *
+     * ⚠ The RequestStack is kept rather than the Request it currently holds.
+     * This is a shared service, so a Request captured here would be the one
+     * being served when the container was built — correct under PHP-FPM, where
+     * the container dies with the request, and wrong under any runtime that
+     * keeps it alive (FrankenPHP worker mode, RoadRunner, Swoole), where every
+     * later request would be sorted by the first one's query string.
+     *
      * @param RequestStack $requestStack
      * @param RouterInterface $router
      */
     public function __construct(RequestStack $requestStack, RouterInterface $router)
     {
-        $this->request = $requestStack->getCurrentRequest();
+        $this->requestStack = $requestStack;
         $this->router = $router;
+    }
+
+    /**
+     * The request being served, read afresh on every access.
+     */
+    protected function request(): ?Request
+    {
+        return $this->requestStack->getCurrentRequest();
+    }
+
+    /**
+     * Discards the sort configuration built for the request just served.
+     *
+     * The attributes come from the grid's `sort.map` and are re-declared on
+     * every render, so keeping them would leave a second grid in the same
+     * worker process sorting by the first grid's columns.
+     */
+    public function reset(): void
+    {
+        $this->attributes = [];
+        $this->attributeOrders = null;
+        $this->defaultSort = [];
+        $this->enableMultiSort = false;
+        $this->sortParam = 'sort';
+        $this->separator = ',';
     }
 
     /**
@@ -239,7 +271,7 @@ class Sort implements SortInterface
      */
     protected function parseSortQueryParams(): array
     {
-        $queryParameters = $this->request->query->all();
+        $queryParameters = $this->request()?->query->all() ?? [];
 
         if (!isset($queryParameters[$this->sortParam])) {
             return [];
@@ -352,7 +384,7 @@ class Sort implements SortInterface
         $parameters = $gridview->getUrlState()->withSort($this->createSortParam($attribute));
 
         return $this->router->generate(
-            $gridview->getOptions()['integration']['routeName'] ?? $this->request->attributes->get('_route'),
+            $gridview->getOptions()['integration']['routeName'] ?? $this->request()?->attributes->get('_route'),
             $parameters,
             $absolute ? RouterInterface::ABSOLUTE_URL : RouterInterface::ABSOLUTE_PATH
         );
