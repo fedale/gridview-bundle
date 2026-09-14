@@ -84,12 +84,20 @@ services:
             - !tagged_iterator fedale_gridview.exporter
     Fedale\GridviewBundle\Export\GridExporterRegistry: '@fedale_gridview.exporter_registry'
 
+    # ⚠ The kernel.reset tag is load-bearing, not hygiene. This service holds the
+    # Symfony Form the grid binds to the request, and a Form is single-use. Under
+    # a runtime that keeps the container alive across requests (FrankenPHP worker
+    # mode, RoadRunner, Swoole) an unreset instance serves every later request
+    # with the first one's filter data — silently, since the result count comes
+    # from a stateless path and stays correct. See SearchForm::reset().
     fedale_gridview.search_form:
         class: Fedale\GridviewBundle\Form\SearchForm
         arguments:
             - '@form.factory'
             - '@request_stack'
             - '@fedale_gridview.filter_applier_registry'
+        tags:
+            - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Form\SearchForm: '@fedale_gridview.search_form'
     Fedale\GridviewBundle\Contract\SearchFormInterface: '@fedale_gridview.search_form'
 
@@ -150,6 +158,10 @@ services:
             - '@fedale_gridview.column_type_registry'
     Fedale\GridviewBundle\Column\ColumnFactory: '@fedale_gridview.column_factory'
 
+    # Carries the Gridview being assembled plus its runtime options, so it is
+    # per-request state like the search form above. reset() already existed and
+    # was only ever called from the constructor; the tag is what gets it called
+    # between requests on a long-running worker.
     fedale_gridview.gridview_builder:
         class: Fedale\GridviewBundle\Grid\GridviewBuilder
         arguments:
@@ -158,6 +170,8 @@ services:
             - '@fedale_gridview.column_factory'
             - '@fedale_gridview.theme_registry'
             - !tagged_locator { tag: fedale_gridview.data_provider }
+        tags:
+            - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
     Fedale\GridviewBundle\Contract\GridviewBuilderInterface: '@fedale_gridview.gridview_builder'
 

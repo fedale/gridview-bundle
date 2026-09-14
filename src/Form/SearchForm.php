@@ -9,16 +9,30 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Service\ResetInterface;
 
 
-class SearchForm implements SearchFormInterface
+/**
+ * The grid's filter form.
+ *
+ * ⚠ This service holds per-request state and MUST be reset between requests —
+ * see {@see reset()}. It is registered with a `kernel.reset` tag for exactly
+ * that reason; dropping the tag reintroduces the bug described there.
+ */
+class SearchForm implements SearchFormInterface, ResetInterface
 {
 
-    private Form $modelType;
+    /**
+     * Built on first use rather than in the constructor, and discarded by
+     * {@see reset()}. A Symfony Form is single-use — once handleRequest() has
+     * submitted it, it can never be bound to another request — so an instance
+     * created in the constructor would be reusable exactly once.
+     */
+    private ?FormInterface $modelType = null;
 
-    private Criteria $criteria;
+    private ?Criteria $criteria = null;
 
     private ArrayCollection $filters;
 
@@ -28,20 +42,31 @@ class SearchForm implements SearchFormInterface
         private ?FilterApplierRegistry $applierRegistry = null
     ) {
         $this->filters = new ArrayCollection();
+    }
 
-        // name, method, action and so on must be passed as argument!
-        $formBuilder = $this->formFactory->createNamedBuilder(
-            'fedaleForm',
-            FormType::class,
-            null,
-            [
-                'method' => 'get',
-                'action' => '',
-                'required' => false
-            ]
-        );
-        $this->modelType = $formBuilder->getForm();
-        $this->modelType->add('save', SubmitType::class, ['label' => 'Filter', 'attr' => ['class' => 'gv-btn gv-btn-primary']]);
+    /**
+     * Discards everything derived from the request being served.
+     *
+     * ⚠ Without this the grid is broken under any runtime that keeps the
+     * container alive across requests — FrankenPHP worker mode, RoadRunner,
+     * Swoole. The failure is quiet and easy to misread: the form built for the
+     * first request stays submitted with that request's data, so
+     * {@see Gridview::renderGrid()} renders rows for a filter nobody asked for
+     * while the result count — which is computed from the raw request params by
+     * {@see applyFilters()}, a stateless path — reports the correct figure. A
+     * search therefore shows every record above a footer claiming it found
+     * three, and pagination and the renderer switch fail the same way.
+     *
+     * The applier registry is dropped too: callers register appliers into it
+     * per grid (closures that capture that request's services), so keeping it
+     * would pin request-scoped objects in memory for the life of the worker.
+     */
+    public function reset(): void
+    {
+        $this->modelType = null;
+        $this->criteria = null;
+        $this->filters = new ArrayCollection();
+        $this->applierRegistry = null;
     }
 
     public function getFilters()
@@ -51,8 +76,10 @@ class SearchForm implements SearchFormInterface
 
     public function addGlobalSearch(): void
     {
-        if (!$this->modelType->has('_q')) {
-            $this->modelType->add('_q', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
+        $modelType = $this->getModelType();
+
+        if (!$modelType->has('_q')) {
+            $modelType->add('_q', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
                 'required' => false,
                 'label'    => false,
             ]);
@@ -63,7 +90,7 @@ class SearchForm implements SearchFormInterface
     {
         $name = str_replace('.', '_', $name);
         $class = "Fedale\\GridviewBundle\\Filter\\Filter" . ucfirst($type) . 'Type';
-        $this->modelType->add($name, $class, $options);
+        $this->getModelType()->add($name, $class, $options);
     }
 
     /**
@@ -102,7 +129,7 @@ class SearchForm implements SearchFormInterface
 
     public function getCriteria(): Criteria|null
     {
-        return $this->criteria ?? null;
+        return $this->criteria;
     }
 
     public function setCriteria(Criteria $criteria)
@@ -117,7 +144,32 @@ class SearchForm implements SearchFormInterface
 
     public function getModelType()
     {
-        return $this->modelType;
+        return $this->modelType ??= $this->createModelType();
+    }
+
+    /**
+     * The empty filter form, as it looks before any column has registered a
+     * field on it. Every caller goes through {@see getModelType()}, so one is
+     * built per request and no more.
+     */
+    private function createModelType(): FormInterface
+    {
+        // name, method, action and so on must be passed as argument!
+        $formBuilder = $this->formFactory->createNamedBuilder(
+            'fedaleForm',
+            FormType::class,
+            null,
+            [
+                'method' => 'get',
+                'action' => '',
+                'required' => false
+            ]
+        );
+
+        $modelType = $formBuilder->getForm();
+        $modelType->add('save', SubmitType::class, ['label' => 'Filter', 'attr' => ['class' => 'gv-btn gv-btn-primary']]);
+
+        return $modelType;
     }
 
     public function andFilterWhere()

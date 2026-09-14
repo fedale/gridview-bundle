@@ -1609,12 +1609,6 @@ parameters:
 			path: src/Form/SearchForm.php
 
 		-
-			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$modelType \(Symfony\\Component\\Form\\Form\) does not accept Symfony\\Component\\Form\\FormInterface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Form/SearchForm.php
-
-		-
 			message: '#^Property Fedale\\GridviewBundle\\Form\\SearchForm\:\:\$requestStack is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
