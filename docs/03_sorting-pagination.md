@@ -195,3 +195,44 @@ protected function viewConfig(): array
 
 Each `<option>` value is the fully-built page URL, so navigation needs no client-side query
 rebuilding — see the [`gridview-page-jump`](12_javascript.md#gridview-page-jump) controller.
+
+---
+
+## Extending Sort or Pagination
+
+Both classes are shared services that hold state belonging to a single request — the
+sort attributes, the page number, the page size. They read the request through a
+`protected request()` method and expose a `reset()` that Symfony calls between requests.
+
+If you extend either one, read the request with `$this->request()` rather than storing
+it, and override `reset()` to clear any state your subclass adds:
+
+```php
+use Fedale\GridviewBundle\Sort\Sort;
+
+final class TenantAwareSort extends Sort
+{
+    private ?string $tenant = null;
+
+    public function apply(): void
+    {
+        $this->tenant = $this->request()?->attributes->get('tenant');
+    }
+
+    public function reset(): void
+    {
+        parent::reset();
+
+        $this->tenant = null;
+    }
+}
+```
+
+> **Upgrading from 1.2.1 or earlier.** The `protected $request` property that held a
+> `Request` is gone. Replace `$this->request` with `$this->request()`, which returns
+> `null` outside a request.
+
+Storing the request instead of the stack breaks the grid under FrankenPHP worker mode,
+RoadRunner and Swoole, where the container outlives the request that built it. See
+[Request-scoped services](14_extending.md#request-scoped-services) for the full
+explanation.

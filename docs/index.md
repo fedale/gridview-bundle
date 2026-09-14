@@ -16,7 +16,7 @@ guide you need. Every page is self-contained.
 - **[Columns](02_columns.md)** — string shorthand, full definitions, column types, the
   `media` type, ActionColumn, custom column types, nested data, and raw HTML.
 - **[Sorting & Pagination](03_sorting-pagination.md)** — default/multi-attribute sorting,
-  page navigation, and jump-to-page.
+  page navigation, jump-to-page, and extending `Sort` or `Pagination`.
 - **[Filtering & Search](04_filtering.md)** — per-column filters, the filterBar, filter
   types, applying filters in the repository, permission-based row hiding, and global search.
 
@@ -42,6 +42,7 @@ guide you need. Every page is self-contained.
   merge precedence.
 - **[JavaScript Controllers](12_javascript.md)** — the Stimulus controllers shipped with the bundle.
 - **[Real-time updates (Mercure)](13_real-time.md)** — signal-based auto-refresh.
-- **[Extending the Bundle](14_extending.md)** — public interfaces, custom columns, the built-in
-  `JsonDataProvider` (token-authenticated HTTP grids), custom data providers, and row events.
+- **[Extending the Bundle](14_extending.md)** — public interfaces, request-scoped services,
+  custom columns, the built-in `JsonDataProvider` (token-authenticated HTTP grids), custom
+  data providers, and row events.
 - **[Full Example](15_full-example.md)** — a complete controller + template walkthrough.

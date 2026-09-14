@@ -16,6 +16,86 @@ rather than on the concrete classes:
 | `SearchFormInterface` | `Fedale\GridviewBundle\Service` | ✓ |
 | `SearchModelInterface` | `Fedale\GridviewBundle\Service` | ✓ |
 
+## Request-scoped services
+
+Several of the bundle's services hold state that belongs to one request: the filter
+form, the sort attributes, the page number, the query builder and the rows built from
+it. They are all shared Symfony services, so that state has to be read and discarded
+per request rather than captured once.
+
+Two rules follow, and they matter if you extend `Sort`, `Pagination`,
+`EntityDataProvider`, `SearchModel` or `GridviewService`.
+
+### Read the request through `request()`, never store it
+
+These classes keep the `RequestStack` and read the current request on every access:
+
+```php
+// In a subclass of Sort or Pagination
+$page = $this->request()?->query->get('page');
+```
+
+`request()` is `protected` in `Sort` and `Pagination`, and returns `null` outside a
+request. `GridviewService::getRequest()` is the `public` equivalent and is also
+nullable, so check the result instead of dereferencing it:
+
+```php
+$request = $gridviewService->getRequest();
+if (null === $request) {
+    return;
+}
+```
+
+Do not capture the request in a constructor or a setter:
+
+```php
+// Wrong: this pins one request for the lifetime of the service
+public function __construct(RequestStack $requestStack)
+{
+    $this->request = $requestStack->getCurrentRequest();
+}
+```
+
+Under PHP-FPM that works, because the container is rebuilt for every request. Under a
+runtime that keeps the container alive — FrankenPHP worker mode, RoadRunner, Swoole —
+the captured request is whichever one happened to build the container, and every later
+request reads its query string instead of its own. The grid then sorts and pages by the
+wrong request while the result count, which is recomputed each time, stays correct — so
+the symptom reads as a data bug rather than a caching one.
+
+> **Upgrading from 1.2.1 or earlier.** `Sort` and `Pagination` used to expose a
+> `protected $request` property holding a `Request`. It is gone: replace
+> `$this->request` with `$this->request()` in any subclass.
+> `GridviewService::getRequest()` also changed from `Request` to `?Request`, which
+> static analysis reports at any dereference that assumes non-null.
+
+### Reset what your subclass adds
+
+Each of these services is tagged `kernel.reset`, so Symfony calls `reset()` between
+requests. If your subclass adds request-scoped state of its own, override `reset()` and
+clear it, calling the parent:
+
+```php
+final class TenantAwareSort extends Sort
+{
+    private ?string $tenant = null;
+
+    public function reset(): void
+    {
+        parent::reset();
+
+        $this->tenant = null;
+    }
+}
+```
+
+Without this the leftover value is served to the next request on a long-running worker.
+Under PHP-FPM `reset()` runs on a process that is ending anyway, so it costs nothing and
+changes nothing — you never have to choose between the two runtimes.
+
+A custom data provider registered as a service is worth the same treatment: if it caches
+a query, a result set or the parsed request params, tag it `kernel.reset` and clear them.
+
 ## Creating a custom column
 
 1. Implement `ColumnInterface` (or extend `AbstractColumn` for convenience).
