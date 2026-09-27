@@ -255,6 +255,13 @@ Detailed documentation is available for:
 
 See the **docs/** directory.
 
+## Using an AI coding assistant?
+
+Point it at `vendor/fedale/gridview-bundle/docs/agents.md` — a compact map of what the bundle already
+does and how to reach it, written to stop an assistant hand-rolling forms, filters, exports or markup
+that Gridview provides. Referencing that path from your project's own `AGENTS.md` / `CLAUDE.md` is
+enough.
+
 ---
 
 # Inspiration

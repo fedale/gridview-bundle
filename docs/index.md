@@ -10,6 +10,9 @@ The grid is not automagic: you configure a data source and a column list, the bu
 New here? Start with **[Getting Started](01_getting-started.md)**, then reach for the
 guide you need. Every page is self-contained.
 
+Working with an AI coding assistant? Point it at **[agents.md](agents.md)** first — a compact
+capability map that keeps it from reimplementing features the bundle already has.
+
 ### Core
 
 - **[Getting Started](01_getting-started.md)** — overview, quick start, and the data provider.

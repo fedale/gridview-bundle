@@ -504,11 +504,20 @@ Accepts anything Twig's `{% form_theme %}` tag does — a single template path o
 
 ### Overriding the form layout with a Twig view
 
-By default the fields render automatically. To control the layout, point `crud.form.view` at a Twig
+By default the fields render automatically. To control the layout, point `form.view` at a Twig
 template (passed as the `$view` argument to `renderForm()`) and place **single-brace tokens**
 `{ attribute }` — consistent with the layout tokens (`{toolbar}`, `{header}`…). Each token is
 replaced by that attribute's generated widget; CSRF and any unplaced fields are appended by
 `form_end()`.
+
+```php
+protected function viewConfig(): array
+{
+    return [
+        'form' => ['view' => 'gridview/user/_form.html.twig'],
+    ];
+}
+```
 
 ```twig
 {# templates/gridview/user/_form.html.twig #}
