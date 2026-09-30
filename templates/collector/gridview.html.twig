@@ -211,6 +211,7 @@
                         <th>Attribute</th>
                         <th>Type</th>
                         <th>In index</th>
+                        <th>Views</th>
                         <th>Sortable</th>
                         <th>Filterable</th>
                         <th>Filter bar</th>
@@ -226,6 +227,13 @@
                             <td>{{ column.attribute ?? '' }}</td>
                             <td>{{ column.type }}</td>
                             <td>{{ helper.bool(column.activeIndex) }}</td>
+                            <td>
+                                {%- if column.views is null and column.hideInViews is null -%}all
+                                {%- else -%}
+                                    {{- column.views ? column.views|join(', ') : 'all' -}}
+                                    {{- column.hideInViews ? ' except ' ~ column.hideInViews|join(', ') : '' -}}
+                                {%- endif -%}
+                            </td>
                             <td>{{ helper.bool(column.sortable) }}</td>
                             <td>{{ helper.bool(column.filterable) }}</td>
                             <td>{{ column.filterBar is null ? 'auto' : helper.bool(column.filterBar) }}</td>

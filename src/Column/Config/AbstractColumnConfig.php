@@ -162,6 +162,34 @@ abstract class AbstractColumnConfig implements ColumnConfigInterface
         return $this->active(['inUpdate' => false]);
     }
 
+    /**
+     * Restrict the column to the named data renderers (views): `table`, `card`,
+     * `list` or a custom strategy. It is skipped entirely in every other view —
+     * no cell, no header, no entry in the "Columns" toggle — while its filter,
+     * export entry and CRUD control stay registered.
+     *
+     * Use it to keep a wide table wide without crowding the card and list views:
+     * `TextColumn::new('summary')->onlyInViews('card')`.
+     */
+    public function onlyInViews(string ...$views): static
+    {
+        $this->spec['views'] = array_values($views);
+
+        return $this;
+    }
+
+    /**
+     * Exclude the column from the named data renderers, keeping it in every other
+     * one — the complement of {@see onlyInViews()}, for "everywhere but there":
+     * `DateColumn::new('createdAt')->hideInViews('card', 'list')`.
+     */
+    public function hideInViews(string ...$views): static
+    {
+        $this->spec['hideInViews'] = array_values($views);
+
+        return $this;
+    }
+
     public function priority(int $priority): static
     {
         $this->spec['priority'] = $priority;

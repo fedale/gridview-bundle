@@ -221,18 +221,31 @@ class Gridview implements GridviewInterface
     }
 
     /**
-     * Columns to render in the grid table (header, body, footer, filter row and
-     * the "Columns" toggle): registered columns active in the `index` context.
-     * Columns inactive in `index` only stay in {@see getColumns()} (filterable,
-     * exportable, editable in forms) but produce no table cell.
+     * Columns to render in the data region (header, body, footer, filter row and
+     * the "Columns" toggle): registered columns active in the `index` context AND
+     * taking part in the requested view. Columns inactive in `index` only stay in
+     * {@see getColumns()} (filterable, exportable, editable in forms) but produce
+     * no cell.
+     *
+     * $view defaults to the ACTIVE renderer, so every section of one render —
+     * thead, tbody, tfoot, the filter row, the card/list items — sees the same
+     * list without asking for it. Pass a name to inspect another view.
      */
-    public function getIndexColumns(): ArrayCollection
+    public function getIndexColumns(?string $view = null): ArrayCollection
     {
+        $view ??= $this->getRenderer();
+
         // Re-index to contiguous 0..n keys so the per-column `data-col` used by
         // the visibility/reorder JS (derived from the preserved keys here and
         // from loop.index0 in thead/tbody) stays aligned across sections.
         return new ArrayCollection(array_values(
-            $this->columns->filter(static fn(ColumnInterface $c) => $c->isActiveIn('index'))->toArray()
+            $this->columns->filter(
+                // The per-view axis lives on AbstractColumn, not the interface: a
+                // column implementing ColumnInterface directly takes part in every
+                // view, as it did before the axis existed.
+                static fn(ColumnInterface $c) => $c->isActiveIn('index')
+                    && (!$c instanceof AbstractColumn || $c->isActiveInView($view))
+            )->toArray()
         ));
     }
 
@@ -800,8 +813,14 @@ class Gridview implements GridviewInterface
         $applied = $this->urlState->getFilters();
         $chips   = [];
 
-        foreach ($this->getIndexColumns() as $column) {
-            if (!$column instanceof DataColumn || !$column->isFilterable() || empty($column->filter)) {
+        // Every index column, NOT just the ones the active view renders: a filter
+        // stays applied in a view that hides its column, so its chip must stay
+        // reachable — it is then the only affordance left to clear that filter.
+        foreach ($this->columns as $column) {
+            if (!$column instanceof DataColumn || !$column->isActiveIn('index')) {
+                continue;
+            }
+            if (!$column->isFilterable() || empty($column->filter)) {
                 continue;
             }
 
@@ -1314,6 +1333,8 @@ class Gridview implements GridviewInterface
                 'attribute' => $column->getAttribute(),
                 'type' => (new \ReflectionClass($column))->getShortName(),
                 'activeIndex' => $column->isActiveIn('index'),
+                'views' => $column instanceof AbstractColumn ? $column->getViews() : null,
+                'hideInViews' => $column instanceof AbstractColumn ? $column->getHideInViews() : null,
                 'sortable' => $column->isSortable(),
                 'filterable' => $column->isFilterable(),
                 'exportable' => $column->isExportable(),

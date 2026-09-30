@@ -157,6 +157,33 @@ class ColumnConfigTest extends TestCase
         $this->assertFalse($column->isActiveIn('create'));
         $this->assertTrue($column->isActiveIn('update'));
     }
+
+    public function testViewSugarWritesTheViewsSpec(): void
+    {
+        $this->assertSame(
+            ['type' => 'text', 'attribute' => 'summary', 'views' => ['card', 'list']],
+            TextColumn::new('summary')->onlyInViews('card', 'list')->toArray()
+        );
+
+        $this->assertSame(
+            ['type' => 'text', 'attribute' => 'createdAt', 'hideInViews' => ['card']],
+            TextColumn::new('createdAt')->hideInViews('card')->toArray()
+        );
+    }
+
+    public function testViewSugarGatesTheRuntimeViews(): void
+    {
+        $factory = new ColumnFactory();
+        $gridview = $this->createStub(Gridview::class);
+
+        $column = $factory->create(TextColumn::new('summary')->onlyInViews('card'), $gridview, 0);
+
+        $this->assertTrue($column->isActiveInView('card'));
+        $this->assertFalse($column->isActiveInView('table'));
+        // The per-view axis never touches the other contexts.
+        $this->assertTrue($column->isActiveIn('index'));
+        $this->assertTrue($column->isActiveIn('update'));
+    }
 }
 
 enum ConfigTestStatus: string

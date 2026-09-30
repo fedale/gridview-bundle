@@ -63,6 +63,8 @@ Every builder inherits these from `AbstractColumnConfig`:
 | `required(bool = true)` | `control.required` (creates the control if absent) |
 | `onlyOnIndex()`, `onlyOnShow()`, `onlyOnForm()`, `onlyOnCreate()`, `onlyOnUpdate()` | `active` (restrict to one context) |
 | `hideOnIndex()`, `hideOnShow()`, `hideOnForm()`, `hideOnCreate()`, `hideOnUpdate()` | `active` (hide from one context) |
+| `onlyInViews(string ...$views)` | `views` (restrict to some data renderers) |
+| `hideInViews(string ...$views)` | `hideInViews` (hide from some data renderers) |
 
 Anything without a dedicated shortcut still accepts the raw array — e.g.
 `->filter(['type' => 'text', 'options' => ['trim' => false]])` or
@@ -233,6 +235,65 @@ in the form, the other on the detail page. `onlyOnForm()`/`hideOnForm()` cover
 both create and update at once; reach for `onlyOnCreate()`/`onlyOnUpdate()` (or
 the finer `control.modes` key) only when a field must differ between adding and
 editing.
+
+### Per-view visibility (`onlyInViews` / `hideInViews`)
+
+`active.inIndex` is all-or-nothing across the data renderers: a column in the
+index is drawn by the table, the card view and the list view alike. That rarely
+suits all three at once — a table can carry twelve columns comfortably, while a
+card with twelve label/value pairs is unreadable.
+
+The `views` axis scopes a column to named renderers, and `hideInViews` expresses
+the complement:
+
+| Method | Column appears in |
+|--------|-------------------|
+| `onlyInViews('card')` | the card view only |
+| `onlyInViews('table', 'list')` | the table and the list, not the card view |
+| `hideInViews('card')` | every view except the card one |
+| `hideInViews('card', 'list')` | the table only (with the three built-in renderers) |
+
+```php
+use Fedale\GridviewBundle\Column\Config\DateColumn;
+use Fedale\GridviewBundle\Column\Config\TextColumn;
+
+protected function buildColumns(): array
+{
+    return [
+        // Drawn by every renderer (the default).
+        TextColumn::new('name')->label('Name')->sortable(),
+
+        // A long teaser: reads well in a card, wrecks a table row.
+        TextColumn::new('summary')->label('Summary')->onlyInViews('card'),
+
+        // Housekeeping metadata: fine in a dense table, noise on a card.
+        DateColumn::new('createdAt')->label('Created')->hideInViews('card', 'list'),
+    ];
+}
+```
+
+The names are renderer keys — `table`, `card`, `list`, or any custom strategy you
+mapped in `display.renderer.map` (see
+[Choosing the data renderer](05_layout.md#choosing-the-data-renderer)). A name
+listed in both wins as a *hide*.
+
+**What the axis does and does not touch.** A column excluded from the active view
+renders nothing there — no header, no cell, no entry in the "Columns" toggle — but
+it stays a registered column, exactly like `hideOnIndex()`:
+
+- its **filter** is still built and still applied, and its filter chip still shows
+  in a view that hides the column (otherwise an applied filter would become
+  impossible to clear);
+- its **CRUD control** and detail-view cell are untouched — those are contexts,
+  not views;
+- it is still **exported**. Export follows the `exportable` flag, not the renderer
+  on screen, so a card-only column lands in the CSV of a table view.
+
+Two things stay out of scope by design. The per-view choice is the developer's,
+not the user's: the "Columns" dropdown is a table-only affordance and continues to
+list what the table draws. And a custom card/list item template gets the filtering
+for free **only** if it iterates `gridview.indexColumns` — that property resolves
+to the columns of the view being rendered.
 
 ## Column types
 

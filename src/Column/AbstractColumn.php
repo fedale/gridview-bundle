@@ -32,6 +32,26 @@ abstract class AbstractColumn implements ColumnInterface
      * @var array{index: bool, show: bool, create: bool, update: bool}
      */
     protected array $active = ['index' => true, 'show' => true, 'create' => true, 'update' => true];
+
+    /**
+     * Data renderers (views) this column takes part in, or null for all of them.
+     * Scopes the `index` context per view — `table`, `card`, `list` or a custom
+     * strategy — so a wide table can stay wide while the card and list views
+     * show only the few columns that read well there. Set via
+     * `views => string|string[]` (an allow-list) and/or
+     * `hideInViews => string|string[]` (its complement, for "everywhere but X").
+     *
+     * Like `active.inIndex`, exclusion is per rendering only: the column stays
+     * registered, so its filter, export entry and CRUD control are untouched.
+     * Unlike `visible`, it produces no markup at all in the excluded view.
+     *
+     * @var list<string>|null
+     */
+    protected ?array $views = null;
+
+    /** @var list<string>|null Views this column is excluded from; null = none. */
+    protected ?array $hideInViews = null;
+
     protected bool $visible    = true;
     protected bool $sortable   = true;
     protected bool $filterable = true;
@@ -166,6 +186,78 @@ abstract class AbstractColumn implements ColumnInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Whether this column takes part in the given data renderer (view).
+     * `hideInViews` wins over `views` when a name appears in both.
+     */
+    public function isActiveInView(string $view): bool
+    {
+        if ($this->hideInViews !== null && \in_array($view, $this->hideInViews, true)) {
+            return false;
+        }
+
+        return $this->views === null || \in_array($view, $this->views, true);
+    }
+
+    /** @return list<string>|null */
+    public function getViews(): ?array
+    {
+        return $this->views;
+    }
+
+    /** @return list<string>|null */
+    public function getHideInViews(): ?array
+    {
+        return $this->hideInViews;
+    }
+
+    /**
+     * Restrict the column to the named renderers. Null clears the restriction.
+     *
+     * @param string|list<string>|null $views
+     */
+    public function setViews(string|array|null $views): static
+    {
+        $this->views = $this->normalizeViews($views, 'views');
+
+        return $this;
+    }
+
+    /**
+     * Exclude the column from the named renderers, keeping it in every other one.
+     *
+     * @param string|list<string>|null $views
+     */
+    public function setHideInViews(string|array|null $views): static
+    {
+        $this->hideInViews = $this->normalizeViews($views, 'hideInViews');
+
+        return $this;
+    }
+
+    /**
+     * @param string|list<string>|null $views
+     *
+     * @return list<string>|null
+     */
+    private function normalizeViews(string|array|null $views, string $key): ?array
+    {
+        if ($views === null) {
+            return null;
+        }
+
+        $names = array_values(array_unique(array_map('strval', (array) $views)));
+        if ($names === []) {
+            throw new \InvalidArgumentException(sprintf(
+                'Column "%s" declares an empty "%s" list; name at least one renderer, or use active(false) to drop the column everywhere.',
+                $this->getAttribute() ?? $this->label ?? 'unknown',
+                $key,
+            ));
+        }
+
+        return $names;
     }
 
     public function isVisible(): bool

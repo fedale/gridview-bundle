@@ -288,6 +288,12 @@ The `list` and `card` strategies iterate `gridview.indexColumns` and reuse the s
 → label/value pair. Per-row attributes from the `RowSubscriber`/`Row` (even/odd,
 custom classes) apply to the `<li>`/`<article>` just as they do to `<tr>`.
 
+**Not every column suits every renderer.** `gridview.indexColumns` resolves to the
+columns of the view being rendered, so a column can opt out of one renderer and
+stay in the others — a long teaser only in the cards, housekeeping dates only in
+the table. Declare it on the column with `onlyInViews()` / `hideInViews()`; see
+[Per-view visibility](02_columns.md#per-view-visibility-onlyinviews--hideinviews).
+
 **CardView layout.** Cards flow in a CSS-grid `repeat(auto-fill, minmax(--gv-card-min, 1fr))`,
 so the column count adapts to the container width (down to one column on mobile).
 Tune it per grid with the card entry in `renderer.map`:

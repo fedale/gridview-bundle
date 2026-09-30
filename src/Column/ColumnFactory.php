@@ -24,6 +24,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  *     sortable?: bool,
  *     visible?: bool|callable,
  *     active?: bool|callable,
+ *     views?: string|string[],
+ *     hideInViews?: string|string[],
  *     twigFilter?: string,
  *     filterBar?: bool,
  *     editable?: bool,

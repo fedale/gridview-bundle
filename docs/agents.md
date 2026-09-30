@@ -73,6 +73,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | Multi-field or alias-based ordering | `dataConfig.sort.map` (one sort key → several ORDER BY fields) | [03_sorting-pagination.md](03_sorting-pagination.md#sorting) |
 | CSV / Excel / PDF download | `exportable` columns + the `{export}` token; auto-wired in CRUD controllers | [10_export.md](10_export.md#export) |
 | Cards or a list instead of a table | `display.renderer` (`table` / `card` / `list`) + `{viewSwitcher}` | [05_layout.md](05_layout.md#choosing-the-data-renderer) |
+| A column in some views only (a teaser in cards, dates only in the table) | `->onlyInViews('card')` / `->hideInViews('card', 'list')` | [02_columns.md](02_columns.md#per-view-visibility-onlyinviews--hideinviews) |
 | Edit a cell in place | `->editable()` on the column | [08_crud.md](08_crud.md#inline-editing) |
 | Select rows and act on them | `CheckboxColumn` + the `{bulkBar}` token | [08_crud.md](08_crud.md#bulk-actions-selection--batch-update) |
 | A read-only single-record page | `DetailView` / `AbstractDetailController` | [09_detail-view.md](09_detail-view.md) |
@@ -174,6 +175,17 @@ TextColumn::new('fullName')->onlyOnIndex(),      // in the table only
 
 Contexts are `index`, `show`, `create`, `update` — hence `onlyOnIndex()`, `onlyOnForm()`,
 `hideOnUpdate()` and friends. See [02_columns.md](02_columns.md#active-vs-visible--access-control).
+
+A third axis scopes the `index` context per data renderer, because one column list
+rarely suits a table and a card at once:
+
+```php
+TextColumn::new('summary')->onlyInViews('card'),        // cards only
+DateColumn::new('createdAt')->hideInViews('card', 'list'), // table only
+```
+
+Excluded views draw nothing, while the filter, the CRUD control and the export entry stay in place.
+See [Per-view visibility](02_columns.md#per-view-visibility-onlyinviews--hideinviews).
 
 ### 5. Insert layout tokens into the existing tree
 
