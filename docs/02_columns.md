@@ -79,7 +79,7 @@ remove capability.
 | `NumberColumn`, `PercentColumn` | `decimals(int)` |
 | `DateColumn`, `DatetimeColumn`, `TimeColumn` | `pattern(string)` |
 | `BooleanColumn` | `labels(string $true, string $false)` |
-| `SelectColumn`, `MultiSelectColumn` | `enumClass(string)`, `enum(string $class, bool $required = false)`, `choices(array)` |
+| `SelectColumn`, `MultiSelectColumn` | `enumClass(string)`, `enum(string $class, bool $required = false)`, `choices(array)` — both `enum()` and `choices()` also fill the choice filter's option list (see [`choice`](04_filtering.md#choice)) |
 | `RelationColumn` | `targetClass(string)`, `choiceLabel(string)`, `relation(string $class, ?string $choiceLabel = null, bool $required = false)` |
 
 `RelationColumn::relation()` derives the relation filter, the relation control

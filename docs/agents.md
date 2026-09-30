@@ -90,7 +90,7 @@ controller or a URL string, stop and check the row above.
 
 ---
 
-## Nine traps
+## Ten traps
 
 ### 1. Two config namespaces: `viewConfig()` keys vs grid options
 
@@ -240,6 +240,27 @@ themselves up. Do not generate those URLs by hand and do not invent suffixes.
 See [08_crud.md](08_crud.md#routing-convention).
 
 ---
+
+### 10. A `choice` or `relation` filter needs its options
+
+Both render a `<select>` the bundle cannot fill on its own — it never queries the database to build
+a filter. Declared without options they render an empty dropdown, which looks like a broken grid
+rather than a missing config key.
+
+```php
+// RIGHT — the enum fills the choice filter
+SelectColumn::new('status')->enum(PostStatus::class),
+
+// RIGHT — a relation filter is a plain option list: hand it one
+RelationColumn::new('author')->relation(User::class, choiceLabel: 'fullName')
+    ->filter(['type' => 'relation', 'options' => ['choices' => $authorChoices]]),
+
+// WRONG — declares the filter, renders it empty
+RelationColumn::new('author')->relation(User::class),
+```
+
+For a list too large to inline, give the relation filter an `ajax_url` instead. See
+[04_filtering.md](04_filtering.md#choice).
 
 ## The guides
 

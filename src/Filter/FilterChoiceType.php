@@ -12,8 +12,13 @@ class FilterChoiceType extends AbstractType
     {
         // No sensible generic default exists — the caller (column `filter.options.choices`)
         // must supply the real choice list, e.g. from a backing PHP enum.
+        // `required: false` + an empty placeholder mirror FilterRelationType: a
+        // filter is never mandatory, and without the empty option the user could
+        // pick a value but never get back to "no filter".
         $resolver->setDefaults([
-            'choices' => [],
+            'choices'     => [],
+            'required'    => false,
+            'placeholder' => '',
         ]);
     }
 

@@ -73,10 +73,25 @@ export default class extends Controller {
 
     // ── Static choices from data attribute ────────────────────────────
 
+    // The empty "no filter" option Symfony rendered for a single select. Both
+    // loaders below replace the whole option list, so it has to be carried over:
+    // without it the select shows its first real choice while no filter is
+    // applied, and the user has no way back to "no filter".
+    _takePlaceholder() {
+        if (this.element.multiple) return null;
+
+        return [...this.element.options].find(o => !o.value) ?? null;
+    }
+
+    _resetOptions(placeholder) {
+        this.element.innerHTML = '';
+        if (placeholder) this.element.appendChild(placeholder);
+    }
+
     _loadChoicesFromData() {
         const select   = this.element;
         const selected = new Set(this.selectedValue.map(String));
-        select.innerHTML = '';
+        this._resetOptions(this._takePlaceholder());
         this.choicesValue.forEach(item => {
             const opt       = document.createElement('option');
             opt.value       = String(item.v);
@@ -92,10 +107,12 @@ export default class extends Controller {
         const select = this.element;
         const currentValues = [...select.options].filter(o => o.selected).map(o => o.value);
 
+        const placeholder = this._takePlaceholder();
+
         try {
             const res  = await fetch(this.ajaxUrlValue, { headers: { Accept: 'application/json' } });
             const data = await res.json();
-            select.innerHTML = '';
+            this._resetOptions(placeholder);
             data.forEach(item => {
                 const opt       = document.createElement('option');
                 opt.value       = String(item[this.optionValueValue]);

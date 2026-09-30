@@ -400,7 +400,30 @@ A `<select>` built from a static choices array.
 ]
 ```
 
-Accepts all standard Symfony `ChoiceType` options under `options`.
+Accepts all standard Symfony `ChoiceType` options under `options`. The filter is
+optional and carries an empty option, so a chosen value can always be cleared;
+pass your own `placeholder` to label it (`'placeholder' => 'Any status'`).
+
+**`choices` is not optional.** Nothing can guess the value set, so a choice filter
+declared without it renders an empty `<select>`. The fluent builders fill it for
+you — `SelectColumn::new('status')->enum(PostStatus::class)` derives the choices
+from the enum's cases (using each case's `label()` when the enum defines one,
+otherwise the case name), and `->choices([...])` feeds the display map and the
+filter at once. The array spec has no such shortcut: write the `choices` out.
+
+The same applies to the `relation` filter below, with one difference: it has no
+shortcut at all. `RelationColumn::relation(User::class)` declares the filter but
+cannot populate it — the bundle never queries the database to build a filter — so
+pass `choices` (or an `ajax_url`) yourself:
+
+```php
+RelationColumn::new('author')->label('Author')
+    ->relation(User::class, choiceLabel: 'fullName')
+    ->filter(['type' => 'relation', 'options' => [
+        'choices'    => $this->authorChoices(),   // ['Ada Lovelace' => 12, ...]
+        'searchable' => true,
+    ]]),
+```
 
 ---
 

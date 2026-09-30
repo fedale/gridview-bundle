@@ -69,7 +69,10 @@ class ColumnConfigTest extends TestCase
             'type' => 'select',
             'attribute' => 'status',
             'control' => ['type' => 'enum', 'options' => ['class' => ConfigTestStatus::class], 'required' => true],
-            'filter' => 'choice',
+            'filter' => [
+                'type' => 'choice',
+                'options' => ['choices' => ['Draft' => 'draft', 'Published' => 'published']],
+            ],
         ], $spec);
     }
 
@@ -158,6 +161,56 @@ class ColumnConfigTest extends TestCase
         $this->assertTrue($column->isActiveIn('update'));
     }
 
+    public function testEnumSugarPopulatesTheChoiceFilter(): void
+    {
+        $spec = SelectColumn::new('status')->enum(ConfigTestStatus::class)->toArray();
+
+        $this->assertSame('choice', $spec['filter']['type']);
+        // A bare choice filter would render an empty <select>.
+        $this->assertSame(
+            ['Draft' => 'draft', 'Published' => 'published'],
+            $spec['filter']['options']['choices']
+        );
+    }
+
+    public function testEnumSugarPrefersTheEnumsOwnLabel(): void
+    {
+        $spec = SelectColumn::new('status')->enum(ConfigTestLabelledStatus::class)->toArray();
+
+        $this->assertSame(
+            ['status.open' => 'open', 'status.closed' => 'closed'],
+            $spec['filter']['options']['choices']
+        );
+    }
+
+    public function testChoicesSugarFeedsBothTheDisplayAndTheFilter(): void
+    {
+        $choices = ['Yes' => 'y', 'No' => 'n'];
+        $spec = SelectColumn::new('answer')->choices($choices)->toArray();
+
+        $this->assertSame($choices, $spec['format']['choices']);
+        $this->assertSame($choices, $spec['filter']['options']['choices']);
+    }
+
+    public function testEnumSugarKeepsOtherFilterOptions(): void
+    {
+        $spec = SelectColumn::new('status')
+            ->filter(['type' => 'choice', 'options' => ['placeholder' => 'any']])
+            ->enum(ConfigTestStatus::class)
+            ->toArray();
+
+        $this->assertSame('any', $spec['filter']['options']['placeholder']);
+        $this->assertArrayHasKey('choices', $spec['filter']['options']);
+    }
+
+    public function testEnumSugarRejectsANonEnumClass(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('expects a backed enum class');
+
+        SelectColumn::new('status')->enum(\stdClass::class);
+    }
+
     public function testViewSugarWritesTheViewsSpec(): void
     {
         $this->assertSame(
@@ -190,4 +243,15 @@ enum ConfigTestStatus: string
 {
     case Draft = 'draft';
     case Published = 'published';
+}
+
+enum ConfigTestLabelledStatus: string
+{
+    case Open = 'open';
+    case Closed = 'closed';
+
+    public function label(): string
+    {
+        return 'status.' . $this->value;
+    }
 }
