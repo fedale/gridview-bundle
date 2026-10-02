@@ -84,11 +84,12 @@ protected function viewConfig(): array
 }
 ```
 
-> **Upgrading an existing app?** `gridview-export` is a new Stimulus controller, so
-> add it to your `assets/controllers.json` under `@fedale/gridview-bundle`
-> (`"export": {"enabled": true, "fetch": "lazy"}`) — new controllers are not
-> enabled retroactively. Without it nothing breaks: the links carry no column
-> state and the export falls back to the full set.
+> **Upgrading an existing app?** `gridview-export` is a new Stimulus controller, and
+> `composer update fedale/gridview-bundle` is all it takes: Flex rewrites
+> `assets/controllers.json` from the bundle's own `package.json` and adds the entry
+> enabled. Updating the files in place without running Composer leaves the
+> controller unregistered — nothing breaks, the links simply carry no column state
+> and the export falls back to the full set.
 
 ### Limiting the formats per grid
 
