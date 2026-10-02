@@ -3,7 +3,9 @@
 ## Export
 
 Exports respect the **current filters/sort** (the data provider is re-run without
-pagination) and the **export columns** (those flagged `exportable`, else the visible data columns).
+pagination) and the **export columns** — those flagged `exportable`, else the data
+columns the grid shows, narrowed to [what the user is actually
+looking at](#the-file-matches-the-screen).
 Built-in formats (all native PHP, no extra dependency): **CSV** (`csv`), **Excel** (`xlsx`, a real
 Office Open XML file), **PDF** (`pdf`, a paginated Helvetica table) and **JSON** (`json`). The set is
 **extensible** — implement `ExporterInterface` and the service is auto-registered (no config),
@@ -45,6 +47,48 @@ protected function viewConfig(): array
 
 The `{export}` link carries the current querystring, so the download reflects the active filters.
 Mark columns with `exportable => true` to restrict the export to a subset.
+
+### The file matches the screen
+
+Column visibility and column order are client-side: the user hides three columns
+and drags a fourth, and the server never hears about it. Left alone, the export
+would hand back every column in declaration order — a file that looks nothing like
+the table it was downloaded from.
+
+So the export link reports the current column state. On click, the
+`gridview-export` Stimulus controller appends `cols=` with the keys of the columns
+the grid is drawing, in the order it draws them, read from the rendered DOM; the
+`/export` action then selects and orders the columns to match. It works the same in
+the card and list views, where the columns on screen are the ones the per-view axis
+left in (see [Per-view visibility](02_columns.md#per-view-visibility-onlyinviews--hideinviews)).
+
+Two rules keep it predictable:
+
+- **A column that can appear in the grid is exported only when it is on screen.**
+  Hidden by the "Columns" menu, or absent from the current renderer — same outcome.
+- **A column that never appears in the grid is always exported.** An `exportable`
+  column kept out of the index — an internal code meant for the file alone — has no
+  cell to be reported from, so it is kept and appended after the on-screen ones.
+
+The write-side fields follow from the second rule's premise: a column declared
+`onlyOnForm()` or `onlyOnShow()` is not part of the default export set at all. A
+slug, a rich-text body or an upload path exists for the form, not for the file.
+Flag it `exportable` to put it back.
+
+Turn the whole thing off per grid to always export the full configured set:
+
+```php
+protected function viewConfig(): array
+{
+    return ['export' => ['followsUi' => false]];
+}
+```
+
+> **Upgrading an existing app?** `gridview-export` is a new Stimulus controller, so
+> add it to your `assets/controllers.json` under `@fedale/gridview-bundle`
+> (`"export": {"enabled": true, "fetch": "lazy"}`) — new controllers are not
+> enabled retroactively. Without it nothing breaks: the links carry no column
+> state and the export falls back to the full set.
 
 ### Limiting the formats per grid
 

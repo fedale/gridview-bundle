@@ -15,6 +15,12 @@
         "fetch": "lazy",
         "enabled": true
       },
+      "export": {
+        "main": "controllers/gridview-export_controller.js",
+        "name": "gridview-export",
+        "fetch": "lazy",
+        "enabled": true
+      },
       "visibility": {
         "main": "controllers/gridview-visibility_controller.js",
         "name": "gridview-visibility",

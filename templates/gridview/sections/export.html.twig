@@ -5,8 +5,13 @@
   Requires options.integration.export = { url, formats: [{key, label}, ...] }.
 #}
 {% set ex = gridview.options.integration.export|default({}) %}
+{# `followsUi` (default on): the gridview-export controller appends the columns
+   the grid is currently showing, in their current order, so the file matches the
+   screen. Set integration.export.followsUi to false to always export the full
+   configured set. #}
+{% set exFollowsUi = ex.followsUi|default(true) %}
 {% if ex.url is defined and ex.formats is defined and ex.formats is not empty %}
-<div class="gv-export gv-dropdown" data-controller="gridview-dropdown">
+<div class="gv-export gv-dropdown" data-controller="gridview-dropdown{{ exFollowsUi ? ' gridview-export' : '' }}"{% if exFollowsUi %} data-gridview-export-grid-id-value="{{ gridview.key }}"{% endif %}>
     <button type="button" class="{{ gridview.cls('btn') }}" data-action="gridview-dropdown#toggle" aria-expanded="false">{{ 'export.label'|trans({}, 'GridviewBundle') }} <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">⤓</span></button>
     <ul class="gv-dropdown-menu gv-dropdown-menu--end">
         {% for f in ex.formats %}

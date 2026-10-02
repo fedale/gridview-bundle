@@ -286,8 +286,10 @@ it stays a registered column, exactly like `hideOnIndex()`:
   impossible to clear);
 - its **CRUD control** and detail-view cell are untouched — those are contexts,
   not views;
-- it is still **exported**. Export follows the `exportable` flag, not the renderer
-  on screen, so a card-only column lands in the CSV of a table view.
+- it is **not exported from a view that hides it**: the export link reports the
+  columns on screen, so a card-only column lands in the CSV of the card view and
+  stays out of the table's (see [The file matches the
+  screen](10_export.md#the-file-matches-the-screen)).
 
 Two things stay out of scope by design. The per-view choice is the developer's,
 not the user's: the "Columns" dropdown is a table-only affordance and continues to

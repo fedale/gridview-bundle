@@ -455,23 +455,85 @@ class Gridview implements GridviewInterface
 
     /**
      * Columns to export: those flagged `exportable`, or — when none is flagged —
-     * the visible data columns (excluding structural/action columns).
+     * the data columns the grid shows (structural and action columns excluded,
+     * and so are the ones inactive in `index`: a field that exists only for the
+     * CRUD form or the detail view — a slug, a rich-text body, an upload — has no
+     * business in the file of a grid that never displays it. Flag it
+     * `exportable` to put it back).
+     *
+     * $uiKeys is the ordered list of column keys the page reported for this
+     * export (see {@see applyUiColumnState()}); null exports the whole set, as a
+     * request that carries no column state does.
+     *
+     * @param list<string>|null $uiKeys
      *
      * @return ColumnInterface[]
      */
-    public function getExportColumns(): array
+    public function getExportColumns(?array $uiKeys = null): array
     {
         $columns = $this->columns->toArray();
 
         $flagged = array_values(array_filter($columns, static fn($c) => $c->isExportable()));
-        if ($flagged !== []) {
-            return $flagged;
+        $selected = $flagged !== [] ? $flagged : array_values(array_filter(
+            $columns,
+            static fn($c) => $c->isToggleable()
+                && $c->getAttribute() !== null
+                && $c->isVisible()
+                && $c->isActiveIn('index')
+        ));
+
+        return $uiKeys === null ? $selected : $this->applyUiColumnState($selected, $uiKeys);
+    }
+
+    /**
+     * Reduce and reorder the export set to the columns the grid is actually
+     * showing. Column visibility and reordering are client-side only, so without
+     * the keys the page reports, a file exported from a grid with three columns
+     * hidden and two moved would still carry every column in declaration order.
+     *
+     * The rule is per column, not per list: a column that CAN appear in the index
+     * is exported only when the page reports it, in the reported order; a column
+     * that never appears there — exportable but not rendered, say an internal
+     * code meant for the file alone — has no key to be reported under, so it is
+     * kept and appended after the reported ones.
+     *
+     * @param ColumnInterface[] $columns
+     * @param list<string>      $uiKeys
+     *
+     * @return ColumnInterface[]
+     */
+    private function applyUiColumnState(array $columns, array $uiKeys): array
+    {
+        $reportable = [];
+        foreach ($this->columns as $column) {
+            $attribute = $column->getAttribute();
+            if ($attribute !== null && $column->isActiveIn('index')) {
+                $reportable[$attribute] = true;
+            }
         }
 
-        return array_values(array_filter(
-            $columns,
-            static fn($c) => $c->isToggleable() && $c->getAttribute() !== null && $c->isVisible()
-        ));
+        $onScreen = [];
+        $offScreen = [];
+        foreach ($columns as $column) {
+            $attribute = $column->getAttribute();
+            if ($attribute !== null && isset($reportable[$attribute])) {
+                $onScreen[$attribute] = $column;
+                continue;
+            }
+            $offScreen[] = $column;
+        }
+
+        $ordered = [];
+        foreach ($uiKeys as $key) {
+            if (isset($onScreen[$key])) {
+                $ordered[] = $onScreen[$key];
+                // A key repeated by the page (card/list items repeat their field
+                // keys) must not duplicate the column in the file.
+                unset($onScreen[$key]);
+            }
+        }
+
+        return [...$ordered, ...$offScreen];
     }
 
     private function initializeDataProvider(): void

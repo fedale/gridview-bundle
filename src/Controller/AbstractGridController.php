@@ -70,6 +70,7 @@ abstract class AbstractGridController extends AbstractController
      *  - template.index:  page shell wrapping the grid listing
      *  - export.filename: export file base (null → fall back to id)
      *  - export.formats:  null → all exporters; [keys] → ordered allow-list
+     *  - export.followsUi: export the columns the page shows, in its order
      *  - attributes:      table-level HTML attrs
      *  - options:         extra builder opts (layout, globalSearch, ...)
      *
@@ -82,7 +83,10 @@ abstract class AbstractGridController extends AbstractController
         return [
             'id'         => $id,
             'template'   => ['index' => 'gridview/with_sidebar.html.twig'],
-            'export'     => ['filename' => null, 'formats' => null],
+            // `followsUi`: let the export mirror what the user is looking at —
+            // the columns they left visible, in the order they arranged them.
+            // Set it false to always export the full configured set.
+            'export'     => ['filename' => null, 'formats' => null, 'followsUi' => true],
             'attributes' => ['class' => 'table'],
             'options'    => [],
         ];
@@ -138,7 +142,7 @@ abstract class AbstractGridController extends AbstractController
 
         return $exporter->export(
             $gridview->getExportRows(),
-            $gridview->getExportColumns(),
+            $gridview->getExportColumns($this->reportedColumns($request)),
             ['filename' => $this->config('export.filename') ?? $this->config('id')],
         );
     }
@@ -155,6 +159,38 @@ abstract class AbstractGridController extends AbstractController
     protected function gridColumns(): array
     {
         return $this->buildColumns();
+    }
+
+    /**
+     * The ordered column keys the page reported for this export, or null when the
+     * request carries none — an export link built by hand, or a grid with
+     * `export.followsUi` off, then exports the full configured set.
+     *
+     * Unknown keys are harmless: {@see Gridview::getExportColumns()} matches them
+     * against the grid's own columns and ignores the rest.
+     *
+     * @return list<string>|null
+     */
+    private function reportedColumns(Request $request): ?array
+    {
+        if (!$this->config('export.followsUi')) {
+            return null;
+        }
+
+        // Read through all() so an array-shaped `cols` cannot blow up the request.
+        $cols = $request->query->all()['cols'] ?? null;
+        if (!\is_string($cols) || trim($cols) === '') {
+            return null;
+        }
+
+        $keys = array_values(array_filter(
+            array_map('trim', explode(',', $cols)),
+            static fn(string $key) => $key !== '',
+        ));
+
+        // All separators and no keys says nothing about the grid; treat it as the
+        // absent parameter rather than as "export no columns".
+        return $keys === [] ? null : $keys;
     }
 
     /**
@@ -200,6 +236,9 @@ abstract class AbstractGridController extends AbstractController
                         static fn($e) => ['key' => $e->getKey(), 'label' => $e->getLabel()],
                         $this->exportFormats(),
                     ),
+                    // Drives the `gridview-export` controller on the menu: off, the
+                    // links carry no column state and the server exports everything.
+                    'followsUi' => (bool) $this->config('export.followsUi'),
                 ],
             ],
             // Resolved real-time settings consumed by _grid.html.twig. `enabled`

@@ -163,6 +163,34 @@ $columns = [
 
 ---
 
+## `gridview-export`
+
+Appends the current column state to the export links, so the downloaded file has the
+columns the grid is showing, in the order it shows them. On click it rewrites the
+link's `href` with `cols=<key>,<key>,…`; `AbstractGridController::export()` reads it
+back (see [The file matches the screen](10_export.md#the-file-matches-the-screen)).
+
+**Connects to:** the `{export}` section template, unless `export.followsUi` is false.
+
+**Values:**
+
+| Value | Type | Description |
+|-------|------|-------------|
+| `gridId` | `String` | Unique grid key (set automatically) |
+
+The keys are read from the rendered DOM — every `[data-col-key]` inside
+`[data-gv="{gridId}"]`, skipping the ones computed to `display: none`, first
+occurrence wins — not from the stored preferences. The markup is what the user is
+looking at whatever wrote it, and the three renderers key their cells the same way
+(the table on its `<th>`, the card and list on each field), so one query covers all
+of them. Structural keys (`_selection`, the action column) travel along and the
+server ignores them, as it ignores any key that matches no column.
+
+To act on the column state yourself — a custom "download" button, say — read the
+same selectors; there is no bundle API to call.
+
+---
+
 ## `gridview-page-jump`
 
 Navigates to the page chosen in the pagination's jump-to-page `<select>`. Each `<option>`

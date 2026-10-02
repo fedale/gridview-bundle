@@ -10,7 +10,10 @@ Reuses the per-row attributes/classes from the RowSubscriber and Row model. #}
         {% set titleColumns = gridview.indexColumns|filter(c => titleField and c.kind == 'data' and c.attribute ==
         titleField) %}
         {% for column in titleColumns %}
-        <div class="gv-card__title">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
+        {# data-col-key like every other cell: the title is a column too, and
+           anything reading the rendered columns (the export link, for one) would
+           otherwise miss the one field the card leads with. #}
+        <div class="gv-card__title" data-col-key="{{ column.attribute|default('col') }}">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>
         {% endfor %}
         {% for column in gridview.indexColumns|filter(c => c.kind == 'checkbox') %}
         <div class="gv-card__select">{% include '@FedaleGridview/gridview/sections/dataview/_cell.html.twig' %}</div>

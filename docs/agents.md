@@ -72,6 +72,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | One search box across several fields | `behavior.globalSearch` | [04_filtering.md](04_filtering.md#global-search) |
 | Multi-field or alias-based ordering | `dataConfig.sort.map` (one sort key → several ORDER BY fields) | [03_sorting-pagination.md](03_sorting-pagination.md#sorting) |
 | CSV / Excel / PDF download | `exportable` columns + the `{export}` token; auto-wired in CRUD controllers | [10_export.md](10_export.md#export) |
+| The export to match the columns on screen | nothing — it already does; `export.followsUi: false` opts out | [10_export.md](10_export.md#the-file-matches-the-screen) |
 | Cards or a list instead of a table | `display.renderer` (`table` / `card` / `list`) + `{viewSwitcher}` | [05_layout.md](05_layout.md#choosing-the-data-renderer) |
 | A column in some views only (a teaser in cards, dates only in the table) | `->onlyInViews('card')` / `->hideInViews('card', 'list')` | [02_columns.md](02_columns.md#per-view-visibility-onlyinviews--hideinviews) |
 | Edit a cell in place | `->editable()` on the column | [08_crud.md](08_crud.md#inline-editing) |
@@ -184,8 +185,9 @@ TextColumn::new('summary')->onlyInViews('card'),        // cards only
 DateColumn::new('createdAt')->hideInViews('card', 'list'), // table only
 ```
 
-Excluded views draw nothing, while the filter, the CRUD control and the export entry stay in place.
-See [Per-view visibility](02_columns.md#per-view-visibility-onlyinviews--hideinviews).
+Excluded views draw nothing, while the filter and the CRUD control stay in place; the export follows
+the screen, so the file of a view carries that view's columns. See
+[Per-view visibility](02_columns.md#per-view-visibility-onlyinviews--hideinviews).
 
 ### 5. Insert layout tokens into the existing tree
 
