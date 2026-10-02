@@ -633,7 +633,9 @@ class Gridview implements GridviewInterface
      */
     public function setColumns(array $columns): static
     {
-        foreach ($columns as $key => $spec) {
+        // Composite specs first: a virtual column contributes the fields it is
+        // built from, so the loop below only ever sees ordinary columns.
+        foreach (ColumnFactory::expand($columns) as $key => $spec) {
             $column = $this->columnFactory->create($spec, $this, $key);
             $column->setGridview($this);
 

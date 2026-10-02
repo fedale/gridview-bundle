@@ -75,6 +75,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | The export to match the columns on screen | nothing — it already does; `export.followsUi: false` opts out | [10_export.md](10_export.md#the-file-matches-the-screen) |
 | Cards or a list instead of a table | `display.renderer` (`table` / `card` / `list`) + `{viewSwitcher}` | [05_layout.md](05_layout.md#choosing-the-data-renderer) |
 | A column in some views only (a teaser in cards, dates only in the table) | `->onlyInViews('card')` / `->hideInViews('card', 'list')` | [02_columns.md](02_columns.md#per-view-visibility-onlyinviews--hideinviews) |
+| One column in the grid, several fields in the form (a full name, an address) | `VirtualColumn::new('fullName')->from(['firstName', 'lastName'])` | [02_columns.md](02_columns.md#virtual-columns--one-to-read-several-to-write) |
 | Edit a cell in place | `->editable()` on the column | [08_crud.md](08_crud.md#inline-editing) |
 | Select rows and act on them | `CheckboxColumn` + the `{bulkBar}` token | [08_crud.md](08_crud.md#bulk-actions-selection--batch-update) |
 | A read-only single-record page | `DetailView` / `AbstractDetailController` | [09_detail-view.md](09_detail-view.md) |

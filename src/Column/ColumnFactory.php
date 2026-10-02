@@ -24,6 +24,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  *     sortable?: bool,
  *     visible?: bool|callable,
  *     active?: bool|callable,
+ *     sources?: array<int, string|array<string, mixed>|ColumnConfigInterface>,
  *     views?: string|string[],
  *     hideInViews?: string|string[],
  *     twigFilter?: string,
@@ -55,6 +56,46 @@ class ColumnFactory
         'checkbox' => CheckboxColumn::class,
         'serial'   => SerialColumn::class,
     ];
+
+    /**
+     * Expands the composite specs in an authored column list. A virtual column
+     * carries the fields it is built from in `sources`; each becomes a column of
+     * its own, spliced in right after it, so the grid shows one column and the
+     * CRUD form gets the real fields back.
+     *
+     * Runs before anything is instantiated, so the rest of the pipeline only ever
+     * sees ordinary columns. Keys are preserved (a spec without an `attribute`
+     * falls back to its key for a name) and the spliced sources get their own
+     * string keys, which cannot collide with the authored ones.
+     *
+     * @param array<int|string, ColumnConfigInterface|array<string, mixed>|string> $specs
+     *
+     * @return array<int|string, ColumnConfigInterface|array<string, mixed>|string>
+     */
+    public static function expand(array $specs): array
+    {
+        $expanded = [];
+        foreach ($specs as $key => $spec) {
+            $array = $spec instanceof ColumnConfigInterface ? $spec->toArray() : $spec;
+            if (!\is_array($array) || !isset($array['sources']) || !\is_array($array['sources'])) {
+                $expanded[$key] = $spec;
+                continue;
+            }
+
+            $sources = $array['sources'];
+            unset($array['sources']);
+            $expanded[$key] = $array;
+
+            foreach ($sources as $source) {
+                $sourceKey = \is_array($source) && isset($source['attribute'])
+                    ? $key . ':' . $source['attribute']
+                    : $key . ':' . \count($expanded);
+                $expanded[$sourceKey] = $source;
+            }
+        }
+
+        return $expanded;
+    }
 
     /** Register a custom column type. Call from a Symfony CompilerPass or bundle boot. */
     public function register(string $type, string $columnClass): void
@@ -102,7 +143,11 @@ class ColumnFactory
         $attribute = $spec['attribute'] ?? 'column_' . $key;
         $value     = $spec['value'] ?? null;
 
-        unset($spec['attribute'], $spec['value'], $spec['type']);
+        // `sources` is an authoring-time key consumed by expand(); a spec that
+        // reaches here still carrying one was built outside the authoring entry
+        // points, and the column renders fine without it (its value closure is
+        // part of the spec) — it just contributes no columns of its own.
+        unset($spec['attribute'], $spec['value'], $spec['type'], $spec['sources']);
 
         // Structural / custom columns keep their dedicated class.
         if (isset($this->registry[$type])) {

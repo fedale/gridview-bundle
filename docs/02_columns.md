@@ -81,6 +81,7 @@ remove capability.
 | `BooleanColumn` | `labels(string $true, string $false)` |
 | `SelectColumn`, `MultiSelectColumn` | `enumClass(string)`, `enum(string $class, bool $required = false)`, `choices(array)` — both `enum()` and `choices()` also fill the choice filter's option list (see [`choice`](04_filtering.md#choice)) |
 | `RelationColumn` | `targetClass(string)`, `choiceLabel(string)`, `relation(string $class, ?string $choiceLabel = null, bool $required = false)` |
+| `VirtualColumn` | `from(array $sources, string $separator = ' ')` — see [Virtual columns](#virtual-columns--one-to-read-several-to-write) |
 
 `RelationColumn::relation()` derives the relation filter, the relation control
 and a default display closure (`$data['author']['name'] ?? $data['author']['id']`)
@@ -296,6 +297,73 @@ not the user's: the "Columns" dropdown is a table-only affordance and continues 
 list what the table draws. And a custom card/list item template gets the filtering
 for free **only** if it iterates `gridview.indexColumns` — that property resolves
 to the columns of the view being rendered.
+
+## Virtual columns — one to read, several to write
+
+A grid often wants a field that does not exist. A full name, built from a first
+and a last name. An address, joined from street, city and zip. Rendering it is a
+closure away, but the CRUD form then needs the real fields back — so the same
+thing gets declared twice, in two places, and drifts apart over time.
+
+`VirtualColumn` declares both at once. It renders the joined value, and each of
+its `from()` sources becomes a column of its own, hidden behind it and carrying
+the control that writes the underlying field:
+
+```php
+use Fedale\GridviewBundle\Column\Config\VirtualColumn;
+
+protected function buildColumns(): array
+{
+    return [
+        VirtualColumn::new('fullName')->label('Name')->from(['firstName', 'lastName']),
+    ];
+}
+```
+
+| Context | What it renders |
+|---------|-----------------|
+| the grid | one `Name` column: `Ada Lovelace` |
+| the detail view | the same single column |
+| create / update | two fields: `firstName` and `lastName` |
+
+A bare attribute name gets a default text control. Pass a builder instead when the
+source needs more — its own label, a type, validation:
+
+```php
+VirtualColumn::new('fullName')->label('Name')->from([
+    TextColumn::new('firstName')->label('First name')->required(),
+    TextColumn::new('lastName')->label('Last name')->required(),
+]),
+
+// Any separator, and dot notation to reach into a relation
+VirtualColumn::new('place')->label('Place')->from(['city', 'country.name'], separator: ', '),
+```
+
+Parts that are empty are dropped rather than padded, so a missing middle name
+leaves no double space behind. An explicit `value()`/`valueGetter()` on the column
+wins over the join, and a source that declares its own `active` keeps it — pass
+`['attribute' => 'lastName', 'active' => ['inIndex' => true]]` to put a source
+back on screen next to the virtual column.
+
+**Sorting and searching stay the grid's business.** The joined value exists only
+at render time, so there is nothing for the database to order or match. Both are
+one config entry away, because each takes several fields per key:
+
+```php
+// dataConfig(): sort by last name, then first name, under the virtual column's key
+'sort' => ['map' => [
+    'fullName' => ['asc' => ['e.lastName', 'e.firstName'], 'desc' => ['e.lastName', 'e.firstName']],
+]],
+
+// …and search across both at once
+'options' => ['behavior' => ['globalSearch' => ['e.firstName', 'e.lastName']]],
+```
+
+**What it is not.** A virtual column has no field behind it, so it cannot be
+inline-edited, and its sources are hidden from the grid — which means the export
+carries the joined `Name` rather than the two parts (see [The file matches the
+screen](10_export.md#the-file-matches-the-screen)). The whole mechanism is
+authoring-time: by the time the grid renders, these are ordinary columns.
 
 ## Column types
 

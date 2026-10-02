@@ -72,7 +72,9 @@ class DetailViewBuilder implements DetailViewBuilderInterface
      */
     public function setColumns(array $columns): static
     {
-        foreach ($columns as $key => $spec) {
+        // Same expansion as the grid: a virtual column renders its joined value
+        // here too, and its sources stay hidden behind it.
+        foreach (ColumnFactory::expand($columns) as $key => $spec) {
             $this->detailview->addColumn(
                 $this->columnFactory->create($spec, $this->columnContext(), $key)
             );
