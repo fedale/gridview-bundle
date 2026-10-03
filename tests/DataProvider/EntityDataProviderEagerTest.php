@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Tests\DataProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Fedale\GridviewBundle\DataProvider\EntityDataProvider;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Tests\Support\PlainRepository;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,8 @@ class EntityDataProviderEagerTest extends TestCase
             $this->createMock(EventDispatcherInterface::class),
             $em,
             $requestStack,
-            new RowSerializerFactory($em)
+            new RowSerializerFactory($em, new EntityIdentifier($em)),
+            new EntityIdentifier($em)
         );
     }
 

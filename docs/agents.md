@@ -79,6 +79,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | Edit a cell in place | `->editable()` on the column | [08_crud.md](08_crud.md#inline-editing) |
 | Select rows and act on them | `CheckboxColumn` + the `{bulkBar}` token | [08_crud.md](08_crud.md#bulk-actions-selection--batch-update) |
 | A read-only single-record page | `DetailView` / `AbstractDetailController` | [09_detail-view.md](09_detail-view.md) |
+| A UUID or composite primary key | nothing — the CRUD routes and the bulk actions already take any key | [08_crud.md](08_crud.md#keys-that-are-not-an-auto-increment-int) |
 | Bootstrap or Tailwind classes on the chrome | the `bootstrap5` / `tailwind` theme | [06_theming.md](06_theming.md#framework-themes-real-framework-classes) |
 | Colours, spacing, dark mode | CSS custom properties (design tokens) | [06_theming.md](06_theming.md#token-reference) |
 | A column type the bundle lacks | register a `ColumnTypeInterface` service | [14_extending.md](14_extending.md#creating-a-custom-column) |

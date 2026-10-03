@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Fedale\GridviewBundle\DataProvider\EntityDataProvider;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Tests\Support\RecordingRepository;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +33,8 @@ class EntityDataProviderDefaultsTest extends TestCase
             $this->createMock(EventDispatcherInterface::class),
             $em,
             $requestStack,
-            new RowSerializerFactory($em)
+            new RowSerializerFactory($em, new EntityIdentifier($em)),
+            new EntityIdentifier($em)
         );
     }
 

@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\ObjectRepository;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Grid\DoctrineChildRowResolver;
 use Fedale\GridviewBundle\Grid\GroupingConfig;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
@@ -37,7 +38,9 @@ class DoctrineChildRowResolverTest extends TestCase
         $em->method('getClassMetadata')->willReturn($metadata);
         $em->method('getMetadataFactory')->willReturn($metadataFactory);
 
-        return new DoctrineChildRowResolver($em, new RowSerializerFactory($em));
+        $identifier = new EntityIdentifier($em);
+
+        return new DoctrineChildRowResolver($em, new RowSerializerFactory($em, $identifier), $identifier);
     }
 
     public function testResolveForParentReturnsOneRowPerRelatedRecord(): void

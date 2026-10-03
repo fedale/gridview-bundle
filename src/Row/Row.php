@@ -6,6 +6,13 @@ class Row
 {
     public array $data = [];
 
+    /**
+     * The record's identifier as a URL-safe token, set by a data provider that
+     * knows the key (see {@see \Fedale\GridviewBundle\Doctrine\EntityIdentifier}).
+     * Null for a provider that does not — a JSON API's rows, say.
+     */
+    public ?string $identifierToken = null;
+
     public array $attr = [];
 
     public string $prefixKey = 'row_';
@@ -55,6 +62,22 @@ class Row
         } else {
             $this->setAttr('class', 'odd');
         }
+    }
+
+    /**
+     * What the links, the selection checkboxes and the inline editor address this
+     * record by: the provider's token when there is one, else a plain `id` in the
+     * row data, so a provider with no notion of a key still works.
+     */
+    public function getIdentifier(): ?string
+    {
+        if ($this->identifierToken !== null) {
+            return $this->identifierToken;
+        }
+
+        $id = $this->data['id'] ?? null;
+
+        return \is_scalar($id) ? (string) $id : null;
     }
 
     public function setAttr(string $key, string $value, $replace = false)

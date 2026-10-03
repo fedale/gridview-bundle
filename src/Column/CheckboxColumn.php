@@ -71,7 +71,11 @@ HTML;
 
     public function render($row, $index): string
     {
-        $id = htmlspecialchars((string)($row->data['id'] ?? $index));
+        // The row's own identifier (a UUID, a composite token, an int) — the
+        // value the bulk actions resolve records back from. The index is a last
+        // resort for a provider that knows no key; selecting such a row cannot
+        // address anything server-side anyway.
+        $id = htmlspecialchars((string) ($row->getIdentifier() ?? $index));
         return sprintf(
             '<input type="checkbox" data-gridview-selection-target="checkbox" data-action="change->gridview-selection#toggle" value="%s">',
             $id

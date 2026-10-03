@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Serializer;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -19,6 +20,7 @@ class RowSerializerFactory
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private EntityIdentifier $identifier,
     ) {
     }
 
@@ -28,7 +30,10 @@ class RowSerializerFactory
     public function create(array $ignoredAttributes = []): Serializer
     {
         $defaultContext = [
-            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn($object) => $object->getId(),
+            // The identifier rather than getId(): an entity with a composite key
+            // usually has no such method, and a circular reference only needs
+            // something that names the record it points back at.
+            AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn($object) => $this->identifier->fromEntity($object),
             AbstractNormalizer::IGNORED_ATTRIBUTES => $ignoredAttributes,
         ];
 

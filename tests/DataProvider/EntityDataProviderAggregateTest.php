@@ -7,6 +7,7 @@ use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\DataProvider\EntityDataProvider;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -27,7 +28,8 @@ class EntityDataProviderAggregateTest extends TestCase
             $this->createMock(EventDispatcherInterface::class),
             $em,
             $requestStack,
-            new RowSerializerFactory($em)
+            new RowSerializerFactory($em, new EntityIdentifier($em)),
+            new EntityIdentifier($em)
         );
         $provider->setQueryBuilder(
             (new QueryBuilder($em))->select('e')->from('App\Entity\Order', 'e')

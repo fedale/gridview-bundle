@@ -11,6 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
 use Fedale\GridviewBundle\Contract\GridFormBuilderInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class GridCrudHandler implements GridCrudHandlerInterface
         private CsrfTokenManagerInterface $csrfTokenManager,
         private Environment $twig,
         private ManagerRegistry $managerRegistry,
+        private EntityIdentifier $identifier,
     ) {
     }
 
@@ -315,9 +317,20 @@ class GridCrudHandler implements GridCrudHandlerInterface
             ->where("e.$field = :value")
             ->setParameter('value', $value);
 
-        if ($excludeId !== null && $excludeId !== '') {
-            $idField = $meta->getSingleIdentifierFieldName();
-            $qb->andWhere("e.$idField <> :excludeId")->setParameter('excludeId', $excludeId);
+        // Exclude the record being edited. Through the identifier resolver, so a
+        // composite key excludes the whole tuple rather than exploding on
+        // getSingleIdentifierFieldName().
+        $criteria = $excludeId === null || $excludeId === ''
+            ? null
+            : $this->identifier->criteriaMap($dataClass, (string) $excludeId);
+
+        if ($criteria !== null) {
+            $clauses = [];
+            foreach ($criteria as $i => $value) {
+                $clauses[] = "e.{$i} = :exclude_{$i}";
+                $qb->setParameter("exclude_{$i}", $value);
+            }
+            $qb->andWhere('NOT (' . implode(' AND ', $clauses) . ')');
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;

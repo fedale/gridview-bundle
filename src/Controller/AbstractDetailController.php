@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Grid\DetailView;
 use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
 use Fedale\GridviewBundle\Row\Row;
@@ -88,7 +89,11 @@ abstract class AbstractDetailController extends AbstractController
     /** Override to customise lookup (e.g. soft-delete scope). */
     protected function findModel(int|string $id): ?object
     {
-        return $this->em()->getRepository($this->getDataClass())->find($id);
+        // Through the identifier resolver, so a UUID or a composite token in the
+        // URL finds its record exactly like an auto-increment int does.
+        $criteria = $this->identifiers()->criteria($this->getDataClass(), (string) $id);
+
+        return $criteria === null ? null : $this->em()->getRepository($this->getDataClass())->find($criteria);
     }
 
     /**
@@ -104,12 +109,15 @@ abstract class AbstractDetailController extends AbstractController
                 DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone(date_default_timezone_get()),
             ]),
             new ObjectNormalizer(null, null, null, null, null, null, [
-                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => static fn ($object) => $object->getId(),
+                // Not getId(): an entity with a composite key usually has no such
+                // method, and the identifier token names any record.
+                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn ($object) => $this->identifiers()->fromEntity($object),
             ]),
         ]);
 
-        $row       = new Row(0, 1);
-        $row->data = $serializer->normalize($entity);
+        $row                  = new Row(0, 1);
+        $row->data            = $serializer->normalize($entity);
+        $row->identifierToken = $this->identifiers()->fromEntity($entity);
 
         return $row;
     }
@@ -124,11 +132,18 @@ abstract class AbstractDetailController extends AbstractController
         return $this->container->get(EntityManagerInterface::class);
     }
 
+    /** Reads and writes the URL tokens that stand for a record. */
+    protected function identifiers(): EntityIdentifier
+    {
+        return $this->container->get(EntityIdentifier::class);
+    }
+
     public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(), [
             GridviewBuilderFactory::class,
             EntityManagerInterface::class,
+            EntityIdentifier::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\DataProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -59,6 +60,7 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
         private EntityManagerInterface $entityManager,
         private RequestStack $requestStack,
         private RowSerializerFactory $serializerFactory,
+        private EntityIdentifier $identifier,
     ) {
         $this->models = new ArrayCollection();
         $this->populateParams();
@@ -353,6 +355,10 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
 
             $data       = $model !== null ? $serializer->normalize($model) : [];
             $row->data  = $extra === [] ? $data : array_merge($data, $extra);
+            // Resolved once per row, from the entity rather than from the
+            // normalized data: this is what every link and every checkbox in the
+            // grid will address the record by, whatever shape its key has.
+            $row->identifierToken = $model !== null ? $this->identifier->fromEntity($model) : null;
             $event->row = $row;
             $this->eventDispatcher->dispatch($event, RowEvent::BEFORE_ROW);
             $this->models->add($row);

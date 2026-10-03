@@ -125,6 +125,7 @@ services:
             - '@security.csrf.token_manager'
             - '@twig'
             - '@doctrine'
+            - '@fedale_gridview.entity_identifier'
     Fedale\GridviewBundle\Crud\GridCrudHandler: '@fedale_gridview.crud_handler'
     Fedale\GridviewBundle\Contract\GridCrudHandlerInterface: '@fedale_gridview.crud_handler'
 
@@ -222,12 +223,23 @@ services:
             - !tagged_locator { tag: fedale_gridview.data_provider }
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
+    # Reads and writes the URL tokens that stand for a record. Shared by the
+    # controllers (which resolve a token back to an entity) and by the row
+    # builders (which stamp one on every row), so a UUID or a composite key
+    # travels exactly like an auto-increment int.
+    fedale_gridview.entity_identifier:
+        class: Fedale\GridviewBundle\Doctrine\EntityIdentifier
+        arguments:
+            - '@doctrine.orm.default_entity_manager'
+    Fedale\GridviewBundle\Doctrine\EntityIdentifier: '@fedale_gridview.entity_identifier'
+
     # Builds the entity-to-row serializer, shared by the data provider (parent
     # rows) and the child-row resolver (grouped rows) for identical row data.
     fedale_gridview.row_serializer_factory:
         class: Fedale\GridviewBundle\Serializer\RowSerializerFactory
         arguments:
             - '@doctrine.orm.default_entity_manager'
+            - '@fedale_gridview.entity_identifier'
     Fedale\GridviewBundle\Serializer\RowSerializerFactory: '@fedale_gridview.row_serializer_factory'
 
     # Resolves grouped child rows by navigating a Doctrine association on the
@@ -237,6 +249,7 @@ services:
         arguments:
             - '@doctrine.orm.default_entity_manager'
             - '@fedale_gridview.row_serializer_factory'
+            - '@fedale_gridview.entity_identifier'
     Fedale\GridviewBundle\Contract\ChildRowResolverInterface: '@fedale_gridview.child_row_resolver'
 
     fedale_gridview.entity_data_provider:
@@ -246,6 +259,7 @@ services:
             - '@doctrine.orm.default_entity_manager'
             - '@request_stack'
             - '@fedale_gridview.row_serializer_factory'
+            - '@fedale_gridview.entity_identifier'
         calls:
             - [setSort, ['@fedale_gridview.sort']]
             - [setPagination, ['@fedale_gridview.pagination']]

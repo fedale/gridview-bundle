@@ -110,14 +110,14 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_ADD, null);
     }
 
-    #[Route('/update/{id}', name: 'update', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
-    public function update(Request $request, int $id): Response
+    #[Route('/update/{id}', name: 'update', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    public function update(Request $request, string $id): Response
     {
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_EDIT, $id);
     }
 
-    #[Route('/clone/{id}', name: 'clone', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
-    public function cloneRecord(Request $request, int $id): Response
+    #[Route('/clone/{id}', name: 'clone', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    public function cloneRecord(Request $request, string $id): Response
     {
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_CLONE, $id);
     }
@@ -143,14 +143,11 @@ abstract class AbstractCrudGridController extends AbstractGridController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'delete', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
-    public function delete(Request $request, int $id): Response
+    #[Route('/{id}/delete', name: 'delete', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    public function delete(Request $request, string $id): Response
     {
         $crud = $this->crud();
-        $entity = $this->em()->getRepository($this->getDataClass())->find($id);
-        if ($entity === null) {
-            throw $this->createNotFoundException();
-        }
+        $entity = $this->findRecord($id);
 
         // GET → render the confirmation recap into the modal.
         if ($request->isMethod('GET')) {
@@ -220,13 +217,10 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return new Response($this->crud()->renderBatchForm($form, \count($ids), $request->getRequestUri(), ['gridview' => $gridview]));
     }
 
-    #[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'], requirements: ['id' => '\d+', 'field' => '[a-zA-Z_]+'])]
-    public function inline(Request $request, int $id, string $field): Response
+    #[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+', 'field' => '[a-zA-Z_]+'])]
+    public function inline(Request $request, string $id, string $field): Response
     {
-        $entity = $this->em()->getRepository($this->getDataClass())->find($id);
-        if ($entity === null) {
-            throw $this->createNotFoundException();
-        }
+        $entity = $this->findRecord($id);
 
         // Only columns explicitly marked editable may be edited inline.
         $gridview = $this->buildGridview();
@@ -312,24 +306,24 @@ abstract class AbstractCrudGridController extends AbstractGridController
 
         if ($this->routeExists($this->routeName(GridAction::Show))) {
             $buttons['show'] = fn(array $row) => CrudButton::show(
-                $this->generateUrl($this->routeName(GridAction::Show), ['id' => $row['id']])
+                $this->generateUrl($this->routeName(GridAction::Show), ['id' => $this->rowId($row)])
             );
         }
         if ($this->routeExists($this->routeName(GridAction::Update))) {
             $buttons['edit'] = fn(array $row) => CrudButton::edit(
-                $this->generateUrl($this->routeName(GridAction::Update), ['id' => $row['id']]),
+                $this->generateUrl($this->routeName(GridAction::Update), ['id' => $this->rowId($row)]),
                 $mode
             );
         }
         if ($this->routeExists($this->routeName(GridAction::Clone))) {
             $buttons['clone'] = fn(array $row) => CrudButton::clone(
-                $this->generateUrl($this->routeName(GridAction::Clone), ['id' => $row['id']]),
+                $this->generateUrl($this->routeName(GridAction::Clone), ['id' => $this->rowId($row)]),
                 $mode
             );
         }
         if ($this->routeExists($this->routeName(GridAction::Delete))) {
             $buttons['delete'] = fn(array $row) => CrudButton::delete(
-                $this->generateUrl($this->routeName(GridAction::Delete), ['id' => $row['id']])
+                $this->generateUrl($this->routeName(GridAction::Delete), ['id' => $this->rowId($row)])
             );
         }
 
@@ -409,18 +403,12 @@ abstract class AbstractCrudGridController extends AbstractGridController
      * Shared add/edit/clone handler. XHR (modal) → partial/Turbo Stream; direct
      * navigation → full page + redirect on submit.
      */
-    protected function handleForm(Request $request, string $mode, ?int $id): Response
+    protected function handleForm(Request $request, string $mode, ?string $id): Response
     {
         $dataClass = $this->getDataClass();
         $crud = $this->crud();
 
-        $entity = null;
-        if ($id !== null) {
-            $entity = $this->em()->getRepository($dataClass)->find($id);
-            if ($entity === null) {
-                throw $this->createNotFoundException();
-            }
-        }
+        $entity = $id !== null ? $this->findRecord($id) : null;
 
         $gridview = $this->buildGridview();
         $columns = $gridview->getColumns();
@@ -583,23 +571,68 @@ abstract class AbstractCrudGridController extends AbstractGridController
     }
 
     /**
-     * Resolves the target ids: explicit `ids[]` from the query, or all-mode
-     * (`all=1`) resolved server-side by re-running the filtered search.
+     * The record named by an `{id}` route parameter, whatever shape the entity's
+     * key has — an int, a UUID, a composite token. A token that does not describe
+     * this entity's key is a 404 rather than a query.
+     */
+    protected function findRecord(string $id): object
+    {
+        $dataClass = $this->getDataClass();
+        $criteria = $this->identifiers()->criteria($dataClass, $id);
+
+        $entity = $criteria === null ? null : $this->em()->getRepository($dataClass)->find($criteria);
+        if ($entity === null) {
+            throw $this->createNotFoundException();
+        }
+
+        return $entity;
+    }
+
+    /**
+     * Resolves the target records: the explicit `ids[]` from the query, or
+     * all-mode (`all=1`) resolved server-side by re-running the filtered search.
      *
-     * @return int[]
+     * Each entry is what `find()` takes — a bare value for a single-field key, a
+     * field => value map for a composite one — so the bulk handlers stay agnostic.
+     *
+     * @return list<string|array<string, string>>
      */
     protected function resolveBulkIds(Request $request): array
     {
+        $dataClass = $this->getDataClass();
+        $identifiers = $this->identifiers();
+
         if ($request->query->getBoolean('all')) {
             $params = $request->query->all($this->config('form.filterName'));
-            $qb = $this->em()->getRepository($this->getDataClass())->search($params);
+            $qb = $this->em()->getRepository($dataClass)->search($params);
             $alias = $qb->getRootAliases()[0];
-            $qb->select("DISTINCT {$alias}.id")->setFirstResult(null)->setMaxResults(null);
 
-            return array_map(static fn(array $row) => (int) $row['id'], $qb->getQuery()->getScalarResult());
+            // Select the real key fields rather than a hardcoded `id`, so the
+            // "select every match" path works on a UUID or a composite key too.
+            $fields = $identifiers->fields($dataClass);
+            $select = array_map(static fn(string $field): string => "{$alias}.{$field}", $fields);
+            $qb->select('DISTINCT ' . implode(', ', $select))->setFirstResult(null)->setMaxResults(null);
+
+            $single = \count($fields) === 1;
+
+            return array_map(
+                static fn(array $row) => $single ? (string) $row[$fields[0]] : array_map(strval(...), $row),
+                $qb->getQuery()->getScalarResult(),
+            );
         }
 
-        return array_map('intval', (array) $request->query->all('ids'));
+        $ids = [];
+        foreach ((array) $request->query->all('ids') as $token) {
+            if (!\is_string($token) && !\is_int($token)) {
+                continue;
+            }
+            $criteria = $identifiers->criteria($dataClass, (string) $token);
+            if ($criteria !== null) {
+                $ids[] = $criteria;
+            }
+        }
+
+        return $ids;
     }
 
     protected function bulkStream(): Response

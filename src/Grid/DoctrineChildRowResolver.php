@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Grid;
 use Doctrine\ORM\EntityManagerInterface;
 use Fedale\GridviewBundle\Contract\ChildCountResolverInterface;
 use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -28,6 +29,7 @@ class DoctrineChildRowResolver implements ChildRowResolverInterface, ChildCountR
     public function __construct(
         private EntityManagerInterface $entityManager,
         private RowSerializerFactory $serializerFactory,
+        private EntityIdentifier $identifier,
     ) {
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -158,6 +160,7 @@ class DoctrineChildRowResolver implements ChildRowResolverInterface, ChildCountR
         foreach ($children as $i => $child) {
             $row = new Row($i, $total);
             $row->data = $serializer->normalize($child);
+            $row->identifierToken = $this->identifier->fromEntity($child);
             // Child ids share the 'row_N' space with parent rows, which would
             // duplicate DOM ids; scope them by parent so each stays unique.
             $row->setAttr('id', sprintf('child_%s_%d', $parentKey, $i), true);

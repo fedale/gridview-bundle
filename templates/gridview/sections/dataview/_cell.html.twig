@@ -13,7 +13,7 @@
     <span class="gv-editable"
           data-action="{{ column.editableTrigger }}->gridview-inline-edit#edit"
           data-gv-field="{{ column.attribute }}"
-          data-gv-id="{{ row.data.id }}">{{ cellContent|raw }}</span>
+          data-gv-id="{{ row.identifier }}">{{ cellContent|raw }}</span>
 {%- else -%}
     {{- cellContent|raw -}}
 {%- endif -%}

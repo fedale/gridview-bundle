@@ -558,6 +558,64 @@ The view applies in every presentation mode (modal, page, custom).
 > in the view still renders — it falls through to `form_end()` at the bottom — so fields are never
 > silently lost.
 
+### Keys that are not an auto-increment int
+
+Nothing in the bundle assumes `id` is an integer, or that there is one of it. A
+grid links to its records (edit, clone, delete, inline edit) and the browser
+sends them back (the selection checkboxes), so a key only has to survive a round
+trip through a URL — and `EntityIdentifier` is the single place that writes those
+tokens and reads them back.
+
+**A UUID key needs nothing.** The CRUD routes accept any non-slash segment, so
+`/update/0192c1a0-4c3a-7b3e-9f1a-2b3c4d5e6f70` resolves like `/update/42` does:
+
+```php
+#[ORM\Id]
+#[ORM\Column(type: UuidType::NAME, unique: true)]
+private ?Uuid $id = null;
+```
+
+**A composite key travels as one token**, its parts joined with `~` in the order
+Doctrine reports the key fields, each part URL-encoded so no value can split it:
+
+```php
+#[ORM\Id] #[ORM\ManyToOne] private ?Post $post = null;
+#[ORM\Id] #[ORM\Column(length: 5)] private ?string $locale = null;
+
+// → /gridview/translations/update/7~it
+```
+
+Everything downstream follows from that token: the checkbox of each row carries
+it, the bulk actions resolve it back to `find()` criteria (a bare value for a
+single key, a field => value map for a composite one), the delete CSRF token is
+derived from it, and the live uniqueness check excludes the whole tuple instead
+of a single `id` column.
+
+Three things to know when you leave auto-increment ints behind:
+
+- **A key field must read as a string.** Scalars, backed enums, stringable
+  objects (a `Uuid`) and to-one associations with a single-field key all do. A
+  `DateTimeInterface` key does not: map it to a scalar (an `int` day number, an
+  ISO string) instead, or the grid tells you so with an exception rather than
+  building a URL it cannot read back.
+- **The `{id}` route requirement is `[^/]+`, not `\d+`.** If you mount a detail
+  controller (`/{id}`) on the same prefix as the CRUD one, give its route a
+  requirement that cannot swallow `/new` or `/exists`.
+- **Custom action buttons build their own URLs.** `['id' => $row['id']]` is fine
+  while the key is a single column named `id`; past that, ask for the token:
+
+```php
+'buttons' => [
+    'audit' => fn(array $row) => sprintf(
+        '<a href="%s">Audit</a>',
+        $this->generateUrl('audit_show', ['id' => $this->rowId($row)]),
+    ),
+],
+```
+
+`rowId()` is available on both controller bases, and so is `identifiers()` for
+the resolver itself.
+
 ### Delete with recap
 
 `delete()` is split into GET (recap) + POST (delete). The GET branch renders a confirmation summary

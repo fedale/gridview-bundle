@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Export\ExporterInterface;
 use Fedale\GridviewBundle\Export\GridExporterRegistry;
@@ -423,6 +424,41 @@ abstract class AbstractGridController extends AbstractController
         return $this->container->get(EntityManagerInterface::class);
     }
 
+    /**
+     * Reads and writes the URL tokens that stand for a record: the grid links by
+     * them and the browser sends them back. Everything that needs an entity's key
+     * goes through here, so an int, a UUID and a composite key are the same to
+     * the rest of the controller.
+     */
+    protected function identifiers(): EntityIdentifier
+    {
+        return $this->container->get(EntityIdentifier::class);
+    }
+
+    /**
+     * The URL token for a normalized row — what a link to that record carries.
+     * Falls back to a plain `id` for rows that are not Doctrine-backed (a
+     * JsonDataProvider's, say), which is what those grids used before.
+     *
+     * @param array<string, mixed> $row
+     */
+    protected function rowId(array $row): string
+    {
+        // The resolver needs the container, which only the framework sets: a
+        // controller built by hand (a unit test exercising a button closure)
+        // falls through to the row's own id, as the bundle did before.
+        if (isset($this->container)) {
+            $token = $this->identifiers()->fromRow($this->getDataClass(), $row);
+            if ($token !== null) {
+                return $token;
+            }
+        }
+
+        $id = $row['id'] ?? null;
+
+        return \is_scalar($id) ? (string) $id : '';
+    }
+
     public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(), [
@@ -431,6 +467,7 @@ abstract class AbstractGridController extends AbstractController
             SearchModelInterface::class,
             EntityManagerInterface::class,
             GridviewConfigRegistry::class,
+            EntityIdentifier::class,
             // Optional: present only when symfony/mercure-bundle is installed.
             '?' . HubInterface::class,
             '?' . Authorization::class,
