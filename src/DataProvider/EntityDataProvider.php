@@ -177,7 +177,15 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
         // working either way.
         if (method_exists($repository, 'search')) {
             $this->filterPath = 'repository search()';
-            $this->queryBuilder = $repository->search($this->params);
+            $qb = $repository->search($this->params);
+
+            // Also here, not just on the fallback path below: `eager` is the
+            // grid's own declaration of what its columns read, and a repository
+            // writing its own query has no way to know about it. Relations the
+            // query already joins are skipped, so this cannot double up.
+            $this->applyEagerRelations($qb);
+
+            $this->queryBuilder = $qb;
 
             return;
         }

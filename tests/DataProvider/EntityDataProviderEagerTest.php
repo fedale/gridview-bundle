@@ -8,6 +8,7 @@ use Fedale\GridviewBundle\DataProvider\EntityDataProvider;
 use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Fedale\GridviewBundle\Tests\Support\PlainRepository;
+use Fedale\GridviewBundle\Tests\Support\RecordingRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +46,34 @@ class EntityDataProviderEagerTest extends TestCase
         // addSelect() keeps the joined relations in the hydration, avoiding a
         // lazy load per row when a column reads them.
         $this->assertStringContainsString('gv_author', explode('FROM', $dql)[0]);
+    }
+
+    /**
+     * A repository writing its own query has no way to know what the grid's
+     * columns read, so `eager` has to reach that path too — it used to be
+     * applied only when the provider built the query itself, which silently
+     * dropped the declaration for every repository implementing search().
+     */
+    public function testEagerRelationsReachARepositorysOwnQuery(): void
+    {
+        $em = $this->createMock(EntityManagerInterface::class);
+        $queryBuilder = (new QueryBuilder($em))->select('e')->from('App\Entity\Post', 'e');
+        $em->method('getRepository')->willReturn(new RecordingRepository($queryBuilder));
+
+        $requestStack = new RequestStack();
+        $requestStack->push(Request::create('/posts'));
+
+        $provider = new EntityDataProvider(
+            $this->createMock(EventDispatcherInterface::class),
+            $em,
+            $requestStack,
+            new RowSerializerFactory($em, new EntityIdentifier($em)),
+            new EntityIdentifier($em)
+        );
+        $provider->setEagerRelations(['author']);
+        $provider->prepareModels('App\Entity\Post');
+
+        $this->assertStringContainsString('LEFT JOIN e.author gv_author', $provider->getDebugQuery()['dql']);
     }
 
     public function testNoEagerRelationsLeavesQueryUnjoined(): void
