@@ -161,6 +161,7 @@ class DoctrineChildRowResolver implements ChildRowResolverInterface, ChildCountR
             $row = new Row($i, $total);
             $row->data = $serializer->normalize($child);
             $row->identifierToken = $this->identifier->fromEntity($child);
+            $row->data[EntityIdentifier::ROW_KEY] = $row->identifierToken;
             // Child ids share the 'row_N' space with parent rows, which would
             // duplicate DOM ids; scope them by parent so each stays unique.
             $row->setAttr('id', sprintf('child_%s_%d', $parentKey, $i), true);

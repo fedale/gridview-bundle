@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Tests\Doctrine;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +29,15 @@ class EntityIdentifierTest extends TestCase
     private function identifier(array $classes): EntityIdentifier
     {
         $em = $this->createMock(EntityManagerInterface::class);
+
+        // Everything the map knows is an entity; anything else is transient, the
+        // way a value object (a Uuid) is.
+        $factory = $this->createMock(ClassMetadataFactory::class);
+        $factory->method('isTransient')->willReturnCallback(
+            static fn(string $class): bool => !isset($classes[$class])
+        );
+        $em->method('getMetadataFactory')->willReturn($factory);
+
         $em->method('getClassMetadata')->willReturnCallback(
             function (string $class) use ($classes): ClassMetadata {
                 $spec = $classes[$class] ?? ['fields' => []];
@@ -108,6 +118,19 @@ class EntityIdentifierTest extends TestCase
         $this->assertSame(['id' => '42'], $identifier->criteriaMap(self::RECORD, '42'));
     }
 
+    public function testAStampedTokenWinsOverReadingTheRow(): void
+    {
+        // The provider stamps the token it computed from the entity: an
+        // association that was not fetch-joined normalizes to null, and a key
+        // made of one would be unreadable from the row alone.
+        $identifier = $this->identifier([self::RECORD => ['fields' => ['post', 'locale']]]);
+
+        $this->assertSame(
+            '7~it',
+            $identifier->fromRow(self::RECORD, [EntityIdentifier::ROW_KEY => '7~it', 'post' => null, 'locale' => 'it'])
+        );
+    }
+
     public function testARowIsReadByItsKeyFields(): void
     {
         $identifier = $this->identifier([self::RECORD => ['fields' => ['post', 'locale']]]);
@@ -137,6 +160,26 @@ class EntityIdentifierTest extends TestCase
         $identifier = $this->identifier([
             self::RECORD => ['fields' => ['post', 'locale'], 'values' => ['post' => new \ArrayObject(), 'locale' => 'it']],
             self::POST => ['fields' => ['id'], 'values' => ['id' => 7]],
+        ]);
+
+        $this->assertSame('7~it', $identifier->fromEntity(new \stdClass()));
+    }
+
+    public function testAnEntityKeyFieldIsReadByItsKeyNotItsLabel(): void
+    {
+        // A mapped entity with a __toString() — a Post whose label is its title —
+        // must still be addressed by its key: the label is neither unique nor
+        // something find() could resolve.
+        $post = new class implements \Stringable {
+            public function __toString(): string
+            {
+                return 'How to Build Scalable Web Applications';
+            }
+        };
+
+        $identifier = $this->identifier([
+            self::RECORD => ['fields' => ['post', 'locale'], 'values' => ['post' => $post, 'locale' => 'it']],
+            $post::class => ['fields' => ['id'], 'values' => ['id' => 7]],
         ]);
 
         $this->assertSame('7~it', $identifier->fromEntity(new \stdClass()));

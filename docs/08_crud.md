@@ -601,6 +601,12 @@ Three things to know when you leave auto-increment ints behind:
 - **The `{id}` route requirement is `[^/]+`, not `\d+`.** If you mount a detail
   controller (`/{id}`) on the same prefix as the CRUD one, give its route a
   requirement that cannot swallow `/new` or `/exists`.
+- **A composite-key grid pages without the id subquery.** Doctrine's paginator
+  keeps the page size right over a fetch-joined collection by paging through a
+  subquery on the entity's id — which a composite key has no single column for,
+  so those grids page over the list query itself. Correct as long as that query
+  joins no to-many collection; aggregate one (a `COUNT` subquery, as the demo's
+  category grid does) instead of fetch-joining it.
 - **Custom action buttons build their own URLs.** `['id' => $row['id']]` is fine
   while the key is a single column named `id`; past that, ask for the token:
 

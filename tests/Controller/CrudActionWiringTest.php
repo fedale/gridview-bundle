@@ -80,6 +80,22 @@ class CrudActionWiringTest extends TestCase
         $this->assertStringContainsString('data-action="gridview-crud#open"', $edit);
     }
 
+    /**
+     * `/{id}/delete` is the one CRUD route whose id is the first segment, so a
+     * permissive requirement makes it a candidate for `/bulk/delete` as well.
+     * The guard has to fire mid-path, which an end anchor would not do.
+     */
+    public function testTheIdRequirementCannotSwallowTheBulkRoutes(): void
+    {
+        $pattern = '#^' . AbstractCrudGridController::ID_REQUIREMENT . '$#';
+
+        $this->assertSame(0, preg_match('#^' . AbstractCrudGridController::ID_REQUIREMENT . '/delete$#', 'bulk/delete'));
+        $this->assertSame(1, preg_match($pattern, '42'));
+        $this->assertSame(1, preg_match($pattern, '0192c1a0-4c3a-7b3e-9f1a-2b3c4d5e6f70'));
+        $this->assertSame(1, preg_match($pattern, '7~it'));
+        $this->assertSame(0, preg_match($pattern, 'a/b'));
+    }
+
     public function testExplicitButtonsAreLeftUntouched(): void
     {
         $custom  = [['type' => 'action', 'buttons' => ['edit' => '<a>x</a>']]];

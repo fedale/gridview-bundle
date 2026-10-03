@@ -102,6 +102,20 @@ abstract class AbstractCrudGridController extends AbstractGridController
     {
     }
 
+    /**
+     * What an `{id}` route parameter accepts: any single path segment, so a UUID
+     * or a composite token (`7~it`) resolves like an auto-increment int.
+     *
+     * The lookahead is not decoration. `/{id}/delete` is the one route whose id
+     * is the first segment, which makes it a candidate for `/bulk/delete` too —
+     * "delete the record called bulk" would shadow the bulk action, and used to
+     * be ruled out only by the id having to be a number. It is written against
+     * the following slash rather than an end anchor: a requirement is spliced
+     * into the route's own regex, where `$` means the end of the whole path and
+     * would never fire mid-path.
+     */
+    public const ID_REQUIREMENT = '(?!bulk/)[^/]+';
+
     // ---- actions: add / edit / clone -----------------------------------
 
     #[Route('/new', name: 'create', methods: ['GET', 'POST'])]
@@ -110,13 +124,13 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_ADD, null);
     }
 
-    #[Route('/update/{id}', name: 'update', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    #[Route('/update/{id}', name: 'update', methods: ['GET', 'POST'], requirements: ['id' => self::ID_REQUIREMENT])]
     public function update(Request $request, string $id): Response
     {
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_EDIT, $id);
     }
 
-    #[Route('/clone/{id}', name: 'clone', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    #[Route('/clone/{id}', name: 'clone', methods: ['GET', 'POST'], requirements: ['id' => self::ID_REQUIREMENT])]
     public function cloneRecord(Request $request, string $id): Response
     {
         return $this->handleForm($request, GridCrudHandlerInterface::MODE_CLONE, $id);
@@ -143,7 +157,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'delete', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+'])]
+    #[Route('/{id}/delete', name: 'delete', methods: ['GET', 'POST'], requirements: ['id' => self::ID_REQUIREMENT])]
     public function delete(Request $request, string $id): Response
     {
         $crud = $this->crud();
@@ -217,7 +231,7 @@ abstract class AbstractCrudGridController extends AbstractGridController
         return new Response($this->crud()->renderBatchForm($form, \count($ids), $request->getRequestUri(), ['gridview' => $gridview]));
     }
 
-    #[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'], requirements: ['id' => '[^/]+', 'field' => '[a-zA-Z_]+'])]
+    #[Route('/inline/{id}/{field}', name: 'inline', methods: ['GET', 'POST'], requirements: ['id' => self::ID_REQUIREMENT, 'field' => '[a-zA-Z_]+'])]
     public function inline(Request $request, string $id, string $field): Response
     {
         $entity = $this->findRecord($id);

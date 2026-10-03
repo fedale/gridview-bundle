@@ -118,6 +118,7 @@ abstract class AbstractDetailController extends AbstractController
         $row                  = new Row(0, 1);
         $row->data            = $serializer->normalize($entity);
         $row->identifierToken = $this->identifiers()->fromEntity($entity);
+        $row->data[EntityIdentifier::ROW_KEY] = $row->identifierToken;
 
         return $row;
     }

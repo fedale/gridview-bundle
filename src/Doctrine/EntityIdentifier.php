@@ -27,6 +27,17 @@ class EntityIdentifier
      */
     private const SEPARATOR = '~';
 
+    /**
+     * Reserved row key carrying the token alongside the record's own fields.
+     *
+     * A row cannot always be read back for its key: the serializer normalizes an
+     * association that was not fetch-joined to null, on purpose (it refuses to
+     * lazy-load a grid into an N+1), and a composite key made of one is then
+     * unreadable. So the provider stamps the token it computed from the entity,
+     * and anything working from row data reads it from here first.
+     */
+    public const ROW_KEY = '_gv_id';
+
     public function __construct(private EntityManagerInterface $entityManager)
     {
     }
@@ -72,6 +83,11 @@ class EntityIdentifier
      */
     public function fromRow(string $class, array $row): ?string
     {
+        $stamped = $row[self::ROW_KEY] ?? null;
+        if (\is_string($stamped) && $stamped !== '') {
+            return $stamped;
+        }
+
         $meta = $this->entityManager->getClassMetadata($class);
 
         $parts = [];
@@ -172,17 +188,24 @@ class EntityIdentifier
             return (string) $value->value;
         }
 
-        if (\is_scalar($value) || $value instanceof \Stringable) {
+        if (\is_scalar($value)) {
             return (string) $value;
         }
 
         // An association standing in for a key field: its own key identifies it,
-        // and a single-field one is the only shape a token can carry here.
-        if (!$nested && \is_object($value)) {
+        // and a single-field one is the only shape a token can carry here. This
+        // comes BEFORE the stringable branch on purpose — an entity with a
+        // __toString() would otherwise be addressed by its label.
+        if (!$nested && \is_object($value) && !$this->entityManager->getMetadataFactory()->isTransient($value::class)) {
             $values = $this->entityManager->getClassMetadata($value::class)->getIdentifierValues($value);
             if (\count($values) === 1) {
                 return $this->stringify(reset($values), true);
             }
+        }
+
+        // A value object standing for the key itself: a Uuid, a Ulid, a custom id.
+        if ($value instanceof \Stringable) {
+            return (string) $value;
         }
 
         throw new \InvalidArgumentException(sprintf(

@@ -327,6 +327,22 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
         return $this->models;
     }
 
+    /**
+     * Whether the paginator may use its fetch-join mode, which keeps the page
+     * size right when the list query fetch-joins a to-many collection. It does
+     * that by paging over a subquery that selects the entity's id — so an entity
+     * with a composite key has no single column for it, and Doctrine refuses.
+     * Those grids page over the query itself, which is correct as long as the
+     * list query joins no collection; a composite-key grid that needs one should
+     * aggregate it (a COUNT subquery) rather than fetch-join it.
+     */
+    private function pagesWithFetchJoin(): bool
+    {
+        $entities = $this->queryBuilder instanceof QueryBuilder ? $this->queryBuilder->getRootEntities() : [];
+
+        return $entities === [] || !$this->identifier->isComposite($entities[0]);
+    }
+
     private function prepareData(): void
     {
         if (!$this->queryBuilder instanceof QueryBuilder) {
@@ -335,7 +351,7 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
 
         $serializer = $this->serializerFactory->create($this->ignoredAttributes);
 
-        $this->paginator = new Paginator($this->queryBuilder, true);
+        $this->paginator = new Paginator($this->queryBuilder, $this->pagesWithFetchJoin());
 
         $event = new RowEvent();
         foreach ($this->paginator as $key => $model) {
@@ -359,6 +375,12 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
             // normalized data: this is what every link and every checkbox in the
             // grid will address the record by, whatever shape its key has.
             $row->identifierToken = $model !== null ? $this->identifier->fromEntity($model) : null;
+            if ($row->identifierToken !== null) {
+                // Also in the row data: a column callback and an action button see
+                // the array, not the Row, and a key field that is an association
+                // may well have normalized to null.
+                $row->data[EntityIdentifier::ROW_KEY] = $row->identifierToken;
+            }
             $event->row = $row;
             $this->eventDispatcher->dispatch($event, RowEvent::BEFORE_ROW);
             $this->models->add($row);
@@ -368,7 +390,7 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
 
     public function getTotalCount($criteria = []): int
     {
-        $this->paginator = new Paginator($this->queryBuilder, true);
+        $this->paginator = new Paginator($this->queryBuilder, $this->pagesWithFetchJoin());
         $this->totalRows = count($this->paginator);
 
         return $this->totalRows;
