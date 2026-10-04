@@ -4,11 +4,14 @@ namespace Fedale\GridviewBundle\Tests\Grid;
 
 use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Grid\DetailView;
+use Fedale\GridviewBundle\I18n\GridviewI18nCatalog;
 use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Tests\Support\FakeDetailColumn;
+use Fedale\GridviewBundle\Twig\GridviewI18nExtension;
 use Fedale\GridviewBundle\Twig\OptionsExtension;
 use PHPUnit\Framework\TestCase;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\StringLoaderExtension;
 use Twig\Loader\ArrayLoader;
@@ -78,6 +81,11 @@ class DetailViewTest extends TestCase
         $twig = new Environment($loader, ['autoescape' => 'html']);
         $twig->addExtension(new OptionsExtension());
         $twig->addExtension(new StringLoaderExtension());
+        // The detail template resolves its labels exactly like the grid header
+        // does, so the i18n extension is part of the contract, not decoration.
+        $translator = $this->createMock(TranslatorInterface::class);
+        $translator->method('trans')->willReturnArgument(0);
+        $twig->addExtension(new GridviewI18nExtension(new GridviewI18nCatalog($translator, [])));
 
         $detail = $this->detailView($twig);
         $detail->setModel($this->model());
@@ -88,6 +96,8 @@ class DetailViewTest extends TestCase
         $html = $detail->render()->getContent();
 
         $this->assertStringContainsString('class="table table-bordered"', $html);
+        // A literal label passes through untouched; a client-domain key would be
+        // wrapped for the i18n runtime instead.
         $this->assertStringContainsString('<th scope="row">Name</th>', $html);
         $this->assertStringContainsString('Acme', $html);
         $this->assertStringContainsString('IT123', $html);

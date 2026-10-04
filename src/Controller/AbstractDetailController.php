@@ -7,13 +7,10 @@ use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Grid\DetailView;
 use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
 use Fedale\GridviewBundle\Row\Row;
+use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 /**
  * Read-only "show" controller base: renders a single record as a key/value
@@ -99,21 +96,17 @@ abstract class AbstractDetailController extends AbstractController
     /**
      * Wraps the entity into the same {@see Row} shape grid columns expect
      * (`->data` = normalized array), so DataColumn::render() works unchanged.
-     * Mirrors the normalizer setup of EntityDataProvider.
+     *
+     * Through the SAME factory the grid's rows go through, rather than a
+     * hand-rolled serializer: that one walked the whole object graph, lazy-loading
+     * every association it met — a detail view of an entity with a to-many
+     * relation would spend its time loading records nothing renders, and could
+     * run until the request timed out. The factory's normalizer refuses to
+     * initialize anything, and brings the Uid and backed-enum handling with it.
      */
     protected function toRow(object $entity): Row
     {
-        $serializer = new Serializer([
-            new DateTimeNormalizer([
-                DateTimeNormalizer::FORMAT_KEY   => \DateTimeInterface::ATOM,
-                DateTimeNormalizer::TIMEZONE_KEY => new \DateTimeZone(date_default_timezone_get()),
-            ]),
-            new ObjectNormalizer(null, null, null, null, null, null, [
-                // Not getId(): an entity with a composite key usually has no such
-                // method, and the identifier token names any record.
-                AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => fn ($object) => $this->identifiers()->fromEntity($object),
-            ]),
-        ]);
+        $serializer = $this->container->get(RowSerializerFactory::class)->create();
 
         $row                  = new Row(0, 1);
         $row->data            = $serializer->normalize($entity);
@@ -145,6 +138,7 @@ abstract class AbstractDetailController extends AbstractController
             GridviewBuilderFactory::class,
             EntityManagerInterface::class,
             EntityIdentifier::class,
+            RowSerializerFactory::class,
         ]);
     }
 }

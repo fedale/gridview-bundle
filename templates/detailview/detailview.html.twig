@@ -7,7 +7,10 @@
     <tbody>
     {% for column in columns %}
         <tr>
-            <th scope="row">{{ column.label }}</th>
+            {# Same label resolution as the grid's header: a client-domain key is
+               swapped by the i18n runtime, a literal passes through unchanged.
+               Printing column.label raw would show the key itself. #}
+            <th scope="row">{{ gv_header_label(column.label) }}</th>
             <td data-col-key="{{ column.attribute }}" {{ column.options|options }}>
                 {% set cellContent %}
                     {% if column.twigFilter %}
