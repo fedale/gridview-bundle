@@ -11,12 +11,17 @@
     <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
     {% else %}
-<a href="{{ crud.addUrl }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(_addLabel) }}>
+{# page/custom mode: a full-page navigation. The grid renders inside a
+   <turbo-frame>, so the link has to leave it — otherwise Turbo looks for a frame
+   of the same id in the form page, finds none, and writes "Content missing"
+   while the URL stays on the listing. Same reasoning as CrudButton::edit(). #}
+<a href="{{ crud.addUrl }}" class="{{ gridview.cls('btn.primary') }}" data-turbo-frame="_top" {{ gv_i18n(_addLabel) }}>
     <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
     {% endif %}
 {% elseif gridview.options.integration.addRoute is not empty %}
-<a href="{{ path(gridview.options.integration.addRoute) }}" class="{{ gridview.cls('btn.primary') }}" {{ gv_i18n(_addLabel) }}>
+{# An app-owned route: a page of the host application, never this grid's frame. #}
+<a href="{{ path(gridview.options.integration.addRoute) }}" class="{{ gridview.cls('btn.primary') }}" data-turbo-frame="_top" {{ gv_i18n(_addLabel) }}>
     <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
 {% endif %}
