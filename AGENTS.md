@@ -119,8 +119,13 @@ application kernel of its own to boot). PHPUnit 9.6, helpers in `tests/Support/`
   `gridview.cls('btn.primary')` so a theme can remap them. If a new element needs a themable class,
   add the key to the `default` map in `ThemeRegistry` (the canonical key set) and to any framework
   theme that has a real equivalent.
-- CSS: plain CSS, 4-space indent, `kebab-case` classes, flat selectors, logical properties
-  (`margin-block-end`), design tokens as custom properties. No SCSS/LESS, no nested rules.
+- Styles are **SCSS** under `assets/styles/`, composed with `@use`: `_tokens.scss` holds
+  the `--gv-*` design tokens, `_dark.scss` the dark-mode overrides, `presets/` the
+  per-framework token bridges, `gridview.scss` the components. Every component style
+  reads a token rather than a literal colour, so a host app can re-skin the grid by
+  overriding the custom properties alone. 4-space indent, `kebab-case` `gv-*` classes,
+  logical properties (`margin-block-end`); nesting is used sparingly, for state and
+  modifiers rather than to mirror the DOM.
 - JavaScript: ES6+, 4-space indent, `camelCase`, one Stimulus controller per file under
   `assets/controllers/`, cleaning up its listeners in `disconnect()`. Anything that touches table
   cells must keep working across Turbo frame renders.
