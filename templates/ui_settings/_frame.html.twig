@@ -1,0 +1,43 @@
+{#
+  Content of the `gv-ui-settings` turbo-frame (see UiSettingsController):
+  a GET scope picker that navigates the frame, then the POST form of the scope.
+  The `saved` marker is a Stimulus target: its arrival tells the
+  gridview-ui-settings controller to reload the grids on the page.
+#}
+{% form_theme form formTheme %}
+<turbo-frame id="gv-ui-settings">
+    <form class="gv-ui-settings__scope" method="get" action="{{ path('fedale_gridview_ui_settings') }}">
+        <label for="gv-ui-settings-scope">{{ 'ui_settings.scope'|trans({}, 'GridviewBundle') }}</label>
+        <select id="gv-ui-settings-scope" name="scope" class="form-select"
+                data-action="change->gridview-ui-settings#switchScope">
+            {% for value, label in scopes %}
+                <option value="{{ value }}"{{ value == scope ? ' selected' }}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <p class="gv-ui-settings__hint">
+            {{ (grid is null ? 'ui_settings.scope_global_help' : 'ui_settings.scope_grid_help')|trans({}, 'GridviewBundle') }}
+        </p>
+    </form>
+
+    {% if saved %}
+        <p class="gv-ui-settings__saved" role="status" data-gridview-ui-settings-target="saved">
+            {{ 'ui_settings.saved'|trans({}, 'GridviewBundle') }}
+        </p>
+    {% endif %}
+
+    {% if hasSettings %}
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <div class="gv-ui-settings__actions">
+                <button type="button" class="{{ cls['btn']|default('gv-btn') }}" data-action="gridview-ui-settings#close">
+                    {{ 'ui_settings.close'|trans({}, 'GridviewBundle') }}
+                </button>
+                <button type="submit" class="{{ cls['btn.primary']|default('gv-btn gv-btn-primary') }}">
+                    {{ 'ui_settings.save'|trans({}, 'GridviewBundle') }}
+                </button>
+            </div>
+        {{ form_end(form) }}
+    {% else %}
+        <p class="gv-ui-settings__empty">{{ 'ui_settings.empty'|trans({}, 'GridviewBundle') }}</p>
+    {% endif %}
+</turbo-frame>

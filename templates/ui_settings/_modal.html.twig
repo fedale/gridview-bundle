@@ -1,0 +1,34 @@
+{#
+  UI settings modal shell. Include it once per page, inside the element that
+  carries the `gridview-ui-settings` controller (the same element must also hold
+  the trigger, e.g. a menu item with data-action="gridview-ui-settings#open"):
+
+    <div data-controller="gridview-ui-settings"
+         data-gridview-ui-settings-url-value="{{ path('fedale_gridview_ui_settings') }}"
+         data-gridview-ui-settings-grid-value="{{ gridview.id|default('') }}">
+        ... trigger ...
+        {% include '@FedaleGridview/ui_settings/_modal.html.twig' %}
+    </div>
+
+  The body is a lazy turbo-frame filled by UiSettingsController on open. The
+  wrapper carries data-gridview so the --gv-* tokens and .gv-modal rules apply
+  outside a grid too.
+#}
+<div data-gridview class="gv-ui-settings">
+    <div class="gv-modal" tabindex="-1" aria-hidden="true"
+         data-gridview-ui-settings-target="modal"
+         data-action="click->gridview-ui-settings#backdropClose">
+        <div class="gv-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="gv-ui-settings-title">
+            <div class="gv-modal__header">
+                <h2 class="gv-modal__title" id="gv-ui-settings-title">{{ 'ui_settings.title'|trans({}, 'GridviewBundle') }}</h2>
+                <button type="button" class="gv-modal__close" data-action="gridview-ui-settings#close"
+                        aria-label="{{ 'crud.close'|trans({}, 'GridviewBundle') }}">&times;</button>
+            </div>
+            <div class="gv-modal__body">
+                <turbo-frame id="gv-ui-settings" data-turbo="true" data-gridview-ui-settings-target="frame">
+                    <p class="gv-ui-settings__loading">{{ 'ui_settings.loading'|trans({}, 'GridviewBundle') }}</p>
+                </turbo-frame>
+            </div>
+        </div>
+    </div>
+</div>

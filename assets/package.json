@@ -116,6 +116,12 @@
         "name": "gridview-mercure",
         "fetch": "lazy",
         "enabled": true
+      },
+      "ui-settings": {
+        "main": "controllers/gridview-ui-settings_controller.js",
+        "name": "gridview-ui-settings",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

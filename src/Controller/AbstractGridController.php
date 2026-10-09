@@ -11,6 +11,7 @@ use Fedale\GridviewBundle\Grid\Gridview;
 use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
 use Fedale\GridviewBundle\Grid\GridviewConfigRegistry;
 use Fedale\GridviewBundle\Routing\GridAction;
+use Fedale\GridviewBundle\UiSettings\GridDescriptor;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -91,6 +92,21 @@ abstract class AbstractGridController extends AbstractController
             'attributes' => ['class' => 'table'],
             'options'    => [],
         ];
+    }
+
+    /**
+     * Describes this grid for the UI settings modal (id, heading, declared
+     * options) from its view config alone: no data, columns or request needed.
+     */
+    public function describeGrid(): GridDescriptor
+    {
+        $label = $this->config('labels.heading');
+
+        return new GridDescriptor(
+            (string) $this->config('id'),
+            \is_string($label) && $label !== '' ? $label : null,
+            (array) $this->config('options', []),
+        );
     }
 
     /** @return array<string, mixed> CRUD-specific grid options; empty for read-only grids. */

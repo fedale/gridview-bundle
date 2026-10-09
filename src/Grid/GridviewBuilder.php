@@ -6,6 +6,7 @@ use Fedale\GridviewBundle\Contract\GridviewBuilderInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
+use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -29,6 +30,7 @@ class GridviewBuilder implements GridviewBuilderInterface
         private ColumnFactory $columnFactory,
         private ThemeRegistry $themeRegistry,
         private ContainerInterface $dataProviderLocator,
+        private ?UiSettingsResolver $uiSettings = null,
     ) {
         $this->reset();
     }
@@ -139,6 +141,11 @@ class GridviewBuilder implements GridviewBuilderInterface
             if (isset($this->runtimeOptions[$group])) {
                 $merged[$group] = array_replace($yamlOptions[$group] ?? [], $this->runtimeOptions[$group]);
             }
+        }
+        // End-user UI settings (global, then per grid) win over code and YAML,
+        // leaf by leaf, and only where the grid can honour them.
+        if ($this->uiSettings !== null && $id !== null) {
+            $merged = $this->uiSettings->apply($id, $merged);
         }
         $this->gridview->setOptions($merged);
         $this->gridview->setAttributes($this->mergeAttributes($yamlAttributes, $this->runtimeAttributes));

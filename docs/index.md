@@ -31,6 +31,8 @@ capability map that keeps it from reimplementing features the bundle already has
   per-element attribute/styling bags.
 - **[Internationalization (i18n)](07_i18n.md)** — instant client-side language switching,
   translation domains, and localizing your own strings.
+- **[UI settings](18_ui-settings.md)** — an end-user settings modal: global and per-grid
+  overrides of grid options (e.g. the default renderer), extensible with one class per option.
 
 ### CRUD & detail
 

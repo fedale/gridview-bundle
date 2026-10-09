@@ -178,6 +178,7 @@ services:
             - '@fedale_gridview.column_factory'
             - '@fedale_gridview.theme_registry'
             - !tagged_locator { tag: fedale_gridview.data_provider }
+            - '@fedale_gridview.ui_settings.resolver'
         tags:
             - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
@@ -221,6 +222,7 @@ services:
             # `defaults.dataProvider` / `gridviews.<id>.dataProvider` without
             # eagerly instantiating every provider.
             - !tagged_locator { tag: fedale_gridview.data_provider }
+            - '@fedale_gridview.ui_settings.resolver'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
     # Reads and writes the URL tokens that stand for a record. Shared by the
@@ -333,3 +335,47 @@ services:
             - '@fedale_gridview.paginator_strategy_registry'
         tags:
             - { name: twig.extension }
+
+    # End-user UI settings (global + per grid) applied over each grid's options.
+    # Off until the host app points `fedale_gridview.ui_settings.store` at a real
+    # UiSettingsStoreInterface; `fedale_gridview.ui_settings.store` is an alias
+    # set in FedaleGridviewBundle::loadExtension().
+    fedale_gridview.ui_settings.null_store:
+        class: Fedale\GridviewBundle\UiSettings\NullUiSettingsStore
+
+    fedale_gridview.ui_settings.resolver:
+        class: Fedale\GridviewBundle\UiSettings\UiSettingsResolver
+        arguments:
+            - !tagged_iterator fedale_gridview.ui_setting
+            - '@fedale_gridview.ui_settings.store'
+        tags:
+            - { name: kernel.reset, method: reset }
+    Fedale\GridviewBundle\UiSettings\UiSettingsResolver: '@fedale_gridview.ui_settings.resolver'
+
+    fedale_gridview.ui_settings.renderer:
+        class: Fedale\GridviewBundle\UiSettings\RendererUiSetting
+        tags:
+            - { name: fedale_gridview.ui_setting, priority: 100 }
+
+    # Every AbstractGridController subclass (autoconfigured with the
+    # `fedale_gridview.grid` tag), lazily, to list the per-grid scopes.
+    fedale_gridview.ui_settings.grid_registry:
+        class: Fedale\GridviewBundle\UiSettings\GridRegistry
+        arguments:
+            - !tagged_locator { tag: fedale_gridview.grid }
+    Fedale\GridviewBundle\UiSettings\GridRegistry: '@fedale_gridview.ui_settings.grid_registry'
+
+    # The settings modal's turbo-frame endpoint. Routes are declared as
+    # attributes; the host app imports them with its own prefix.
+    Fedale\GridviewBundle\Controller\UiSettingsController:
+        arguments:
+            - '@fedale_gridview.ui_settings.resolver'
+            - '@fedale_gridview.ui_settings.grid_registry'
+            - '@form.factory'
+            - '@twig'
+            - '@translator'
+            - '@router'
+            - '@fedale_gridview.theme_registry'
+            - '%fedale_gridview.config%'
+        tags:
+            - controller.service_arguments

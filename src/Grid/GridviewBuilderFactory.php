@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Grid;
 use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
+use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
 use Psr\Container\ContainerInterface;
 
 class GridviewBuilderFactory
@@ -15,6 +16,7 @@ class GridviewBuilderFactory
         private ColumnFactory $columnFactory,
         private ThemeRegistry $themeRegistry,
         private ContainerInterface $dataProviderLocator,
+        private ?UiSettingsResolver $uiSettings = null,
     ) {}
 
     public function createGridviewBuilder(): GridviewBuilder
@@ -25,6 +27,7 @@ class GridviewBuilderFactory
             $this->columnFactory,
             $this->themeRegistry,
             $this->dataProviderLocator,
+            $this->uiSettings,
         );
     }
 
