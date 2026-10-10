@@ -178,7 +178,7 @@ services:
             - '@fedale_gridview.column_factory'
             - '@fedale_gridview.theme_registry'
             - !tagged_locator { tag: fedale_gridview.data_provider }
-            - '@fedale_gridview.ui_settings.resolver'
+            - '@?fedale_gridview.ui_settings.resolver'
         tags:
             - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
@@ -222,7 +222,7 @@ services:
             # `defaults.dataProvider` / `gridviews.<id>.dataProvider` without
             # eagerly instantiating every provider.
             - !tagged_locator { tag: fedale_gridview.data_provider }
-            - '@fedale_gridview.ui_settings.resolver'
+            - '@?fedale_gridview.ui_settings.resolver'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
     # Reads and writes the URL tokens that stand for a record. Shared by the
@@ -337,25 +337,10 @@ services:
             - { name: twig.extension }
 
     # End-user UI settings (global + per grid) applied over each grid's options.
-    # Off until the host app points `fedale_gridview.ui_settings.store` at a real
-    # UiSettingsStoreInterface; `fedale_gridview.ui_settings.store` is an alias
-    # set in FedaleGridviewBundle::loadExtension().
-    fedale_gridview.ui_settings.null_store:
-        class: Fedale\GridviewBundle\UiSettings\NullUiSettingsStore
-
-    fedale_gridview.ui_settings.resolver:
-        class: Fedale\GridviewBundle\UiSettings\UiSettingsResolver
-        arguments:
-            - !tagged_iterator fedale_gridview.ui_setting
-            - '@fedale_gridview.ui_settings.store'
-        tags:
-            - { name: kernel.reset, method: reset }
-    Fedale\GridviewBundle\UiSettings\UiSettingsResolver: '@fedale_gridview.ui_settings.resolver'
-
-    fedale_gridview.ui_settings.renderer:
-        class: Fedale\GridviewBundle\UiSettings\RendererUiSetting
-        tags:
-            - { name: fedale_gridview.ui_setting, priority: 100 }
+    # They are fedale/setting-bundle scoped settings: `fedale_gridview.ui_settings.resolver`
+    # and the built-in RendererUiSetting are defined in
+    # FedaleGridviewBundle::loadExtension() only when setting-bundle is installed
+    # and enabled, hence the `@?` references to the resolver.
 
     # Every AbstractGridController subclass (autoconfigured with the
     # `fedale_gridview.grid` tag), lazily, to list the per-grid scopes.
@@ -369,7 +354,7 @@ services:
     # attributes; the host app imports them with its own prefix.
     Fedale\GridviewBundle\Controller\UiSettingsController:
         arguments:
-            - '@fedale_gridview.ui_settings.resolver'
+            - '@?fedale_gridview.ui_settings.resolver'
             - '@fedale_gridview.ui_settings.grid_registry'
             - '@form.factory'
             - '@twig'

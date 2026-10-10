@@ -41,7 +41,7 @@ final class RendererUiSetting extends AbstractUiSetting
         return \count($this->renderers($grid->options)) > 1;
     }
 
-    public function choices(?GridDescriptor $grid): array
+    public function choicesFor(?GridDescriptor $grid): array
     {
         $names = $grid === null ? self::BUILT_IN : $this->renderers($grid->options);
 
@@ -53,13 +53,22 @@ final class RendererUiSetting extends AbstractUiSetting
         return $choices;
     }
 
-    public function isApplicable(mixed $value, array $options): bool
+    /**
+     * @param mixed $context the grid's resolved options; null when no grid is
+     *                       involved (the global scope of the modal)
+     */
+    public function isApplicable(mixed $value, mixed $context): bool
     {
-        return \is_string($value) && \in_array($value, $this->renderers($options), true);
+        if (!\is_string($value)) {
+            return false;
+        }
+
+        return !\is_array($context) || \in_array($value, $this->renderers($context), true);
     }
 
     /**
      * @param array<string, mixed> $options
+     *
      * @return list<string>
      */
     private function renderers(array $options): array

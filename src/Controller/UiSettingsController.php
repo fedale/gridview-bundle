@@ -7,8 +7,10 @@ use Fedale\GridviewBundle\UiSettings\GridDescriptor;
 use Fedale\GridviewBundle\UiSettings\GridRegistry;
 use Fedale\GridviewBundle\UiSettings\UiSettingInterface;
 use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
+use Fedale\SettingBundle\Exception\SettingValidationException;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -28,6 +30,9 @@ use Twig\Environment;
  * client controller reloads the grids on the page). An invalid submission is
  * re-rendered with a 422, which Turbo swaps into the frame.
  *
+ * Answers 404 while the feature is off: fedale/setting-bundle not installed
+ * (no resolver) or its scoped store not configured.
+ *
  * The host app imports the route with its own prefix, e.g.
  * `resource: '@FedaleGridviewBundle/src/Controller/UiSettingsController.php'`,
  * `type: attribute`, `prefix: /gridview/_settings`.
@@ -37,10 +42,11 @@ final class UiSettingsController
     private const DOMAIN = 'GridviewBundle';
 
     /**
-     * @param array<string, mixed> $bundleConfig the processed `fedale_gridview` config
+     * @param UiSettingsResolver|null $resolver     null when fedale/setting-bundle is not installed
+     * @param array<string, mixed>    $bundleConfig the processed `fedale_gridview` config
      */
     public function __construct(
-        private readonly UiSettingsResolver $resolver,
+        private readonly ?UiSettingsResolver $resolver,
         private readonly GridRegistry $grids,
         private readonly FormFactoryInterface $formFactory,
         private readonly Environment $twig,
@@ -54,8 +60,9 @@ final class UiSettingsController
     #[Route('', name: 'fedale_gridview_ui_settings', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        if (!$this->resolver->isEnabled()) {
-            throw new NotFoundHttpException('UI settings are disabled: set fedale_gridview.ui_settings.store.');
+        $resolver = $this->resolver;
+        if ($resolver === null || !$resolver->isEnabled()) {
+            throw new NotFoundHttpException('UI settings are disabled: install fedale/setting-bundle and set fedale_setting.scoped.store.');
         }
 
         $scope = (string) $request->query->get('scope', UiSettingsResolver::GLOBAL_SCOPE);
@@ -64,13 +71,11 @@ final class UiSettingsController
             $grid = $this->grids->get($scope) ?? throw new NotFoundHttpException(sprintf('Unknown grid "%s".', $scope));
         }
 
-        $settings = $this->resolver->settingsFor($grid);
-        $form = $this->buildForm($settings, $grid, $scope);
+        $settings = $resolver->settingsFor($grid);
+        $form = $this->buildForm($resolver, $settings, $grid, $scope);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->resolver->save($scope, (array) $form->getData());
-
+        if ($form->isSubmitted() && $form->isValid() && $this->save($resolver, $form, $scope, $grid)) {
             return new RedirectResponse(
                 $this->urlGenerator->generate('fedale_gridview_ui_settings', ['scope' => $scope, 'saved' => 1]),
                 Response::HTTP_SEE_OTHER,
@@ -92,28 +97,47 @@ final class UiSettingsController
     }
 
     /**
-     * One optional choice field per setting. The empty choice means "inherit":
-     * from the code configuration in the global scope, from the global value
-     * (named in the placeholder) in a grid scope.
+     * Saves the submitted values; a value setting-bundle rejects (e.g. a
+     * constraint of the setting) becomes an error on its field.
+     */
+    private function save(UiSettingsResolver $resolver, FormInterface $form, string $scope, ?GridDescriptor $grid): bool
+    {
+        try {
+            $resolver->save($scope, (array) $form->getData(), $grid);
+        } catch (SettingValidationException $e) {
+            $field = $form->has($e->getKey()) ? $form->get($e->getKey()) : $form;
+            foreach ($e->getViolationMessages() as $message) {
+                $field->addError(new FormError($message));
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * One optional choice field per setting. The empty choice means "inherit",
+     * and the placeholder names the value inherited.
      *
      * @param array<string, UiSettingInterface> $settings
      */
-    private function buildForm(array $settings, ?GridDescriptor $grid, string $scope): FormInterface
+    private function buildForm(UiSettingsResolver $resolver, array $settings, ?GridDescriptor $grid, string $scope): FormInterface
     {
         $builder = $this->formFactory->createNamedBuilder(
             'gv_ui_settings',
             FormType::class,
-            $this->resolver->values($scope),
+            $resolver->values($scope),
             [
                 'action' => $this->urlGenerator->generate('fedale_gridview_ui_settings', ['scope' => $scope]),
                 'translation_domain' => false,
             ],
         );
 
-        $global = $this->resolver->values(UiSettingsResolver::GLOBAL_SCOPE);
+        $inherited = $resolver->inherited($scope, $grid);
         foreach ($settings as $key => $setting) {
             $choices = [];
-            foreach ($setting->choices($grid) as $labelKey => $value) {
+            foreach ($setting->choicesFor($grid) as $labelKey => $value) {
                 $choices[$this->trans($labelKey)] = $value;
             }
 
@@ -122,7 +146,7 @@ final class UiSettingsController
                 'help' => $setting->help() !== null ? $this->trans($setting->help()) : null,
                 'choices' => $choices,
                 'required' => false,
-                'placeholder' => $this->placeholder($setting, $grid, $global),
+                'placeholder' => $this->placeholder($setting, $grid, $inherited),
                 'choice_translation_domain' => false,
             ]);
         }
@@ -130,20 +154,22 @@ final class UiSettingsController
         return $builder->getForm();
     }
 
-    /** @param array<string, mixed> $global */
-    private function placeholder(UiSettingInterface $setting, ?GridDescriptor $grid, array $global): string
+    /**
+     * The "inherit" choice, naming the value the field falls back to when one
+     * applies (from the global scope or the platform defaults), else the code
+     * configuration.
+     *
+     * @param array<string, mixed> $inherited
+     */
+    private function placeholder(UiSettingInterface $setting, ?GridDescriptor $grid, array $inherited): string
     {
-        if ($grid === null) {
+        $value = $inherited[$setting->key()] ?? null;
+        $label = $value === null ? false : array_search($value, $setting->choicesFor($grid), true);
+        if ($label === false) {
             return $this->trans('ui_settings.inherit_code');
         }
 
-        $value = $global[$setting->key()] ?? null;
-        $label = array_search($value, $setting->choices(null), true);
-        if ($value === null || $label === false || !$setting->isApplicable($value, $grid->options)) {
-            return $this->trans('ui_settings.inherit_code');
-        }
-
-        return $this->translator->trans('ui_settings.inherit_global', ['%value%' => $this->trans((string) $label)], self::DOMAIN);
+        return $this->translator->trans('ui_settings.inherit_value', ['%value%' => $this->trans((string) $label)], self::DOMAIN);
     }
 
     /** @return array<string, string> scope => label, global first */
