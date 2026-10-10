@@ -85,6 +85,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | A column type the bundle lacks | register a `ColumnTypeInterface` service | [14_extending.md](14_extending.md#creating-a-custom-column) |
 | Rows from an HTTP API instead of Doctrine | `JsonDataProvider`, or your own `DataProviderInterface` | [14_extending.md](14_extending.md#the-built-in-jsondataprovider) |
 | Live updates when another user writes | Mercure signal + auto-refresh | [13_real-time.md](13_real-time.md) |
+| End users changing grid options at runtime (all grids or one grid) | the UI settings modal, on fedale/setting-bundle; one `AbstractUiSetting` class per option | [18_ui-settings.md](18_ui-settings.md) |
 | To scaffold a CRUD controller | `php bin/console make:gridview:crud --fluent` | [08_crud.md](08_crud.md#scaffolding-a-controller-with-makegridviewcrud) |
 
 Everything in that table is configuration on a column, a token in a layout string, or a YAML key.
@@ -285,6 +286,7 @@ For a list too large to inline, give the relation filter an `ajax_url` instead. 
 | [13_real-time.md](13_real-time.md) | Mercure signals and auto-refresh |
 | [14_extending.md](14_extending.md) | Public interfaces, custom columns, custom data providers, row events |
 | [15_full-example.md](15_full-example.md) | A complete controller plus template, and the raw builder API |
+| [18_ui-settings.md](18_ui-settings.md) | The end-user settings modal: enabling it, precedence, adding a setting |
 
 ---
 

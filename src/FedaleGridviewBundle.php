@@ -7,11 +7,17 @@ use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Controller\AbstractGridController;
 use Fedale\GridviewBundle\Export\ExporterInterface;
-use Fedale\GridviewBundle\UiSettings\UiSettingInterface;
-use Fedale\GridviewBundle\UiSettings\UiSettingsStoreInterface;
+use Fedale\GridviewBundle\UiSettings\RendererUiSetting;
+use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
+use Fedale\SettingBundle\FedaleSettingBundle;
+use Fedale\SettingBundle\Scoped\ScopedSettingsResolver;
+use Fedale\SettingBundle\Scoped\ScopedSettingsWriter;
+use Fedale\SettingBundle\Scoped\SettingDefinitionInterface;
+use Fedale\SettingBundle\Scoped\SettingDefinitionRegistry;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 /**
@@ -84,22 +90,44 @@ class FedaleGridviewBundle extends AbstractBundle
                 ->addTag('maker.command');
         }
 
-        // UI settings: every UiSettingInterface service (built-in or host-app)
-        // becomes a configurable option of the settings modal, and every grid
-        // controller becomes a per-grid scope of it.
-        $containerBuilder->registerForAutoconfiguration(UiSettingInterface::class)
-            ->addTag('fedale_gridview.ui_setting');
+        // Every grid controller becomes a per-grid scope of the UI settings modal.
         $containerBuilder->registerForAutoconfiguration(AbstractGridController::class)
             ->addTag('fedale_gridview.grid');
-        $containerBuilder->setAlias(
-            'fedale_gridview.ui_settings.store',
-            $config['ui_settings']['store'] ?? 'fedale_gridview.ui_settings.null_store',
-        );
-        $containerBuilder->setAlias(UiSettingsStoreInterface::class, 'fedale_gridview.ui_settings.store');
+
+        // UI settings are fedale/setting-bundle scoped settings, an optional
+        // dependency (see composer.json "suggest"): without the bundle installed
+        // and enabled nothing is defined, grids render as configured in code and
+        // the modal's route answers 404. Host UiSettingInterface services need no
+        // tag of ours: setting-bundle autoconfigures every SettingDefinitionInterface.
+        if (interface_exists(SettingDefinitionInterface::class) && self::isBundleEnabled($containerBuilder, FedaleSettingBundle::class)) {
+            $containerBuilder->register('fedale_gridview.ui_settings.resolver', UiSettingsResolver::class)
+                ->setArguments([
+                    new Reference(ScopedSettingsResolver::class),
+                    new Reference(ScopedSettingsWriter::class),
+                    new Reference(SettingDefinitionRegistry::class),
+                ]);
+            $containerBuilder->setAlias(UiSettingsResolver::class, 'fedale_gridview.ui_settings.resolver');
+
+            $containerBuilder->register('fedale_gridview.ui_settings.renderer', RendererUiSetting::class)
+                ->addTag('fedale_setting.definition');
+        }
 
         $containerConfigurator->parameters()
             ->set('fedale_gridview.config', $config)
             ->set('fedale_gridview.themes', $config['themes'] ?? []);
+    }
+
+    /**
+     * Read from `kernel.bundles`: the container given to loadExtension() holds
+     * only this bundle's extension, so hasExtension() can't see the others.
+     */
+    private static function isBundleEnabled(ContainerBuilder $containerBuilder, string $bundleClass): bool
+    {
+        if (!$containerBuilder->hasParameter('kernel.bundles')) {
+            return false;
+        }
+
+        return \in_array($bundleClass, (array) $containerBuilder->getParameter('kernel.bundles'), true);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -113,16 +141,6 @@ class FedaleGridviewBundle extends AbstractBundle
             // themes are declared under `themes` below. Per-gridview override
             // via `gridviews.<id>.options.theme`.
             ->scalarNode('theme')->defaultValue('default')->end()
-            // End-user UI settings modal (global + per-grid overrides of
-            // options such as the default renderer). `store` is the service id
-            // of a UiSettingsStoreInterface; null keeps the feature off.
-            ->arrayNode('ui_settings')
-            ->addDefaultsIfNotSet()
-            ->info('Runtime UI settings edited by the end user (global + per grid).')
-            ->children()
-            ->scalarNode('store')->defaultNull()->end()
-            ->end()
-            ->end()
             // Host-declared custom themes: map class keys (e.g. 'btn.primary')
             // to concrete CSS classes. `extends` starts from a built-in theme
             // and overrides only some keys; omitted keys fall back to default.

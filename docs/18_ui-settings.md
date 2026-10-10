@@ -23,31 +23,52 @@ From lowest to highest:
 
 Only the option the setting targets is replaced (e.g. `display.renderer.default`); the rest
 of the configuration, such as the renderer `map`, is untouched. A stored value a grid cannot
-honour is skipped for that grid. For example, a global "cards" default does nothing on a
-grid whose `renderer.map` has no `card` entry.
+honour is skipped for that grid, and the next value in line applies. For example, a global
+"cards" default does nothing on a grid whose `renderer.map` has no `card` entry.
+
+In a multi-tenant app the values of the current tenant come first. Tenant 0 holds the
+platform defaults, which apply only where the tenant has set nothing:
+
+```
+tenant's grid value → tenant's global value → platform grid value → platform global value
+```
+
+A tenant that sets "cards" for all grids therefore sees cards on every grid that supports
+them, even where the platform set a per-grid default.
 
 ## Enabling it
 
-The feature is off until the app provides a store, a service implementing
-`Fedale\GridviewBundle\UiSettings\UiSettingsStoreInterface`:
+The values are stored and resolved by
+[fedale/setting-bundle](https://github.com/fedale/setting-bundle) (scoped settings), an
+optional dependency. Without it, the modal's route answers 404 and grids render exactly as
+configured in code. Install it (PHP 8.2+):
+
+```bash
+composer require fedale/setting-bundle
+```
+
+Then give its scoped settings a store, for example the built-in Doctrine table:
 
 ```php
-interface UiSettingsStoreInterface
-{
-    public function load(string $scope): array;              // setting key => value
-    public function save(string $scope, array $values): void; // replaces the bag
-}
-```
+// config/packages/fedale_setting.php
+use Symfony\Config\FedaleSettingConfig;
 
-A scope is `_global` or a grid id. A missing key means "inherit". Point the bundle at the
-store:
+return static function (FedaleSettingConfig $config): void {
+    $config->scoped()->store('doctrine');
+};
+```
 
 ```yaml
-# config/packages/gridview.yaml
-fedale_gridview:
-    ui_settings:
-        store: App\Gridview\SettingBundleUiSettingsStore
+# config/packages/fedale_setting.yaml
+fedale_setting:
+    scoped:
+        store: doctrine
 ```
+
+Generate the migration for its `setting_scoped` table with
+`php bin/console make:migration`. The values live in the `gridview.ui` namespace, at the
+scope levels `global` and `grid` (the scope id is the grid id). See the setting-bundle README
+for custom stores and caching.
 
 Import the route that serves the modal body:
 
@@ -87,34 +108,11 @@ The `grid` value preselects the current page's grid; leave it empty for the glob
 - Grids are discovered automatically: every `AbstractGridController` service becomes a scope,
   described by `describeGrid()` from its `viewConfig()` alone.
 
-## Storing in the database with fedale/setting-bundle
-
-```php
-use Fedale\GridviewBundle\UiSettings\UiSettingsStoreInterface;
-use Fedale\SettingBundle\Contract\SettingsManagerInterface;
-
-final class SettingBundleUiSettingsStore implements UiSettingsStoreInterface
-{
-    public function __construct(private readonly SettingsManagerInterface $settings) {}
-
-    public function load(string $scope): array
-    {
-        $values = $this->settings->get('gridview.ui.' . $scope, []);
-
-        return \is_array($values) ? $values : [];
-    }
-
-    public function save(string $scope, array $values): void
-    {
-        $this->settings->set('gridview.ui.' . $scope, $values, null, 'json');
-    }
-}
-```
-
 ## Adding a setting
 
-Implement `UiSettingInterface`, or extend `AbstractUiSetting`. Autoconfiguration adds the
-`fedale_gridview.ui_setting` tag, and the field appears in the modal:
+Extend `AbstractUiSetting` (or implement `UiSettingInterface`). It is a setting-bundle
+scoped setting, so setting-bundle's autoconfiguration registers it, and the field appears in
+the modal:
 
 ```php
 use Fedale\GridviewBundle\UiSettings\AbstractUiSetting;
@@ -126,7 +124,7 @@ final class EmptyTextUiSetting extends AbstractUiSetting
     public function optionPath(): string { return 'display.emptyText'; }
     public function label(): string      { return 'ui_settings.empty_text.label'; }
 
-    public function choices(?GridDescriptor $grid): array
+    public function choicesFor(?GridDescriptor $grid): array
     {
         return ['ui_settings.empty_text.short' => 'Nothing here', 'ui_settings.empty_text.long' => 'No records match your filters'];
     }
@@ -135,13 +133,18 @@ final class EmptyTextUiSetting extends AbstractUiSetting
 
 | Method | Purpose |
 |---|---|
-| `key()` | storage key, unique |
+| `key()` | storage key, unique within the `gridview.ui` namespace |
 | `optionPath()` | dotted path of the grid option it writes |
 | `label()` / `help()` | `GridviewBundle` translation keys |
 | `supportsGlobal()` / `supportsGrid($grid)` | which scopes offer the field |
-| `choices($grid)` | `label key => value`, narrowed per grid when needed |
-| `isApplicable($value, $options)` | render-time guard against values a grid can't honour |
+| `choicesFor($grid)` | `label key => value`, narrowed per grid when needed |
+| `isApplicable($value, $options)` | render-time guard against values a grid can't honour; `$options` is the grid's resolved options, or null outside a grid |
+
+`AbstractUiSetting` also answers setting-bundle's own questions from these: `namespace()`
+is `gridview.ui`, `type()` is an enum, `supportsScope()` follows `supportsGlobal()`, and the
+global choices are validated on save. Override `constraints()` to add Symfony Validator
+constraints.
 
 The modal renders every setting as an optional choice field. The empty choice means
-"inherit": from the code configuration in the global scope, from the global value in a grid
-scope.
+"inherit", and it names the value inherited: from the global scope or the platform defaults,
+else the code configuration.
