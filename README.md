@@ -4,7 +4,7 @@
 >
 > Build searchable, sortable, editable data grids anywhere in your application — without adopting an admin framework.
 
-Gridview is an **embeddable data-grid platform** for Symfony.
+Gridview is an **embeddable data-grid component** for Symfony.
 
 It brings together everything expected from a modern business grid—filtering, sorting, CRUD, export, real-time updates and internationalization—while remaining just another component of your application.
 
@@ -268,4 +268,4 @@ enough.
 
 Gridview was inspired by the Yii2 GridView ecosystem, particularly Kartik's GridView, while embracing modern Symfony practices.
 
-The goal is to provide Symfony applications with an embeddable, framework-native data-grid platform that integrates naturally with Twig, Forms, Translation and the rest of the Symfony ecosystem.
+The goal is to provide Symfony applications with an embeddable, framework-native data-grid component that integrates naturally with Twig, Forms, Translation and the rest of the Symfony ecosystem.
