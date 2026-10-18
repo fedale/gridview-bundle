@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Fedale\GridviewBundle\Column\AbstractColumn;
 use Fedale\GridviewBundle\Column\CheckboxColumn;
 use Fedale\GridviewBundle\Column\ColumnFactory;
+use Fedale\GridviewBundle\Column\Config\ColumnConfigInterface;
 use Fedale\GridviewBundle\Column\DataColumn;
 use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildCountResolverInterface;
@@ -468,7 +469,11 @@ class Gridview implements GridviewInterface
         return is_string($model) ? $model : null;
     }
 
-    /** All rows matching the current filters/sort, unpaginated (for export). */
+    /**
+     * All rows matching the current filters/sort, unpaginated (for export).
+     *
+     * @return iterable<Row>
+     */
     public function getExportRows(): iterable
     {
         $this->initializeDataProvider();
@@ -703,7 +708,7 @@ class Gridview implements GridviewInterface
     }
 
     /**
-     * @param array<int, string|ColumnSpec> $columns
+     * @param array<int, string|ColumnSpec|ColumnConfigInterface> $columns
      */
     public function setColumns(array $columns): static
     {

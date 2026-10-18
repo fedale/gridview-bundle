@@ -7,9 +7,11 @@ use Fedale\GridviewBundle\Contract\ActionButtonInterface;
 class ActionButton implements ActionButtonInterface
 {
     /**
-     * @param string|\Closure(mixed, int): string $content  HTML string or callable that returns HTML
-     * @param string[]                            $roles     Symfony roles; empty = always shown
-     * @param bool|\Closure(mixed, int): bool     $visible
+     * The closures receive the row as a normalized array (see ActionColumn::render()), never an entity.
+     *
+     * @param string|\Closure(array<string, mixed>, int): string $content  HTML string or callable that returns HTML
+     * @param string[]                                          $roles     Symfony roles; empty = always shown
+     * @param bool|\Closure(array<string, mixed>, int): bool     $visible
      */
     public function __construct(
         private string|\Closure $content,
