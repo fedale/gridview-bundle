@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridDataSourceInterface;
+use Fedale\GridviewBundle\Contract\GridDescriptorProviderInterface;
 use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Controller\AbstractGridController;
 use Fedale\GridviewBundle\Export\ExporterInterface;
@@ -99,6 +100,11 @@ class FedaleGridviewBundle extends AbstractBundle
         // Every grid controller becomes a per-grid scope of the UI settings modal.
         $containerBuilder->registerForAutoconfiguration(AbstractGridController::class)
             ->addTag('fedale_gridview.grid');
+
+        // Grids a host builds at runtime have no controller: a provider of its
+        // own describes them to the same modal.
+        $containerBuilder->registerForAutoconfiguration(GridDescriptorProviderInterface::class)
+            ->addTag('fedale_gridview.grid_descriptor_provider');
 
         // UI settings are fedale/setting-bundle scoped settings, an optional
         // dependency (see composer.json "suggest"): without the bundle installed

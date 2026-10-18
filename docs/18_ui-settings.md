@@ -106,7 +106,51 @@ The `grid` value preselects the current page's grid; leave it empty for the glob
   page from the current URL. The grids re-render with the new settings without a full page
   reload.
 - Grids are discovered automatically: every `AbstractGridController` service becomes a scope,
-  described by `describeGrid()` from its `viewConfig()` alone.
+  described by `describeGrid()` from its `viewConfig()` alone. Grids built without a controller
+  are declared by a provider, see [Grids built at runtime](#grids-built-at-runtime).
+
+## Grids built at runtime
+
+A grid you build with `GridviewBuilderFactory` — one per record type of a metadata-driven app, for
+example — has no controller to describe it, so the modal doesn't know it: opening the modal on its
+id answers 404. Declare those grids with a `GridDescriptorProviderInterface` service. It's
+autoconfigured, so the class is all you write:
+
+```php
+// src/Grid/RecordGridDescriptors.php
+namespace App\Grid;
+
+use App\Metadata\ObjectRegistry;
+use Fedale\GridviewBundle\Contract\GridDescriptorProviderInterface;
+use Fedale\GridviewBundle\UiSettings\GridDescriptor;
+
+final class RecordGridDescriptors implements GridDescriptorProviderInterface
+{
+    public function __construct(
+        private readonly ObjectRegistry $objects,
+        private readonly RecordGridOptions $gridOptions,
+    ) {}
+
+    public function getGridDescriptors(): iterable
+    {
+        foreach ($this->objects->all() as $object) {
+            yield new GridDescriptor(
+                'record_' . $object->name(),          // the id passed to setId()
+                $object->pluralLabel(),               // the scope's name in the modal
+                $this->gridOptions->for($object),     // what the grid gets from setOptions()
+            );
+        }
+    }
+}
+```
+
+The descriptor's options are a copy of the options the grid receives from `setOptions()`: the
+modal reads them to know, for instance, which renderers the grid maps. Build both from one place —
+here a `RecordGridOptions` service that the code building the grid uses too — so the copy can't
+drift from the real grid.
+
+The providers are only asked when the modal needs the list of scopes, never while a grid renders.
+When two grids share an id they share one scope, and a controller's grid wins over a provider's.
 
 ## Adding a setting
 

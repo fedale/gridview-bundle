@@ -87,6 +87,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | Rows from DBAL, a domain service or runtime-defined objects | a `GridDataSourceInterface` under `dataConfig.dataSource`: the bundle parses filters, search, sort and page into one `GridQuery` | [14_extending.md](14_extending.md#feeding-a-grid-from-a-custom-data-source) |
 | Live updates when another user writes | Mercure signal + auto-refresh | [13_real-time.md](13_real-time.md) |
 | End users changing grid options at runtime (all grids or one grid) | the UI settings modal, on fedale/setting-bundle; one `AbstractUiSetting` class per option | [18_ui-settings.md](18_ui-settings.md) |
+| A grid built at runtime (no controller) as a scope of the UI settings modal | a `GridDescriptorProviderInterface` service | [18_ui-settings.md](18_ui-settings.md#grids-built-at-runtime) |
 | To scaffold a CRUD controller | `php bin/console make:gridview:crud --fluent` | [08_crud.md](08_crud.md#scaffolding-a-controller-with-makegridviewcrud) |
 
 Everything in that table is configuration on a column, a token in a layout string, or a YAML key.

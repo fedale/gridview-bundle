@@ -1,10 +1,22 @@
 # Feedback from the first data-source consumer (metadata-driven)
 
-Status: **1 and 3 fixed** on branch `fix_metadata_feedback`; **2 and 4 planned** below, each with
-a decision to take first; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
+Status: **1, 2 and 3 fixed**; **4 decided**, being implemented; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
 `../metadata-driven` (runtime grids at `/o/{object}`, built with `GridviewBuilderFactory`, fed by a
 DBAL `GridDataSourceInterface`). Every item has a workaround on the consumer side, quoted below so
 the fix can be checked against it. Follow `CLAUDE.md` for style and verification.
+
+## Decisions (2026-10-18, by the maintainer)
+
+- **2 — the copy.** The descriptor carries a copy of the options the host passes to
+  `setOptions()`; no build hook. Implement the plan of §2 as written. Consumer side,
+  metadata-driven will extract one `options(ObjectDefinitionDto)` method used both by its grid
+  factory and by its provider, so the copy cannot drift there.
+- **4 — accept the break in 1.3.** Remove the `@use` from `gridview.scss`, add the opt-in
+  `gridview-flatpickr.scss`, write the upgrade note in `docs/06_theming.md` and the release notes,
+  and drop the demo stub. metadata-driven drops its stub once this is merged.
+
+Workarounds of 1 and 3 are removed in metadata-driven (`integration.routeName` set, fluent builder
+chain, `array $row` action closure, `getExportRows()` passed as is); its suite is green on `main`.
 
 ## 1. `_grid.html.twig` drops the route parameters (bug)
 
@@ -61,6 +73,15 @@ descriptor carries a copy of the options the host will pass to `setOptions()` (s
 from the real grid), or the provider gets a hook to build the grid's options once and the host
 reuses it in its controller (no drift, more API). Recommendation: the copy, documented as "keep it
 next to the code that builds the grid" — the modal only reads the renderer map from it.
+
+**Done** (the copy, as decided). `Contract\GridDescriptorProviderInterface`, autoconfigured with
+`fedale_gridview.grid_descriptor_provider`; `UiSettings\ControllerGridDescriptorProvider` carries
+the controller discovery and is registered first (priority 256), so a controller's grid wins a
+shared id; `GridRegistry` merges the providers lazily. The autoconfiguration is unconditional, like
+the existing `fedale_gridview.grid` tag, rather than inside the setting-bundle guard: the registry
+itself is always defined. Docs: `docs/18_ui-settings.md#grids-built-at-runtime`, `docs/agents.md`.
+Tests: `tests/UiSettings/GridRegistryTest`; no controller-level test (the scope lookup is
+`GridRegistry::get()`, covered there), the demo's ten controller scopes checked on a booted kernel.
 
 ## 3. Missing or too narrow types in the builder API (DX)
 
