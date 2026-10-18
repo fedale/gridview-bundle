@@ -10,7 +10,9 @@
 // .ea-dark-scheme) and falls back to prefers-color-scheme. See _dark.scss.
 // ═══════════════════════════════════════════════════════════════════
 
-@use 'flatpickr/dist/flatpickr';
+// flatpickr's own CSS is not pulled in here: flatpickr is a host dependency,
+// and a hard @use broke the build of any app that doesn't resolve it through
+// Sass. Hosts opt in with gridview-flatpickr.scss, or load the CSS themselves.
 @use 'tokens';
 @use 'dark';
 // Framework presets — token bridges, inert unless [data-gv-framework] is set

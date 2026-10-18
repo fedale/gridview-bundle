@@ -369,11 +369,22 @@ services:
     # and enabled, hence the `@?` references to the resolver.
 
     # Every AbstractGridController subclass (autoconfigured with the
-    # `fedale_gridview.grid` tag), lazily, to list the per-grid scopes.
+    # `fedale_gridview.grid` tag), lazily, as the built-in source of the
+    # per-grid scopes. A high priority keeps the controllers first, so a host
+    # provider reusing a controller's grid id does not shadow it.
+    fedale_gridview.ui_settings.controller_grid_provider:
+        class: Fedale\GridviewBundle\UiSettings\ControllerGridDescriptorProvider
+        arguments:
+            - !tagged_locator { tag: fedale_gridview.grid }
+        tags:
+            - { name: fedale_gridview.grid_descriptor_provider, priority: 256 }
+
+    # The per-grid scopes: the descriptors of every provider (the controllers
+    # above, plus host providers for grids built at runtime), merged.
     fedale_gridview.ui_settings.grid_registry:
         class: Fedale\GridviewBundle\UiSettings\GridRegistry
         arguments:
-            - !tagged_locator { tag: fedale_gridview.grid }
+            - !tagged_iterator { tag: fedale_gridview.grid_descriptor_provider }
     Fedale\GridviewBundle\UiSettings\GridRegistry: '@fedale_gridview.ui_settings.grid_registry'
 
     # The settings modal's turbo-frame endpoint. Routes are declared as
