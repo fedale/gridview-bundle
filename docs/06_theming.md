@@ -3,9 +3,57 @@
 ## Theming
 
 The bundle ships a **framework-agnostic** stylesheet
-(`assets/styles/gridview.scss`, compiled into the `gridview` Encore entry — no
-CDN dependency). All visuals are driven by **CSS custom properties** scoped under
-`[data-gridview]`, so you restyle the grid without touching the bundle.
+(`assets/styles/gridview.scss`, compiled by your app — no CDN dependency, see
+[Building the stylesheet](#building-the-stylesheet)). All visuals are driven by **CSS custom
+properties** scoped under `[data-gridview]`, so you restyle the grid without touching the bundle.
+
+### Building the stylesheet
+
+`gridview.scss` is Sass, compiled by your app's asset pipeline. It pulls its own partials
+(`tokens`, `dark`, the framework presets) and nothing else: the date filters' picker,
+flatpickr, is a dependency of your app, and its CSS comes from the setup below.
+
+**Webpack Encore.** Add the bundle's stylesheet as an entry. To have the date picker styled,
+add the opt-in `gridview-flatpickr.scss` too, which resolves `flatpickr` from `node_modules`:
+
+```js
+// webpack.config.js
+Encore
+    .addStyleEntry('gridview', './vendor/fedale/gridview-bundle/assets/styles/gridview.scss')
+    .addStyleEntry('gridview-flatpickr', './vendor/fedale/gridview-bundle/assets/styles/gridview-flatpickr.scss')
+    .enableSassLoader();
+```
+
+**AssetMapper + symfonycasts/sass-bundle.** Point the Sass load path at the bundle's styles and
+`@use` them from a stylesheet of your own. Give it a name other than `gridview.scss`, or Sass
+resolves `@use 'gridview'` to the file itself:
+
+```yaml
+# config/packages/symfonycasts_sass.yaml
+symfonycasts_sass:
+    root_sass:
+        - '%kernel.project_dir%/assets/styles/grid.scss'
+    sass_options:
+        load_path:
+            - '%kernel.project_dir%/vendor/fedale/gridview-bundle/assets/styles'
+```
+
+```scss
+// assets/styles/grid.scss
+@use 'gridview';
+```
+
+flatpickr's CSS comes from the importmap, like its JavaScript:
+
+```bash
+php bin/console importmap:require flatpickr flatpickr/dist/flatpickr.min.css
+```
+
+> **Upgrading to 1.3.** Up to 1.2, `gridview.scss` did `@use 'flatpickr/dist/flatpickr'` itself.
+> An Encore app got the picker's CSS without doing anything, and any other app needed an empty
+> stub on its load path to compile at all. From 1.3 the import is gone: on Encore, add the
+> `gridview-flatpickr` entry shown above, or the date filters lose their picker styling; elsewhere,
+> delete the stub.
 
 ### Framework themes (real framework classes)
 

@@ -1,0 +1,6 @@
+// Opt-in entry: flatpickr's date-picker CSS, for hosts that resolve the
+// `flatpickr` package through Sass (Encore, with node_modules on the load
+// path). Compile it next to gridview.scss, or @use it from your own stylesheet.
+// Hosts on AssetMapper load flatpickr/dist/flatpickr.min.css from the importmap
+// instead. See docs/06_theming.md, "Building the stylesheet".
+@use 'flatpickr/dist/flatpickr';

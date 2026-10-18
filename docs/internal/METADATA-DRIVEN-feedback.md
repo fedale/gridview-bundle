@@ -1,6 +1,6 @@
 # Feedback from the first data-source consumer (metadata-driven)
 
-Status: **1, 2 and 3 fixed**; **4 decided**, being implemented; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
+Status: **1–4 fixed**; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
 `../metadata-driven` (runtime grids at `/o/{object}`, built with `GridviewBuilderFactory`, fed by a
 DBAL `GridDataSourceInterface`). Every item has a workaround on the consumer side, quoted below so
 the fix can be checked against it. Follow `CLAUDE.md` for style and verification.
@@ -137,6 +137,14 @@ through `gridview.scss` without doing anything: after it, their date filters are
 they add the opt-in entry. Either accept it for 1.3 with an upgrade note in the guide (recommended:
 there is no changelog file, so the note goes in `docs/06_theming.md` and the release notes), or keep
 the import and only document the stub (no break, but every AssetMapper host keeps the stub).
+
+**Done** (the break accepted, as decided). `gridview.scss` no longer imports flatpickr;
+`assets/styles/gridview-flatpickr.scss` is the opt-in entry; `docs/06_theming.md` gains "Building
+the stylesheet" (Encore and AssetMapper + sass-bundle) with the 1.3 upgrade note — there is no
+changelog file, so the release notes should repeat it. Checked: the demo compiles its stylesheet
+with `sass:build` after its stub and load path are removed, and the opt-in entry compiles against a
+`node_modules`-like path holding flatpickr's CSS. The demo-side removal is in `gridview-demo`'s own
+working tree. metadata-driven can drop its stub.
 
 ## 5. Not a bundle change — for the record
 
