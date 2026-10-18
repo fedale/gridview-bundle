@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle;
 
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
+use Fedale\GridviewBundle\Contract\GridDataSourceInterface;
 use Fedale\GridviewBundle\Contract\PaginatorStrategyInterface;
 use Fedale\GridviewBundle\Controller\AbstractGridController;
 use Fedale\GridviewBundle\Export\ExporterInterface;
@@ -59,6 +60,11 @@ class FedaleGridviewBundle extends AbstractBundle
         // grid's data source away from the default (Doctrine-backed) provider.
         $containerBuilder->registerForAutoconfiguration(DataProviderInterface::class)
             ->addTag('fedale_gridview.data_provider');
+
+        // A grid names its `dataSource` by service id through this tag's
+        // locator (see GridviewBuilder::useDataSource()).
+        $containerBuilder->registerForAutoconfiguration(GridDataSourceInterface::class)
+            ->addTag('fedale_gridview.data_source');
 
         // JsonDataProvider is a ready-made HTTP-backed provider, but it needs
         // symfony/http-client (an optional dependency, see composer.json

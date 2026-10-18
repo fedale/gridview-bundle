@@ -241,6 +241,16 @@ class GridviewConfigRegistry
     }
 
     /**
+     * The `dataProvider` declared for this grid itself (`gridviews.<id>.dataProvider`),
+     * ignoring the inherited `defaults.dataProvider`. A grid with a `dataSource`
+     * overrides the default provider but conflicts with one of its own.
+     */
+    public function resolveGridDataProvider(?string $id): ?string
+    {
+        return $id !== null ? ($this->config['gridviews'][$id]['dataProvider'] ?? null) : null;
+    }
+
+    /**
      * Options for a DetailView. Sibling of {@see resolveOptions()} but it reads
      * the dedicated `defaults.detailview` / `detailviews.<id>` sections — never
      * the grid-only `gridviews.<id>`, whose pagination/realtime/layout keys are

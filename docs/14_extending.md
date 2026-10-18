@@ -15,6 +15,9 @@ rather than on the concrete classes:
 | `PaginationInterface` | `Fedale\GridviewBundle\Component` | ✓ |
 | `SearchFormInterface` | `Fedale\GridviewBundle\Service` | ✓ |
 | `SearchModelInterface` | `Fedale\GridviewBundle\Service` | ✓ |
+| `GridDataSourceInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `FilterCriteriaBuilderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `ColumnAwareDataProviderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
 
 ## Request-scoped services
 
@@ -296,10 +299,300 @@ discoverable in production. This applies to any `DataProviderInterface`, not jus
 > `AbstractGridController`, not `AbstractCrudGridController`. See the note at the end of the next
 > section.
 
+## Feeding a grid from a custom data source
+
+When the rows are neither Doctrine entities nor a JSON API — plain SQL through DBAL, a domain
+service, records whose fields are defined at runtime — implement `GridDataSourceInterface`. It's
+the shortest path to a non-Doctrine grid: the bundle still parses the filters, the global search,
+the sort and the page from the request, and hands your source one normalized `GridQuery`. Your
+source only runs it.
+
+Write a full `DataProviderInterface` (see the next section) only when you need control over the
+pipeline itself — your own request parsing, your own row building.
+
+### The contract
+
+```php
+use Fedale\GridviewBundle\DataSource\GridQuery;
+
+interface GridDataSourceInterface
+{
+    /** Rows matching the criteria and search, ignoring sort and window. */
+    public function count(GridQuery $query): int;
+
+    /** The window of rows (limit null = every row, for the export), filtered, searched, sorted. */
+    public function fetch(GridQuery $query): iterable; // of arrays keyed by column attribute
+}
+```
+
+`count()` is always called first: the pagination needs the total to clamp the requested page
+before it computes the offset.
+
+A `GridQuery` carries:
+
+| Property | What it holds |
+|---|---|
+| `gridId` | the grid's id (`record_pet`) |
+| `source` | the grid's `dataConfig()['model']`, passed through untouched (`['object' => 'pet']`) |
+| `criteria` | `list<FilterCriterion>`, AND-ed |
+| `searchTerm`, `searchFields` | the global search term and the attributes it's matched against |
+| `sort` | `list<SortOrder>` (attribute + `SortDirection::Asc`/`Desc`), in priority order |
+| `offset`, `limit` | the row window; `limit` is null for the export |
+
+Each `FilterCriterion` is an `attribute`, a `FilterOperator`, a `value` and a `caseInsensitive`
+flag. The operators are `Eq`, `Neq`, `Lt`, `Lte`, `Gt`, `Gte`, `Contains`, `NotContains`,
+`StartsWith`, `EndsWith`, `In` (a non-empty list) and `Between` (a `[low, high]` pair, inclusive).
+Values arrive already parsed: the filter syntax users type ("`>= 10`", "`btw 1 and 5`",
+"`%rex`") is the same on a data-source grid as on an entity grid, because both are built by the
+same criteria builders.
+
+- Text values are strings, without wildcard characters.
+- Number values are `int` or `float`.
+- Date values are `\DateTimeImmutable`. The upper bound of a date range already sits at 23:59:59
+  (the filter's `end_of_day` option), so it misses timestamps with fractional seconds after that.
+- Booleans are `bool`.
+- Choice and relation values are the raw submitted strings, blanks removed: cast them to the
+  field's type (int, UUID) yourself.
+
+**Your source must whitelist attributes.** Validate every attribute in the criteria, the sort and
+the search fields against your own field definitions, and quote identifiers before they reach SQL.
+The bundle only passes attributes the grid declared, but a source that builds SQL from runtime
+metadata is the last line of defense against injection through dynamic identifiers.
+
+The global search means a case-insensitive "contains" of the term, OR-ed across `searchFields` and
+AND-ed with the criteria — what `LOWER(field) LIKE '%term%'` does on an entity grid.
+
+### A source over DBAL
+
+```php
+// src/Grid/RecordGridSource.php
+namespace App\Grid;
+
+use App\Metadata\ObjectRegistry;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Fedale\GridviewBundle\Contract\GridDataSourceInterface;
+use Fedale\GridviewBundle\DataSource\FilterOperator;
+use Fedale\GridviewBundle\DataSource\GridQuery;
+
+final class RecordGridSource implements GridDataSourceInterface
+{
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly ObjectRegistry $objects,
+    ) {}
+
+    public function count(GridQuery $query): int
+    {
+        return (int) $this->filtered($query)->select('COUNT(*)')->fetchOne();
+    }
+
+    public function fetch(GridQuery $query): iterable
+    {
+        $qb = $this->filtered($query)->select('*')->setFirstResult($query->offset);
+        if ($query->limit !== null) {
+            $qb->setMaxResults($query->limit);
+        }
+        foreach ($query->sort as $order) {
+            $qb->addOrderBy($this->column($query, $order->attribute), $order->direction->value);
+        }
+
+        return $qb->fetchAllAssociative();
+    }
+
+    private function filtered(GridQuery $query): QueryBuilder
+    {
+        $object = $this->objects->get($query->source['object']);
+        $qb = $this->connection->createQueryBuilder()
+            ->from($this->connection->quoteSingleIdentifier($object->table()));
+
+        foreach ($query->criteria as $i => $criterion) {
+            $column = $this->column($query, $criterion->attribute);
+            if ($criterion->caseInsensitive) {
+                $column = 'LOWER(' . $column . ')';
+            }
+            $param = 'c' . $i;
+            $value = $criterion->value;
+
+            match ($criterion->operator) {
+                FilterOperator::Eq => $qb->andWhere("$column = :$param"),
+                FilterOperator::Gte => $qb->andWhere("$column >= :$param"),
+                FilterOperator::Lte => $qb->andWhere("$column <= :$param"),
+                FilterOperator::Contains => $qb->andWhere("$column LIKE :$param"),
+                FilterOperator::In => $qb->andWhere("$column IN (:$param)"),
+                // ... the other operators
+            };
+
+            if ($criterion->operator === FilterOperator::Contains) {
+                $value = '%' . $value . '%';
+            }
+            if ($criterion->caseInsensitive) {
+                $value = is_array($value) ? array_map('mb_strtolower', $value) : mb_strtolower($value);
+            }
+            $qb->setParameter($param, $value, is_array($value) ? ArrayParameterType::STRING : null);
+        }
+
+        if ($query->searchTerm !== null && $query->searchFields !== []) {
+            $search = [];
+            foreach ($query->searchFields as $field) {
+                $search[] = 'LOWER(' . $this->column($query, $field) . ') LIKE :q';
+            }
+            $qb->andWhere('(' . implode(' OR ', $search) . ')')
+                ->setParameter('q', '%' . mb_strtolower($query->searchTerm) . '%');
+        }
+
+        return $qb;
+    }
+
+    /** The whitelist: only a field the object defines ever reaches the SQL, quoted. */
+    private function column(GridQuery $query, string $attribute): string
+    {
+        $object = $this->objects->get($query->source['object']);
+        if (!$object->hasField($attribute)) {
+            throw new \InvalidArgumentException(sprintf('Unknown field "%s".', $attribute));
+        }
+
+        return $this->connection->quoteSingleIdentifier($object->field($attribute)->column());
+    }
+}
+```
+
+A class implementing `GridDataSourceInterface` is autoconfigured with the
+`fedale_gridview.data_source` tag, so a grid can also name it by service id.
+
+### Selecting the source for a grid
+
+Put the source under the `dataSource` key of the data config, as an instance or a service id. No
+YAML entry is needed, so grids created at runtime work out of the box:
+
+```php
+$gridview = $builderFactory->createGridviewBuilder()
+    ->setId('record_pet')
+    ->setSearchModel($searchModel)                 // before setColumns(), see below
+    ->setDataProvider([
+        'dataSource' => $this->recordGridSource,   // or 'App\Grid\RecordGridSource'
+        'model'      => ['object' => 'pet'],       // passed through as GridQuery::$source
+        'identifier' => 'id',                      // the row key links and checkboxes use
+        'pagination' => ['defaultPageSize' => 25],
+    ])
+    ->setColumns($columns)
+    ->setOptions(['behavior' => ['globalSearch' => ['name', 'email']]])
+    ->renderGridview();
+```
+
+- **Filters come from the columns.** Each filterable column (and each `search.fields` entry) is
+  applied on its own attribute; no `search.map` is needed. To pass applier options to a column
+  filter — `default_operator`, `end_of_day`, `range_separator` — add a `search.map` entry with the
+  attribute in place of the DQL field: `'name' => ['text', 'name', ['default_operator' => 'eq']]`.
+- **Sorting comes from the columns too.** Without a `sort.map`, every sortable column sorts on its
+  own attribute. An explicit `sort.map` still wins, and its fields are source attributes.
+- **Global search fields** are attribute names (`'name'`), not DQL fields (`'c.name'`).
+- **`identifier`** is the row key (or a list of keys, for a composite one) the grid turns into the
+  token of each row — the same token format an entity grid uses. It defaults to `'id'`.
+- **Your own filter types** go in `search.builders` (filter type → a
+  `FilterCriteriaBuilderInterface`), consulted before the built-in builders. `search.appliers` write
+  DQL, so a data-source grid that declares them is refused, and so is a filter type with no builder.
+- **`dataSource` overrides `defaults.dataProvider`**, but declaring a `dataProvider` for the same
+  grid (`gridviews.<id>.dataProvider`) throws.
+
+> **Call `setSearchModel()` before `setColumns()`.** The column filters are registered on the
+> filter form when `setColumns()` runs, and only if the grid has a search model by then. A
+> data-source grid whose filters were dropped this way throws a `LogicException` naming them,
+> rather than rendering without them. `SearchModelInterface` is autowirable: inject it into your
+> controller.
+
+### A controller for runtime grids
+
+`AbstractGridController` derives everything from an entity class, so a data-source grid is built
+from `GridviewBuilderFactory` directly. One controller can serve every object:
+
+```php
+// src/Controller/RecordGridController.php
+namespace App\Controller;
+
+use App\Grid\RecordGridSource;
+use App\Metadata\ObjectRegistry;
+use Fedale\GridviewBundle\Contract\SearchModelInterface;
+use Fedale\GridviewBundle\Export\GridExporterRegistry;
+use Fedale\GridviewBundle\Grid\Gridview;
+use Fedale\GridviewBundle\Grid\GridviewBuilderFactory;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/records/{object}', name: 'record_')]
+final class RecordGridController extends AbstractController
+{
+    public function __construct(
+        private readonly GridviewBuilderFactory $builders,
+        private readonly SearchModelInterface $searchModel,
+        private readonly RecordGridSource $source,
+        private readonly ObjectRegistry $objects,
+    ) {}
+
+    #[Route('', name: 'index')]
+    public function index(string $object): Response
+    {
+        return $this->grid($object)->renderGrid('record/index.html.twig');
+    }
+
+    #[Route('/export', name: 'export')]
+    public function export(string $object, Request $request, GridExporterRegistry $exporters): Response
+    {
+        $format = (string) $request->query->get('format', 'csv');
+        if (!$exporters->has($format)) {
+            throw $this->createNotFoundException();
+        }
+
+        // The same filters, global search and sort as the list, every row.
+        $gridview = $this->grid($object);
+
+        return $exporters->get($format)->export(
+            $gridview->getExportRows(),
+            $gridview->getExportColumns(),
+            ['filename' => $object],
+        );
+    }
+
+    private function grid(string $object): Gridview
+    {
+        $definition = $this->objects->get($object);
+
+        return $this->builders->createGridviewBuilder()
+            ->setId('record_' . $object)
+            ->setSearchModel($this->searchModel)
+            ->setDataProvider(['dataSource' => $this->source, 'model' => ['object' => $object]])
+            ->setColumns($definition->gridColumns())
+            ->setOptions([
+                'behavior' => ['globalSearch' => $definition->textFields()],
+                'integration' => ['routeName' => 'record_index'],
+            ])
+            ->renderGridview();
+    }
+}
+```
+
+The rows reach column callbacks as arrays. To show a select field's label while the source returns
+its stored value, map it in the column's value callback: filters and sort keep working on the
+stored value.
+
+### What a data-source grid doesn't do
+
+The bundle's CRUD and detail controllers, grouping (`GroupingCapableInterface`), footer aggregates
+(`AggregatableInterface`), the children scope check (`ScopeVerifiableInterface`) and Mercure
+auto-refresh assume Doctrine entities, and a data-source grid doesn't get them. Link the rows to
+your own edit pages through the row token. Entity grids keep all of these, unchanged.
+
+In the WebProfiler, a data-source grid shows the `GridQuery` it sent (criteria, search, sort,
+window) where an entity grid shows its DQL.
+
 ## Creating a custom data provider
 
-When `JsonDataProvider` doesn't fit — a non-JSON source, a CLI tool's output, bespoke pagination,
-multi-field sort, POST requests — write your own implementation instead.
+When neither `JsonDataProvider` nor a [data source](#feeding-a-grid-from-a-custom-data-source)
+fits — bespoke request parsing, your own row building, POST requests — write your own
+implementation instead.
 
 The default `DataProviderInterface` implementation, `EntityDataProvider`, reads from Doctrine.
 To back a grid with something else — an HTTP API, a CLI tool's output, anything iterable — write

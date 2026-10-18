@@ -9,6 +9,7 @@ use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\Column\DataColumn;
 use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildCountResolverInterface;
+use Fedale\GridviewBundle\Contract\ColumnAwareDataProviderInterface;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\DataProviderInterface;
 use Fedale\GridviewBundle\Contract\GridviewInterface;
@@ -41,6 +42,28 @@ class Gridview implements GridviewInterface
     private ?array $dataProviderOptions = null;
     private array $defaultFilterParams = [];
     private bool $dataProviderInitialized = false;
+
+    /**
+     * The filters the grid registered, keyed by request param key:
+     * [filter type, attribute]. Handed to a provider that applies the filters
+     * itself ({@see ColumnAwareDataProviderInterface}); an entity grid never
+     * reads it, its filters go through `search.map` or the repository.
+     *
+     * @var array<string, array{0: string, 1: string}>
+     */
+    private array $filterSpecs = [];
+
+    /**
+     * Filters dropped because no search model was set: without one a filter is
+     * never added to the form, silently. Recorded so the builder can refuse a
+     * grid that would otherwise lose its filters without a word.
+     *
+     * @var list<string>
+     */
+    private array $filtersSkippedForMissingSearchModel = [];
+
+    /** Whether the request's global search term has reached the data provider. */
+    private bool $globalSearchApplied = false;
     private ?GroupingConfig $groupingConfig = null;
 
     /** @var array<int, ColumnInterface>|null */
@@ -450,7 +473,33 @@ class Gridview implements GridviewInterface
     {
         $this->initializeDataProvider();
 
+        // The export carries the grid's query string, global search included:
+        // without this the file ignored the search box the list honored.
+        $request = $this->gridviewService->getRequest();
+        if ($request !== null) {
+            $this->applyGlobalSearch($request);
+        }
+
         return $this->dataProvider->getAllData();
+    }
+
+    /**
+     * Hands the request's global search term (`_q` under the form name) to the
+     * data provider, once: EntityDataProvider::applyGlobalSearch() adds a
+     * condition on every call, and both the list and the export reach here.
+     */
+    private function applyGlobalSearch(Request $request): void
+    {
+        $globalFields = $this->options['behavior']['globalSearch'];
+        if ($this->globalSearchApplied || empty($globalFields)) {
+            return;
+        }
+
+        $q = trim($request->query->all($this->options['behavior']['formName'])['_q'] ?? '');
+        if ($q !== '') {
+            $this->dataProvider->applyGlobalSearch($globalFields, $q);
+            $this->globalSearchApplied = true;
+        }
     }
 
     /**
@@ -582,6 +631,12 @@ class Gridview implements GridviewInterface
             $this->dataProvider->setEagerRelations($this->dataProviderOptions['eager']);
         }
 
+        // A provider that applies the filters itself gets them from the
+        // columns, so a data-source grid needs no `search.map`.
+        if ($this->dataProvider instanceof ColumnAwareDataProviderInterface) {
+            $this->dataProvider->setFilterSpecs($this->filterSpecs);
+        }
+
         $this->dataProvider->prepareModels($this->dataProviderOptions['model']);
 
         // Sort config is grouped under `sort`: `map` (attribute definitions),
@@ -589,6 +644,10 @@ class Gridview implements GridviewInterface
         $sortOptions = $this->dataProviderOptions['sort'] ?? [];
         if (!empty($sortOptions['map'])) {
             $this->dataProvider->getSort()->setAttributes($sortOptions['map']);
+        } elseif ($this->dataProvider instanceof ColumnAwareDataProviderInterface) {
+            // No DQL to map to: the sortable columns sort on their own
+            // attribute, which is what the provider passes on to its source.
+            $this->dataProvider->getSort()->setAttributes($this->sortableAttributes());
         }
         if (!empty($sortOptions['default'])) {
             $this->dataProvider->getSort()->setDefaultSort($sortOptions['default']);
@@ -609,6 +668,21 @@ class Gridview implements GridviewInterface
         if (!empty($this->options['integration']['routeName'])) {
             $this->dataProvider->getPagination()->setRoute($this->options['integration']['routeName']);
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function sortableAttributes(): array
+    {
+        $attributes = [];
+        foreach ($this->columns as $column) {
+            if ($column instanceof DataColumn && $column->isSortable()) {
+                $attributes[] = $column->getAttribute();
+            }
+        }
+
+        return array_values(array_unique($attributes));
     }
 
     public function getDefaultFilterParams(): array
@@ -647,12 +721,8 @@ class Gridview implements GridviewInterface
                 continue;
             }
 
-            if (isset($this->searchModel) && $column->isFilterable() && isset($column->filter)) {
-                $options = $this->buildFilterOptions(
-                    self::filterParamKey((string) $column->getAttribute()),
-                    $column->filter,
-                );
-                $this->searchForm->addFilter($column->getAttribute(), $column->filter['type'], $options);
+            if ($column->isFilterable() && isset($column->filter)) {
+                $this->registerColumnFilter((string) $column->getAttribute(), $column->filter);
             }
 
             $this->addColumn($column);
@@ -707,6 +777,34 @@ class Gridview implements GridviewInterface
     }
 
     /**
+     * @param array<string, mixed> $filter the column's filter spec
+     */
+    private function registerColumnFilter(string $attribute, array $filter): void
+    {
+        if (!isset($this->searchModel)) {
+            $this->filtersSkippedForMissingSearchModel[] = $attribute;
+
+            return;
+        }
+
+        $paramKey = self::filterParamKey($attribute);
+        $options = $this->buildFilterOptions($paramKey, $filter);
+        $this->searchForm->addFilter($attribute, $filter['type'], $options);
+        $this->filterSpecs[$paramKey] = [(string) $filter['type'], $attribute];
+    }
+
+    /**
+     * The filters dropped because the grid had no search model when they were
+     * registered (column filters and `search.fields` alike).
+     *
+     * @return list<string>
+     */
+    public function getFiltersSkippedForMissingSearchModel(): array
+    {
+        return $this->filtersSkippedForMissingSearchModel;
+    }
+
+    /**
      * Registers the controls declared in `search.fields`: filters that have no
      * column of their own, typically rendered in a search box detached from the
      * grid. Its twin `search.map` says how a param becomes SQL; the two are
@@ -729,6 +827,10 @@ class Gridview implements GridviewInterface
     private function registerSearchFields(): void
     {
         if (!isset($this->searchModel)) {
+            foreach (array_keys($this->dataProviderOptions['search']['fields'] ?? []) as $name) {
+                $this->filtersSkippedForMissingSearchModel[] = (string) $name;
+            }
+
             return;
         }
 
@@ -743,6 +845,7 @@ class Gridview implements GridviewInterface
             }
 
             $this->searchForm->addFilter($name, $spec['type'], $this->buildFilterOptions($paramKey, $spec));
+            $this->filterSpecs[$paramKey] = [$spec['type'], $name];
         }
     }
 
@@ -1197,12 +1300,7 @@ class Gridview implements GridviewInterface
             $parameters['form'] = $this->searchForm->getModelType()->createView();
         }
 
-        if (!empty($globalFields)) {
-            $q = trim($request->query->all($formName)['_q'] ?? '');
-            if ($q !== '') {
-                $this->dataProvider->applyGlobalSearch($globalFields, $q);
-            }
-        }
+        $this->applyGlobalSearch($request);
 
         // Let the active paginator strategy influence data fetching before getData()
         // (e.g. virtual scroll disabling paging). Pure-presentation strategies
