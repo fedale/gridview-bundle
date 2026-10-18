@@ -2,32 +2,16 @@
 
 namespace Fedale\GridviewBundle\Filter\Applier;
 
-use Doctrine\ORM\QueryBuilder;
+use Fedale\GridviewBundle\Contract\FilterCriteriaBuilderInterface;
+use Fedale\GridviewBundle\Filter\Criteria\DateCriteriaBuilder;
 
-class DateFilterApplier extends AbstractFilterApplier
+/**
+ * Date range filter; see {@see DateCriteriaBuilder}.
+ */
+class DateFilterApplier extends CriteriaFilterApplier
 {
-    private const ISO_DATE = '/^\d{4}-\d{2}-\d{2}$/';
-
-    public function apply(QueryBuilder $qb, string $dqlField, mixed $rawValue, array $options = []): void
+    protected function createCriteriaBuilder(): FilterCriteriaBuilderInterface
     {
-        if (!is_array($rawValue) || $this->isBlank($rawValue)) {
-            return;
-        }
-
-        $endOfDay = $options['end_of_day'] ?? true;
-
-        $from = $rawValue['from'] ?? null;
-        if (is_string($from) && preg_match(self::ISO_DATE, $from)) {
-            $p = $this->uniqueParam();
-            $qb->andWhere($qb->expr()->gte($dqlField, ':' . $p));
-            $qb->setParameter($p, new \DateTime($from));
-        }
-
-        $to = $rawValue['to'] ?? null;
-        if (is_string($to) && preg_match(self::ISO_DATE, $to)) {
-            $p = $this->uniqueParam();
-            $qb->andWhere($qb->expr()->lte($dqlField, ':' . $p));
-            $qb->setParameter($p, new \DateTime($to . ($endOfDay ? ' 23:59:59' : '')));
-        }
+        return new DateCriteriaBuilder();
     }
 }

@@ -70,7 +70,7 @@ class EntityIdentifier
             $parts[] = $this->stringify($value);
         }
 
-        return $this->encode($parts);
+        return self::encodeParts($parts);
     }
 
     /**
@@ -110,7 +110,7 @@ class EntityIdentifier
             $parts[] = $this->stringify($value);
         }
 
-        return $parts === [] ? null : $this->encode($parts);
+        return $parts === [] ? null : self::encodeParts($parts);
     }
 
     /**
@@ -154,9 +154,14 @@ class EntityIdentifier
     }
 
     /**
+     * The token of a key whose parts are already strings, in key-field order.
+     * Public for providers that know a record's key without Doctrine (see
+     * {@see \Fedale\GridviewBundle\DataProvider\DataSourceDataProvider}), so
+     * their tokens have exactly the shape an entity grid's do.
+     *
      * @param list<string> $parts
      */
-    private function encode(array $parts): string
+    public static function encodeParts(array $parts): string
     {
         // Encoding is symmetric with decode() and a no-op for the keys that
         // matter in practice — an int stays an int, a UUID stays a UUID — while a

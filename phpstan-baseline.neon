@@ -1196,12 +1196,6 @@ parameters:
 			path: src/DataProvider/EntityDataProvider.php
 
 		-
-			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getParams\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/DataProvider/EntityDataProvider.php
-
-		-
 			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:getTotalCount\(\) has parameter \$criteria with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -1209,12 +1203,6 @@ parameters:
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:prepareModels\(\) has parameter \$models with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/DataProvider/EntityDataProvider.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:setDefaultParams\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/DataProvider/EntityDataProvider.php
@@ -1228,12 +1216,6 @@ parameters:
 		-
 			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:\$paginator has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: src/DataProvider/EntityDataProvider.php
-
-		-
-			message: '#^Property Fedale\\GridviewBundle\\DataProvider\\EntityDataProvider\:\:\$params type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
 			count: 1
 			path: src/DataProvider/EntityDataProvider.php
 
@@ -1278,42 +1260,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/FedaleGridviewBundle.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\BooleanFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Filter/Applier/BooleanFilterApplier.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\ChoiceFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Filter/Applier/ChoiceFilterApplier.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\DateFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Filter/Applier/DateFilterApplier.php
-
-		-
-			message: '#^Binary operation "\+" between string and 0 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Filter/Applier/NumberFilterApplier.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\NumberFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Filter/Applier/NumberFilterApplier.php
-
-		-
-			message: '#^Method Fedale\\GridviewBundle\\Filter\\Applier\\TextFilterApplier\:\:apply\(\) has parameter \$options with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Filter/Applier/TextFilterApplier.php
 
 		-
 			message: '#^Method Fedale\\GridviewBundle\\Filter\\FilterDefaultNormalizer\:\:normalize\(\) has parameter \$options with no value type specified in iterable type array\.$#'

@@ -8,6 +8,7 @@ use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
@@ -20,6 +21,8 @@ use Fedale\GridviewBundle\Event\RowEvent;
 
 class EntityDataProvider extends AbstractDataProvider implements AggregatableInterface, GroupingCapableInterface, ScopeVerifiableInterface
 {
+    use ReadsFilterParamsTrait;
+
     /**
      * Nullable, and assigned rather than unset by {@see reset()}: an unset
      * typed property throws on the next read instead of being rebuilt, and
@@ -33,11 +36,6 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
     private $paginator;
 
     private ?int $totalRows = null;
-
-    private array $params;
-
-    /** The filter-form param name (grid `formName` option); drives which query params are read. */
-    private string $formName = 'fedaleForm';
 
     /** How the current filters were applied: repository search(), searchFields, or none. */
     private string $filterPath = 'none';
@@ -126,39 +124,9 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
         $this->eagerRelations = $relations;
     }
 
-    private function populateParams(): void
+    protected function currentRequest(): ?Request
     {
-        $this->params = $this->requestStack->getCurrentRequest()?->query->all($this->formName) ?? [];
-    }
-
-    /**
-     * Set the filter-form param name (the grid `formName` option) and re-read the
-     * request params under it. The constructor primes params with the default
-     * 'fedaleForm'; the grid forwards the configured name before prepareModels().
-     */
-    public function setFormName(string $formName): void
-    {
-        $this->formName = $formName;
-        $this->populateParams();
-    }
-
-    public function setDefaultParams(array $defaults): void
-    {
-        parent::setDefaultParams($defaults);
-
-        if ($defaults === []) {
-            return;
-        }
-
-        // A submitted GET form always sends every field (even empty), so a
-        // present-but-empty form param means the user cleared the filters:
-        // defaults apply only when the form is absent from the query string.
-        $request = $this->requestStack->getCurrentRequest();
-        if ($request !== null && $request->query->has($this->formName)) {
-            return;
-        }
-
-        $this->params = $defaults;
+        return $this->requestStack->getCurrentRequest();
     }
 
     public function setQueryBuilder(QueryBuilder $queryBuilder): void
@@ -408,12 +376,6 @@ class EntityDataProvider extends AbstractDataProvider implements AggregatableInt
     public function getFilterPath(): string
     {
         return $this->filterPath;
-    }
-
-    /** The raw filter-form params read from the request (for the profiler). */
-    public function getParams(): array
-    {
-        return $this->params;
     }
 
     /**

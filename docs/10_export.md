@@ -2,8 +2,8 @@
 
 ## Export
 
-Exports respect the **current filters/sort** (the data provider is re-run without
-pagination) and the **export columns** — those flagged `exportable`, else the data
+Exports respect the **current filters, global search and sort** (the data provider is
+re-run without pagination) and the **export columns** — those flagged `exportable`, else the data
 columns the grid shows, narrowed to [what the user is actually
 looking at](#the-file-matches-the-screen).
 Built-in formats (all native PHP, no extra dependency): **CSV** (`csv`), **Excel** (`xlsx`, a real
@@ -45,7 +45,8 @@ protected function viewConfig(): array
 }
 ```
 
-The `{export}` link carries the current querystring, so the download reflects the active filters.
+The `{export}` link carries the current querystring, so the download reflects the active filters
+and the global search term (before 1.3 the export ignored the global search).
 Mark columns with `exportable => true` to restrict the export to a subset.
 
 ### The file matches the screen

@@ -50,6 +50,24 @@ services:
         class: Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry
     Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry: '@fedale_gridview.filter_applier_registry'
 
+    fedale_gridview.filter_criteria_builder_registry:
+        class: Fedale\GridviewBundle\Filter\Criteria\FilterCriteriaBuilderRegistry
+    Fedale\GridviewBundle\Filter\Criteria\FilterCriteriaBuilderRegistry: '@fedale_gridview.filter_criteria_builder_registry'
+
+    # Builds the per-grid adapter of a `dataSource` grid, wired to the shared
+    # sort, pagination and search model. Stateless, so no kernel.reset: the
+    # adapters it creates are not services and die with their grid.
+    fedale_gridview.data_source_provider_factory:
+        class: Fedale\GridviewBundle\DataProvider\DataSourceDataProviderFactory
+        arguments:
+            - '@event_dispatcher'
+            - '@request_stack'
+            - '@fedale_gridview.filter_criteria_builder_registry'
+            - '@fedale_gridview.sort'
+            - '@fedale_gridview.pagination'
+            - '@fedale_gridview.search_model'
+    Fedale\GridviewBundle\DataProvider\DataSourceDataProviderFactory: '@fedale_gridview.data_source_provider_factory'
+
     fedale_gridview.control_type_registry:
         class: Fedale\GridviewBundle\Form\Control\ControlTypeRegistry
     Fedale\GridviewBundle\Form\Control\ControlTypeRegistry: '@fedale_gridview.control_type_registry'
@@ -179,6 +197,10 @@ services:
             - '@fedale_gridview.theme_registry'
             - !tagged_locator { tag: fedale_gridview.data_provider }
             - '@?fedale_gridview.ui_settings.resolver'
+            # Indexed-by-service-id locator of every GridDataSourceInterface
+            # (autoconfigured), for a grid naming its `dataSource` by id.
+            - !tagged_locator { tag: fedale_gridview.data_source }
+            - '@fedale_gridview.data_source_provider_factory'
         tags:
             - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
@@ -223,6 +245,10 @@ services:
             # eagerly instantiating every provider.
             - !tagged_locator { tag: fedale_gridview.data_provider }
             - '@?fedale_gridview.ui_settings.resolver'
+            # Indexed-by-service-id locator of every GridDataSourceInterface
+            # (autoconfigured), for a grid naming its `dataSource` by id.
+            - !tagged_locator { tag: fedale_gridview.data_source }
+            - '@fedale_gridview.data_source_provider_factory'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
 
     # Reads and writes the URL tokens that stand for a record. Shared by the

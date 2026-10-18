@@ -84,6 +84,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | Colours, spacing, dark mode | CSS custom properties (design tokens) | [06_theming.md](06_theming.md#token-reference) |
 | A column type the bundle lacks | register a `ColumnTypeInterface` service | [14_extending.md](14_extending.md#creating-a-custom-column) |
 | Rows from an HTTP API instead of Doctrine | `JsonDataProvider`, or your own `DataProviderInterface` | [14_extending.md](14_extending.md#the-built-in-jsondataprovider) |
+| Rows from DBAL, a domain service or runtime-defined objects | a `GridDataSourceInterface` under `dataConfig.dataSource`: the bundle parses filters, search, sort and page into one `GridQuery` | [14_extending.md](14_extending.md#feeding-a-grid-from-a-custom-data-source) |
 | Live updates when another user writes | Mercure signal + auto-refresh | [13_real-time.md](13_real-time.md) |
 | End users changing grid options at runtime (all grids or one grid) | the UI settings modal, on fedale/setting-bundle; one `AbstractUiSetting` class per option | [18_ui-settings.md](18_ui-settings.md) |
 | To scaffold a CRUD controller | `php bin/console make:gridview:crud --fluent` | [08_crud.md](08_crud.md#scaffolding-a-controller-with-makegridviewcrud) |
