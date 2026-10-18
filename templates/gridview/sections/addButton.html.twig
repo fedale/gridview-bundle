@@ -21,7 +21,7 @@
     {% endif %}
 {% elseif gridview.options.integration.addRoute is not empty %}
 {# An app-owned route: a page of the host application, never this grid's frame. #}
-<a href="{{ path(gridview.options.integration.addRoute) }}" class="{{ gridview.cls('btn.primary') }}" data-turbo-frame="_top" {{ gv_i18n(_addLabel) }}>
+<a href="{{ path(gridview.options.integration.addRoute, gridview.urlState.routeParams) }}" class="{{ gridview.cls('btn.primary') }}" data-turbo-frame="_top" {{ gv_i18n(_addLabel) }}>
     <span class="{{ gridview.cls('btn.icon') }}" aria-hidden="true">+</span>{{ _addText }}
 </a>
 {% endif %}

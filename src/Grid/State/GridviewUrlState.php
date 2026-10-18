@@ -73,6 +73,18 @@ class GridviewUrlState
         return $state;
     }
 
+    /**
+     * The current route's own parameters (e.g. {object}), without any query
+     * state: what path() needs to rebuild the list URL itself, as the filter
+     * form action does.
+     *
+     * @return array<string, mixed>
+     */
+    public function getRouteParams(): array
+    {
+        return $this->routeParams;
+    }
+
     /** All current parameters as an array (for Symfony path()) */
     public function toArray(): array
     {

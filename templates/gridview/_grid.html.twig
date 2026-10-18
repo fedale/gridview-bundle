@@ -29,13 +29,13 @@
          {% if gvControllers is not empty %}data-controller="{{ gvControllers|join(' ') }}"{% endif %}
          {% if gridview.hasCheckboxColumn %}data-gridview-selection-grid-id-value="{{ gridview.key }}"{% endif %}
          {% if gvInline %}data-gridview-inline-edit-base-value="{{ gridview.options.integration.crud.inlineUrl }}"{% endif %}
-         {% if gvIsTable and gridview.isGrouped and gridview.groupingConfig.lazy and gridview.options.integration.routeName %}data-gridview-grouping-url-value="{{ path(gridview.options.integration.routeName) }}"{% endif %}
+         {% if gvIsTable and gridview.isGrouped and gridview.groupingConfig.lazy and gridview.options.integration.routeName %}data-gridview-grouping-url-value="{{ path(gridview.options.integration.routeName, gridview.urlState.routeParams) }}"{% endif %}
          {% if gvRealtime %}data-gridview-mercure-hub-value="{{ gridview.options.behavior.realtime.hubUrl }}"
          data-gridview-mercure-topic-value="{{ gridview.options.behavior.realtime.topic }}"
          data-gridview-mercure-form-value="gv-form-{{ gridview.key }}"{% endif %}
          {% if gvCrud and gridview.hasCheckboxColumn %}data-action="gridview-selection:open->gridview-crud#openFromEvent"{% endif %}>
         {% if form is defined and form is not null %}
-        {{ form_start(form, {'action': gridview.options.integration.routeName ? path(gridview.options.integration.routeName) : '', 'attr': {'id': 'gv-form-' ~ gridview.key, 'data-controller': 'gridview-filter', 'data-turbo-action': 'replace'}}) }}
+        {{ form_start(form, {'action': gridview.options.integration.routeName ? path(gridview.options.integration.routeName, gridview.urlState.routeParams) : '', 'attr': {'id': 'gv-form-' ~ gridview.key, 'data-controller': 'gridview-filter', 'data-turbo-action': 'replace'}}) }}
         {% endif %}
         {{ gridview_children(gridview, 'shell') }}
         {% if form is defined and form is not null %}

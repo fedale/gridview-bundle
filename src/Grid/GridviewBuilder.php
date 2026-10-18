@@ -2,6 +2,7 @@
 namespace Fedale\GridviewBundle\Grid;
 
 use Fedale\GridviewBundle\Column\ColumnFactory;
+use Fedale\GridviewBundle\Column\Config\ColumnConfigInterface;
 use Fedale\GridviewBundle\Contract\GridDataSourceInterface;
 use Fedale\GridviewBundle\Contract\GridviewBuilderInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
@@ -54,23 +55,23 @@ class GridviewBuilder implements GridviewBuilderInterface
     }
 
     /**
-     * @param array<int, string|ColumnSpec> $columns
+     * @param array<int, string|ColumnSpec|ColumnConfigInterface> $columns
      */
-    public function setColumns(array $columns)
+    public function setColumns(array $columns): static
     {
         $this->gridview->setColumns($columns);
 
         return $this;
     }
 
-    public function setSearchModel(SearchModelInterface $searchModel)
+    public function setSearchModel(SearchModelInterface $searchModel): static
     {
         $this->gridview->setSearchModel($searchModel);
 
         return $this;
     }
 
-    public function setDataProvider(array $dataProviderOptions): GridviewBuilderInterface
+    public function setDataProvider(array $dataProviderOptions): static
     {
         // Buffered rather than pushed straight to the Gridview: `pagination`
         // still needs to be merged with the YAML-resolved bundle/per-grid
