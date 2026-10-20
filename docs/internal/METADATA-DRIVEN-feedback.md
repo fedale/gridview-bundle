@@ -1,6 +1,6 @@
 # Feedback from the first data-source consumer (metadata-driven)
 
-Status: **1–4 fixed**; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
+Status: **1–4 and 6 fixed**; 5 deferred. Found on 2026-10-18 while integrating 1.3.x-dev (`GridDataSourceInterface`) into
 `../metadata-driven` (runtime grids at `/o/{object}`, built with `GridviewBuilderFactory`, fed by a
 DBAL `GridDataSourceInterface`). Every item has a workaround on the consumer side, quoted below so
 the fix can be checked against it. Follow `CLAUDE.md` for style and verification.
@@ -145,6 +145,53 @@ changelog file, so the release notes should repeat it. Checked: the demo compile
 with `sass:build` after its stub and load path are removed, and the opt-in entry compiles against a
 `node_modules`-like path holding flatpickr's CSS. The demo-side removal is in `gridview-demo`'s own
 working tree. metadata-driven can drop its stub.
+
+## 6. The date filter needs an import nobody lists (bug, found 2026-10-20)
+
+Verified in a browser on metadata-driven after 2 and 4 were merged (both work: the modal opens on
+`record_<object>`, the stylesheet compiles with no stub). With a date column on the page, the
+console shows:
+
+```
+Error loading controller "gridview-date-filter": TypeError: Failed to resolve module specifier
+"flatpickr/dist/l10n/it.js".
+```
+
+`assets/controllers/gridview-date-filter_controller.js` imports `flatpickr/dist/l10n/it.js`, but
+neither `assets/package.json` (`symfony.importmap`) nor the `importmap:require` line of
+`docs/06_theming.md` lists it, so an AssetMapper host's importmap lacks it and the date filters fall
+back to plain text inputs, silently. Related: the picker is always Italian (`locale: Italian`
+hard-wired), whatever the page or grid locale.
+
+Fix: either load the locale dynamically from the grid's i18n locale (and list the locales the
+bundle supports), or at least add `flatpickr/dist/l10n/it.js` to the importmap peers and to the
+documented `importmap:require` command. Test: a JS-level or functional check that every bare
+module specifier imported by `assets/controllers/*.js` is declared in `assets/package.json`.
+
+Consumer workaround: `importmap:require flatpickr/dist/l10n/it.js`, and
+`import 'flatpickr/dist/flatpickr.min.css'` in `app.js` — the guide's `importmap:require` adds the
+CSS to the importmap but a CSS entry only loads when something imports it; say so in the guide.
+
+**Fixed** on branch `fix_date_filter_locale`, the dynamic option:
+
+- `gridview-date-filter_controller.js` no longer imports a locale statically. The picker opens in
+  flatpickr's built-in English and swaps in the locale when `import()` of
+  `flatpickr/dist/l10n/<code>.js` resolves; a locale the importmap doesn't map logs a warning and
+  leaves the picker in English instead of failing the controller.
+- The locale is the `locale` client option, else the page's `<html lang>` (`it-IT` → `it`):
+  `FilterDateType` no longer defaults it to `'it'`. Behavior change for a page without
+  `lang="it"`, stated as an upgrade note in `docs/04_filtering.md`.
+- The locale lookup was checked against both real shapes of `it.js`: the jsDelivr ESM bundle
+  AssetMapper downloads (metadata-driven's `assets/vendor`) and the npm UMD file Encore resolves.
+- `tests/Assets/ControllerImportsTest`: every static bare import of `assets/*.js` and
+  `assets/controllers/*.js` is a `symfony.importmap` peer of `assets/package.json` (fails on the
+  old controller). Dynamic imports are left out on purpose.
+- `docs/06_theming.md`: the `importmap:require` line includes the locale, and the guide says the
+  CSS entry must be imported from `app.js`.
+
+Not covered by an automated test: the picker in a browser (no JS test runner in the bundle).
+metadata-driven can keep `importmap:require flatpickr/dist/l10n/it.js` and the CSS import, and
+should set `<html lang>` (or `clientOptions.locale`) to get the language it wants.
 
 ## 5. Not a bundle change — for the record
 

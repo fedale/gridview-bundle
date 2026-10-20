@@ -10,9 +10,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FilterDateType extends AbstractType
 {
+    /**
+     * No `locale`: the picker follows the page language unless the column sets
+     * one in its clientOptions.
+     */
     private const CLIENT_DEFAULTS = [
         'mode'      => 'range',
-        'locale'    => 'it',
         'altFormat' => 'd/m/Y',
     ];
 
