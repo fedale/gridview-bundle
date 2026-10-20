@@ -1,8 +1,38 @@
 import { Controller } from '@hotwired/stimulus';
 import flatpickr from 'flatpickr';
-import { Italian } from 'flatpickr/dist/l10n/it.js';
 
-const LOCALES = { it: Italian };
+/**
+ * The flatpickr locale code for an explicit `locale` client option, else for
+ * the page language (<html lang="it-IT"> → 'it'). Null means flatpickr's
+ * built-in English.
+ */
+function localeCode(explicit) {
+    const code = String(explicit || document.documentElement.lang || '').toLowerCase().split('-')[0];
+
+    return /^[a-z]{2,3}$/.test(code) && code !== 'en' ? code : null;
+}
+
+/**
+ * Loads flatpickr's locale module on demand rather than with a static import:
+ * a static import of a locale the host's importmap doesn't map fails the whole
+ * controller, and the date filter silently degrades to a plain input. A host
+ * maps the locales it uses (`importmap:require flatpickr/dist/l10n/it.js`);
+ * a missing one leaves the picker in English, with a warning.
+ */
+async function loadLocale(code) {
+    try {
+        const module = await import(`flatpickr/dist/l10n/${code}.js`);
+        // The ESM build exports the locale by name (`Italian`) and every
+        // registered locale under `default`; a CDN conversion may nest them.
+        const candidates = [module.default?.[code], module.default?.default?.[code], ...Object.values(module)];
+
+        return candidates.find((locale) => locale && typeof locale === 'object' && 'weekdays' in locale) ?? null;
+    } catch (error) {
+        console.warn(`gridview-date-filter: flatpickr locale "${code}" could not be loaded, the picker stays in English. Map it with "importmap:require flatpickr/dist/l10n/${code}.js".`, error);
+
+        return null;
+    }
+}
 
 export default class extends Controller {
     static values = {
@@ -16,10 +46,11 @@ export default class extends Controller {
         if (!this._fromInput) return;
 
         const opts   = Object.assign(
-            { mode: 'range', locale: 'it', altFormat: 'd/m/Y' },
+            { mode: 'range', altFormat: 'd/m/Y' },
             this.optionsValue
         );
-        const locale = LOCALES[opts.locale] ?? Italian;
+        const code   = localeCode(opts.locale);
+        delete opts.locale;
         const mode   = opts.mode;
 
         // minDate/maxDate arrive as ISO (Y-m-d) from the server, but flatpickr's
@@ -60,13 +91,23 @@ export default class extends Controller {
 
         this._fp = flatpickr(this._displayInput, {
             ...opts,
-            locale,
             mode,
             defaultDate,
             altInput:   false,                     // display input is the only visible one
             dateFormat: opts.altFormat ?? 'd/m/Y', // user-facing format
             onChange: (dates) => this._onDateChange(dates, mode),
         });
+
+        // The picker works in English at once; the locale is swapped in when
+        // its module arrives, unless the controller was disconnected meanwhile.
+        if (code !== null) {
+            const fp = this._fp;
+            loadLocale(code).then((locale) => {
+                if (locale && this._fp === fp) {
+                    fp.set('locale', locale);
+                }
+            });
+        }
     }
 
     disconnect() {

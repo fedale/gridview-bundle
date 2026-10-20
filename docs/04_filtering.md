@@ -570,7 +570,7 @@ Supports both single-date and date-range selection. Always submits ISO `YYYY-MM-
 as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 
 ```php
-'filter' => ['type' => 'date']   // range mode, Italian locale, d/m/Y display
+'filter' => ['type' => 'date']   // range mode, the page's language, d/m/Y display
 ```
 
 **PHP form options** (`options` key — Symfony form type):
@@ -585,7 +585,7 @@ as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `mode` | `string` | `'range'` | `'single'` or `'range'` |
-| `locale` | `string` | `'it'` | Locale code; currently `'it'` (Italian) is bundled |
+| `locale` | `string` | the page's `<html lang>` | flatpickr locale code (`'it'`, `'de'`, …); English needs nothing |
 | `altFormat` | `string` | `'d/m/Y'` | Display format shown to the user |
 | `dateFormat` | `string` | `'Y-m-d'` | Value format sent to the server (keep ISO) |
 | `minDate` | `string` | today − 1 year | Earliest selectable date (e.g. `'2020-01-01'` or `'today'`) |
@@ -597,6 +597,22 @@ pass your own values via `clientOptions` to widen, narrow, or remove the bounds.
 controller converts them to `Date` objects before handing them to Flatpickr.
 
 Any other [Flatpickr option](https://flatpickr.js.org/options/) can be passed via `clientOptions`.
+
+The picker speaks the page's language — the `lang` of the `<html>` element, `it-IT` → `it` — unless
+the column sets `locale`. It opens in English and switches as soon as the locale module has loaded.
+Under AssetMapper, map each locale your pages use:
+
+```bash
+php bin/console importmap:require flatpickr/dist/l10n/it.js
+```
+
+A locale that isn't mapped leaves the picker in English and logs a warning in the browser console;
+the filter keeps working. Under Encore the locale modules come from `node_modules` with no extra
+step.
+
+> **Upgrading to 1.3.** Up to 1.2 the picker was always Italian, and the Italian locale was a
+> static import that an AssetMapper app had to map or lose the picker altogether. To keep Italian
+> on a page that doesn't declare `<html lang="it">`, set `'clientOptions' => ['locale' => 'it']`.
 
 **Examples:**
 

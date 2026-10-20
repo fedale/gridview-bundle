@@ -43,10 +43,19 @@ symfonycasts_sass:
 @use 'gridview';
 ```
 
-flatpickr's CSS comes from the importmap, like its JavaScript:
+flatpickr's CSS comes from the importmap, like its JavaScript, plus the picker's locales your pages
+use (see [the date filter](04_filtering.md#date)):
 
 ```bash
-php bin/console importmap:require flatpickr flatpickr/dist/flatpickr.min.css
+php bin/console importmap:require flatpickr flatpickr/dist/flatpickr.min.css flatpickr/dist/l10n/it.js
+```
+
+A CSS entry of the importmap is only loaded when a module imports it, so import it from your
+entrypoint:
+
+```js
+// assets/app.js
+import 'flatpickr/dist/flatpickr.min.css';
 ```
 
 > **Upgrading to 1.3.** Up to 1.2, `gridview.scss` did `@use 'flatpickr/dist/flatpickr'` itself.
