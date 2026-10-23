@@ -193,6 +193,48 @@ Not covered by an automated test: the picker in a browser (no JS test runner in 
 metadata-driven can keep `importmap:require flatpickr/dist/l10n/it.js` and the CSS import, and
 should set `<html lang>` (or `clientOptions.locale`) to get the language it wants.
 
+## 7. Two more defaults of the date filter (found 2026-10-20, while verifying 6)
+
+6 is verified in a browser on metadata-driven: `<html lang="en">` gives an English picker with a
+clean console; switching `lang` to `it` and reconnecting the controller gives Italian weekdays, and
+the disconnect cleans the previous instance (one display input left).
+
+Two defaults of `src/Filter/FilterDateType.php` still surprise a host:
+
+- **Italian placeholders.** `from_placeholder` / `to_placeholder` default to `'Da'` / `'A'`
+  (lines 42–43), whatever the locale: the fields read "Da"/"A" on an English page. Make them
+  translation keys of the `GridviewBundle` domain (like the rest of the chrome), resolved in the
+  form's translation domain.
+- **±1 year range.** `minDate` / `maxDate` default to one year before and after today (lines
+  58–59), so the picker of a birth date, a contract start or any historical date cannot select
+  most of the values the column holds — and nothing tells the user why. Default to no bounds, and
+  keep `minDate` / `maxDate` as opt-in options.
+
+Consumer side: no workaround yet (the grid of metadata-driven builds its date filters with
+`filterDate()`, so both defaults apply to every date field).
+
+## 8. A single-select AJAX relation filter reconnects forever (bug, found 2026-10-20)
+
+Found on metadata-driven with a relation column filtered as
+`['type' => 'relation', 'options' => ['ajax_url' => …, 'searchable' => true]]` (single select).
+The console logged 3068 Stimulus lifecycle events of `gridview-relation-filter` on the same
+`<select>` in 16 seconds, and every cycle fetched `ajax_url` again.
+
+Cause, in `assets/controllers/gridview-relation-filter_controller.js`: for a single select,
+`_buildSearchableSelect()` moves the `<select>` inside the new wrapper. Stimulus sees the element
+leave and re-enter the DOM, so it calls `disconnect()` — whose `_teardown()` puts the select back
+before the wrapper and removes it — then `connect()` again, which loads the options and moves the
+select again. The multi-select path leaves the select where it is, and does not loop.
+
+Fix: do not move the controller's own element. Keep the `<select>` in place and insert the wrapper
+next to it (as the multi-select path does), or let the controller live on a wrapper element that
+the template renders. Make `connect()` idempotent too (no fetch when the options are already
+loaded). Test: a single-select relation filter with `ajax_url` stays connected (one connect, one
+fetch).
+
+Consumer workaround: `'multiple' => true` on the relation filters (useful anyway: several records
+at once).
+
 ## 5. Not a bundle change — for the record
 
 - The export action of a runtime grid is hand-written in the host (format check, `cols=` parsing,
