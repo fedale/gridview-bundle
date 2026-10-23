@@ -266,3 +266,41 @@ validation stays authoritative.
 | `checkUrl` | `String` | Endpoint returning `{exists: bool}` for the uniqueness check |
 | `unique` | `Array` | Field names (bare, e.g. `code`) checked for uniqueness |
 | `id` | `String` | Current row id to exclude (edit only; empty for add/clone) |
+
+## `gridview-collection`
+
+Adds and removes the rows of a `CollectionType` in any form: "add" appends the prototype under a
+fresh key, "remove" drops a row; `min` hides the remove buttons, `max` disables "add". Nested
+collections each have their own controller. See [Form components](19_form-components.md#repeatable-rows-collection).
+
+**Connects to:** the `.gv-collection` container.
+
+**Targets:** `list` (the rows' container), `row` (each row), `add` (the add button).
+
+**Actions:** `gridview-collection#add`, `gridview-collection#remove` (on a button inside a row).
+
+**Values:**
+
+| Value | Type | Description |
+|-------|------|-------------|
+| `prototype` | `String` | The HTML of a new row |
+| `prototypeName` | `String` | The placeholder of the row key in the prototype (`__name__` by default) |
+| `index` | `Number` | The first key no row uses |
+| `min` | `Number` | Rows required; at the minimum the remove buttons hide |
+| `max` | `Number` | Rows allowed; `0` for no limit |
+
+## `gridview-password-strength`
+
+A strength meter under a password input: four bars and a word, updated on
+`gridview-password-strength#update` (bind it to `input`). A hint only. See
+[Form components](19_form-components.md#password-strength-meter-and-showhide-eye).
+
+**Values:** `minLength` (`Number`, 8), `labels` (`Array`, the five level names).
+
+## `gridview-password-reveal`
+
+A show/hide eye inside a password input. The input is never moved: its row becomes a
+`gv-form-row--password` grid holding the `.gv-password-reveal` button. Leaving the page always
+hides the password again.
+
+**Values:** `showLabel`, `hideLabel` (`String`, the button's accessible name).

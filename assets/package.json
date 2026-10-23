@@ -122,6 +122,24 @@
         "name": "gridview-ui-settings",
         "fetch": "lazy",
         "enabled": true
+      },
+      "collection": {
+        "main": "controllers/gridview-collection_controller.js",
+        "name": "gridview-collection",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "password-strength": {
+        "main": "controllers/gridview-password-strength_controller.js",
+        "name": "gridview-password-strength",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "password-reveal": {
+        "main": "controllers/gridview-password-reveal_controller.js",
+        "name": "gridview-password-reveal",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

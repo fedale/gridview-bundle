@@ -126,6 +126,13 @@ What the theme is — and isn't:
 > themed too: the CRUD controller forwards the already-built grid into the
 > partial, so they use the same `gridview.cls()` and follow the per-grid theme.
 
+### Outside the grid: `data-gv-scope`
+
+The tokens are defined on the grid (`[data-gridview]`) and on any element carrying
+`data-gv-scope`. A host page that renders its own forms with the bundle's form theme marks a
+container once (`<main data-gv-scope>`) and gets the tokens, the dark mode and the `gv-btn`
+buttons there too. See [Form components](19_form-components.md).
+
 ### Light / dark mode
 
 Dark mode is automatic and also togglable, in this order of precedence:

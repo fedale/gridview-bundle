@@ -4,6 +4,7 @@
 // Structure (logically split):
 //   _tokens.scss → design tokens (light / default), the --gv-* vars
 //   _dark.scss   → dark-mode token overrides + host/OS theme detection
+//   _forms.scss  → form components (switch, segmented, password, collection)
 //   gridview.scss → component styles (this file), consuming the tokens
 //
 // Dark mode follows the host app theme ([data-bs-theme], [data-gv-theme],
@@ -19,6 +20,9 @@
 // (emitted by the bundle when a framework `theme` is configured).
 @use 'presets/bootstrap5';
 @use 'presets/tailwind';
+// Form components (switch, segmented choice, password, collection), for the CRUD forms and
+// any host form rendered with gv_form_theme inside [data-gridview] or [data-gv-scope].
+@use 'forms';
 
 // ── Base inputs ────────────────────────────────────────────────────
 
@@ -97,7 +101,7 @@
 
 // ── gv-btn ────────────────────────────────────────────────────────
 
-[data-gridview] .gv-btn {
+:is([data-gridview], [data-gv-scope]) .gv-btn {
     display: inline-flex;
     align-items: center;
     gap: .3rem;
@@ -487,7 +491,7 @@
 // Inline button glyphs (add "+", export "⤓"). gv-btn is an inline-flex with a
 // gap, so spacing is handled by the button; the glyph is centred in its own box
 // (inline-flex) to avoid clipping a tall/bold "+".
-[data-gridview] .gv-btn-icon {
+:is([data-gridview], [data-gv-scope]) .gv-btn-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1757,14 +1761,14 @@ turbo-frame[busy]>[data-gridview] {
 }
 
 // ── Alert banner (CRUD fetch errors) ─────────────────────────────
-[data-gridview] .gv-alert {
+:is([data-gridview], [data-gv-scope]) .gv-alert {
     margin: .75rem;
     padding: .6rem .8rem;
     border-radius: var(--gv-radius);
     font-size: var(--gv-input-font-size);
 }
 
-[data-gridview] .gv-alert--danger {
+:is([data-gridview], [data-gv-scope]) .gv-alert--danger {
     background: var(--gv-error-bg);
     color: var(--gv-error-color);
     border: 1px solid var(--gv-error-border);
@@ -1772,17 +1776,17 @@ turbo-frame[busy]>[data-gridview] {
 
 // ── Form helpers (CRUD partials) ─────────────────────────────────
 // Muted helper text (intro lines, recap labels).
-[data-gridview] .gv-muted {
+:is([data-gridview], [data-gv-scope]) .gv-muted {
     color: var(--gv-color-text-muted);
 }
 
 // Intro paragraph above a CRUD form / confirmation.
-[data-gridview] .gv-form-intro {
+:is([data-gridview], [data-gv-scope]) .gv-form-intro {
     margin: 0 0 1rem;
 }
 
 // Right-aligned action row at the bottom of a CRUD form.
-[data-gridview] .gv-form-actions {
+:is([data-gridview], [data-gv-scope]) .gv-form-actions {
     display: flex;
     justify-content: flex-end;
     gap: .5rem;

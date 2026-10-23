@@ -78,6 +78,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | One column in the grid, several fields in the form (a full name, an address) | `VirtualColumn::new('fullName')->from(['firstName', 'lastName'])` | [02_columns.md](02_columns.md#virtual-columns--one-to-read-several-to-write) |
 | Edit a cell in place | `->editable()` on the column | [08_crud.md](08_crud.md#inline-editing) |
 | Select rows and act on them | `CheckboxColumn` + the `{bulkBar}` token | [08_crud.md](08_crud.md#bulk-actions-selection--batch-update) |
+| A switch, buttons side by side, a password meter / eye, repeatable rows in **any** form | `gv_form_theme` + `[data-gv-scope]` + `gv-switch` / `gv-segmented` / the `gridview-password-*` and `gridview-collection` controllers | [19_form-components.md](19_form-components.md) |
 | A read-only single-record page | `DetailView` / `AbstractDetailController` | [09_detail-view.md](09_detail-view.md) |
 | A UUID or composite primary key | nothing — the CRUD routes and the bulk actions already take any key | [08_crud.md](08_crud.md#keys-that-are-not-an-auto-increment-int) |
 | Bootstrap or Tailwind classes on the chrome | the `bootstrap5` / `tailwind` theme | [06_theming.md](06_theming.md#framework-themes-real-framework-classes) |
@@ -289,6 +290,7 @@ For a list too large to inline, give the relation filter an `ajax_url` instead. 
 | [14_extending.md](14_extending.md) | Public interfaces, custom columns, custom data providers, row events |
 | [15_full-example.md](15_full-example.md) | A complete controller plus template, and the raw builder API |
 | [18_ui-settings.md](18_ui-settings.md) | The end-user settings modal: enabling it, precedence, adding a setting |
+| [19_form-components.md](19_form-components.md) | The form theme outside the grid, required markers, switch, segmented choice, password meter and eye, repeatable rows |
 
 ---
 
