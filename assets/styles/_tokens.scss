@@ -7,7 +7,7 @@
 //                 `fedale_gridview.theme: bootstrap5`, which also emits real
 //                 Bootstrap classes and ships the token bridge — see presets/)
 //   Tailwind    → set vars in @layer base  (or `theme: tailwind`)
-//   Custom      → [data-gridview] { --gv-*: ... }
+//   Custom      → [data-gridview] { --gv-*: ... }   ([data-gv-scope] too: see below)
 //
 // Dark-mode token overrides live in `_dark.scss`; per-framework token bridges
 // in `presets/` (activated by the data-gv-framework attribute).
@@ -17,6 +17,13 @@
 
 [data-gridview] {
   position: relative; // required for loading overlay positioning
+}
+
+// The tokens live on the grid, and on any container marked [data-gv-scope]: a host page
+// using the form components (gv_form_theme, switch, collection...) outside a grid opts in
+// with that attribute, e.g. <main data-gv-scope>. Dark mode and presets follow it too.
+[data-gridview],
+[data-gv-scope] {
   // Accent (muted slate-blue — override to match your brand)
   --gv-color-primary:       #4b6cb7;
 

@@ -37,4 +37,20 @@ class ControllerImportsTest extends TestCase
             }
         }
     }
+
+    /**
+     * A controller declared in assets/package.json but missing on disk breaks the host's
+     * importmap build, not this repository's tests.
+     */
+    public function testEveryDeclaredControllerExists(): void
+    {
+        $package = json_decode((string) file_get_contents(self::ASSETS . '/package.json'), true, 512, \JSON_THROW_ON_ERROR);
+        $controllers = $package['symfony']['controllers'] ?? [];
+        $this->assertNotEmpty($controllers);
+
+        foreach ($controllers as $key => $controller) {
+            $this->assertFileExists(self::ASSETS . '/' . $controller['main'], sprintf('Controller "%s" points at a missing file.', $key));
+            $this->assertSame('gridview-' . $key, $controller['name'], sprintf('Controller "%s" should be named "gridview-%s".', $key, $key));
+        }
+    }
 }

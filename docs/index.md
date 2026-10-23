@@ -38,6 +38,8 @@ capability map that keeps it from reimplementing features the bundle already has
 
 - **[CRUD forms](08_crud.md)** — forms generated from columns, validation, bulk actions,
   inline editing, and the controller base classes.
+- **[Form components](19_form-components.md)** — the form theme in your own forms, required
+  markers, switch, buttons side by side, password meter and eye, repeatable rows.
 - **[DetailView](09_detail-view.md)** — rendering a single record.
 - **[Export](10_export.md)** — export formats, per-grid limits, and saved searches & selections.
 

@@ -85,19 +85,19 @@
 
 // ── OS preference (stand-alone fallback) ──────────────────────────
 @media (prefers-color-scheme: dark) {
-  [data-gridview] { @include gv-dark-vars; }
+  :is([data-gridview], [data-gv-scope]) { @include gv-dark-vars; }
 }
 
 // ── Host-driven dark theme (wins over the OS rule via specificity) ─
 // Attribute selectors are intentionally element-agnostic so they match
 // whether the host sets the flag on <html> (Bootstrap) or <body> (EasyAdmin).
-:is([data-bs-theme="dark"], [data-gv-theme="dark"], .ea-dark-scheme) [data-gridview] {
+:is([data-bs-theme="dark"], [data-gv-theme="dark"], .ea-dark-scheme) :is([data-gridview], [data-gv-scope]) {
   @include gv-dark-vars;
 }
 
 // ── Explicit light host override ──────────────────────────────────
 // Undoes the OS-dark media rule when the host forces a light theme.
-:is([data-bs-theme="light"], [data-gv-theme="light"], .ea-light-scheme) [data-gridview] {
+:is([data-bs-theme="light"], [data-gv-theme="light"], .ea-light-scheme) :is([data-gridview], [data-gv-scope]) {
   --gv-color-bg:          #ffffff;
   --gv-color-bg-subtle:   #f7f8f9;
   --gv-color-bg-hover:    #eaecef;
