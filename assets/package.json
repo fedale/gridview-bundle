@@ -140,6 +140,12 @@
         "name": "gridview-password-reveal",
         "fetch": "lazy",
         "enabled": true
+      },
+      "conditional": {
+        "main": "controllers/gridview-conditional_controller.js",
+        "name": "gridview-conditional",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {
