@@ -13,6 +13,7 @@
 //   .gv-password-meter       the strength meter of a password (gridview-password-strength)
 //   .gv-password-reveal      the show/hide eye of a password (gridview-password-reveal)
 //   .gv-collection           repeatable rows, added and removed (gridview-collection)
+//   .gv-form-row[hidden]     a row shown only while another field holds some values (gridview-conditional)
 //
 // Every colour and size comes from the --gv-* tokens.
 // ═══════════════════════════════════════════════════════════════════
@@ -47,6 +48,13 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
 
 :is(#{$gv-scopes}) :is(input[type="checkbox"], input[type="radio"]) {
     accent-color: var(--gv-color-primary);
+}
+
+// ── Conditional rows (gridview-conditional) ────────────────────────
+// A hidden row stays hidden whatever its row modifier (switch, password...) sets.
+
+.gv-form-row[hidden] {
+    display: none !important;
 }
 
 // ── Expanded choices: one option per line, the box before its label ──

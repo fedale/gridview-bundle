@@ -110,6 +110,31 @@ character beyond the first (lower case, upper case, digit, symbol) and every 4 c
 The labels are values, so translate them where the form is built
 (`'data-gridview-password-strength-labels-value' => json_encode([...])`).
 
+## Conditional rows
+
+The `gridview-conditional` controller shows a form row only while another field of the form
+holds some values: the hours of a qualification while its kind is "course". Mark every row with
+the name of its field (`data-gv-field`), and give the dependent row the controller:
+
+```php
+$builder->add('kind', ChoiceType::class, [
+    'choices' => ['Course' => 'course', 'Language' => 'language'],
+    'row_attr' => ['data-gv-field' => 'kind'],
+]);
+$builder->add('hours', IntegerType::class, ['row_attr' => [
+    'data-gv-field' => 'hours',
+    'data-controller' => 'gridview-conditional',
+    'data-gridview-conditional-field-value' => 'kind',
+    'data-gridview-conditional-values-value' => '["course"]',
+]]);
+```
+
+The deciding row is looked up among the row's siblings first, so each row of a collection follows
+its own field, then anywhere in the form. A select gives its value, a radio group the checked
+one, a checkbox `true` or `false`. A hidden row is `hidden` (`.gv-form-row[hidden]` wins over any
+row modifier). Hiding is presentation only: the server must ignore or empty a field that does not
+apply.
+
 ## Repeatable rows (collection)
 
 The `gridview-collection` controller adds and removes the rows of a `CollectionType`

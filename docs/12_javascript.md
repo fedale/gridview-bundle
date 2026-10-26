@@ -304,3 +304,14 @@ A show/hide eye inside a password input. The input is never moved: its row becom
 hides the password again.
 
 **Values:** `showLabel`, `hideLabel` (`String`, the button's accessible name).
+
+## `gridview-conditional`
+
+Shows a form row only while another field of the form holds some values. The deciding row is
+the one marked `data-gv-field="<field>"` among the row's siblings, or anywhere in the form. See
+[Form components](19_form-components.md#conditional-rows).
+
+**Connects to:** the dependent row (`.gv-form-row`).
+
+**Values:** `field` (`String`, the deciding field's name), `values` (`Array`, the values for which
+the row shows).
