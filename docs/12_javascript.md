@@ -315,3 +315,14 @@ the one marked `data-gv-field="<field>"` among the row's siblings, or anywhere i
 
 **Values:** `field` (`String`, the deciding field's name), `values` (`Array`, the values for which
 the row shows).
+
+## `gridview-dependent-select`
+
+A remote select (Symfony UX Autocomplete) whose options depend on another field: when the
+deciding field changes, the choice is emptied and the autocomplete URL becomes `url?param=<value>`.
+See [Form components](19_form-components.md#cascading-selects).
+
+**Connects to:** the dependent row, holding the `<select>`.
+
+**Values:** `field` (`String`, the deciding field's `data-gv-field`), `url` (`String`, the lookup
+URL), `param` (`String`, the query parameter carrying the deciding value).

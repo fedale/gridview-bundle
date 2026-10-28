@@ -146,6 +146,12 @@
         "name": "gridview-conditional",
         "fetch": "lazy",
         "enabled": true
+      },
+      "dependent-select": {
+        "main": "controllers/gridview-dependent-select_controller.js",
+        "name": "gridview-dependent-select",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {
