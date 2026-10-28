@@ -135,6 +135,36 @@ one, a checkbox `true` or `false`. A hidden row is `hidden` (`.gv-form-row[hidde
 row modifier). Hiding is presentation only: the server must ignore or empty a field that does not
 apply.
 
+## Cascading selects
+
+The `gridview-dependent-select` controller makes a remote select (Symfony UX Autocomplete) list
+the records of the value chosen in another field: the provinces of a region, the municipalities
+of a province. Mark the deciding row with `data-gv-field`, and give the dependent row the
+controller, the lookup URL and the query parameter that carries the deciding value:
+
+```php
+$builder->add('municipality', ChoiceType::class, [
+    'autocomplete' => true,
+    'autocomplete_url' => '/municipalities/lookup?province=',
+    'row_attr' => [
+        'data-gv-field' => 'municipality',
+        'data-controller' => 'gridview-dependent-select',
+        'data-gridview-dependent-select-field-value' => 'province',
+        'data-gridview-dependent-select-url-value' => '/municipalities/lookup',
+        'data-gridview-dependent-select-param-value' => 'province',
+    ],
+]);
+```
+
+When the deciding field changes, the choice is emptied, with the options of the former value
+(so the fields depending on this one empty in turn), and the autocomplete URL becomes
+`url?param=<value>`: UX Autocomplete reloads from it. Rows are found as for conditional rows
+(siblings first). Make the endpoint return nothing for an empty value, and check on the server
+that the record chosen belongs to the deciding one.
+
+Inside `[data-gridview]` or `[data-gv-scope]`, an autocomplete takes the look of the other
+inputs: its wrapper draws no second frame.
+
 ## Repeatable rows (collection)
 
 The `gridview-collection` controller adds and removes the rows of a `CollectionType`

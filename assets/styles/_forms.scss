@@ -76,6 +76,29 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
     }
 }
 
+// ── Autocomplete (Symfony UX Autocomplete / Tom Select) ────────────
+// Tom Select copies the select's classes onto its wrapper: the wrapper must not draw a
+// second frame around the control, which carries the input's look itself.
+
+:is(#{$gv-scopes}) .ts-wrapper.gv-form-control {
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+}
+
+:is(#{$gv-scopes}) .ts-wrapper .ts-control {
+    border-color: var(--gv-input-border);
+    border-radius: var(--gv-input-radius);
+    background: var(--gv-input-bg);
+    color: var(--gv-input-color);
+}
+
+:is(#{$gv-scopes}) .ts-wrapper.focus .ts-control {
+    border-color: var(--gv-input-border-focus);
+    box-shadow: var(--gv-input-shadow-focus);
+}
+
 // ── Required fields ────────────────────────────────────────────────
 
 :is(#{$gv-scopes}) .gv-form-label.required::after {
