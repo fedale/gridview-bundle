@@ -77,8 +77,10 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
 }
 
 // ── Autocomplete (Symfony UX Autocomplete / Tom Select) ────────────
-// Tom Select copies the select's classes onto its wrapper: the wrapper must not draw a
-// second frame around the control, which carries the input's look itself.
+// Tom Select ships a light theme of its own (tom-select.default.css): every colour is taken
+// back here from the --gv-* tokens, so an autocomplete looks like the other inputs and follows
+// the dark mode. Tom Select copies the select's classes onto its wrapper: the wrapper must not
+// draw a second frame around the control.
 
 :is(#{$gv-scopes}) .ts-wrapper.gv-form-control {
     padding: 0;
@@ -87,16 +89,98 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
     box-shadow: none;
 }
 
-:is(#{$gv-scopes}) .ts-wrapper .ts-control {
-    border-color: var(--gv-input-border);
-    border-radius: var(--gv-input-radius);
-    background: var(--gv-input-bg);
-    color: var(--gv-input-color);
+:is(#{$gv-scopes}) .ts-wrapper {
+    .ts-control,
+    &.single .ts-control,
+    &.single.input-active .ts-control,
+    &.full .ts-control {
+        border: 1px solid var(--gv-input-border);
+        border-radius: var(--gv-input-radius);
+        background: var(--gv-input-bg);
+        box-shadow: none;
+        color: var(--gv-input-color);
+        font-size: var(--gv-input-font-size);
+    }
+
+    .ts-control,
+    .ts-control input {
+        color: var(--gv-input-color);
+        font-size: var(--gv-input-font-size);
+    }
+
+    .ts-control input::placeholder {
+        color: var(--gv-color-text-muted);
+    }
+
+    &.focus .ts-control {
+        border-color: var(--gv-input-border-focus);
+        box-shadow: var(--gv-input-shadow-focus);
+    }
+
+    // The caret of a single select.
+    &.single .ts-control::after {
+        border-top-color: var(--gv-color-text-muted);
+    }
+
+    &.single.dropdown-active .ts-control::after {
+        border-color: transparent transparent var(--gv-color-text-muted) transparent;
+    }
+
+    &.disabled .ts-control {
+        opacity: 1;
+        background: var(--gv-color-bg-subtle);
+        color: var(--gv-color-text-muted);
+    }
+
+    // The chosen items of a multiple select, as chips.
+    &.multi .ts-control > [data-value] {
+        border: 1px solid var(--gv-accent-border);
+        border-radius: var(--gv-radius);
+        background: var(--gv-accent-bg);
+        box-shadow: none;
+        color: var(--gv-color-text);
+        text-shadow: none;
+    }
+
+    &.multi .ts-control > [data-value].active {
+        background: var(--gv-color-primary);
+        color: var(--gv-btn-primary-color);
+    }
+
+    &.plugin-remove_button .item .remove {
+        border-color: var(--gv-accent-border);
+    }
 }
 
-:is(#{$gv-scopes}) .ts-wrapper.focus .ts-control {
-    border-color: var(--gv-input-border-focus);
-    box-shadow: var(--gv-input-shadow-focus);
+:is(#{$gv-scopes}) .ts-dropdown {
+    border: 1px solid var(--gv-dropdown-border);
+    border-radius: var(--gv-dropdown-radius);
+    background: var(--gv-dropdown-bg);
+    box-shadow: var(--gv-dropdown-shadow);
+    color: var(--gv-color-text);
+    font-size: var(--gv-input-font-size);
+
+    .option,
+    .optgroup-header {
+        background: none;
+        color: var(--gv-color-text);
+    }
+
+    .active {
+        background: var(--gv-dropdown-item-hover);
+        color: var(--gv-color-text);
+    }
+
+    .highlight {
+        background: var(--gv-color-highlight-bg);
+        color: var(--gv-color-highlight-txt);
+    }
+
+    .no-results,
+    .no-more-results,
+    .create {
+        color: var(--gv-color-text-muted);
+    }
 }
 
 // ── Required fields ────────────────────────────────────────────────

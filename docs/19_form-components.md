@@ -162,8 +162,9 @@ When the deciding field changes, the choice is emptied, with the options of the 
 (siblings first). Make the endpoint return nothing for an empty value, and check on the server
 that the record chosen belongs to the deciding one.
 
-Inside `[data-gridview]` or `[data-gv-scope]`, an autocomplete takes the look of the other
-inputs: its wrapper draws no second frame.
+Inside `[data-gridview]` or `[data-gv-scope]`, an autocomplete (Tom Select) takes the look of
+the other inputs from the `--gv-*` tokens, dark mode included: control, caret, dropdown, active
+option, highlighted term, chips of a multiple select. Its wrapper draws no second frame.
 
 ## Repeatable rows (collection)
 
