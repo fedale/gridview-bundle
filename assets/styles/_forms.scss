@@ -181,6 +181,23 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
     .create {
         color: var(--gv-color-text-muted);
     }
+
+    // The loading spinner, at the size of a line of text rather than Tom Select's 30px.
+    .spinner {
+        width: 1rem;
+        height: 1rem;
+        margin: .35rem .6rem;
+        vertical-align: middle;
+    }
+
+    .spinner::after {
+        width: 1rem;
+        height: 1rem;
+        margin: 0;
+        box-sizing: border-box;
+        border-width: 2px;
+        border-color: var(--gv-spinner-color) transparent var(--gv-spinner-color) transparent;
+    }
 }
 
 // ── Required fields ────────────────────────────────────────────────
