@@ -202,6 +202,7 @@ backdrop): `--gv-info-bg`, `--gv-info-color`, `--gv-info-border`,
 | `--gv-rating-color` | `rating` (`.gv-rating`) | `#f59e0b` |
 | `--gv-badge-bg` / `--gv-badge-color` | `badge` (`.gv-badge`) | grey chip |
 | `--gv-badge-radius` / `--gv-badge-padding` / `--gv-badge-font-size` | `badge` shape | pill |
+| `--gv-badge-{info,success,warning,danger}-bg` / `-color` | `.gv-badge--tone-info`, `--tone-success`, `--tone-warning`, `--tone-danger` | blue, green, amber, red; dark variants |
 | `--gv-json-bg` / `--gv-json-color` / `--gv-json-border` | `json` (`.gv-json`) | subtle box |
 
 `number`/`money`/`percent` cells carry `.gv-num` (right-aligned, tabular
@@ -210,7 +211,9 @@ carry `.gv-list`. `color` cells prefix a `.gv-color-swatch` before the value,
 and a `media` column with `format.shape: 'circle'` adds `.gv-img-circle` for a
 round crop (e.g. avatars). Per-value badge colours can also be passed inline
 from the column config (`format.colors: {VALUE: '#0a0'}`), which emit a
-`gv-badge--<value>` modifier class for finer CSS targeting.
+`gv-badge--<value>` modifier class for finer CSS targeting. Host code drawing its own
+badges (a cell renderer, a template) can pick a tone instead, which follows the theme and the
+dark mode: `<span class="gv-badge gv-badge--tone-success">Active</span>`.
 
 > After changing the SCSS, rebuild assets: `cd app && yarn encore dev`
 > (or `yarn watch`).

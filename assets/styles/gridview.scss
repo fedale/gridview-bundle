@@ -1390,6 +1390,15 @@ turbo-frame[busy]>[data-gridview] {
     white-space: nowrap;
 }
 
+// Badge tones, for a badge drawn by host code. "tone-" keeps them apart from the
+// gv-badge--<value> modifier the badge type emits for each value.
+@each $tone in info, success, warning, danger {
+    [data-gridview] .gv-badge--tone-#{$tone} {
+        background: var(--gv-badge-#{$tone}-bg);
+        color: var(--gv-badge-#{$tone}-color);
+    }
+}
+
 // JSON — preformatted block
 [data-gridview] .gv-json {
     margin: 0;

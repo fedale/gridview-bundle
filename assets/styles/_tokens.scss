@@ -142,6 +142,15 @@
   // Badge (status chip)
   --gv-badge-bg:            #eaecef;
   --gv-badge-color:         #374151;
+  // Badge tones: gv-badge--tone-info, -success, -warning, -danger (no tone: the default)
+  --gv-badge-info-bg:       #dbeafe;
+  --gv-badge-info-color:    #1e3a8a;
+  --gv-badge-success-bg:    #d1e7dd;
+  --gv-badge-success-color: #0f5132;
+  --gv-badge-warning-bg:    #fff3cd;
+  --gv-badge-warning-color: #664d03;
+  --gv-badge-danger-bg:     #f8d7da;
+  --gv-badge-danger-color:  #842029;
   --gv-badge-radius:        999px;
   --gv-badge-padding:       .1rem .55rem;
   --gv-badge-font-size:     .75rem;

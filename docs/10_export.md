@@ -19,7 +19,10 @@ appearing in the export menu and selectable via `?format=<key>`.
 | JSON | `json` | `.json` | Array of objects, one key per column attribute (falling back to the label) |
 
 All cell values are **flattened to plain text** (HTML stripped), consistently across
-formats: a currency column is exported with its rendered string.
+formats, by `Export\CellText`: a currency column is exported with its rendered string. HTML
+a cell renders (a `Twig\Markup`: column types, value closures returning one) also has its
+entities decoded, so `Rossi &amp; Co` is exported as `Rossi & Co`; a plain string is not HTML
+and keeps its text as it is. A host exporter can call `CellText::of()` to do the same.
 
 To add a format, all you need is a class implementing `ExporterInterface`:
 
