@@ -206,16 +206,6 @@ class PdfExporter implements ExporterInterface
 
     private function flatten(mixed $value): string
     {
-        if ($value === null) {
-            return '';
-        }
-        if (\is_array($value)) {
-            return implode(', ', array_map(fn ($v) => $this->flatten($v), $value));
-        }
-        if (\is_scalar($value)) {
-            return trim(strip_tags((string) $value));
-        }
-
-        return '';
+        return CellText::of($value);
     }
 }
