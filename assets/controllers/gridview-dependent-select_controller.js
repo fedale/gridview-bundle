@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { findDecidingRow } from '../deciding-row.js';
 
 /*
  * A select whose options load from a URL that depends on another field: the municipalities of
@@ -11,8 +12,8 @@ import { Controller } from '@hotwired/stimulus';
  *     <select data-controller="symfony--ux-autocomplete--autocomplete" …>
  *   </div>
  *
- * The deciding row is the one marked data-gv-field="<field>" among this row's siblings, or else
- * anywhere in the form. When its value changes, the choice here is emptied (which in turn empties
+ * The deciding row is the one marked data-gv-field="<field>" nearest to this row, in the same
+ * collection row first (see ../deciding-row.js). When its value changes, the choice here is emptied (which in turn empties
  * the fields depending on this one) and the select's autocomplete URL becomes
  * url?param=<value>: Symfony UX Autocomplete reloads its options from it. The server must check
  * that the record chosen belongs to the deciding one.
@@ -23,9 +24,7 @@ export default class extends Controller {
     static values = { field: String, url: String, param: String };
 
     connect() {
-        const selector = `[data-gv-field="${CSS.escape(this.fieldValue)}"]`;
-        this.source = this.element.parentElement?.querySelector(`:scope > ${selector}`)
-            ?? this.element.closest('form')?.querySelector(selector);
+        this.source = findDecidingRow(this.element, this.fieldValue);
         this.select = this.element.querySelector('select');
         if (!this.source || !this.select) {
             return;
