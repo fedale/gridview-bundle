@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import { findDecidingRow } from '../deciding-row.js';
 
 /*
  * Shows a form row only while another field of the same form holds some values: the hours of
@@ -8,8 +9,9 @@ import { Controller } from '@hotwired/stimulus';
  *        data-gridview-conditional-field-value="kind"
  *        data-gridview-conditional-values-value='["course"]'>…</div>
  *
- * The deciding field is the row marked data-gv-field="kind" among the siblings of this row (so
- * that each row of a collection follows its own "kind"), or else anywhere in the form. A
+ * The deciding field is the row marked data-gv-field="kind" nearest to this row, in the same
+ * collection row first, so that each row of a collection follows its own "kind" even when a
+ * layout puts the two in different columns (see ../deciding-row.js). A
  * select gives its value, a radio group its checked value, a checkbox "true" or "false".
  * Hiding is presentation only: the server must ignore or empty a field that does not apply.
  */
@@ -17,9 +19,7 @@ export default class extends Controller {
     static values = { field: String, values: Array };
 
     connect() {
-        const selector = `[data-gv-field="${CSS.escape(this.fieldValue)}"]`;
-        this.source = this.element.parentElement?.querySelector(`:scope > ${selector}`)
-            ?? this.element.closest('form')?.querySelector(selector);
+        this.source = findDecidingRow(this.element, this.fieldValue);
         if (!this.source) {
             return;
         }

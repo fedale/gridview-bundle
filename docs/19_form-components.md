@@ -129,8 +129,10 @@ $builder->add('hours', IntegerType::class, ['row_attr' => [
 ]]);
 ```
 
-The deciding row is looked up among the row's siblings first, so each row of a collection follows
-its own field, then anywhere in the form. A select gives its value, a radio group the checked
+The deciding row is the nearest one, looked up from the row's parent outwards, and **within the
+same collection row first**: each row of a collection follows its own field, even when a layout
+puts the two fields in different columns or fieldsets. Failing that, the nearest one anywhere in
+the form. A select gives its value, a radio group the checked
 one, a checkbox `true` or `false`. A hidden row is `hidden` (`.gv-form-row[hidden]` wins over any
 row modifier). Hiding is presentation only: the server must ignore or empty a field that does not
 apply.
@@ -159,7 +161,7 @@ $builder->add('municipality', ChoiceType::class, [
 When the deciding field changes, the choice is emptied, with the options of the former value
 (so the fields depending on this one empty in turn), and the autocomplete URL becomes
 `url?param=<value>`: UX Autocomplete reloads from it. Rows are found as for conditional rows
-(siblings first). Make the endpoint return nothing for an empty value, and check on the server
+(nearest first, same collection row first). Make the endpoint return nothing for an empty value, and check on the server
 that the record chosen belongs to the deciding one.
 
 Inside `[data-gridview]` or `[data-gv-scope]`, an autocomplete (Tom Select) takes the look of
