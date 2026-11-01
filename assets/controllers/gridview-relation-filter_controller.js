@@ -15,7 +15,9 @@ export default class extends Controller {
     };
 
     connect() {
-        if (this.ajaxUrlValue) {
+        // Reconnecting (a Turbo restore, the element moved by another script)
+        // finds the AJAX options already in place: no second fetch.
+        if (this.ajaxUrlValue && this.element.dataset.gvOptionsLoaded !== 'true') {
             this._loadOptions().then(() => this._enhance());
         } else if (this.choicesValue.length > 0) {
             this._loadChoicesFromData();
@@ -37,13 +39,9 @@ export default class extends Controller {
 
     _teardown() {
         if (!this._wrapper) return;
-        if (this.element.multiple) {
-            // select was left outside the wrapper, just show it again
-            this.element.style.display = '';
-        } else {
-            // select was moved inside the wrapper — put it back before removing
-            this._wrapper.before(this.element);
-        }
+        // The select never leaves its place: show it again (multi-select) and
+        // drop what was built next to it.
+        this.element.style.display = '';
         this._wrapper.remove();
         this._wrapper  = null;
         this._trigger  = null;
@@ -112,6 +110,7 @@ export default class extends Controller {
         try {
             const res  = await fetch(this.ajaxUrlValue, { headers: { Accept: 'application/json' } });
             const data = await res.json();
+            select.dataset.gvOptionsLoaded = 'true';
             this._resetOptions(placeholder);
             data.forEach(item => {
                 const opt       = document.createElement('option');
@@ -158,7 +157,7 @@ export default class extends Controller {
             // Search inside panel
             const searchInput = document.createElement('input');
             searchInput.type        = 'text';
-            searchInput.placeholder = 'Cerca...';
+            searchInput.placeholder = i18n.t('search.placeholder');
             searchInput.className   = 'gv-multi-search';
             searchInput.autocomplete = 'off';
             searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
@@ -313,28 +312,28 @@ export default class extends Controller {
 
     // ── Single-select with search ──────────────────────────────────────
 
+    // The search box goes right before the select, which stays where it is:
+    // moving the controller's own element makes Stimulus disconnect and
+    // connect it again, and each connect fetched and moved it once more.
     _buildSearchableSelect() {
-        // bfcache guard: if already wrapped, unwrap first
-        if (this.element.parentElement?.classList.contains('gv-relation-filter-wrapper')) {
-            const stale = this.element.parentElement;
-            stale.before(this.element);
-            stale.remove();
+        const select = this.element;
+        // bfcache guard: remove a search box left from a previous session
+        if (select.previousElementSibling?.classList.contains('gv-relation-filter-wrapper')) {
+            select.previousElementSibling.remove();
         }
         const wrapper = document.createElement('div');
         wrapper.className = 'gv-relation-filter-wrapper';
 
         const search = document.createElement('input');
         search.type         = 'text';
-        search.placeholder  = 'Cerca...';
+        search.placeholder  = i18n.t('search.placeholder');
         search.className    = 'gv-relation-filter-search';
         search.autocomplete = 'off';
         search.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
         search.addEventListener('input', () => this._filterOptions(search.value));
 
-        const select = this.element;
         select.parentNode.insertBefore(wrapper, select);
         wrapper.appendChild(search);
-        wrapper.appendChild(select);
         this._wrapper = wrapper;
     }
 

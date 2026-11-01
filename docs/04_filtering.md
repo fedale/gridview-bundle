@@ -577,8 +577,10 @@ as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `from_placeholder` | `string` | `'Da'` | Placeholder on the underlying from input (shown before JS loads) |
-| `to_placeholder` | `string` | `'A'` | Placeholder on the underlying to input |
+| `from_placeholder` | `string` | `'filter.date_from'` | Placeholder of the from input, a key of the `GridviewBundle` domain ("From", "Da"); a plain text the catalog lacks is shown as it is |
+| `to_placeholder` | `string` | `'filter.date_to'` | Placeholder of the to input ("To", "A") |
+
+The picker's own input shows both, "From – To" (just "From" with `mode: 'single'`).
 
 **Client options** (`clientOptions` key — passed verbatim to Flatpickr):
 
@@ -588,12 +590,17 @@ as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 | `locale` | `string` | the page's `<html lang>` | flatpickr locale code (`'it'`, `'de'`, …); English needs nothing |
 | `altFormat` | `string` | `'d/m/Y'` | Display format shown to the user |
 | `dateFormat` | `string` | `'Y-m-d'` | Value format sent to the server (keep ISO) |
-| `minDate` | `string` | today − 1 year | Earliest selectable date (e.g. `'2020-01-01'` or `'today'`) |
-| `maxDate` | `string` | today + 1 year | Latest selectable date |
+| `minDate` | `string` | none | Earliest selectable date (e.g. `'2020-01-01'` or `'today'`) |
+| `maxDate` | `string` | none | Latest selectable date |
 
-`minDate`/`maxDate` default to a one-year window around today (mirroring the NG DateFilter);
-pass your own values via `clientOptions` to widen, narrow, or remove the bounds. ISO
-(`YYYY-MM-DD`) bounds are accepted even though the display format is `d/m/Y` — the Stimulus
+Any date can be picked by default: a birth date or a contract start is often years away from
+today. Bound the picker via `clientOptions` when a column needs it.
+
+> **Upgrade note.** Until 1.3 the placeholders defaulted to the Italian `'Da'` / `'A'` whatever
+> the locale, and `minDate`/`maxDate` to one year around today. Pass them explicitly to keep the
+> old behavior.
+
+ISO (`YYYY-MM-DD`) bounds are accepted even though the display format is `d/m/Y` — the Stimulus
 controller converts them to `Date` objects before handing them to Flatpickr.
 
 Any other [Flatpickr option](https://flatpickr.js.org/options/) can be passed via `clientOptions`.

@@ -213,6 +213,15 @@ Two defaults of `src/Filter/FilterDateType.php` still surprise a host:
 Consumer side: no workaround yet (the grid of metadata-driven builds its date filters with
 `filterDate()`, so both defaults apply to every date field).
 
+**Fixed** on branch `fix/date-and-relation-filters`:
+
+- `from_placeholder` / `to_placeholder` default to `filter.date_from` / `filter.date_to`, keys of
+  the `GridviewBundle` domain (en "From"/"To", it "Da"/"A"); the from/to inputs carry that
+  translation domain, so a host's own plain-text placeholder still shows as it is. The picker's
+  display input, which had no placeholder at all, now shows "From – To" ("From" in single mode).
+- No `minDate` / `maxDate` by default; `clientOptions` still bounds a column.
+- `tests/Filter/FilterDateTypeTest`; upgrade note in `docs/04_filtering.md`.
+
 ## 8. A single-select AJAX relation filter reconnects forever (bug, found 2026-10-20)
 
 Found on metadata-driven with a relation column filtered as
@@ -234,6 +243,14 @@ fetch).
 
 Consumer workaround: `'multiple' => true` on the relation filters (useful anyway: several records
 at once).
+
+**Fixed** on branch `fix/date-and-relation-filters`: `_buildSearchableSelect()` inserts the search
+box right before the `<select>`, which no longer moves; `_teardown()` only removes what was built.
+`connect()` skips the fetch when the AJAX options are already loaded (`data-gv-options-loaded`), so
+a reconnect costs nothing. The two hard-wired "Cerca..." placeholders use `search.placeholder` of
+the catalog. Checked in a browser (no JS runner in the bundle) on a page with the controller and a
+stubbed `ajax_url`: before, 43 connects and 43 fetches in half a second; after, one connect and one
+fetch, a reconnect adds no fetch and no second search box, and the search still hides options.
 
 ## 5. Not a bundle change — for the record
 

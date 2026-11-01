@@ -69,6 +69,8 @@ inline.saved: "Salvato"
 
 filter.reset: "Reset filtri"
 filter.clear: "Rimuovi filtro"
+filter.date_from: "Da"
+filter.date_to: "A"
 filter.query_too_long: "La query URL supera il limite consentito (%size% / %limit% byte)."
 filter.reduce_fields: "Riduci la selezione in: %fields%."
 filter.reduce_generic: "Riduci il numero di valori selezionati nei filtri e riprova."
