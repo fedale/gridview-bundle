@@ -72,6 +72,10 @@ export default class extends Controller {
         this._displayInput = document.createElement('input');
         this._displayInput.type = 'text';
         this._displayInput.className = 'gv-date-display';
+        // The translated placeholders of the hidden inputs: "From – To" for a range.
+        const fromHint = this._fromInput.placeholder;
+        const toHint   = this._toInput?.placeholder ?? '';
+        this._displayInput.placeholder = mode === 'range' && toHint !== '' ? `${fromHint} – ${toHint}` : fromHint;
 
         // Prepend is always safe: it inserts as first child regardless of DOM nesting
         this.element.prepend(this._displayInput);
