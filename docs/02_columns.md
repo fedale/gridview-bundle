@@ -58,7 +58,8 @@ Every builder inherits these from `AbstractColumnConfig`:
 | `value` / `valueGetter` / `formatter` / `renderer` | the pipeline overrides |
 | `format(array)` | `format` (merged) |
 | `filter(bool\|string\|array\|FilterType)` | `filter` |
-| `filterText(bool $trim = true)`, `filterNumber()`, `filterBoolean()`, `filterDate()`, `filterChoice()`, `filterRelation()` | `filter` shortcuts |
+| `filterText(bool $trim = true)`, `filterNumber()`, `filterBoolean()`, `filterDate()`, `filterChoice()` | `filter` shortcuts |
+| `filterRelation(?array $choices, ?string $ajaxUrl, ?bool $multiple, ?bool $searchable, ?string $optionLabel, ?string $optionValue, ?int $controlsThreshold, array $options = [])` | `filter` (type `relation` plus its `options`; every argument is optional) |
 | `control(bool\|string\|array\|ControlType)` | `control` |
 | `required(bool = true)` | `control.required` (creates the control if absent) |
 | `onlyOnIndex()`, `onlyOnShow()`, `onlyOnForm()`, `onlyOnCreate()`, `onlyOnUpdate()` | `active` (restrict to one context) |
