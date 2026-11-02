@@ -193,3 +193,42 @@ $this->createGridviewBuilder()
 `defaults.pagination` / `gridviews.<id>.pagination` follow the same tiering, but the
 runtime override is a controller's own `dataConfig()['pagination']` (see
 [Pagination](03_sorting-pagination.md#pagination)) rather than `setOptions()`.
+
+## Strict options
+
+The options merge is forgiving by design: an unknown key is merged and ignored, an unknown renderer
+falls back to the table, an unknown layout token renders nothing. None of those raise an error, so a
+typo shows up only as a grid that looks slightly wrong. Strict mode turns them into an exception that
+lists every problem at once, each with its path and, for a misspelt name, the closest valid one:
+
+```
+Gridview "customer" has 2 invalid option(s):
+ - display.renderr: Unknown key "renderr"; it would be ignored. Did you mean "renderer"? Known keys: ...
+ - display.layout.toolbar: Unknown layout token "{globalSerch}"; it would render nothing. Did you mean "globalSearch"? ...
+```
+
+```yaml
+# config/packages/gridview.yaml
+fedale_gridview:
+  # null (the default) follows kernel.debug: on in dev and test, off in prod
+  strict_options: ~
+```
+
+Strict mode checks the options each grid receives, after the YAML defaults, the per-grid preset,
+the controller's `viewConfig()['options']` and the UI settings are merged. It checks:
+
+- **keys and value types** against the options schema (`display.*`, `behavior.*`, `integration.*`,
+  plus the CRUD controller's `actionLayout`);
+- **names that must exist**: `display.theme` (built-in or declared under `themes`),
+  `display.renderer` and the `renderer.map` keys (a `sections/dataview/{name}.html.twig` template),
+  `behavior.pagination.mode` (a registered paginator strategy);
+- **layout tokens**: every `{token}` in a region must be a region, a slot, a `layout.templates`
+  entry or a block template. Table tokens (`{thead}`, `{tbody}`, …) are accepted in `dataview` and
+  `tfoot` only. To add a token of your own, declare it under `layout.templates` or `layout.slots`.
+
+A template you add under `templates/bundles/FedaleGridviewBundle/gridview/sections/` counts as a
+block, the same way it does at render time.
+
+The check is also available without strict mode, as the `GridOptionsValidator` service, for code
+that builds options before it hands them to a grid. See
+[Describing and validating grid configuration](14_extending.md#describing-and-validating-grid-configuration).

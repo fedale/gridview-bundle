@@ -324,9 +324,43 @@ abstract class AbstractColumnConfig implements ColumnConfigInterface
         return $this->filter(FilterType::Choice);
     }
 
-    public function filterRelation(): static
-    {
-        return $this->filter(FilterType::Relation);
+    /**
+     * A relation filter. Called with no argument it declares the bare type, as
+     * before; the arguments fill its `options`, which a relation filter needs
+     * to show anything at all — the bundle never queries the database to
+     * populate it, so give either static `$choices` or an `$ajaxUrl`.
+     * Arguments left null are not written, so the filter type's own defaults
+     * apply. `$options` carries any other ChoiceType option (e.g. `placeholder`)
+     * and is overridden by the named arguments.
+     *
+     * @param array<string, int|string>|null $choices static `['Label' => value]` map
+     * @param array<string, mixed>           $options
+     */
+    public function filterRelation(
+        ?array $choices = null,
+        ?string $ajaxUrl = null,
+        ?bool $multiple = null,
+        ?bool $searchable = null,
+        ?string $optionLabel = null,
+        ?string $optionValue = null,
+        ?int $controlsThreshold = null,
+        array $options = [],
+    ): static {
+        $options = array_replace($options, array_filter([
+            'choices'            => $choices,
+            'ajax_url'           => $ajaxUrl,
+            'multiple'           => $multiple,
+            'searchable'         => $searchable,
+            'option_label'       => $optionLabel,
+            'option_value'       => $optionValue,
+            'controls_threshold' => $controlsThreshold,
+        ], static fn($value) => $value !== null));
+
+        if ($options === []) {
+            return $this->filter(FilterType::Relation);
+        }
+
+        return $this->filter(['type' => FilterType::Relation->value, 'options' => $options]);
     }
 
     /**

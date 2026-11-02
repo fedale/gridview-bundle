@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Grid;
 
 use Fedale\GridviewBundle\Column\ColumnFactory;
 use Fedale\GridviewBundle\DataProvider\DataSourceDataProviderFactory;
+use Fedale\GridviewBundle\Grid\Options\GridOptionsValidator;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
 use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
@@ -20,6 +21,7 @@ class GridviewBuilderFactory
         private ?UiSettingsResolver $uiSettings = null,
         private ?ContainerInterface $dataSourceLocator = null,
         private ?DataSourceDataProviderFactory $dataSourceProviderFactory = null,
+        private ?GridOptionsValidator $optionsValidator = null,
     ) {}
 
     public function createGridviewBuilder(): GridviewBuilder
@@ -33,6 +35,7 @@ class GridviewBuilderFactory
             $this->uiSettings,
             $this->dataSourceLocator,
             $this->dataSourceProviderFactory,
+            $this->optionsValidator,
         );
     }
 

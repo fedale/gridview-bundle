@@ -411,19 +411,21 @@ from the enum's cases (using each case's `label()` when the enum defines one,
 otherwise the case name), and `->choices([...])` feeds the display map and the
 filter at once. The array spec has no such shortcut: write the `choices` out.
 
-The same applies to the `relation` filter below, with one difference: it has no
-shortcut at all. `RelationColumn::relation(User::class)` declares the filter but
-cannot populate it — the bundle never queries the database to build a filter — so
-pass `choices` (or an `ajax_url`) yourself:
+The same applies to the `relation` filter below. `RelationColumn::relation(User::class)`
+declares the filter but can't populate it — the bundle never queries the database to
+build a filter — so pass `choices` (or an `ajaxUrl`) to `filterRelation()`:
 
 ```php
 RelationColumn::new('author')->label('Author')
     ->relation(User::class, choiceLabel: 'fullName')
-    ->filter(['type' => 'relation', 'options' => [
-        'choices'    => $this->authorChoices(),   // ['Ada Lovelace' => 12, ...]
-        'searchable' => true,
-    ]]),
+    ->filterRelation(choices: $this->authorChoices(), searchable: true),   // ['Ada Lovelace' => 12, ...]
 ```
+
+Every argument of `filterRelation()` is optional and maps to one option of the table
+below (`ajaxUrl` → `ajax_url`, `optionLabel` → `option_label`, …); an argument you
+leave out isn't written, so the filter's own default applies. Any other `ChoiceType`
+option goes in `options:`. The order of the calls doesn't matter: `relation()` keeps
+the options of a relation filter declared before it.
 
 ---
 
@@ -453,6 +455,19 @@ search input and optional AJAX loading.
         'multiple'     => true,
     ],
 ]
+```
+
+The same two filters with the fluent builder:
+
+```php
+RelationColumn::new('locations')->filterRelation(choices: $locationChoices, multiple: true, searchable: true),
+
+RelationColumn::new('locations')->filterRelation(
+    ajaxUrl: '/api/filter-options/locations',
+    optionLabel: 'name',
+    optionValue: 'id',
+    multiple: true,
+),
 ```
 
 | Option | Type | Default | Description |

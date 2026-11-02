@@ -90,6 +90,40 @@ class ColumnConfigTest extends TestCase
         $this->assertSame(7, $value(['author' => ['id' => 7]]));
     }
 
+    public function testFilterRelationWithoutArgumentsDeclaresTheBareType(): void
+    {
+        $this->assertSame('relation', TextColumn::new('author')->filterRelation()->toArray()['filter']);
+    }
+
+    public function testFilterRelationWritesOnlyTheGivenOptions(): void
+    {
+        $spec = TextColumn::new('author')
+            ->filterRelation(ajaxUrl: '/options/author', multiple: true, searchable: true, optionLabel: 'label', options: ['placeholder' => 'Any', 'multiple' => false])
+            ->toArray();
+
+        $this->assertSame([
+            'type'    => 'relation',
+            'options' => [
+                'placeholder'  => 'Any',
+                // The named argument wins over the same key in $options.
+                'multiple'     => true,
+                'ajax_url'     => '/options/author',
+                'searchable'   => true,
+                'option_label' => 'label',
+            ],
+        ], $spec['filter']);
+    }
+
+    public function testRelationSyncKeepsTheOptionsOfAnEarlierRelationFilter(): void
+    {
+        $spec = RelationColumn::new('author')
+            ->filterRelation(choices: ['Ada Lovelace' => 12])
+            ->relation(\stdClass::class, choiceLabel: 'name')
+            ->toArray();
+
+        $this->assertSame(['type' => 'relation', 'options' => ['choices' => ['Ada Lovelace' => 12]]], $spec['filter']);
+    }
+
     public function testExplicitValueIsNotOverriddenByRelationSync(): void
     {
         $custom = static fn (array $data): mixed => 'X';

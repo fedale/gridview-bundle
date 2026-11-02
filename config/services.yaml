@@ -201,6 +201,8 @@ services:
             # (autoconfigured), for a grid naming its `dataSource` by id.
             - !tagged_locator { tag: fedale_gridview.data_source }
             - '@fedale_gridview.data_source_provider_factory'
+            # Defined only in strict mode (FedaleGridviewBundle::loadExtension()).
+            - '@?fedale_gridview.strict_options_validator'
         tags:
             - { name: kernel.reset, method: reset }
     Fedale\GridviewBundle\Grid\GridviewBuilder: '@fedale_gridview.gridview_builder'
@@ -249,7 +251,39 @@ services:
             # (autoconfigured), for a grid naming its `dataSource` by id.
             - !tagged_locator { tag: fedale_gridview.data_source }
             - '@fedale_gridview.data_source_provider_factory'
+            - '@?fedale_gridview.strict_options_validator'
     Fedale\GridviewBundle\Grid\GridviewBuilderFactory: '@fedale_gridview.builder_factory'
+
+    # Which layout tokens and renderers exist, read the way the render engine
+    # reads them (through the Twig loader, so host template overrides count).
+    fedale_gridview.template_catalog:
+        class: Fedale\GridviewBundle\Grid\TemplateCatalog
+        arguments:
+            - '@twig'
+    Fedale\GridviewBundle\Grid\TemplateCatalog: '@fedale_gridview.template_catalog'
+
+    # Always available, so a host (an app builder, an MCP server) can check an
+    # options array before handing it to a grid. The builders only call it in
+    # strict mode, through the `fedale_gridview.strict_options_validator` alias.
+    fedale_gridview.options_validator:
+        class: Fedale\GridviewBundle\Grid\Options\GridOptionsValidator
+        arguments:
+            - '@fedale_gridview.theme_registry'
+            - '@fedale_gridview.paginator_strategy_registry'
+            - '@fedale_gridview.template_catalog'
+    Fedale\GridviewBundle\Grid\Options\GridOptionsValidator: '@fedale_gridview.options_validator'
+
+    # Machine-readable description of what grids can be configured with.
+    fedale_gridview.capabilities:
+        class: Fedale\GridviewBundle\Capabilities\GridCapabilities
+        arguments:
+            - '@fedale_gridview.column_type_registry'
+            - '@fedale_gridview.control_type_registry'
+            - '@fedale_gridview.exporter_registry'
+            - '@fedale_gridview.theme_registry'
+            - '@fedale_gridview.paginator_strategy_registry'
+            - '@fedale_gridview.template_catalog'
+    Fedale\GridviewBundle\Capabilities\GridCapabilities: '@fedale_gridview.capabilities'
 
     # Reads and writes the URL tokens that stand for a record. Shared by the
     # controllers (which resolve a token back to an entity) and by the row

@@ -90,6 +90,9 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | End users changing grid options at runtime (all grids or one grid) | the UI settings modal, on fedale/setting-bundle; one `AbstractUiSetting` class per option | [18_ui-settings.md](18_ui-settings.md) |
 | A grid built at runtime (no controller) as a scope of the UI settings modal | a `GridDescriptorProviderInterface` service | [18_ui-settings.md](18_ui-settings.md#grids-built-at-runtime) |
 | To scaffold a CRUD controller | `php bin/console make:gridview:crud --fluent` | [08_crud.md](08_crud.md#scaffolding-a-controller-with-makegridviewcrud) |
+| An error instead of an option that is silently ignored (unknown key, wrong type, unknown renderer, theme or layout token) | `strict_options` — on by default in dev and test | [11_configuration.md](11_configuration.md#strict-options) |
+| A relation filter with choices or an AJAX source | `->filterRelation(choices: …)` / `->filterRelation(ajaxUrl: …)` | [04_filtering.md](04_filtering.md#relation) |
+| To generate grid configuration from code or a tool (types, formats, tokens, options JSON Schema; checking the result) | `GridCapabilities`, `gridview:capabilities`, `GridOptionsValidator` | [14_extending.md](14_extending.md#describing-and-validating-grid-configuration) |
 
 Everything in that table is configuration on a column, a token in a layout string, or a YAML key.
 If you find yourself writing a `<table>`, a `form_row` loop, a filter form type, an export
@@ -123,9 +126,10 @@ protected function viewConfig(): array
 ```
 
 When a guide names a key as `display.renderer.default` or `behavior.globalSearch`, that is the path
-*inside* `options` (and the same path a YAML preset uses). Guessing the nesting silently does
-nothing — an unknown key is merged and ignored, with no error — so copy the snippet from the guide
-rather than inferring the shape.
+*inside* `options` (and the same path a YAML preset uses). Guessing the nesting does nothing in
+production — an unknown key is merged and ignored — so copy the snippet from the guide rather than
+inferring the shape. In dev and test, [strict options](11_configuration.md#strict-options) turn the
+mistake into an exception that names the path and the closest valid key: read it, don't disable it.
 
 ### 2. Callbacks receive arrays, not entities
 

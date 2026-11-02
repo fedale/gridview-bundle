@@ -124,6 +124,22 @@ class FedaleGridviewBundle extends AbstractBundle
                 ->addTag('fedale_setting.definition');
         }
 
+        // Strict options: every grid's options are validated before the merge
+        // and an InvalidGridOptionsException lists what would otherwise be
+        // ignored without a trace. null (the default) follows kernel.debug, so
+        // a mistake breaks the page in development and costs nothing in prod.
+        $strict = $config['strict_options'] ?? ($containerBuilder->hasParameter('kernel.debug') && (bool) $containerBuilder->getParameter('kernel.debug'));
+        if ($strict) {
+            $containerBuilder->setAlias('fedale_gridview.strict_options_validator', 'fedale_gridview.options_validator');
+        }
+
+        // gridview:capabilities needs symfony/console, which the bundle does not require.
+        if (class_exists(\Symfony\Component\Console\Command\Command::class)) {
+            $containerBuilder->register(\Fedale\GridviewBundle\Command\CapabilitiesCommand::class, \Fedale\GridviewBundle\Command\CapabilitiesCommand::class)
+                ->setArgument('$capabilities', new Reference('fedale_gridview.capabilities'))
+                ->addTag('console.command');
+        }
+
         $containerConfigurator->parameters()
             ->set('fedale_gridview.config', $config)
             ->set('fedale_gridview.themes', $config['themes'] ?? []);
@@ -153,6 +169,10 @@ class FedaleGridviewBundle extends AbstractBundle
             // themes are declared under `themes` below. Per-gridview override
             // via `gridviews.<id>.options.theme`.
             ->scalarNode('theme')->defaultValue('default')->end()
+            // Validate every grid's options and throw on unknown keys, wrong
+            // types and unknown themes/renderers/paginators/layout tokens.
+            // null follows kernel.debug (on in dev and test, off in prod).
+            ->booleanNode('strict_options')->defaultNull()->end()
             // Host-declared custom themes: map class keys (e.g. 'btn.primary')
             // to concrete CSS classes. `extends` starts from a built-in theme
             // and overrides only some keys; omitted keys fall back to default.

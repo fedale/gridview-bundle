@@ -61,7 +61,12 @@ class RelationColumn extends AbstractColumnConfig
         }
 
         $this->spec['control'] = ['type' => 'relation', 'required' => $this->required, 'options' => $options];
-        $this->spec['filter']  = ['type' => 'relation'];
+        // Keep the options of a relation filter declared earlier in the chain
+        // (filterRelation(ajaxUrl: …)->choiceLabel(…) must not lose the URL).
+        $filter = $this->spec['filter'] ?? null;
+        if (!\is_array($filter) || ($filter['type'] ?? null) !== 'relation') {
+            $this->spec['filter'] = ['type' => 'relation'];
+        }
 
         // Derive a display closure only when the user has not set an explicit one.
         if ($this->autoValue || !\array_key_exists('value', $this->spec)) {

@@ -774,6 +774,78 @@ class ApiBackedController extends AbstractGridController
 }
 ```
 
+## Describing and validating grid configuration
+
+Code that writes grid configuration rather than a person typing it (an app builder, a code
+generator, an MCP server an AI agent calls) needs two things the guides can't give it: the list of
+what this application has registered, and a way to check what it produced. The bundle provides both
+as services.
+
+### What a grid can be configured with: `GridCapabilities`
+
+`GridCapabilities::describe()` returns plain data, read from the registries at call time, so the
+types and formats your application registers are included:
+
+| Key | Content |
+|---|---|
+| `columnTypes`, `filterTypes`, `filterOperators`, `controlTypes` | registered type names |
+| `exportFormats` | `[{key, label}]` of every exporter |
+| `themes`, `paginationModes`, `crudModes`, `renderers` | the valid values of those options |
+| `layout` | `regions` (with their default children), `blocks` (the block tokens), `tableTokens` |
+| `optionsSchema` | the JSON Schema of the grid options |
+
+```php
+use Fedale\GridviewBundle\Capabilities\GridCapabilities;
+
+final class GridToolbox
+{
+    public function __construct(private readonly GridCapabilities $capabilities)
+    {
+    }
+
+    public function describeGrids(): array
+    {
+        return $this->capabilities->describe();
+    }
+}
+```
+
+The same data is available from the console, whole or one section at a time:
+
+```bash
+php bin/console gridview:capabilities
+php bin/console gridview:capabilities optionsSchema
+```
+
+### Checking options before they reach a grid: `GridOptionsValidator`
+
+`GridOptionsValidator::validate()` runs the checks of [strict mode](11_configuration.md#strict-options)
+on any options array and returns every violation, each with a `path` and a `message`, instead of
+throwing:
+
+```php
+use Fedale\GridviewBundle\Grid\Options\GridOptionsValidator;
+
+$violations = $this->optionsValidator->validate([
+    'display'  => ['renderer' => 'cards'],
+    'behavior' => ['globalSearch' => 'c.name'],
+]);
+
+foreach ($violations as $violation) {
+    // display.renderer: Unknown renderer "cards"; the grid would fall back to the table. Did you mean "card"? ...
+    // behavior.globalSearch: Expected list of string, got string.
+    echo $violation, "\n";
+}
+```
+
+`assertValid($options, $gridId)` throws an `InvalidGridOptionsException` instead; its
+`getViolations()` returns the same list. Use `validate()` in a tool loop: give the violations back
+to whoever wrote the options, let them fix the options, and check again.
+
+The validator covers the grid **options** (`display`, `behavior`, `integration`, `actionLayout`).
+Columns are covered by their fluent builders, whose typed methods are the schema; the
+`dataConfig()` array is not validated.
+
 ## Listening to row events
 
 `RowEvent` is dispatched twice for every data row — before and after it is added to the
