@@ -7,6 +7,7 @@ use Fedale\GridviewBundle\Contract\GridDataSourceInterface;
 use Fedale\GridviewBundle\Contract\GridviewBuilderInterface;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
 use Fedale\GridviewBundle\DataProvider\DataSourceDataProviderFactory;
+use Fedale\GridviewBundle\Grid\Options\GridOptionsValidator;
 use Fedale\GridviewBundle\Service\GridviewService;
 use Fedale\GridviewBundle\Theme\ThemeRegistry;
 use Fedale\GridviewBundle\UiSettings\UiSettingsResolver;
@@ -36,6 +37,8 @@ class GridviewBuilder implements GridviewBuilderInterface
         private ?UiSettingsResolver $uiSettings = null,
         private ?ContainerInterface $dataSourceLocator = null,
         private ?DataSourceDataProviderFactory $dataSourceProviderFactory = null,
+        // Strict mode only (see `strict_options`): null skips validation.
+        private ?GridOptionsValidator $optionsValidator = null,
     ) {
         $this->reset();
     }
@@ -140,6 +143,10 @@ class GridviewBuilder implements GridviewBuilderInterface
         if ($this->uiSettings !== null && $id !== null) {
             $merged = $this->uiSettings->apply($id, $merged);
         }
+        // Checked before the merge into the grid: Gridview::setOptions() keeps
+        // only the three groups, so a misplaced top-level key would be gone by
+        // then, and everything else it would keep without complaint.
+        $this->optionsValidator?->assertValid($merged, $id);
         $this->gridview->setOptions($merged);
         $this->gridview->setAttributes($this->mergeAttributes($yamlAttributes, $this->runtimeAttributes));
 

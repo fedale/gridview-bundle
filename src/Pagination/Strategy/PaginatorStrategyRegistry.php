@@ -50,4 +50,12 @@ class PaginatorStrategyRegistry
 
         return $this->strategies[$name];
     }
+
+    /**
+     * @return list<string>
+     */
+    public function names(): array
+    {
+        return array_keys($this->strategies);
+    }
 }

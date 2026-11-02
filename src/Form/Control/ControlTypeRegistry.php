@@ -105,4 +105,12 @@ class ControlTypeRegistry
     {
         return isset($this->types[$type]);
     }
+
+    /**
+     * @return list<string> built-in plus registered control types
+     */
+    public function names(): array
+    {
+        return array_keys($this->types);
+    }
 }
