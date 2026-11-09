@@ -116,3 +116,7 @@ $dataProvider = [
 | `model` | `string` | Fully-qualified entity class name |
 | `pagination` | `array` | Pagination options — `defaultPageSize`, `maxPageSize`, and the optional `pageSizeOptions` selector (see [Pagination](03_sorting-pagination.md#pagination)) |
 | `sort` | `array` | Grouped sort config: `map` (the attribute → ORDER BY fields map), `default` (initial ordering when no `?sort=` is present) and `multiSort` (allow ordering by several attributes at once). See [Sorting](03_sorting-pagination.md#sorting). |
+
+---
+
+[Documentation index](index.md) · [Next: Columns →](02_columns.md)

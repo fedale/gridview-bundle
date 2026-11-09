@@ -249,3 +249,7 @@ This bag is shorthand for the most common targets; under the hood it feeds the s
 per-region attribute map as [`layout.attrs[T]`](05_layout.md#per-region-html-attributes), which
 can attach attributes to **any** region or table-internal (e.g. `thead`, `toolbar`,
 `header`) and overrides the bag per key.
+
+---
+
+[← Previous: Layout & Responsive](05_layout.md) · [Documentation index](index.md) · [Next: Internationalization (i18n) →](07_i18n.md)

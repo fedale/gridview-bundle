@@ -81,20 +81,6 @@ This separation keeps the bundle flexible enough to integrate into existing appl
 
 ---
 
-## Is Gridview the right tool?
-
-| Your goal                                             | Recommended solution |
-| ----------------------------------------------------- | -------------------- |
-| Build a complete `/admin` backend                     | EasyAdmin            |
-| Render a lightweight Doctrine table                   | kibatic/datagrid     |
-| Embed a rich data grid inside an existing application | **fedale/gridview**  |
-
-These tools are complementary rather than direct competitors.
-
-Gridview deliberately occupies the middle ground: richer than a simple datagrid library, more reusable than an admin framework.
-
----
-
 ## Typical applications
 
 Gridview is particularly suited to software where the grid is **part of the interface**, not the whole interface.
@@ -242,18 +228,18 @@ Because these concerns stay separate, applications remain predictable and easier
 
 Detailed documentation is available for:
 
-* Data Providers
-* Search Models
-* Column types
-* Controls
-* Filters
-* Export
-* Themes
-* Internationalization
-* Mercure integration
-* Maker commands
+* [Data Providers](docs/01_getting-started.md#data-provider)
+* [Search Models](docs/04_filtering.md)
+* [Column types](docs/02_columns.md)
+* [Controls](docs/08_crud.md#declaring-a-control-on-a-column)
+* [Filters](docs/04_filtering.md)
+* [Export](docs/10_export.md)
+* [Themes](docs/06_theming.md)
+* [Internationalization](docs/07_i18n.md)
+* [Mercure integration](docs/13_real-time.md)
+* [Maker commands](docs/08_crud.md#scaffolding-a-controller-with-makegridviewcrud)
 
-See the **docs/** directory.
+See the [documentation index](docs/index.md) for the full list of guides.
 
 ## Using an AI coding assistant?
 

@@ -540,3 +540,7 @@ the responsive wrapper falls back to **horizontal scrolling**.
 The markup is driven by the [`gridview-responsive`](12_javascript.md#gridview-responsive) Stimulus
 controller and styled through the `--gv-*` tokens, so it follows light/dark mode and any
 [token overrides](06_theming.md#overriding-tokens) automatically.
+
+---
+
+[← Previous: Filtering & Search](04_filtering.md) · [Documentation index](index.md) · [Next: Theming & Styling →](06_theming.md)

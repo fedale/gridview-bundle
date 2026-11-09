@@ -266,3 +266,7 @@ This lets you set a grid-wide style and override only the exceptions:
 - See the **CategoryController** in `gridview-demo` for a working example with chips
 - Combine with the [custom filter modal tutorial](16_tutorial-custom-filter-modal.md) if you
   want a completely custom filter UI alongside standard columns
+
+---
+
+[← Previous: Tutorial — A custom, EasyAdmin-style filter modal](16_tutorial-custom-filter-modal.md) · [Documentation index](index.md) · [Next: UI settings — let end users configure the grids →](18_ui-settings.md)

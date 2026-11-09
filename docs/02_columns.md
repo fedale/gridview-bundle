@@ -889,3 +889,7 @@ environment — handy for non-trivial cell markup:
         'published' => (int) ($data['publishedCount'] ?? 0),
     ]),
 ```
+
+---
+
+[← Previous: Getting Started](01_getting-started.md) · [Documentation index](index.md) · [Next: Sorting & Pagination →](03_sorting-pagination.md)

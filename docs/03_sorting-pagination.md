@@ -236,3 +236,7 @@ Storing the request instead of the stack breaks the grid under FrankenPHP worker
 RoadRunner and Swoole, where the container outlives the request that built it. See
 [Request-scoped services](14_extending.md#request-scoped-services) for the full
 explanation.
+
+---
+
+[← Previous: Columns](02_columns.md) · [Documentation index](index.md) · [Next: Filtering & Search →](04_filtering.md)

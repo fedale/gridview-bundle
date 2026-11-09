@@ -992,3 +992,7 @@ class UserController extends AbstractCrudGridController
 the action buttons keep working whatever the prefix is. The manual
 [route wiring](#wiring-the-routes-host-app-owns-them) remains available for
 controllers that need a fully custom action set.
+
+---
+
+[← Previous: Internationalization (i18n)](07_i18n.md) · [Documentation index](index.md) · [Next: DetailView (single record) →](09_detail-view.md)

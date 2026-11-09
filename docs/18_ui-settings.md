@@ -192,3 +192,7 @@ constraints.
 The modal renders every setting as an optional choice field. The empty choice means
 "inherit", and it names the value inherited: from the global scope or the platform defaults,
 else the code configuration.
+
+---
+
+[← Previous: Tutorial — Filter clear affordances: choose how to remove a filter](17_tutorial-filter-clear-affordances.md) · [Documentation index](index.md) · [Next: Form components →](19_form-components.md)

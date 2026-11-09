@@ -98,3 +98,7 @@ public function list(Request $request): Response
     return $gridview->renderGrid('@FedaleGridview/gridview/index.html.twig', []);
 }
 ```
+
+---
+
+[← Previous: Extending the Bundle](14_extending.md) · [Documentation index](index.md) · [Next: Tutorial — A custom, EasyAdmin-style filter modal →](16_tutorial-custom-filter-modal.md)

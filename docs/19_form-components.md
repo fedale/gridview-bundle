@@ -215,3 +215,7 @@ own controller, and the outer one ignores the rows of the inner ones.
 | `gv-collection__fields` | The fields of an inline row |
 | `gv-collection__remove` | The remove button of a row |
 | `gv-collection__add` | The add button (target `add`), full width, dashed |
+
+---
+
+[← Previous: UI settings — let end users configure the grids](18_ui-settings.md) · [Documentation index](index.md)

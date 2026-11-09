@@ -169,3 +169,7 @@ selections (n = number of selected rows). Enter confirms, Escape / backdrop canc
 their `data-col-key` (the column attribute) and persists the order via the preference provider
 (bucket `columnOrder`), re-applying it on connect — so it survives Turbo refreshes. Purely cosmetic
 (client-side); structural columns (checkbox/actions) stay put.
+
+---
+
+[← Previous: DetailView (single record)](09_detail-view.md) · [Documentation index](index.md) · [Next: YAML Configuration →](11_configuration.md)

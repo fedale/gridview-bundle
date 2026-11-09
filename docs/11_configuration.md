@@ -232,3 +232,7 @@ block, the same way it does at render time.
 The check is also available without strict mode, as the `GridOptionsValidator` service, for code
 that builds options before it hands them to a grid. See
 [Describing and validating grid configuration](14_extending.md#describing-and-validating-grid-configuration).
+
+---
+
+[← Previous: Export & Saved Searches](10_export.md) · [Documentation index](index.md) · [Next: JavaScript Controllers →](12_javascript.md)

@@ -326,3 +326,7 @@ See [Form components](19_form-components.md#cascading-selects).
 
 **Values:** `field` (`String`, the deciding field's `data-gv-field`), `url` (`String`, the lookup
 URL), `param` (`String`, the query parameter carrying the deciding value).
+
+---
+
+[← Previous: YAML Configuration](11_configuration.md) · [Documentation index](index.md) · [Next: Real-time updates (Mercure) →](13_real-time.md)

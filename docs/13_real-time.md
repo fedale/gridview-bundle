@@ -114,3 +114,7 @@ shows a `.gv-info-banner` toast. On disconnect it closes the stream.
 > The editor also receives the signal and sees the toast — harmless, their grid is already
 > fresh from their own action. To suppress it, include a client id in the payload and
 > ignore your own — not done by default.
+
+---
+
+[← Previous: JavaScript Controllers](12_javascript.md) · [Documentation index](index.md) · [Next: Extending the Bundle →](14_extending.md)

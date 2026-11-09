@@ -131,3 +131,7 @@ fedale_gridview:
 > sections (`gridviews.<id>` vs `detailviews.<id>`) — no semantic collision. The
 > merge precedence mirrors the grid: built-in detail defaults < `defaults.detailview`
 > < `detailviews.<id>` < runtime `setOptions()`/`setAttributes()`.
+
+---
+
+[← Previous: CRUD Forms & Controllers](08_crud.md) · [Documentation index](index.md) · [Next: Export & Saved Searches →](10_export.md)

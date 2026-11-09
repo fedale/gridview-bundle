@@ -882,3 +882,7 @@ Tag the subscriber with `kernel.event_subscriber` or rely on Symfony's autoconfi
 > row here would leave short or empty pages and a wrong total. To make entire rows
 > visible only to some users, filter in the query instead — see
 > [Hiding rows by permission](04_filtering.md#hiding-rows-by-permission-filter-in-the-query).
+
+---
+
+[← Previous: Real-time updates (Mercure)](13_real-time.md) · [Documentation index](index.md) · [Next: Full Example →](15_full-example.md)

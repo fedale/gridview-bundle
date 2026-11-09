@@ -956,3 +956,7 @@ appears in the toolbar so the user can submit the form manually.
 > **[A custom, EasyAdmin-style filter modal](16_tutorial-custom-filter-modal.md)** — a
 > Filter button + modal with comparison operators and a reset, built entirely in the
 > client app with no bundle changes.
+
+---
+
+[← Previous: Sorting & Pagination](03_sorting-pagination.md) · [Documentation index](index.md) · [Next: Layout & Responsive →](05_layout.md)

@@ -283,3 +283,7 @@ To extend it:
 - **Server-side appliers:** if you need bespoke SQL, implement `search()` /
   `applyFilters()` in the repository — see
   [Applying filters in the repository](index.md#applying-filters-in-the-repository--applyfilters).
+
+---
+
+[← Previous: Full Example](15_full-example.md) · [Documentation index](index.md) · [Next: Tutorial — Filter clear affordances: choose how to remove a filter →](17_tutorial-filter-clear-affordances.md)
