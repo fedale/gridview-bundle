@@ -11,7 +11,7 @@ class BooleanColumn extends AbstractColumn
         private string $attribute,
         protected ?string $twigFilter = null,
         protected ?string $label = null,
-        protected ?array $options = []
+        protected ?array $options = [],
     ) {
         $this->sortable   = false;
         $this->filterable = false;

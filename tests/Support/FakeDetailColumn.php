@@ -26,27 +26,107 @@ class FakeDetailColumn implements ColumnInterface
         $this->renderer = $renderer ?? static fn ($model, $index) => $model->data[$attribute] ?? null;
     }
 
-    public function isActive(): bool { return true; }
-    public function isActiveIn(string $context): bool { return true; }
-    public function isVisible(): bool { return $this->visible; }
-    public function isFilterable(): bool { return false; }
-    public function isSortable(): bool { return false; }
-    public function isToggleable(): bool { return true; }
-    public function getKind(): string { return 'data'; }
-    public function setGridview(Gridview $gridview): void {}
-    public function getAttribute(): ?string { return $this->attribute; }
-    public function getLabel(): ?string { return $this->label; }
-    public function getTwigFilter(): ?string { return $this->twigFilter; }
-    public function getControl(): ?array { return null; }
-    public function buildControl(FormBuilderInterface $form, ControlTypeRegistry $registry): void {}
-    public function getShowInDeleteConfirm(): bool|array { return false; }
-    public function isBatchUpdate(): bool { return false; }
-    public function isExportable(): bool { return true; }
-    public function isEditable(): bool { return false; }
-    public function getEditableTrigger(): string { return 'dblclick'; }
-    public function render(mixed $model, int $index): mixed { return ($this->renderer)($model, $index); }
-    public function renderHeader(mixed $label): string { return (string) $label; }
+    public function isActive(): bool
+    {
+        return true;
+    }
+
+    public function isActiveIn(string $context): bool
+    {
+        return true;
+    }
+
+    public function isVisible(): bool
+    {
+        return $this->visible;
+    }
+
+    public function isFilterable(): bool
+    {
+        return false;
+    }
+
+    public function isSortable(): bool
+    {
+        return false;
+    }
+
+    public function isToggleable(): bool
+    {
+        return true;
+    }
+
+    public function getKind(): string
+    {
+        return 'data';
+    }
+
+    public function setGridview(Gridview $gridview): void
+    {
+    }
+
+    public function getAttribute(): ?string
+    {
+        return $this->attribute;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
+
+    public function getTwigFilter(): ?string
+    {
+        return $this->twigFilter;
+    }
+
+    public function getControl(): ?array
+    {
+        return null;
+    }
+
+    public function buildControl(FormBuilderInterface $form, ControlTypeRegistry $registry): void
+    {
+    }
+
+    public function getShowInDeleteConfirm(): bool|array
+    {
+        return false;
+    }
+
+    public function isBatchUpdate(): bool
+    {
+        return false;
+    }
+
+    public function isExportable(): bool
+    {
+        return true;
+    }
+
+    public function isEditable(): bool
+    {
+        return false;
+    }
+
+    public function getEditableTrigger(): string
+    {
+        return 'dblclick';
+    }
+
+    public function render(mixed $model, int $index): mixed
+    {
+        return ($this->renderer)($model, $index);
+    }
+
+    public function renderHeader(mixed $label): string
+    {
+        return (string) $label;
+    }
 
     /** Read by the template (`column.options`); not part of the interface. */
-    public function getOptions(): array { return []; }
+    public function getOptions(): array
+    {
+        return [];
+    }
 }

@@ -51,7 +51,7 @@ class Row
 
         if ($key == 0) {
             $this->setAttr('class', 'first');
-        } else if ($key == $total) {
+        } elseif ($key == $total) {
             $this->setAttr('class', 'last');
         } else {
             $this->setAttr('class', 'middle');

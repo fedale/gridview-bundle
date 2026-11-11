@@ -61,6 +61,7 @@ trait ResolvesViewConfig
      *
      * @param array<string, mixed> $defaults
      * @param array<string, mixed> $overrides
+     *
      * @return array<string, mixed>
      */
     protected function mergeConfig(array $defaults, array $overrides): array
@@ -90,6 +91,7 @@ trait ResolvesViewConfig
      * overrides to add its own (e.g. id-derived labels) and calls parent.
      *
      * @param array<string, mixed> $resolved
+     *
      * @return array<string, mixed>
      */
     protected function applyConventions(array $resolved): array

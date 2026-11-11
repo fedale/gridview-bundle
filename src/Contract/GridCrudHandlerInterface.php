@@ -94,6 +94,7 @@ interface GridCrudHandlerInterface
 
     /**
      * Validates + saves one inline-edited field.
+     *
      * @return array{ok: bool, body: string} body = new cell HTML (ok) or editor with errors
      */
     public function saveInline(string $dataClass, ColumnInterface $column, object $entity, Request $request, string $action, array $context = []): array;

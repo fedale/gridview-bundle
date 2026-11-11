@@ -4,7 +4,10 @@ $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
     ->ignoreDotFiles(true)
     ->ignoreVCS(true)
-    ->exclude(['var', 'vendor'])
+    // The maker skeletons are code-generation templates: the short echo tags and
+    // alternative control syntax are what keeps them readable, so the PHP-code
+    // rules (echo_tag_syntax, no_alternative_syntax) must not rewrite them.
+    ->exclude(['var', 'vendor', 'src/Maker/Resources/skeleton'])
     ->files()
     ->name('*.php')
 ;
@@ -49,5 +52,11 @@ return (new PhpCsFixer\Config())
         // The bundle writes arrow/closure declarations without the extra space
         // (fn(...) and function(...)), so keep the default spacing untouched.
         'function_declaration' => false,
+        // Adding ": void" to a public or protected method of a non-final class
+        // (SearchModel, SearchForm, Row, ...) is a BC break: a host-app subclass
+        // that overrides it without the return type stops compiling. Return
+        // types on the extension surface are added by hand, in a release that
+        // announces them, not by the formatter.
+        'void_return' => false,
     ])
 ;

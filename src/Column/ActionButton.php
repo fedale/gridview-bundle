@@ -9,15 +9,16 @@ class ActionButton implements ActionButtonInterface
     /**
      * The closures receive the row as a normalized array (see ActionColumn::render()), never an entity.
      *
-     * @param string|\Closure(array<string, mixed>, int): string $content  HTML string or callable that returns HTML
-     * @param string[]                                          $roles     Symfony roles; empty = always shown
+     * @param string|\Closure(array<string, mixed>, int): string $content HTML string or callable that returns HTML
+     * @param string[]                                           $roles   Symfony roles; empty = always shown
      * @param bool|\Closure(array<string, mixed>, int): bool     $visible
      */
     public function __construct(
         private string|\Closure $content,
         private array $roles = [],
         private bool|\Closure $visible = true,
-    ) {}
+    ) {
+    }
 
     public function render(mixed $model, int $index): string
     {

@@ -64,7 +64,7 @@ class ThemeRegistry
 
     /**
      * @param array<string, array{extends?: string, classes?: array<string, string>}> $customThemes
-     *        Host-declared themes from `fedale_gridview.themes`.
+     *                                                                                              Host-declared themes from `fedale_gridview.themes`.
      */
     public function __construct(private array $customThemes = [])
     {
@@ -110,6 +110,7 @@ class ThemeRegistry
      * chains and guarding against cycles via $seen.
      *
      * @param string[] $seen
+     *
      * @return array<string, string>
      */
     private function overrides(string $theme, array $seen): array

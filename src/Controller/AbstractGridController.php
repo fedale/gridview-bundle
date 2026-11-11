@@ -3,8 +3,8 @@
 namespace Fedale\GridviewBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Contract\SearchModelInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Export\ExporterInterface;
 use Fedale\GridviewBundle\Export\GridExporterRegistry;
 use Fedale\GridviewBundle\Grid\Gridview;
@@ -381,7 +381,7 @@ abstract class AbstractGridController extends AbstractController
      *  - active:      grid opted in (YAML) AND a Mercure hub is available
      *  - topic:       the per-grid topic ("<prefix><id>")
      *  - topicPrefix: prefix used to build the topic
-     *  - hubUrl:      public hub URL for the browser (null when inactive)
+     *  - hubUrl:      public hub URL for the browser (null when inactive).
      *
      * @return array{active: bool, topic: string, topicPrefix: string, hubUrl: ?string}
      */

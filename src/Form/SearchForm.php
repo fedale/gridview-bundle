@@ -2,18 +2,17 @@
 
 namespace Fedale\GridviewBundle\Form;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\QueryBuilder;
 use Fedale\GridviewBundle\Contract\FilterApplierInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
 use Fedale\GridviewBundle\Filter\Applier\FilterApplierRegistry;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Form\FormFactoryInterface;
-use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Service\ResetInterface;
-
 
 /**
  * The grid's filter form.
@@ -24,7 +23,6 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 class SearchForm implements SearchFormInterface, ResetInterface
 {
-
     /**
      * Built on first use rather than in the constructor, and discarded by
      * {@see reset()}. A Symfony Form is single-use — once handleRequest() has
@@ -47,7 +45,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
     public function __construct(
         private FormFactoryInterface $formFactory,
         private RequestStack $requestStack,
-        private ?FilterApplierRegistry $applierRegistry = null
+        private ?FilterApplierRegistry $applierRegistry = null,
     ) {
         $this->filters = new ArrayCollection();
     }
@@ -98,7 +96,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
     public function addFilter(string $name, string $type, array $options)
     {
         $name = str_replace('.', '_', $name);
-        $class = "Fedale\\GridviewBundle\\Filter\\Filter" . ucfirst($type) . 'Type';
+        $class = 'Fedale\\GridviewBundle\\Filter\\Filter' . ucfirst($type) . 'Type';
         $this->getModelType()->add($name, $class, $options);
     }
 
@@ -157,7 +155,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
         return $this->applierRegistry ??= new FilterApplierRegistry();
     }
 
-    public function getCriteria(): Criteria|null
+    public function getCriteria(): ?Criteria
     {
         return $this->criteria;
     }
@@ -192,7 +190,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
             [
                 'method' => 'get',
                 'action' => '',
-                'required' => false
+                'required' => false,
             ]
         );
 
@@ -311,12 +309,13 @@ class SearchForm implements SearchFormInterface, ResetInterface
             'in' => $this->inOp($qb, $attribute, $param),
             default => $this->default($qb, $attribute, $param),
         };
+
         return $search;
     }
 
     public function search(QueryBuilder $qb, string $attribute, string $param)
     {
-        $token = strtok(strtolower($param), " ");
+        $token = strtok(strtolower($param), ' ');
 
         if ($this->isOperator($token)) {
             $operator = $token;
@@ -399,7 +398,7 @@ class SearchForm implements SearchFormInterface, ResetInterface
             'isnull',
             'isnotnull',
             'in',
-            'notin'
+            'notin',
         ];
 
         return $operators;
@@ -413,7 +412,6 @@ class SearchForm implements SearchFormInterface, ResetInterface
 
         return false;
     }
-
 
     private function eq(QueryBuilder $qb, string $attribute, string $searchTerm)
     {
@@ -537,7 +535,6 @@ class SearchForm implements SearchFormInterface, ResetInterface
         $qb->andWhere($qb->expr()->like($attribute, ':param'));
         $qb->setParameter(':param', '%' . $searchTerm);
     }
-
 
     private function default(QueryBuilder $qb, string $attribute, string $searchTerm)
     {

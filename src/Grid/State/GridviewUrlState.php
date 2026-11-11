@@ -6,15 +6,15 @@ use Symfony\Component\HttpFoundation\Request;
 
 class GridviewUrlState
 {
-    private array   $filters      = [];
+    private array $filters      = [];
     private ?string $globalSearch = null;
     private ?string $sort         = null;
-    private int     $page         = 1;
-    private ?int    $pageSize     = null;
+    private int $page         = 1;
+    private ?int $pageSize     = null;
     private ?string $view         = null;
 
     /** Current route parameters (e.g. {id}), needed to regenerate its URL. */
-    private array   $routeParams  = [];
+    private array $routeParams  = [];
 
     private string $formName      = 'fedaleForm';
     private string $sortParam     = 'sort';
@@ -28,7 +28,7 @@ class GridviewUrlState
         string $sortParam     = 'sort',
         string $pageParam     = 'page',
         string $pageSizeParam = 'per-page',
-        string $viewParam     = 'view'
+        string $viewParam     = 'view',
     ): static {
         $state = new static();
         $state->formName      = $formName;
@@ -152,38 +152,47 @@ class GridviewUrlState
     {
         return $this->filters;
     }
+
     public function hasFilters(): bool
     {
         return $this->filters !== [];
     }
+
     public function getSort(): ?string
     {
         return $this->sort;
     }
+
     public function getPage(): int
     {
         return $this->page;
     }
+
     public function getGlobalSearch(): ?string
     {
         return $this->globalSearch;
     }
+
     public function getView(): ?string
     {
         return $this->view;
     }
+
     public function getPageSize(): ?int
     {
         return $this->pageSize;
     }
+
     public function getSortParam(): string
     {
         return $this->sortParam;
     }
+
     public function getPageSizeParam(): string
     {
         return $this->pageSizeParam;
     }
+
     public function getViewParam(): string
     {
         return $this->viewParam;

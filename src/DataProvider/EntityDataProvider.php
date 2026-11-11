@@ -2,22 +2,22 @@
 
 namespace Fedale\GridviewBundle\DataProvider;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Fedale\GridviewBundle\Contract\AggregatableInterface;
 use Fedale\GridviewBundle\Contract\ChildRowResolverInterface;
 use Fedale\GridviewBundle\Contract\GroupingCapableInterface;
 use Fedale\GridviewBundle\Contract\ScopeVerifiableInterface;
 use Fedale\GridviewBundle\Contract\SearchFormInterface;
+use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
+use Fedale\GridviewBundle\Event\RowEvent;
 use Fedale\GridviewBundle\Row\Row;
 use Fedale\GridviewBundle\Serializer\RowSerializerFactory;
-use Fedale\GridviewBundle\Event\RowEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class EntityDataProvider extends AbstractDataProvider implements AggregatableInterface, GroupingCapableInterface, ScopeVerifiableInterface
 {

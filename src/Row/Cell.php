@@ -11,7 +11,8 @@ class Cell
         $this->data = $data;
     }
 
-    public function getKey(string $key) {
+    public function getKey(string $key)
+    {
         return $this->data[$key];
     }
 }

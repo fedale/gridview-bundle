@@ -48,17 +48,37 @@ class DoctrineChildRowResolverTest extends TestCase
     {
         $posts = [
             new class {
-                public function getId(): int { return 1; }
-                public function getTitle(): string { return 'First'; }
+                public function getId(): int
+                {
+                    return 1;
+                }
+
+                public function getTitle(): string
+                {
+                    return 'First';
+                }
             },
             new class {
-                public function getId(): int { return 2; }
-                public function getTitle(): string { return 'Second'; }
+                public function getId(): int
+                {
+                    return 2;
+                }
+
+                public function getTitle(): string
+                {
+                    return 'Second';
+                }
             },
         ];
         $parent = new class($posts) {
-            public function __construct(private array $posts) {}
-            public function getPosts(): array { return $this->posts; }
+            public function __construct(private array $posts)
+            {
+            }
+
+            public function getPosts(): array
+            {
+                return $this->posts;
+            }
         };
 
         $rows = $this->resolver($parent)->resolveForParent(42, $this->config());
@@ -74,7 +94,10 @@ class DoctrineChildRowResolverTest extends TestCase
     public function testResolveForParentReturnsEmptyWhenTheRelationHasNoRecords(): void
     {
         $parent = new class {
-            public function getPosts(): array { return []; }
+            public function getPosts(): array
+            {
+                return [];
+            }
         };
 
         $rows = $this->resolver($parent)->resolveForParent(42, $this->config());
@@ -93,15 +116,31 @@ class DoctrineChildRowResolverTest extends TestCase
     {
         $posts = array_map(
             fn(int $i) => new class($i) {
-                public function __construct(private int $id) {}
-                public function getId(): int { return $this->id; }
-                public function getTitle(): string { return "Post {$this->id}"; }
+                public function __construct(private int $id)
+                {
+                }
+
+                public function getId(): int
+                {
+                    return $this->id;
+                }
+
+                public function getTitle(): string
+                {
+                    return "Post {$this->id}";
+                }
             },
             range(1, 5),
         );
         $parent = new class($posts) {
-            public function __construct(private array $posts) {}
-            public function getPosts(): array { return $this->posts; }
+            public function __construct(private array $posts)
+            {
+            }
+
+            public function getPosts(): array
+            {
+                return $this->posts;
+            }
         };
 
         $config = GroupingConfig::fromArray(

@@ -9,51 +9,51 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class Pagination implements PaginationInterface
 {
     /**
-     * @var int|null Current page number.
+     * @var int|null current page number
      */
     protected ?int $currentPage;
 
     /**
-     * @var string Name of query parameter that contains page number.
+     * @var string name of query parameter that contains page number
      */
     protected string $pageParam = 'page';
 
     /**
-     * @var string Name of query parameter that contains number of items on page.
+     * @var string name of query parameter that contains number of items on page
      */
     protected string $pageSizeParam = 'per-page';
 
     /**
      * @var string Name of route. If route was not specified then current route
-     * will be used.
+     *             will be used.
      */
     protected ?string $route = null;
 
     /**
-     * @var int Total number of items.
+     * @var int total number of items
      */
     protected int $totalCount = 0;
 
     /**
      * @var int Default number of items per page. Will be used if [[$pageSize]]
-     * not specified.
+     *          not specified.
      */
     protected int $defaultPageSize = 20;
 
     /**
-     * @var int Default limit of items per page.
+     * @var int default limit of items per page
      */
     protected int $maxPageSize = 50;
 
     /**
-     * @var int|null Default number of items per page.
+     * @var int|null default number of items per page
      */
     protected ?int $pageSize;
 
     /**
      * @var int[] Selectable page sizes offered to the user (e.g. [25, 50, 100]).
-     * When non-empty a page-size selector is rendered and a requested page size
-     * is only honoured if it is one of these values.
+     *            When non-empty a page-size selector is rendered and a requested page size
+     *            is only honoured if it is one of these values.
      */
     protected array $pageSizeOptions = [];
 
@@ -64,13 +64,10 @@ class Pagination implements PaginationInterface
      *      'pageSizeParam' => 'per-page',
      *      'defaultPageSize' => 20,
      *      'maxPageSize' => 50
-     * ]
+     * ].
      */
     protected array $attributes = [];
 
-    /**
-     * @var RequestStack
-     */
     protected RequestStack $requestStack;
 
     /**
@@ -80,8 +77,6 @@ class Pagination implements PaginationInterface
      * see {@see \Fedale\GridviewBundle\Sort\Sort::__construct()}. A captured
      * Request would pin every later page of the grid to the page number asked
      * for by whichever request happened to build the container.
-     *
-     * @param RequestStack $requestStack
      */
     public function __construct(RequestStack $requestStack)
     {
@@ -160,18 +155,18 @@ class Pagination implements PaginationInterface
 
         $totalCount = $this->totalCount < 0 ? 0 : $this->totalCount;
 
-        return (int)(($totalCount + $pageSize - 1) / $pageSize);
+        return (int) (($totalCount + $pageSize - 1) / $pageSize);
     }
 
     /**
      * Get current page number. Pages numeration starts from zero.
      *
-     * @return int the zero-based current page number.
+     * @return int the zero-based current page number
      */
     public function getCurrentPage(): int
     {
         if (!isset($this->currentPage)) {
-            $currentPage = (int)($this->request()?->query->get($this->pageParam, 1) ?? 1) - 1;
+            $currentPage = (int) ($this->request()?->query->get($this->pageParam, 1) ?? 1) - 1;
 
             $this->setCurrentPage($currentPage);
         }
@@ -188,14 +183,13 @@ class Pagination implements PaginationInterface
      */
     protected function setCurrentPage($pageNumber)
     {
-        if (!is_numeric($pageNumber) || (int)$pageNumber <= 0) {
-
+        if (!is_numeric($pageNumber) || (int) $pageNumber <= 0) {
             $this->currentPage = 0;
 
             return $this;
         }
 
-        $pageNumber = (int)$pageNumber;
+        $pageNumber = (int) $pageNumber;
 
         $totalPageCount = $this->getPageCount();
 
@@ -212,8 +206,6 @@ class Pagination implements PaginationInterface
      * Get current number of items per page. If it's not specified yet the value
      * will be taken from query parameters. In other case default value will
      * be used.
-     *
-     * @return int
      */
     public function getPageSize(): ?int
     {
@@ -221,7 +213,7 @@ class Pagination implements PaginationInterface
             return $this->pageSize;
         }
 
-        $pageSize = (int)($this->request()?->query->get(
+        $pageSize = (int) ($this->request()?->query->get(
             $this->pageSizeParam,
             $this->defaultPageSize
         ) ?? $this->defaultPageSize);
@@ -241,9 +233,6 @@ class Pagination implements PaginationInterface
      * Set number of items to show per page.
      * By default, limit will be used.
      *
-     * @param int $pageSize
-     * @param bool $useLimit
-     *
      * @return $this
      */
     public function setPageSize(int $pageSize, bool $useLimit = true): static
@@ -259,7 +248,6 @@ class Pagination implements PaginationInterface
     /**
      * Fetch current route name.
      *
-     * @return string
      * @throws \Exception
      */
     public function getRoute(): string
@@ -272,7 +260,8 @@ class Pagination implements PaginationInterface
     }
 
     /**
-     * @return int Get offset value that can be used in data source query.
+     * @return int get offset value that can be used in data source query
+     *
      * @throws \Exception
      */
     public function getOffset(): int
@@ -284,7 +273,8 @@ class Pagination implements PaginationInterface
     }
 
     /**
-     * @return int Get limit value that can be used in data source query.
+     * @return int get limit value that can be used in data source query
+     *
      * @throws \Exception
      */
     public function getLimit(): int
@@ -296,8 +286,6 @@ class Pagination implements PaginationInterface
 
     /**
      * Get name of query parameter that stores current page index.
-     *
-     * @return string
      */
     public function getPageParamName(): string
     {
@@ -306,8 +294,6 @@ class Pagination implements PaginationInterface
 
     /**
      * Get default number of items per page.
-     *
-     * @return int
      */
     public function getDefaultPageSize(): int
     {
@@ -345,22 +331,21 @@ class Pagination implements PaginationInterface
     /**
      * Set total number of items.
      *
-     * @param int|float $totalCount
-     *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setTotalCount(int|float $totalCount): static
     {
         if (!is_numeric($totalCount)) {
             throw new \Exception(
-                'The expected type of the '.Pagination::class
+                'The expected type of the '.self::class
                 .' items total count is a numeric.'.gettype($totalCount)
                 .' given.'
             );
         }
 
-        $this->totalCount = (int)$totalCount;
+        $this->totalCount = (int) $totalCount;
 
         return $this;
     }
@@ -368,16 +353,17 @@ class Pagination implements PaginationInterface
     /**
      * Set route name.
      *
-     * @param string $route Route name.
+     * @param string $route route name
      *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setRoute($route)
     {
         if (!is_string($route)) {
             throw new \Exception(
-                'The expected type of the '.Pagination::class
+                'The expected type of the '.self::class
                 .' route is a string. '.gettype($route).' given.'
             );
         }
@@ -391,19 +377,20 @@ class Pagination implements PaginationInterface
      * @param int $defaultPageSize
      *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setDefaultPageSize($defaultPageSize)
     {
         if (!is_numeric($defaultPageSize)) {
             throw new \Exception(
-                'The expected type of the '.Pagination::class
+                'The expected type of the '.self::class
                 .' default page size is a numeric.'.gettype($defaultPageSize)
                 .' given.'
             );
         }
 
-        $this->defaultPageSize = (int)$defaultPageSize;
+        $this->defaultPageSize = (int) $defaultPageSize;
 
         return $this;
     }
@@ -412,13 +399,14 @@ class Pagination implements PaginationInterface
      * @param string $pageSizeParam
      *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setPageSizeParam($pageSizeParam)
     {
         if (!is_string($pageSizeParam)) {
             throw new \Exception(
-                'The expected type of the '.Pagination::class
+                'The expected type of the '.self::class
                 .' page size param name is a string. '.gettype($pageSizeParam)
                 .' given.'
             );
@@ -433,13 +421,14 @@ class Pagination implements PaginationInterface
      * @param string $pageParam
      *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setPageParam($pageParam)
     {
         if (!is_string($pageParam)) {
             throw new \Exception(
-                'The expected type of the '.Pagination::class
+                'The expected type of the '.self::class
                 .' page param name is a string. '.gettype($pageParam).' given.'
             );
         }

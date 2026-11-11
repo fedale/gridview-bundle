@@ -6,8 +6,8 @@ use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Form\Control\ControlTypeRegistry;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -102,12 +102,14 @@ abstract class AbstractColumn implements ColumnInterface
         private Gridview $gridview,
         protected ?string $twigFilter = null,
         protected ?string $label = null,
-        protected ?array $options = []
+        protected ?array $options = [],
     ) {
         $this->initColumn();
     }
 
-    protected function initColumn(): void {}
+    protected function initColumn(): void
+    {
+    }
 
     public function renderFilter(FormBuilder $form): void
     {
@@ -380,7 +382,6 @@ abstract class AbstractColumn implements ColumnInterface
         $this->control = $control;
     }
 
-    /** @return bool|array */
     public function getShowInDeleteConfirm(): bool|array
     {
         return $this->showInDeleteConfirm;

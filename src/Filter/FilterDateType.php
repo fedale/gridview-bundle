@@ -3,8 +3,8 @@
 namespace Fedale\GridviewBundle\Filter;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -57,6 +57,7 @@ class FilterDateType extends AbstractType
         // Merge client_options with defaults and inject Stimulus data attributes onto the wrapper div
         $resolver->setNormalizer('attr', function (Options $options, array $value): array {
             $clientOpts = array_merge(self::CLIENT_DEFAULTS, $options['client_options']);
+
             return array_merge([
                 'data-controller'                         => 'gridview-date-filter',
                 'data-gridview-date-filter-options-value' => json_encode($clientOpts),

@@ -22,7 +22,8 @@ class GridviewBuilderFactory
         private ?ContainerInterface $dataSourceLocator = null,
         private ?DataSourceDataProviderFactory $dataSourceProviderFactory = null,
         private ?GridOptionsValidator $optionsValidator = null,
-    ) {}
+    ) {
+    }
 
     public function createGridviewBuilder(): GridviewBuilder
     {

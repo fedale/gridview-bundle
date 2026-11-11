@@ -1,4 +1,5 @@
 <?php
+
 namespace Fedale\GridviewBundle\Grid;
 
 use Fedale\GridviewBundle\Column\ColumnFactory;
@@ -54,6 +55,7 @@ class GridviewBuilder implements GridviewBuilderInterface
     public function setId(string $id): static
     {
         $this->gridview->setId($id);
+
         return $this;
     }
 
@@ -282,6 +284,7 @@ class GridviewBuilder implements GridviewBuilderInterface
         if (array_key_exists('class', $yaml) && $yaml['class'] === null) {
             unset($yaml['class']);
         }
+
         return $yaml;
     }
 }

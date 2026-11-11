@@ -1,11 +1,12 @@
-<?php 
+<?php
+
 namespace Fedale\GridviewBundle\Column;
 
+use Closure;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeInterface;
 use Fedale\GridviewBundle\Filter\FilterClearNormalizer;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Twig\Markup;
-use \Closure;
 
 class DataColumn extends AbstractColumn
 {
@@ -24,7 +25,7 @@ class DataColumn extends AbstractColumn
     /** Per-column options passed to the data type's pipeline stages. */
     private array $format = [];
 
-     /**
+    /**
      * @var string|Closure|null an anonymous function or a string that is used to determine the value to display in the current column.
      *
      * If this is an anonymous function, it will be called for each row and the return value will be used as the value to
@@ -65,14 +66,13 @@ class DataColumn extends AbstractColumn
      */
     public bool $headerMirror = false;
 
-
     public function __construct (
         private Gridview $gridview,
         private string $attribute,
         protected ?string $twigFilter = null,
         protected ?string $label = null,
         protected ?array $options = [],
-    ) { 
+    ) {
         if (null === $this->label) {
             $this->setLabel($attribute);
         }
@@ -220,18 +220,18 @@ class DataColumn extends AbstractColumn
     // https://stackoverflow.com/questions/14704984/access-a-multidimensional-array-with-dot-notation
     private function resolve(array $a, $path, $default = null)
     {
-      $current = $a;
-      $p = strtok($path, '.');
-    
-      while ($p !== false) {
-        if (!isset($current[$p])) {
-          return $default;
+        $current = $a;
+        $p = strtok($path, '.');
+
+        while ($p !== false) {
+            if (!isset($current[$p])) {
+                return $default;
+            }
+            $current = $current[$p];
+            $p = strtok('.');
         }
-        $current = $current[$p];
-        $p = strtok('.');
-      }
-    
-      return $current;
+
+        return $current;
     }
 
     /**
@@ -310,6 +310,7 @@ class DataColumn extends AbstractColumn
 
         // Fallback to retro-compatible logic: ['header'] + 'input' iff inlineClear.
         $inlineClearDefault = (bool) ($this->gridview->getOptions()['behavior']['filterControls']['inlineClear'] ?? false);
+
         return FilterClearNormalizer::normalize(null, $inlineClearDefault);
     }
 

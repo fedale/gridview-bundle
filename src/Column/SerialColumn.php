@@ -1,13 +1,13 @@
-<?php 
+<?php
+
 namespace Fedale\GridviewBundle\Column;
 
-
-class SerialColumn extends AbstractColumn {
-
+class SerialColumn extends AbstractColumn
+{
     // public function __construct(
     //     private Gridview $gridview,
-    //     private ?string $attribute, 
-    //     private string $format, 
+    //     private ?string $attribute,
+    //     private string $format,
     //     private ?string $label,
     //     private ?array $options = []
     // ) {

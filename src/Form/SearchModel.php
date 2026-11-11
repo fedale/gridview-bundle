@@ -41,5 +41,7 @@ class SearchModel implements SearchModelInterface
         $this->dataProvider = $dataProvider;
     }
 
-    public function search(){}
+    public function search()
+    {
+    }
 }

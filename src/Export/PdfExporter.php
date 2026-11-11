@@ -113,7 +113,7 @@ class PdfExporter implements ExporterInterface
         foreach ($cells as $cell) {
             $text = $this->fit($cell, $maxChars);
             $ops[] = sprintf(
-                "BT %s %.1F Tf %.2F %.2F Td (%s) Tj ET",
+                'BT %s %.1F Tf %.2F %.2F Td (%s) Tj ET',
                 $font,
                 self::FONT_SIZE,
                 $x + $col * $colW,
@@ -136,24 +136,24 @@ class PdfExporter implements ExporterInterface
             $kids[] = (6 + 2 * $i) . ' 0 R';
         }
 
-        $objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+        $objects[1] = '<< /Type /Catalog /Pages 2 0 R >>';
         // %.2F (capital) is locale-independent: PDF coordinates always use a dot.
         $objects[2] = sprintf(
-            "<< /Type /Pages /Kids [%s] /Count %d /MediaBox [0 0 %.2F %.2F] "
-            . "/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>",
+            '<< /Type /Pages /Kids [%s] /Count %d /MediaBox [0 0 %.2F %.2F] '
+            . '/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>',
             implode(' ', $kids),
             $pageCount,
             self::PAGE_W,
             self::PAGE_H
         );
-        $objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
-        $objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+        $objects[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+        $objects[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
 
         foreach ($streams as $i => $stream) {
             $contentId = 5 + 2 * $i;
             $pageId = 6 + 2 * $i;
             $objects[$contentId] = sprintf("<< /Length %d >>\nstream\n%s\nendstream", \strlen($stream), $stream);
-            $objects[$pageId] = sprintf("<< /Type /Page /Parent 2 0 R /Contents %d 0 R >>", $contentId);
+            $objects[$pageId] = sprintf('<< /Type /Page /Parent 2 0 R /Contents %d 0 R >>', $contentId);
         }
 
         ksort($objects);

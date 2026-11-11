@@ -18,8 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class RouteNameResolutionTest extends TestCase
 {
     /**
-     * @param array<string, string>|null $methodMap    non-null → returned by routeNames() (method override)
-     * @param array<string, mixed>       $viewConfig   per-controller viewConfig() overrides
+     * @param array<string, string>|null $methodMap      non-null → returned by routeNames() (method override)
+     * @param array<string, mixed>       $viewConfig     per-controller viewConfig() overrides
      * @param list<string>               $existingRoutes route names routeExists() should report as present
      */
     private function controller(

@@ -14,7 +14,7 @@ class OptionsExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('options', [$this, 'renderOptions'], ['is_safe' => ['html']])
+            new TwigFilter('options', [$this, 'renderOptions'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -140,20 +140,17 @@ class OptionsExtension extends AbstractExtension
         return $env->getLoader()->exists($dedicated) ? $dedicated : self::REGION_WRAPPER;
     }
 
-    /**
-     */
     public function renderOptions(array $options = []): string
     {
         $str = '';
-        if ( count($options) == 0) {
+        if (count($options) == 0) {
             return $str;
         }
-        
+
         foreach ($options as $key => $value) {
             $str .= $key . '="' . $value . '" ';
         }
 
         return $str;
     }
-
 }

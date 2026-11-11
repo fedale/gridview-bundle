@@ -12,18 +12,12 @@ abstract class AbstractDataProvider implements DataProviderInterface
     private SearchModelInterface $searchModel;
 
     /**
-     * Array of arrays that carry data on
+     * Array of arrays that carry data on.
      */
     protected $models;
 
-    /**
-     * @var PaginationInterface
-     */
     protected PaginationInterface $pagination;
 
-    /**
-     * @var SortInterface
-     */
     protected SortInterface $sort;
 
     /**
@@ -75,8 +69,6 @@ abstract class AbstractDataProvider implements DataProviderInterface
     }
 
     /**
-     * @param PaginationInterface $pagination
-     *
      * @return $this
      */
     public function setPagination(PaginationInterface $pagination): static
@@ -87,28 +79,20 @@ abstract class AbstractDataProvider implements DataProviderInterface
     }
 
     /**
-     * @param SortInterface $sort
-     *
      * @return AbstractDataProvider
      */
     public function setSort(SortInterface $sort): static
     {
         $this->sort = $sort;
-        
+
         return $this;
     }
 
-    /**
-     * @return PaginationInterface
-     */
     public function getPagination(): PaginationInterface
     {
         return $this->pagination;
     }
 
-    /**
-     * @return SortInterface
-     */
     public function getSort(): SortInterface
     {
         return $this->sort;

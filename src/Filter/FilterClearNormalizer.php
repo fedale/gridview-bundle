@@ -23,7 +23,7 @@ final class FilterClearNormalizer
     private const MODES = ['header', 'input', 'chip', 'none'];
 
     /**
-     * @param mixed $clear             The raw `filter.clear` spec (or null when omitted).
+     * @param mixed $clear              The raw `filter.clear` spec (or null when omitted).
      * @param bool  $inlineClearDefault Grid-level filterControls.inlineClear — only
      *                                  applied when no explicit clear spec is given.
      *

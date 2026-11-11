@@ -11,15 +11,15 @@ namespace Fedale\GridviewBundle\Profiler;
 final class GridviewProfile
 {
     /**
-     * @param array<string, mixed>                   $options    fully merged grid options
-     * @param array<string, mixed>                   $rawParams  raw submitted filter-form params
-     * @param array<string, mixed>                   $filters    active (non-empty) filters
-     * @param array<string, mixed>                   $query      dql/sql/params/rootAlias
-     * @param array<string, mixed>                   $sort       orders/urlSort/multiSort
-     * @param array<string, mixed>                   $pagination mode/page/pageSize/offset/total/pages/options
-     * @param list<string>                           $renderers  available view names
-     * @param list<string>                           $filterBarColumns filter-bar column attributes
-     * @param list<array<string, mixed>>             $columns    per-column flag rows
+     * @param array<string, mixed>       $options          fully merged grid options
+     * @param array<string, mixed>       $rawParams        raw submitted filter-form params
+     * @param array<string, mixed>       $filters          active (non-empty) filters
+     * @param array<string, mixed>       $query            dql/sql/params/rootAlias
+     * @param array<string, mixed>       $sort             orders/urlSort/multiSort
+     * @param array<string, mixed>       $pagination       mode/page/pageSize/offset/total/pages/options
+     * @param list<string>               $renderers        available view names
+     * @param list<string>               $filterBarColumns filter-bar column attributes
+     * @param list<array<string, mixed>> $columns          per-column flag rows
      */
     public function __construct(
         public readonly string $key,

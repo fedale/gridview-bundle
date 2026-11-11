@@ -26,6 +26,7 @@ interface GridFormBuilderInterface
      * The attribute names of the columns that contribute a control, in order.
      *
      * @param iterable<ColumnInterface> $columns
+     *
      * @return string[]
      */
     public function controlAttributes(iterable $columns): array;

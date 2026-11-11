@@ -111,6 +111,7 @@ final class DoctrineTypeMapper
      * inverse-side associations are opt-in only.
      *
      * @param list<array{name: string, kind: string, isIdentifier: bool, inverseSide?: bool}> $fields
+     *
      * @return list<string>
      */
     public function defaultSelection(array $fields): array
@@ -136,7 +137,8 @@ final class DoctrineTypeMapper
      * Builds the ordered list of column plans for the selected fields.
      *
      * @param list<array{name: string, kind: string, isIdentifier: bool, inverseSide?: bool, targetClass?: string}> $selectedFields
-     * @param array<string, array{label?: string, sortable?: bool, filter?: bool, control?: bool}> $advancedOverrides field name => overrides from the wizard's advanced step
+     * @param array<string, array{label?: string, sortable?: bool, filter?: bool, control?: bool}>                  $advancedOverrides field name => overrides from the wizard's advanced step
+     *
      * @return list<array{attribute: string, label: string, type: ?string, sortable: bool, filter: ?array, control: ?array, value: ?RawPhp}>
      */
     public function buildColumnPlans(array $selectedFields, DoctrineHelper $doctrineHelper, ClassMetadata $metadata, array $advancedOverrides = []): array
@@ -304,6 +306,7 @@ final class DoctrineTypeMapper
 
     /**
      * @param list<array{attribute: string, sortable: bool}> $plans
+     *
      * @return array<string, array{asc: list<string>, desc: list<string>}>
      */
     public function sortMapFor(array $plans, string $alias): array
@@ -322,6 +325,7 @@ final class DoctrineTypeMapper
 
     /**
      * @param list<array{attribute: string, filter: ?array}> $plans
+     *
      * @return array<string, array{0: string, 1: string}>
      */
     public function searchFieldsFor(array $plans, string $alias): array

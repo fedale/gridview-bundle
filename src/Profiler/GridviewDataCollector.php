@@ -13,7 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class GridviewDataCollector extends AbstractDataCollector
 {
-    public function __construct(private readonly GridviewProfileRegistry $registry) {}
+    public function __construct(private readonly GridviewProfileRegistry $registry)
+    {
+    }
 
     public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
