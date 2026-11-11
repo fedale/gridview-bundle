@@ -73,6 +73,8 @@ class DataColumnFooterTest extends TestCase
     {
         $column = $this->column('qty');
         $column->setColumnType(new NumberType());
+        // An explicit locale: the default one is the machine's.
+        $column->setFormat(['locale' => 'it']);
         $column->setFooter('sum');
 
         $out = $column->renderFooter(1234, []);

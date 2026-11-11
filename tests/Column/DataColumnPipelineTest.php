@@ -29,7 +29,8 @@ class DataColumnPipelineTest extends TestCase
     {
         $column = $this->column('amount');
         $column->setColumnType(new NumberType());
-        $column->setFormat(['decimals' => 2]);
+        // An explicit locale: the default one is the machine's.
+        $column->setFormat(['decimals' => 2, 'locale' => 'it']);
 
         $out = $column->render($this->row(['amount' => 1234.56]), 0);
 

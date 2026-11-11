@@ -125,6 +125,7 @@ class ThemeRegistryTest extends TestCase
 
         $this->assertSame([
             'btn', 'btn.danger', 'btn.icon', 'btn.primary',
+            'modal.dialog.lg', 'modal.dialog.md', 'modal.dialog.sm', 'modal.dialog.xl',
             'pagination', 'pagination.active', 'pagination.disabled',
             'pagination.item', 'pagination.link',
         ], $keys);

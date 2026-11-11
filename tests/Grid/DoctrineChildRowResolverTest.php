@@ -3,9 +3,9 @@
 namespace Fedale\GridviewBundle\Tests\Grid;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
-use Doctrine\Persistence\ObjectRepository;
 use Fedale\GridviewBundle\Doctrine\EntityIdentifier;
 use Fedale\GridviewBundle\Grid\DoctrineChildRowResolver;
 use Fedale\GridviewBundle\Grid\GroupingConfig;
@@ -24,7 +24,8 @@ class DoctrineChildRowResolverTest extends TestCase
 
     private function resolver(?object $parent): DoctrineChildRowResolver
     {
-        $repository = $this->createMock(ObjectRepository::class);
+        // An EntityRepository: ORM 3 declares it as the return type of getRepository().
+        $repository = $this->createMock(EntityRepository::class);
         $repository->method('findOneBy')->willReturn($parent);
 
         $metadata = $this->createMock(ClassMetadata::class);
