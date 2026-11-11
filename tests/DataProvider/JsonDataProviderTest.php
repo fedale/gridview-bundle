@@ -169,6 +169,33 @@ class JsonDataProviderTest extends TestCase
         $this->assertSame([['id' => 3], ['id' => 4]], array_map(static fn (Row $row): array => $row->data, $rows->toArray()));
     }
 
+    public function testClientSidePaginationFallsBackToTheDefaultPageSize(): void
+    {
+        // getPageSize() is nullable on the interface: when it reports no page
+        // size, the in-memory slice must use the pagination's own default
+        // rather than return the whole list.
+        $all = [['id' => 1], ['id' => 2], ['id' => 3], ['id' => 4], ['id' => 5]];
+        $client = $this->client($all);
+
+        $pagination = $this->createMock(PaginationInterface::class);
+        $pagination->method('getPageSize')->willReturn(null);
+        $pagination->method('getDefaultPageSize')->willReturn(3);
+        $pagination->method('getOffset')->willReturn(0);
+        $pagination->method('setTotalCount')->willReturnSelf();
+
+        $sort = $this->createMock(SortInterface::class);
+        $sort->method('fetchOrders')->willReturn([]);
+
+        $provider = new JsonDataProvider($client, $this->createMock(EventDispatcherInterface::class));
+        $provider->setSort($sort);
+        $provider->setPagination($pagination);
+        $provider->prepareModels(['baseUri' => 'https://api.example.test', 'resource' => 'items']);
+
+        $rows = $provider->getData();
+
+        $this->assertSame([['id' => 1], ['id' => 2], ['id' => 3]], array_map(static fn (Row $row): array => $row->data, $rows->toArray()));
+    }
+
     public function testClientSidePaginationSortsPlainArrayInMemory(): void
     {
         // No totalPath and the endpoint does not sort server-side: the provider

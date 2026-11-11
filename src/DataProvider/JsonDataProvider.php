@@ -28,8 +28,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class JsonDataProvider extends AbstractDataProvider
 {
-    /** Page size used only when the pagination component reports none yet. */
-    private const DEFAULT_PAGE_SIZE = 10;
+    /**
+     * Page size used only when the pagination component reports none yet.
+     * Mirrors Pagination's own default and GridviewConfigRegistry's
+     * DATA_PAGINATION_DEFAULTS, so a grid pages the same way on every provider.
+     */
+    private const DEFAULT_PAGE_SIZE = 20;
 
     private string $baseUri = '';
 
@@ -71,6 +75,9 @@ final class JsonDataProvider extends AbstractDataProvider
     ) {
     }
 
+    /**
+     * @param string|array<string, mixed> $models the resource path, or the full endpoint config
+     */
     public function prepareModels(string|array $models): void
     {
         // A bare string is accepted as a shorthand for the resource path, but
@@ -106,12 +113,18 @@ final class JsonDataProvider extends AbstractDataProvider
         // under. Global search is handled by applyGlobalSearch() instead.
     }
 
+    /**
+     * @param array<array-key, string> $fields
+     */
     public function applyGlobalSearch(array $fields, string $term): void
     {
         $this->searchTerm = $term;
     }
 
-    public function getData()
+    /**
+     * @return ArrayCollection<int, Row>
+     */
+    public function getData(): ArrayCollection
     {
         if (null !== $this->totalPath) {
             // Server-side pagination. totalCount must be set *before* getOffset()
@@ -143,7 +156,10 @@ final class JsonDataProvider extends AbstractDataProvider
         return $this->models = $this->buildRows($page, $limit, $offset);
     }
 
-    public function getAllData()
+    /**
+     * @return ArrayCollection<int, Row>
+     */
+    public function getAllData(): ArrayCollection
     {
         // Export path: every matching row, unpaginated. When the API pages
         // server-side, probe the total and request exactly that many in one call.
@@ -207,6 +223,8 @@ final class JsonDataProvider extends AbstractDataProvider
 
     /**
      * @param list<array<string, mixed>> $items
+     *
+     * @return ArrayCollection<int, Row>
      */
     private function buildRows(array $items, int $pageSize, int $offset): ArrayCollection
     {

@@ -7,17 +7,31 @@ rather than on the concrete classes:
 
 | Interface | Namespace | Stable |
 |-----------|-----------|--------|
-| `GridviewInterface` | `Fedale\GridviewBundle\Grid` | ✓ |
-| `GridviewBuilderInterface` | `Fedale\GridviewBundle\Grid` | ✓ |
-| `ColumnInterface` | `Fedale\GridviewBundle\Column` | ✓ |
-| `DataProviderInterface` | `Fedale\GridviewBundle\DataProvider` | ✓ |
-| `SortInterface` | `Fedale\GridviewBundle\Component` | ✓ |
-| `PaginationInterface` | `Fedale\GridviewBundle\Component` | ✓ |
-| `SearchFormInterface` | `Fedale\GridviewBundle\Service` | ✓ |
-| `SearchModelInterface` | `Fedale\GridviewBundle\Service` | ✓ |
+| `GridviewInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `GridviewBuilderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `ColumnInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `DataProviderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `SortInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `PaginationInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `SearchFormInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+| `SearchModelInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
 | `GridDataSourceInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
 | `FilterCriteriaBuilderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
 | `ColumnAwareDataProviderInterface` | `Fedale\GridviewBundle\Contract` | ✓ |
+
+> **Upgrading from 1.3.0 or earlier.** `PaginationInterface` now declares
+> `getDefaultPageSize(): int`, the page size a data provider falls back to when
+> `getPageSize()` returns `null`. The bundle's `Pagination` class already had it, so
+> nothing changes if you use or extend that class. If your app implements
+> `PaginationInterface` directly, add the method — PHP refuses to load a class that
+> implements the interface without it:
+>
+> ```php
+> public function getDefaultPageSize(): int
+> {
+>     return 20; // or the default page size your pagination is configured with
+> }
+> ```
 
 ## Request-scoped services
 
@@ -652,7 +666,7 @@ final class HttpApiDataProvider extends AbstractDataProvider
         // it runs getTotalCount() before setFirstResult()/setMaxResults().
         $this->pagination->setTotalCount($this->fetchTotalCount());
 
-        $limit  = $this->pagination->getPageSize() ?? 10;
+        $limit  = $this->pagination->getPageSize() ?? $this->pagination->getDefaultPageSize();
         $offset = $this->pagination->getOffset();
 
         $payload = $this->fetch($limit, $offset);

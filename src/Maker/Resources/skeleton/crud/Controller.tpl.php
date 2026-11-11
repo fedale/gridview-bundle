@@ -68,7 +68,7 @@ class <?= $class_name; ?> extends AbstractCrudGridController
             // 'sort' below). Set it only to change the query-builder alias.
 <?php endif; ?>
             'pagination' => ['defaultPageSize' => <?= $page_size; ?>],
-<?php if ($search_php !== null): ?>
+<?php if (isset($search_php)): ?>
             // Declarative filter map (query-side). Mirrors 'sort' below: both are
             // an attribute-keyed 'map'.
             'search' => <?= $search_php; ?>,

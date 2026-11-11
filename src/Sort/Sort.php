@@ -472,10 +472,8 @@ class Sort implements SortInterface
     }
 
     /**
-     * @param string $sortParam
-     *
-     * @return $this
-     * @throws SortException
+     * Name of the query parameter that carries the sort order ("sort" unless
+     * changed with setSortParam()).
      */
     public function getSortParam(): string
     {
