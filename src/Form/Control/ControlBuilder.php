@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Form\Control;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -77,7 +78,7 @@ class ControlBuilder
      *
      * @param bool|string|array<string, mixed>|ControlType $control
      *
-     * @return array{0: class-string, 1: array<string, mixed>}
+     * @return array{0: class-string<FormTypeInterface>, 1: array<string, mixed>}
      */
     public function field(bool|string|array|ControlType $control, ?string $label = null, string $dataType = 'text'): array
     {
@@ -90,7 +91,7 @@ class ControlBuilder
      *
      * @param array<string, mixed> $control
      *
-     * @return array{0: class-string, 1: array<string, mixed>}
+     * @return array{0: class-string<FormTypeInterface>, 1: array<string, mixed>}
      */
     public function formField(array $control, ?string $label = null): array
     {

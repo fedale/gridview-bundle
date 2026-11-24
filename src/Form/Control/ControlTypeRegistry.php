@@ -28,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\FormTypeInterface;
 
 /**
  * Maps a column `control.type` to the Symfony FormType class used to render the
@@ -42,7 +43,7 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 class ControlTypeRegistry
 {
     /**
-     * @var array<string, class-string>
+     * @var array<string, class-string<FormTypeInterface>>
      */
     private array $types = [
         // Text-family
@@ -81,14 +82,18 @@ class ControlTypeRegistry
         'media'    => FileType::class,
     ];
 
-    /** Register or override a control type. */
+    /**
+     * Register or override a control type.
+     *
+     * @param class-string<FormTypeInterface> $formTypeClass
+     */
     public function register(string $type, string $formTypeClass): void
     {
         $this->types[$type] = $formTypeClass;
     }
 
     /**
-     * @return class-string
+     * @return class-string<FormTypeInterface>
      */
     public function get(string $type): string
     {
