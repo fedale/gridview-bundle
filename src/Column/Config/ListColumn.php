@@ -27,4 +27,23 @@ class ListColumn extends AbstractColumnConfig
             ->controlSetting('max', $max)
             ->controlSetting('inline', $inline);
     }
+
+    /**
+     * Edit the list as free text labels (a `tags` control): `$suggestions` are offered as
+     * the user types, and with `$restrict` they are the only labels accepted. `$max` counts
+     * the labels and `$maxLength` measures each one; null: no limit.
+     *
+     * @param list<string> $suggestions
+     */
+    public function tags(array $suggestions = [], bool $restrict = false, ?int $max = null, ?int $maxLength = null): static
+    {
+        $this->controlType(ControlType::Tags)
+            ->controlSetting('suggestions', $suggestions)
+            ->controlSetting('restrict', $restrict);
+        if ($max !== null) {
+            $this->controlSetting('max', $max);
+        }
+
+        return $maxLength !== null ? $this->controlSetting('maxLength', $maxLength) : $this;
+    }
 }

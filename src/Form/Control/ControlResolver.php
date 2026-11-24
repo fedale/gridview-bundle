@@ -48,7 +48,7 @@ class ControlResolver
     private const NUMBER_CONTROLS = ['number', 'integer'];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, multiple: bool, current: MediaFile|list<MediaFile>|null, accept: ?string, showsFiles: bool, entry: ?array<string, mixed>, inline: bool, validate: bool}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, multiple: bool, current: MediaFile|list<MediaFile>|null, accept: ?string, showsFiles: bool, entry: ?array<string, mixed>, inline: bool, suggestions: list<string>, restrict: bool, validate: bool}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -77,7 +77,7 @@ class ControlResolver
         $required = (bool) ($control['required'] ?? false);
         $options  = $control['options'] ?? [];
 
-        $url = $this->setting($type, $control, 'url', ['relation'], 'is_string');
+        $url = $this->setting($type, $control, 'url', ['relation', 'tags'], 'is_string');
         if ($type === 'relation' && $url === null && !isset($options['class'])) {
             throw new \InvalidArgumentException(
                 'A "relation" control requires options.class (the related entity FQCN) or a url (a remote lookup). '
@@ -85,7 +85,7 @@ class ControlResolver
             );
         }
         $labels = $this->setting($type, $control, 'labels', ['relation'], 'is_callable');
-        if ($url !== null && $labels === null) {
+        if ($type === 'relation' && $url !== null && $labels === null) {
             throw new \InvalidArgumentException('A remote "relation" control requires labels, a callable giving the labels of the ids it is given.');
         }
         $dependsOn = $this->setting($type, $control, 'dependsOn', ['relation'], 'is_string');
@@ -107,8 +107,15 @@ class ControlResolver
             $modes = [$modes];
         }
 
-        // A number's bound is any number; a collection's is a count of rows.
-        $bound = static fn(mixed $v): bool => $type === 'collection' ? \is_int($v) && $v >= 0 : \is_int($v) || \is_float($v);
+        // A number's bound is any number; a collection's is a count of rows, a tags
+        // control's a count of labels.
+        $bound = static fn(mixed $v): bool => \in_array($type, ['collection', 'tags'], true) ? \is_int($v) && $v >= 0 : \is_int($v) || \is_float($v);
+
+        $suggestions = $this->setting($type, $control, 'suggestions', ['tags'], static fn(mixed $v): bool => \is_array($v) && array_is_list($v) && array_filter($v, static fn(mixed $label): bool => !\is_string($label) || $label === '') === []);
+        $restrict = $this->setting($type, $control, 'restrict', ['tags'], 'is_bool') ?? false;
+        if ($restrict && ($suggestions ?? []) === []) {
+            throw new \InvalidArgumentException('A "tags" control with restrict requires its suggestions: the only labels it accepts.');
+        }
 
         return [
             'type'            => $type,
@@ -125,11 +132,12 @@ class ControlResolver
             // They live beside `options`, never inside it: `options` goes to the
             // FormType untouched, and NumberType already has a `scale` that rounds.
             'display'         => $this->display($type, $control['display'] ?? null),
-            'maxLength'       => $this->setting($type, $control, 'maxLength', self::TEXT_CONTROLS, 'is_int'),
+            // The longest text, or the longest label of a tags control.
+            'maxLength'       => $this->setting($type, $control, 'maxLength', [...self::TEXT_CONTROLS, 'tags'], 'is_int'),
             // The bounds of a number, or the rows a collection requires and allows (0: no
             // limit).
             'min'             => $this->setting($type, $control, 'min', [...self::NUMBER_CONTROLS, 'collection'], $bound),
-            'max'             => $this->setting($type, $control, 'max', [...self::NUMBER_CONTROLS, 'collection'], $bound),
+            'max'             => $this->setting($type, $control, 'max', [...self::NUMBER_CONTROLS, 'collection', 'tags'], $bound),
             'scale'           => $this->setting($type, $control, 'scale', ['number'], static fn(mixed $v): bool => \is_int($v) && $v >= 0),
             // The password's own settings: asked twice, the strength meter and the
             // show/hide eye (the gridview-password-* controllers), the shortest accepted.
@@ -157,6 +165,10 @@ class ControlResolver
             // `label`), and whether a row stands on one line.
             'entry'           => $this->entry($type, $control, $options),
             'inline'          => $this->setting($type, $control, 'inline', ['collection'], 'is_bool') ?? false,
+            // A tags control: the labels it suggests, and whether they are the only ones
+            // accepted. Its `url` suggests more, its `max` counts the labels.
+            'suggestions'     => $suggestions ?? [],
+            'restrict'        => $restrict,
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.

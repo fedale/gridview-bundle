@@ -10,6 +10,8 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -27,6 +29,9 @@ use Symfony\UX\Autocomplete\Form\AutocompleteChoiceTypeExtension;
  */
 class ControlBuilder
 {
+    /** Controls whose input is a number: `min` and `max` are its attributes and a Range. */
+    private const NUMBER_CONTROLS = ['number', 'integer'];
+
     public function __construct(
         private readonly ControlTypeRegistry $registry,
         private readonly ControlResolver $resolver = new ControlResolver(),
@@ -137,15 +142,28 @@ class ControlBuilder
         // bypass.
         $minLength = \is_int($control['minLength'] ?? null) ? $control['minLength'] : null;
         $maxLength = \is_int($control['maxLength'] ?? null) ? $control['maxLength'] : null;
-        if ($validate && ($minLength !== null || $maxLength !== null)) {
+        if ($validate && $type !== 'tags' && ($minLength !== null || $maxLength !== null)) {
             $constraints[] = new Length(min: $minLength, max: $maxLength);
         }
-        if ($validate && $type !== 'collection' && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
+        if ($validate && !\in_array($type, ['collection', 'tags'], true) && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
             $constraints[] = new Range(min: $control['min'] ?? null, max: $control['max'] ?? null);
         }
         // A collection's bounds count its rows, 0 meaning no limit.
         if ($validate && $type === 'collection' && (($control['min'] ?? 0) > 0 || ($control['max'] ?? 0) > 0)) {
             $constraints[] = new Count(min: ($control['min'] ?? 0) > 0 ? $control['min'] : null, max: ($control['max'] ?? 0) > 0 ? $control['max'] : null);
+        }
+        // A tags control checks each label, their count, and with `restrict` that each one
+        // is a suggestion (TagsType has already given it the suggestion's spelling).
+        if ($validate && $type === 'tags') {
+            if ($maxLength !== null) {
+                $constraints[] = new All([new Length(max: $maxLength)]);
+            }
+            if (\is_int($control['max'] ?? null) && $control['max'] > 0) {
+                $constraints[] = new Count(max: $control['max']);
+            }
+            if (($control['restrict'] ?? false) === true) {
+                $constraints[] = new Choice(choices: $control['suggestions'] ?? [], multiple: true);
+            }
         }
         foreach ($control['constraints'] ?? [] as $constraint) {
             $constraints[] = $constraint;
@@ -177,6 +195,15 @@ class ControlBuilder
         }
         if ($type === 'collection') {
             return [$this->registry->get('collection'), $this->collection($control, $options)];
+        }
+        if ($type === 'tags') {
+            return [$this->registry->get('tags'), $options + array_filter([
+                'suggestions'     => $control['suggestions'] ?? [],
+                'restrict'        => ($control['restrict'] ?? false) === true,
+                'max'             => \is_int($control['max'] ?? null) && $control['max'] > 0 ? $control['max'] : null,
+                'max_length'      => \is_int($control['maxLength'] ?? null) ? $control['maxLength'] : null,
+                'suggestions_url' => \is_string($control['url'] ?? null) ? $control['url'] : null,
+            ], static fn(mixed $value): bool => $value !== null)];
         }
         if ($type === 'relation' && \is_string($control['url'] ?? null)) {
             return $this->remoteRelation($control, $options);
@@ -337,11 +364,12 @@ class ControlBuilder
     {
         $attr = \is_array($options['attr'] ?? null) ? $options['attr'] : [];
 
-        if (\is_int($control['maxLength'] ?? null)) {
+        // A tags input holds several labels: its maxLength is per label (see tags()).
+        if ($type !== 'tags' && \is_int($control['maxLength'] ?? null)) {
             $attr += ['maxlength' => $control['maxLength']];
         }
         foreach (['min', 'max'] as $bound) {
-            if ($type !== 'collection' && ($control[$bound] ?? null) !== null) {
+            if (\in_array($type, self::NUMBER_CONTROLS, true) && ($control[$bound] ?? null) !== null) {
                 $attr += [$bound => $control[$bound]];
             }
         }

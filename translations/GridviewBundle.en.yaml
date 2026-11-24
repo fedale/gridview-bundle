@@ -61,6 +61,9 @@ media.move_down: "Move %name% down"
 collection.add: "Add a row"
 collection.remove: "Remove"
 
+tags.add: "Add a tag"
+tags.remove: "Remove %tag%"
+
 crud.cancel: "Cancel"
 crud.confirm: "Confirm"
 crud.create: "Create"

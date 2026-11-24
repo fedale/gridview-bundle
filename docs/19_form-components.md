@@ -4,8 +4,8 @@ The bundle's form theme and stylesheet are not limited to the grid's CRUD forms.
 form of the host application can use them, and get the same look as the grid: rows, labels,
 controls, errors, required markers, and a few components forms often need: an on/off
 **switch**, a choice drawn as **buttons side by side**, a **password strength meter** and
-**show/hide eye**, **repeatable rows** added and removed in the page, and the **current files**
-of an upload, reordered in the page.
+**show/hide eye**, **repeatable rows** added and removed in the page, the **current files**
+of an upload, reordered in the page, and **free labels** drawn as chips.
 
 Everything is styled through the `--gv-*` design tokens, so it follows the theme, the dark mode
 and the framework presets of the grid ([Theming](06_theming.md)).
@@ -135,6 +135,35 @@ input; without JavaScript the buttons stay hidden and every file is kept.
 | `gv-media-list__item` | A file of the list (target `item`, `data-id`) |
 | `gv-media-list__thumbnail`, `gv-media-list__icon` | A thumbnail for an image, an icon for any other file |
 | `gv-media-list__actions` | Its buttons (target `actions`), hidden until the controller runs |
+
+## Free labels as chips (tags)
+
+The `gridview-tags` controller turns a text input of labels separated by commas into chips: it
+hides the input (still the field the form submits) and draws a chip per label with its ×, then an
+input adding labels, with the suggestions as its datalist. A gridview `tags` control
+([CRUD](08_crud.md#free-labels-tags)) sets it up; by hand, on any text input:
+
+```php
+$builder->add('keywords', TextType::class, ['attr' => [
+    'data-controller' => 'gridview-tags',
+    'data-gridview-tags-suggestions-value' => json_encode(['urgent', 'billing']),
+    'data-gridview-tags-max-value' => 5,
+]]);
+```
+
+| Value | Meaning |
+|---|---|
+| `suggestions` | Labels offered as the user types |
+| `restrict` | Only the suggestions are accepted |
+| `max` / `max-length` | The most labels / the longest one (0: no limit); the input hides at the maximum |
+| `url` | Asked for more suggestions: `?query=<typed text>` in, a JSON list of strings out |
+| `remove-label` / `placeholder` | The texts of the × (`%tag%` is the label) and of the input |
+
+| Class | Element |
+|---|---|
+| `gv-tags` | The box, framed like an input |
+| `gv-tags__chip`, `gv-tags__remove` | A label and its remove button |
+| `gv-tags__entry` | The input adding labels; `aria-invalid` while it holds a refused one |
 
 ## Conditional rows
 

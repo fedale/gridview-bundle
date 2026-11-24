@@ -15,6 +15,7 @@
 //   .gv-collection           repeatable rows, added and removed (gridview-collection)
 //   .gv-media                a media control with its current file (preview, Remove, upload)
 //   .gv-media-list           a media control with several files, reordered (gridview-media-list)
+//   .gv-tags                 free text labels as chips, with an input adding them (gridview-tags)
 //   .gv-form-row[hidden]     a row shown only while another field holds some values (gridview-conditional)
 //
 // Every colour and size comes from the --gv-* tokens.
@@ -564,5 +565,79 @@ form:has(.gv-form-label.required) .gv-required-note {
 
     &[hidden] {
         display: none;
+    }
+}
+
+// ── Tags: free text labels as chips ────────────────────────────────
+//
+// Drawn by gridview-tags in place of the text input it hides: one chip per label with its ×,
+// then the input adding labels, the whole box framed like an input.
+
+.gv-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .25rem;
+    padding: .2rem .35rem;
+    border: 1px solid var(--gv-input-border);
+    border-radius: var(--gv-input-radius);
+    background: var(--gv-input-bg, var(--gv-color-bg));
+
+    &:focus-within {
+        border-color: var(--gv-input-border-focus);
+    }
+}
+
+.gv-tags__list {
+    display: contents;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gv-tags__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .2rem;
+    padding: .1rem .2rem .1rem .5rem;
+    border-radius: 999px;
+    background: var(--gv-color-bg-subtle);
+    border: 1px solid var(--gv-color-border);
+    font-size: .875em;
+}
+
+.gv-tags__remove {
+    display: inline-flex;
+    padding: 0 .3rem;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--gv-color-text-muted);
+    cursor: pointer;
+
+    &:hover {
+        color: var(--gv-danger-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--gv-input-border-focus);
+    }
+}
+
+.gv-tags__entry {
+    flex: 1 1 8rem;
+    min-inline-size: 6rem;
+    padding: .2rem;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+
+    &:focus {
+        outline: none;
+    }
+
+    &[aria-invalid="true"] {
+        color: var(--gv-danger-color);
     }
 }

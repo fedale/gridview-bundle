@@ -84,6 +84,8 @@ class ControlTypeRegistry
         'media'    => FileType::class,
         // Repeatable rows, each a ControlRowType (from control specs) or a host type.
         'collection' => RowCollectionType::class,
+        // Free text labels: a list of strings.
+        'tags'     => TagsType::class,
     ];
 
     /**

@@ -42,4 +42,6 @@ enum ControlType: string
     case Media = 'media';
     /** Repeatable rows: a CollectionType drawn by the gridview-collection controller. */
     case Collection = 'collection';
+    /** Free text labels, drawn as chips by the gridview-tags controller. */
+    case Tags = 'tags';
 }

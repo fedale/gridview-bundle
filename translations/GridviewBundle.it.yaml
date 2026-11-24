@@ -61,6 +61,9 @@ media.move_down: "Sposta giù %name%"
 collection.add: "Aggiungi una riga"
 collection.remove: "Rimuovi"
 
+tags.add: "Aggiungi un tag"
+tags.remove: "Rimuovi %tag%"
+
 crud.cancel: "Annulla"
 crud.confirm: "Conferma"
 crud.create: "Crea"

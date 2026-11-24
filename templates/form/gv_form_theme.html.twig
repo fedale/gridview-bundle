@@ -6,7 +6,8 @@
   [data-gv-scope]: a checkbox with class gv-switch is drawn as a switch, an
   expanded choice with class gv-segmented as buttons side by side (_forms.scss),
   a media control showing its files draws them (gv_media, gv_media_list), and a
-  collection control its repeatable rows (gv_collection).
+  collection control its repeatable rows (gv_collection), a tags control its chips
+  (gv_tags, drawn by the gridview-tags controller).
   Applied automatically unless a host overrides `form.theme` in its grid
   controller's viewConfig() (see AbstractCrudGridController::defaultConfig()).
 #}
@@ -185,3 +186,14 @@
         {%- endif -%}
     </fieldset>
 {%- endblock gv_collection_entry %}
+
+{#- A tags control (TagsType): the labels separated by commas in a text input, which the
+    gridview-tags controller draws as chips with an input adding them. The controller's texts
+    are translated here, its only Twig. -#}
+{%- block gv_tags_widget -%}
+    {%- set attr = attr|merge({
+        'data-gridview-tags-remove-label-value': 'tags.remove'|trans({}, 'GridviewBundle'),
+        'data-gridview-tags-placeholder-value': attr.placeholder|default('tags.add'|trans({}, 'GridviewBundle')),
+    }) -%}
+    {{- block('form_widget_simple') -}}
+{%- endblock gv_tags_widget %}

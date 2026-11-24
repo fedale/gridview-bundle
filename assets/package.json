@@ -158,6 +158,12 @@
         "name": "gridview-media-list",
         "fetch": "lazy",
         "enabled": true
+      },
+      "tags": {
+        "main": "controllers/gridview-tags_controller.js",
+        "name": "gridview-tags",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

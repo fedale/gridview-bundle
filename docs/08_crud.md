@@ -58,6 +58,7 @@ entity, a normalised URL…) with no custom code.
 | `hidden` | `HiddenType` | |
 | `media` | `FileType` | file upload (unmapped, see below) |
 | `collection` | `RowCollectionType` (a `CollectionType`) | repeatable rows, each built from the control specs of `entry` (see [Repeatable rows](#repeatable-rows-collection)) |
+| `tags` | `TagsType` (a `TextType`) | free text labels as chips, bound as a list of strings (see [Free labels](#free-labels-tags)) |
 
 ```php
 $columns = [
@@ -106,6 +107,11 @@ and it would silently round extra decimals instead of letting the user correct t
 | `min`, `max` | `collection` | the rows required and allowed (0: no limit): the buttons of the page, and a `Count` constraint |
 | `entry` | `collection` | the fields of a row: control specs keyed by field name, each may carry its `label` |
 | `inline` | `collection` | `true`: each row on one line |
+| `suggestions` | `tags` | the labels offered as the user types, in this order |
+| `restrict` | `tags` | `true`: only the `suggestions` are accepted (a `Choice` constraint) |
+| `max` | `tags` | the most labels (a `Count` constraint) |
+| `maxLength` | `tags` | the longest label (an `All` of `Length`), not the whole input |
+| `url` | `tags` | suggests more labels: `?query=<typed text>` in, a JSON list of strings out |
 | `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
 | `confirm` | `password` | `true`: asked twice, a `RepeatedType` whose two inputs must match (see below) |
 | `strengthMeter`, `revealToggle` | `password` | `true`: the strength meter and the show/hide eye, on the input typed first ([Form components](19_form-components.md#password-strength-meter-and-showhide-eye)) |
@@ -237,6 +243,33 @@ For rows of your own form type, give `options.entry_type` (and `options.entry_op
 
 The form theme draws the markup of the `gridview-collection` controller ([Form
 components](19_form-components.md#repeatable-rows-collection)).
+
+### Free labels (`tags`)
+
+A `tags` control holds a short list of free text labels: a ticket's keywords, a contact's
+interests. There's no table of tags behind it: a new label is typed right in the form. For labels
+with data of their own (a colour, a description), use a `relation` to an entity instead.
+
+```php
+['attribute' => 'keywords', 'type' => 'list', 'control' => [
+    'type'        => 'tags',
+    'suggestions' => ['urgent', 'waiting for customer', 'billing'],
+    'max'         => 5,
+    'maxLength'   => 40,
+    'url'         => '/tickets/keywords',   // more suggestions: the labels already in use
+]],
+```
+
+The fluent builder has the same: `ListColumn::new('keywords')->tags(['urgent', 'billing'], max: 5)`.
+
+The data is a list of strings. Labels are trimmed, their inner whitespace collapsed, and compared
+case-insensitively: "Urgent" and "urgent" are one label, the first spelling wins, and a label
+matching a suggestion takes its spelling. A label can't hold a comma.
+
+The input is a text field of labels separated by commas, so the form works without JavaScript and
+in tests. The `gridview-tags` controller draws it as chips, each with a remove button, and an input
+adding them: Enter or a comma adds a label, Backspace on an empty input removes the last one, and
+the suggestions are offered as the user types.
 
 ### Validation: required & unique
 
