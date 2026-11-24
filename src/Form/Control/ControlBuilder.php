@@ -2,6 +2,8 @@
 
 namespace Fedale\GridviewBundle\Form\Control;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -126,8 +128,10 @@ class ControlBuilder
         // The length and the bounds are attributes for the browser (see settings())
         // and constraints for the server: the attributes alone are a hint anyone can
         // bypass.
-        if ($validate && \is_int($control['maxLength'] ?? null)) {
-            $constraints[] = new Length(max: $control['maxLength']);
+        $minLength = \is_int($control['minLength'] ?? null) ? $control['minLength'] : null;
+        $maxLength = \is_int($control['maxLength'] ?? null) ? $control['maxLength'] : null;
+        if ($validate && ($minLength !== null || $maxLength !== null)) {
+            $constraints[] = new Length(min: $minLength, max: $maxLength);
         }
         if ($validate && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
             $constraints[] = new Range(min: $control['min'] ?? null, max: $control['max'] ?? null);
@@ -144,8 +148,73 @@ class ControlBuilder
         if ($type === 'media') {
             $options['mapped'] = false;
         }
+        if ($type === 'password') {
+            return $this->password($control, $options);
+        }
 
         return [$this->registry->get($type), $options];
+    }
+
+    /**
+     * A password input, never prefilled by the browser's saved one, with the strength
+     * meter and the show/hide eye when asked; asked twice (`confirm`), a RepeatedType
+     * whose two inputs must match. The meter and the eye go on the input typed first,
+     * never on its confirmation, and so do the label and the help.
+     *
+     * @param array<string, mixed> $control
+     * @param array<string, mixed> $options
+     *
+     * @return array{0: class-string<FormTypeInterface>, 1: array<string, mixed>}
+     */
+    private function password(array $control, array $options): array
+    {
+        $attr = (\is_array($options['attr'] ?? null) ? $options['attr'] : []) + ['autocomplete' => 'new-password'];
+        $first = $attr;
+        $controllers = [];
+        if (($control['strengthMeter'] ?? false) === true) {
+            $controllers[] = 'gridview-password-strength';
+            $first = self::withToken($first, 'data-action', 'gridview-password-strength#update');
+            $first += ['data-gridview-password-strength-min-length-value' => $control['minLength'] ?? 8];
+        }
+        if (($control['revealToggle'] ?? false) === true) {
+            $controllers[] = 'gridview-password-reveal';
+        }
+        foreach ($controllers as $controller) {
+            $first = self::withToken($first, 'data-controller', $controller);
+        }
+
+        if (($control['confirm'] ?? false) !== true) {
+            $options['attr'] = $first;
+
+            return [$this->registry->get('password'), $options];
+        }
+
+        // The group draws no label or help of its own: they move to the first input.
+        // What the spec sets in first_options/second_options wins, key by key.
+        $firstOptions = ['attr' => $first];
+        foreach (['label', 'label_translation_parameters', 'help', 'help_translation_parameters'] as $key) {
+            if (\array_key_exists($key, $options)) {
+                $firstOptions[$key] = $options[$key];
+                unset($options[$key]);
+            }
+        }
+        // The confirmation's label does not repeat the first one: that may be a
+        // translation key of the host's domain, which this one could not translate.
+        // The default label comes with its domain, so a label the spec sets is
+        // translated in the form's domain, as the first one is.
+        $secondOptions = \is_array($options['second_options'] ?? null) ? $options['second_options'] : [];
+        if (!\array_key_exists('label', $secondOptions)) {
+            $secondOptions += ['label' => 'field.password_repeat', 'translation_domain' => 'GridviewBundle'];
+        }
+        unset($options['attr']);
+
+        return [RepeatedType::class, [
+            'type'           => PasswordType::class,
+            'label'          => false,
+            'options'        => ['attr' => $attr] + (\is_array($options['options'] ?? null) ? $options['options'] : []),
+            'first_options'  => (\is_array($options['first_options'] ?? null) ? $options['first_options'] : []) + $firstOptions,
+            'second_options' => $secondOptions,
+        ] + $options];
     }
 
     /**
@@ -206,8 +275,21 @@ class ControlBuilder
      */
     private static function withClass(array $attr, string $class): array
     {
-        $classes = \is_string($attr['class'] ?? null) ? $attr['class'] : '';
-        $attr['class'] = trim($classes . ' ' . $class);
+        return self::withToken($attr, 'class', $class);
+    }
+
+    /**
+     * Appends a token to a space-separated attribute (class, data-controller,
+     * data-action), keeping the ones the spec already gives.
+     *
+     * @param array<string, mixed> $attr
+     *
+     * @return array<string, mixed>
+     */
+    private static function withToken(array $attr, string $name, string $token): array
+    {
+        $tokens = \is_string($attr[$name] ?? null) ? $attr[$name] : '';
+        $attr[$name] = trim($tokens . ' ' . $token);
 
         return $attr;
     }

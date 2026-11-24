@@ -48,7 +48,7 @@ class ControlResolver
     private const NUMBER_CONTROLS = ['number', 'integer'];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, validate: bool}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, validate: bool}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -116,6 +116,12 @@ class ControlResolver
             'min'             => $this->setting($type, $control, 'min', self::NUMBER_CONTROLS, static fn(mixed $v): bool => \is_int($v) || \is_float($v)),
             'max'             => $this->setting($type, $control, 'max', self::NUMBER_CONTROLS, static fn(mixed $v): bool => \is_int($v) || \is_float($v)),
             'scale'           => $this->setting($type, $control, 'scale', ['number'], static fn(mixed $v): bool => \is_int($v) && $v >= 0),
+            // The password's own settings: asked twice, the strength meter and the
+            // show/hide eye (the gridview-password-* controllers), the shortest accepted.
+            'confirm'         => $this->setting($type, $control, 'confirm', ['password'], 'is_bool') ?? false,
+            'strengthMeter'   => $this->setting($type, $control, 'strengthMeter', ['password'], 'is_bool') ?? false,
+            'revealToggle'    => $this->setting($type, $control, 'revealToggle', ['password'], 'is_bool') ?? false,
+            'minLength'       => $this->setting($type, $control, 'minLength', ['password'], static fn(mixed $v): bool => \is_int($v) && $v >= 0),
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.

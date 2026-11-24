@@ -113,6 +113,9 @@ character beyond the first (lower case, upper case, digit, symbol) and every 4 c
 `min-length` add a level, up to 4. Server-side constraints decide what is accepted. With a
 `RepeatedType`, put the controllers on `first_options` only.
 
+A gridview control sets all of this from its settings: `['type' => 'password', 'strengthMeter' => true,
+'revealToggle' => true, 'minLength' => 8, 'confirm' => true]` ([CRUD](08_crud.md#control-settings-display-length-bounds)).
+
 The labels are values, so translate them where the form is built
 (`'data-gridview-password-strength-labels-value' => json_encode([...])`).
 

@@ -13,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
@@ -192,5 +194,76 @@ class ControlBuilderTest extends TestCase
     public function testAMediaControlIsNotMapped(): void
     {
         $this->assertFalse($this->field(['type' => 'media'])[1]['mapped']);
+    }
+
+    public function testAPasswordIsNeverFilledByTheBrowser(): void
+    {
+        [$type, $options] = $this->field(['type' => 'password']);
+
+        $this->assertSame(PasswordType::class, $type);
+        $this->assertSame(['autocomplete' => 'new-password'], $options['attr']);
+    }
+
+    public function testTheMeterAndTheEyeAreTheControllersOfThePassword(): void
+    {
+        [, $options] = $this->field(['type' => 'password', 'strengthMeter' => true, 'revealToggle' => true, 'minLength' => 10]);
+
+        $this->assertSame([
+            'autocomplete'                                     => 'new-password',
+            'data-action'                                      => 'gridview-password-strength#update',
+            'data-gridview-password-strength-min-length-value' => 10,
+            'data-controller'                                  => 'gridview-password-strength gridview-password-reveal',
+        ], $options['attr']);
+        $this->assertEquals([new Length(min: 10)], $options['constraints']);
+    }
+
+    public function testTheMeterKeepsTheControllersTheSpecGives(): void
+    {
+        [, $options] = $this->field(['type' => 'password', 'strengthMeter' => true, 'options' => ['attr' => ['data-controller' => 'caps-lock']]]);
+
+        $this->assertSame('caps-lock gridview-password-strength', $options['attr']['data-controller']);
+        $this->assertSame(8, $options['attr']['data-gridview-password-strength-min-length-value']);
+    }
+
+    public function testAConfirmedPasswordIsAskedTwice(): void
+    {
+        [$type, $options] = $this->controls->formField(
+            (new ControlResolver())->resolve(['type' => 'password', 'required' => true, 'confirm' => true, 'revealToggle' => true, 'options' => ['help' => 'Leave empty to keep it.']], 'text'),
+            'Password',
+        );
+
+        $this->assertSame(RepeatedType::class, $type);
+        $this->assertSame(PasswordType::class, $options['type']);
+        $this->assertFalse($options['label']);
+        $this->assertArrayNotHasKey('help', $options);
+        $this->assertTrue($options['required']);
+        // The eye goes on the input typed first only; both stay unfilled.
+        $this->assertSame(['autocomplete' => 'new-password'], $options['options']['attr']);
+        $this->assertSame([
+            'attr'  => ['autocomplete' => 'new-password', 'data-controller' => 'gridview-password-reveal'],
+            'label' => 'Password',
+            'help'  => 'Leave empty to keep it.',
+        ], $options['first_options']);
+        $this->assertSame(['label' => 'field.password_repeat', 'translation_domain' => 'GridviewBundle'], $options['second_options']);
+    }
+
+    public function testTheSpecMayRelabelTheConfirmation(): void
+    {
+        [, $options] = $this->field(['type' => 'password', 'confirm' => true, 'options' => ['second_options' => ['label' => 'form.repeat', 'attr' => ['class' => 'wide']]]]);
+
+        // Without the bundle's domain: the label is the host's, like the first one.
+        $this->assertSame(['label' => 'form.repeat', 'attr' => ['class' => 'wide']], $options['second_options']);
+    }
+
+    public function testBothInputsOfAConfirmedPasswordMustMatch(): void
+    {
+        $builder = $this->builder();
+        $this->controls->add($builder, 'secret', ['type' => 'password', 'confirm' => true], 'Secret');
+        $form = $builder->getForm();
+
+        $form->submit(['secret' => ['first' => 'correct horse', 'second' => 'battery staple']]);
+
+        $this->assertFalse($form->isValid());
+        $this->assertNull($form->get('secret')->getData());
     }
 }

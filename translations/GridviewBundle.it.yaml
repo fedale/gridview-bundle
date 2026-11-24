@@ -50,6 +50,7 @@ selection.too_large: "Selezione troppo grande da salvare (max 5000)."
 
 field.name: "Nome"
 field.value_in_use: "Valore già in uso."
+field.password_repeat: "Ripeti la password"
 
 crud.cancel: "Annulla"
 crud.confirm: "Conferma"

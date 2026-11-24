@@ -79,6 +79,8 @@ class ControlResolverTest extends TestCase
         $this->assertNull($resolved['display']);
         $this->assertNull($resolved['maxLength']);
         $this->assertNull($resolved['scale']);
+        $this->assertFalse($resolved['confirm']);
+        $this->assertNull($resolved['minLength']);
         $this->assertTrue($resolved['validate']);
     }
 
@@ -105,6 +107,9 @@ class ControlResolverTest extends TestCase
         yield 'a maxLength on a number' => [['type' => 'number', 'maxLength' => 3], 'A "number" control takes no "maxLength"'];
         yield 'a scale on an integer' => [['type' => 'integer', 'scale' => 2], 'A "integer" control takes no "scale"'];
         yield 'a negative scale' => [['type' => 'number', 'scale' => -1], 'The "scale" of a "number" control has an invalid value: int.'];
+        yield 'a confirmation of a text' => [['type' => 'text', 'confirm' => true], 'A "text" control takes no "confirm"; only password do.'];
+        yield 'a minLength of an email' => [['type' => 'email', 'minLength' => 8], 'A "email" control takes no "minLength"'];
+        yield 'a meter given as a string' => [['type' => 'password', 'strengthMeter' => 'yes'], 'The "strengthMeter" of a "password" control has an invalid value: string.'];
         yield 'a text bound' => [['type' => 'integer', 'min' => '1'], 'The "min" of a "integer" control has an invalid value: string.'];
     }
 }

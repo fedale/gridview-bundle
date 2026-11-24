@@ -103,6 +103,9 @@ and it would silently round extra decimals instead of letting the user correct t
 | `maxLength` | `text`, `textarea`, `html`, `email`, `url`, `tel`, `password` | the `maxlength` attribute, and a `Length` constraint |
 | `min`, `max` | `number`, `integer` | the `min` and `max` attributes, and a `Range` constraint |
 | `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
+| `confirm` | `password` | `true`: asked twice, a `RepeatedType` whose two inputs must match (see below) |
+| `strengthMeter`, `revealToggle` | `password` | `true`: the strength meter and the show/hide eye, on the input typed first ([Form components](19_form-components.md#password-strength-meter-and-showhide-eye)) |
+| `minLength` | `password` | the meter's threshold (8 without it), and a `Length` constraint |
 | `validate` | any | `false`: the form adds no constraint of its own (`NotBlank`, `Length`, `Range`); the attributes stay as hints for the browser (see below) |
 
 ```php
@@ -115,12 +118,21 @@ $columns = [
                                                                  'options' => ['choices' => ['Small' => 's', 'Large' => 'l']]]],
     ['attribute' => 'title',  'control' => ['maxLength' => 80]],
     ['attribute' => 'weight', 'type' => 'number', 'control' => ['min' => 0, 'max' => 500, 'scale' => 2]],
+    ['attribute' => 'plainPassword', 'visible' => false,
+     'control' => ['type' => 'password', 'confirm' => true, 'strengthMeter' => true, 'revealToggle' => true, 'minLength' => 10]],
 ];
 ```
 
 The fluent builders have the same settings: `BooleanColumn::asSwitch()`,
 `SelectColumn::choiceDisplay(ChoiceDisplay::Segmented)`, `TextColumn::maxLength(80)`,
-`NumberColumn::bounds(0, 500)` and `NumberColumn::inputDecimals(2)`. An attribute or option the spec
+`NumberColumn::bounds(0, 500)`, `NumberColumn::inputDecimals(2)` and
+`TextColumn::password(confirm: true, strengthMeter: true, revealToggle: true, minLength: 10)`.
+
+A `password` control always carries `autocomplete="new-password"`, so the browser doesn't fill it
+with a saved password. With `confirm`, the label and the help go on the first input, and the
+second one reads "Repeat the password" (`field.password_repeat` in the `GridviewBundle` domain).
+Set `options.second_options` to label it otherwise, and `options.invalid_message` to replace the
+message shown when the two don't match. An attribute or option the spec
 sets itself (`options.attr.maxlength`, `options.placeholder`…) wins over the setting. A setting
 given to a control that doesn't take it is refused with an exception, not ignored.
 

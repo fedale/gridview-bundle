@@ -279,6 +279,10 @@ class ColumnConfigTest extends TestCase
         $this->assertSame(['display' => 'segmented'], SelectColumn::new('size')->choiceDisplay(ChoiceDisplay::Segmented)->toArray()['control']);
         $this->assertSame(['maxLength' => 40], TextColumn::new('title')->maxLength(40)->toArray()['control']);
         $this->assertSame(
+            ['type' => 'password', 'confirm' => true, 'strengthMeter' => true, 'revealToggle' => false, 'minLength' => 10],
+            TextColumn::new('plainPassword')->password(confirm: true, strengthMeter: true, minLength: 10)->toArray()['control'],
+        );
+        $this->assertSame(
             ['min' => 0, 'max' => 10, 'scale' => 2],
             NumberColumn::new('price')->bounds(0, 10)->inputDecimals(2)->toArray()['control'],
         );
