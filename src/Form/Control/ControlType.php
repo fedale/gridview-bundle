@@ -40,4 +40,6 @@ enum ControlType: string
     case Currency = 'currency';
     case Hidden = 'hidden';
     case Media = 'media';
+    /** Repeatable rows: a CollectionType drawn by the gridview-collection controller. */
+    case Collection = 'collection';
 }

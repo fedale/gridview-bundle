@@ -48,7 +48,7 @@ class ControlResolver
     private const NUMBER_CONTROLS = ['number', 'integer'];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, multiple: bool, current: MediaFile|list<MediaFile>|null, accept: ?string, showsFiles: bool, validate: bool}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, multiple: bool, current: MediaFile|list<MediaFile>|null, accept: ?string, showsFiles: bool, entry: ?array<string, mixed>, inline: bool, validate: bool}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -107,6 +107,9 @@ class ControlResolver
             $modes = [$modes];
         }
 
+        // A number's bound is any number; a collection's is a count of rows.
+        $bound = static fn(mixed $v): bool => $type === 'collection' ? \is_int($v) && $v >= 0 : \is_int($v) || \is_float($v);
+
         return [
             'type'            => $type,
             'required'        => $required,
@@ -123,8 +126,10 @@ class ControlResolver
             // FormType untouched, and NumberType already has a `scale` that rounds.
             'display'         => $this->display($type, $control['display'] ?? null),
             'maxLength'       => $this->setting($type, $control, 'maxLength', self::TEXT_CONTROLS, 'is_int'),
-            'min'             => $this->setting($type, $control, 'min', self::NUMBER_CONTROLS, static fn(mixed $v): bool => \is_int($v) || \is_float($v)),
-            'max'             => $this->setting($type, $control, 'max', self::NUMBER_CONTROLS, static fn(mixed $v): bool => \is_int($v) || \is_float($v)),
+            // The bounds of a number, or the rows a collection requires and allows (0: no
+            // limit).
+            'min'             => $this->setting($type, $control, 'min', [...self::NUMBER_CONTROLS, 'collection'], $bound),
+            'max'             => $this->setting($type, $control, 'max', [...self::NUMBER_CONTROLS, 'collection'], $bound),
             'scale'           => $this->setting($type, $control, 'scale', ['number'], static fn(mixed $v): bool => \is_int($v) && $v >= 0),
             // The password's own settings: asked twice, the strength meter and the
             // show/hide eye (the gridview-password-* controllers), the shortest accepted.
@@ -148,6 +153,10 @@ class ControlResolver
             'current'         => $this->current($type, $control, $multiple),
             'accept'          => $this->setting($type, $control, 'accept', ['media'], 'is_string'),
             'showsFiles'      => $type === 'media' && ($multiple || \array_key_exists('current', $control)),
+            // A collection: the control specs of a row's fields (each may carry its
+            // `label`), and whether a row stands on one line.
+            'entry'           => $this->entry($type, $control, $options),
+            'inline'          => $this->setting($type, $control, 'inline', ['collection'], 'is_bool') ?? false,
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.
@@ -173,6 +182,25 @@ class ControlResolver
         }
 
         return $display;
+    }
+
+    /**
+     * The fields of a collection's row, as control specs keyed by name; null when the
+     * spec gives its own `options.entry_type` instead.
+     *
+     * @param array<string, mixed> $control
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>|null
+     */
+    private function entry(string $type, array $control, array $options): ?array
+    {
+        $entry = $this->setting($type, $control, 'entry', ['collection'], static fn(mixed $v): bool => \is_array($v) && $v !== [] && !array_is_list($v));
+        if ($type === 'collection' && $entry === null && !isset($options['entry_type'])) {
+            throw new \InvalidArgumentException('A "collection" control requires an entry (the control specs of a row, keyed by field name) or options.entry_type.');
+        }
+
+        return $entry;
     }
 
     /**

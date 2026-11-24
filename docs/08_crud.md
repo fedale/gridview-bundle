@@ -57,6 +57,7 @@ entity, a normalised URL…) with no custom code.
 | `currency` | `CurrencyType` | the ISO currency-**code** picker (≠ `money`) |
 | `hidden` | `HiddenType` | |
 | `media` | `FileType` | file upload (unmapped, see below) |
+| `collection` | `RowCollectionType` (a `CollectionType`) | repeatable rows, each built from the control specs of `entry` (see [Repeatable rows](#repeatable-rows-collection)) |
 
 ```php
 $columns = [
@@ -102,6 +103,9 @@ and it would silently round extra decimals instead of letting the user correct t
 | `display` | `choice`: `dropdown` (default), `radio`, `segmented`, `checkboxes` | `radio`: one option per line; `segmented`: buttons side by side (`gv-segmented`); `checkboxes`: several options chosen (`expanded` + `multiple`) |
 | `maxLength` | `text`, `textarea`, `html`, `email`, `url`, `tel`, `password` | the `maxlength` attribute, and a `Length` constraint |
 | `min`, `max` | `number`, `integer` | the `min` and `max` attributes, and a `Range` constraint |
+| `min`, `max` | `collection` | the rows required and allowed (0: no limit): the buttons of the page, and a `Count` constraint |
+| `entry` | `collection` | the fields of a row: control specs keyed by field name, each may carry its `label` |
+| `inline` | `collection` | `true`: each row on one line |
 | `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
 | `confirm` | `password` | `true`: asked twice, a `RepeatedType` whose two inputs must match (see below) |
 | `strengthMeter`, `revealToggle` | `password` | `true`: the strength meter and the show/hide eye, on the input typed first ([Form components](19_form-components.md#password-strength-meter-and-showhide-eye)) |
@@ -204,6 +208,35 @@ UX Autocomplete is optional for the bundle: without it, a relation with a `url` 
 telling you to install it (`composer require symfony/ux-autocomplete`).
 
 [Symfony UX Autocomplete]: https://symfony.com/bundles/ux-autocomplete/current/index.html
+
+### Repeatable rows (`collection`)
+
+A `collection` control edits a list as rows the user adds and removes in the page: the phones of a
+contact, the lines of an order. Each row is built from the control specs of `entry`, so its fields
+are the same controls as everywhere else. The data is a list of rows, each an array keyed by field
+name; a row left blank is dropped.
+
+```php
+['attribute' => 'phones', 'type' => 'list', 'control' => [
+    'type'   => 'collection',
+    'entry'  => [
+        'number' => ['type' => 'tel', 'required' => true, 'label' => 'Number'],
+        'note'   => ['type' => 'text', 'maxLength' => 40, 'label' => 'Note'],
+    ],
+    'min'    => 1,       // at least one row: its × hides, and a Count constraint
+    'max'    => 5,       // "+" is disabled at five rows
+    'inline' => true,    // each row on one line
+    'options' => ['add_label' => 'Add a phone'],
+]],
+```
+
+The fluent builder has the same: `ListColumn::new('phones')->rows($entry, min: 1, max: 5, inline: true)`.
+For rows of your own form type, give `options.entry_type` (and `options.entry_options`) instead of
+`entry`: the rows are drawn and added the same way. `add_label` is translated in the form's domain
+(with `add_label_translation_parameters`); without it the button reads "Add a row".
+
+The form theme draws the markup of the `gridview-collection` controller ([Form
+components](19_form-components.md#repeatable-rows-collection)).
 
 ### Validation: required & unique
 

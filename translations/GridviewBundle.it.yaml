@@ -58,6 +58,9 @@ media.remove_named: "Rimuovi %name%"
 media.move_up: "Sposta su %name%"
 media.move_down: "Sposta giù %name%"
 
+collection.add: "Aggiungi una riga"
+collection.remove: "Rimuovi"
+
 crud.cancel: "Annulla"
 crud.confirm: "Conferma"
 crud.create: "Crea"

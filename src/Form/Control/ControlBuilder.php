@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -139,8 +140,12 @@ class ControlBuilder
         if ($validate && ($minLength !== null || $maxLength !== null)) {
             $constraints[] = new Length(min: $minLength, max: $maxLength);
         }
-        if ($validate && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
+        if ($validate && $type !== 'collection' && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
             $constraints[] = new Range(min: $control['min'] ?? null, max: $control['max'] ?? null);
+        }
+        // A collection's bounds count its rows, 0 meaning no limit.
+        if ($validate && $type === 'collection' && (($control['min'] ?? 0) > 0 || ($control['max'] ?? 0) > 0)) {
+            $constraints[] = new Count(min: ($control['min'] ?? 0) > 0 ? $control['min'] : null, max: ($control['max'] ?? 0) > 0 ? $control['max'] : null);
         }
         foreach ($control['constraints'] ?? [] as $constraint) {
             $constraints[] = $constraint;
@@ -170,11 +175,40 @@ class ControlBuilder
         if ($type === 'password') {
             return $this->password($control, $options);
         }
+        if ($type === 'collection') {
+            return [$this->registry->get('collection'), $this->collection($control, $options)];
+        }
         if ($type === 'relation' && \is_string($control['url'] ?? null)) {
             return $this->remoteRelation($control, $options);
         }
 
         return [$this->registry->get($type), $options];
+    }
+
+    /**
+     * The options of a `collection` control: its rows built from the `entry` control
+     * specs (unless the spec names its own entry_type), and the bounds and layout the
+     * gridview-collection controller and the form theme read.
+     *
+     * @param array<string, mixed> $control
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    private function collection(array $control, array $options): array
+    {
+        if (\is_array($control['entry'] ?? null)) {
+            $options += [
+                'entry_type'    => ControlRowType::class,
+                'entry_options' => ['controls' => $control['entry'], 'control_builder' => $this],
+            ];
+        }
+
+        return $options + [
+            'min'    => \is_int($control['min'] ?? null) ? $control['min'] : 0,
+            'max'    => \is_int($control['max'] ?? null) ? $control['max'] : 0,
+            'inline' => ($control['inline'] ?? false) === true,
+        ];
     }
 
     /**
@@ -307,7 +341,7 @@ class ControlBuilder
             $attr += ['maxlength' => $control['maxLength']];
         }
         foreach (['min', 'max'] as $bound) {
-            if (($control[$bound] ?? null) !== null) {
+            if ($type !== 'collection' && ($control[$bound] ?? null) !== null) {
                 $attr += [$bound => $control[$bound]];
             }
         }

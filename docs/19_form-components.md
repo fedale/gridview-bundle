@@ -246,6 +246,10 @@ own controller, and the outer one ignores the rows of the inner ones.
 | `gv-collection__remove` | The remove button of a row |
 | `gv-collection__add` | The add button (target `add`), full width, dashed |
 
+A gridview `collection` control draws all of this from its spec, rows and prototype included
+([CRUD](08_crud.md#repeatable-rows-collection)); write the markup yourself only for a collection
+you render by hand.
+
 ---
 
 [← Previous: UI settings — let end users configure the grids](18_ui-settings.md) · [Documentation index](index.md)

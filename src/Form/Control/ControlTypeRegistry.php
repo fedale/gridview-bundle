@@ -82,6 +82,8 @@ class ControlTypeRegistry
         // Special
         'hidden'   => HiddenType::class,
         'media'    => FileType::class,
+        // Repeatable rows, each a ControlRowType (from control specs) or a host type.
+        'collection' => RowCollectionType::class,
     ];
 
     /**

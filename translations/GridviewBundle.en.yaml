@@ -58,6 +58,9 @@ media.remove_named: "Remove %name%"
 media.move_up: "Move %name% up"
 media.move_down: "Move %name% down"
 
+collection.add: "Add a row"
+collection.remove: "Remove"
+
 crud.cancel: "Cancel"
 crud.confirm: "Confirm"
 crud.create: "Create"
