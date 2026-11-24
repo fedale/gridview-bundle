@@ -5,7 +5,9 @@ namespace Fedale\GridviewBundle\Form\Control;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 
 /**
  * Adds a control (a write-side field) to any Symfony form, from the same `control`
@@ -69,9 +71,22 @@ class ControlBuilder
     }
 
     /**
-     * The FormType and the options of a resolved control, without adding it: for a
-     * host that places the field itself (inside a collection entry, under another
-     * name).
+     * The FormType and the options of a control spec, without adding it: for a host
+     * that places the field itself (inside a collection entry, under another name,
+     * with options of its own on top).
+     *
+     * @param bool|string|array<string, mixed>|ControlType $control
+     *
+     * @return array{0: class-string, 1: array<string, mixed>}
+     */
+    public function field(bool|string|array|ControlType $control, ?string $label = null, string $dataType = 'text'): array
+    {
+        return $this->formField($this->resolver->resolve($control, $dataType), $label);
+    }
+
+    /**
+     * The FormType and the options of a control already resolved by
+     * {@see ControlResolver}, as a column holds it.
      *
      * @param array<string, mixed> $control
      *
@@ -99,12 +114,22 @@ class ControlBuilder
         }
 
         // Server-side validation: NotBlank for required fields (the `required`
-        // option alone is only an HTML hint) plus any explicit constraints. Without
-        // `validate`, the host validates elsewhere: only its explicit ones stay.
+        // option alone is only an HTML hint), Length and Range for the settings below,
+        // plus any explicit constraints. Without `validate`, the host validates
+        // elsewhere: only its explicit ones stay.
         $constraints = $options['constraints'] ?? [];
         if ($validate && ($control['required'] ?? false) === true) {
             $message = $control['requiredMessage'] ?? null;
             $constraints[] = $message !== null ? new NotBlank(message: $message) : new NotBlank();
+        }
+        // The length and the bounds are attributes for the browser (see settings())
+        // and constraints for the server: the attributes alone are a hint anyone can
+        // bypass.
+        if ($validate && \is_int($control['maxLength'] ?? null)) {
+            $constraints[] = new Length(max: $control['maxLength']);
+        }
+        if ($validate && (($control['min'] ?? null) !== null || ($control['max'] ?? null) !== null)) {
+            $constraints[] = new Range(min: $control['min'] ?? null, max: $control['max'] ?? null);
         }
         foreach ($control['constraints'] ?? [] as $constraint) {
             $constraints[] = $constraint;

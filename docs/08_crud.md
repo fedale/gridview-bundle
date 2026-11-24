@@ -100,10 +100,10 @@ and it would silently round extra decimals instead of letting the user correct t
 |---|---|---|
 | `display` | `boolean`: `checkbox` (default), `switch` | `switch` draws an on/off switch (`gv-switch`, `role="switch"`) |
 | `display` | `choice`: `dropdown` (default), `radio`, `segmented`, `checkboxes` | `radio`: one option per line; `segmented`: buttons side by side (`gv-segmented`); `checkboxes`: several options chosen (`expanded` + `multiple`) |
-| `maxLength` | `text`, `textarea`, `html`, `email`, `url`, `tel`, `password` | the `maxlength` attribute |
-| `min`, `max` | `number`, `integer` | the `min` and `max` attributes |
+| `maxLength` | `text`, `textarea`, `html`, `email`, `url`, `tel`, `password` | the `maxlength` attribute, and a `Length` constraint |
+| `min`, `max` | `number`, `integer` | the `min` and `max` attributes, and a `Range` constraint |
 | `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
-| `validate` | any | `false`: the form adds no `NotBlank`; `required` stays an HTML hint (see below) |
+| `validate` | any | `false`: the form adds no constraint of its own (`NotBlank`, `Length`, `Range`); the attributes stay as hints for the browser (see below) |
 
 ```php
 use Fedale\GridviewBundle\Form\Control\BooleanDisplay;
@@ -143,12 +143,13 @@ $this->controls->add($builder, 'guests', ['type' => 'integer', 'required' => tru
 ```
 
 - `add($form, $name, $control, $label)` resolves the spec and adds the field.
-- `formField($resolvedControl, $label)` returns the FormType and its options without adding them,
-  for a field you place yourself (inside a collection entry, under another name). Resolve the spec
-  first with `ControlResolver::resolve()`.
+- `field($control, $label)` returns the FormType and its options without adding them, for a field
+  you place yourself (inside a collection entry, under another name, with options of your own on
+  top). `formField()` does the same from a spec already resolved, as a column holds it.
 - If your application validates the submitted data elsewhere (a domain service that maps its errors
-  back onto the form), pass `'validate' => false`: `required` then only marks the field, and the form
-  adds no `NotBlank` of its own. Constraints you list in `constraints` still apply.
+  back onto the form), pass `'validate' => false`: `required`, `maxLength`, `min` and `max` then only
+  mark the input, and the form adds no `NotBlank`, `Length` or `Range` of its own. Constraints you
+  list in `constraints` still apply.
 
 ### Validation: required & unique
 

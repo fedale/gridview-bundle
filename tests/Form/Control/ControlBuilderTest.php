@@ -18,7 +18,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Forms;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Validation;
 
 /**
@@ -102,6 +104,17 @@ class ControlBuilderTest extends TestCase
         $this->assertSame(['maxlength' => 10, 'placeholder' => 'Title'], $options['attr']);
     }
 
+    public function testLengthAndBoundsAreCheckedByTheServerToo(): void
+    {
+        $length = $this->field(['type' => 'text', 'maxLength' => 40])[1]['constraints'];
+        $range = $this->field(['type' => 'integer', 'min' => 1, 'max' => 10])[1]['constraints'];
+
+        $this->assertEquals([new Length(max: 40)], $length);
+        $this->assertEquals([new Range(min: 1, max: 10)], $range);
+        // Without validation the form adds none: the host checks them itself.
+        $this->assertArrayNotHasKey('constraints', $this->field(['type' => 'text', 'maxLength' => 40, 'validate' => false])[1]);
+    }
+
     public function testBoundsAndScaleBecomeTheAttributesOfTheNumberInput(): void
     {
         [$type, $options] = $this->field(['type' => 'number', 'min' => 0, 'max' => 99.5, 'scale' => 2]);
@@ -169,6 +182,11 @@ class ControlBuilderTest extends TestCase
         $this->controls->add($builder, 'title', true);
 
         $this->assertInstanceOf(TextType::class, $builder->get('title')->getType()->getInnerType());
+    }
+
+    public function testFieldResolvesTheSpecItself(): void
+    {
+        $this->assertSame($this->field(['type' => 'number', 'scale' => 1]), $this->controls->field(['type' => 'number', 'scale' => 1]));
     }
 
     public function testAMediaControlIsNotMapped(): void
