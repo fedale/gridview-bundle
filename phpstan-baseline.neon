@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Instantiated class Symfony\\Component\\Validator\\Constraints\\NotBlank not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Column/AbstractColumn.php
-
-		-
 			message: '#^Method Fedale\\GridviewBundle\\Column\\AbstractColumn\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1304,12 +1298,6 @@ parameters:
 
 		-
 			message: '#^Offset ''modes'' on array\{type\: string, required\: bool, options\: array\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Form/GridFormBuilder.php
-
-		-
-			message: '#^Offset ''options'' on array\{type\: string, required\: bool, options\: array\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: src/Form/GridFormBuilder.php

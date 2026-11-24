@@ -76,6 +76,13 @@ services:
         class: Fedale\GridviewBundle\Form\Control\ControlResolver
     Fedale\GridviewBundle\Form\Control\ControlResolver: '@fedale_gridview.control_resolver'
 
+    fedale_gridview.control_builder:
+        class: Fedale\GridviewBundle\Form\Control\ControlBuilder
+        arguments:
+            - '@fedale_gridview.control_type_registry'
+            - '@fedale_gridview.control_resolver'
+    Fedale\GridviewBundle\Form\Control\ControlBuilder: '@fedale_gridview.control_builder'
+
     fedale_gridview.column_type_registry:
         class: Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry
         factory: ['Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry', create]

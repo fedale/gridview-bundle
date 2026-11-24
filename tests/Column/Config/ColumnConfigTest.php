@@ -11,6 +11,7 @@ use Fedale\GridviewBundle\Column\Config\NumberColumn;
 use Fedale\GridviewBundle\Column\Config\RelationColumn;
 use Fedale\GridviewBundle\Column\Config\SelectColumn;
 use Fedale\GridviewBundle\Column\Config\TextColumn;
+use Fedale\GridviewBundle\Form\Control\ChoiceDisplay;
 use Fedale\GridviewBundle\Grid\Gridview;
 use PHPUnit\Framework\TestCase;
 
@@ -270,6 +271,17 @@ class ColumnConfigTest extends TestCase
         // The per-view axis never touches the other contexts.
         $this->assertTrue($column->isActiveIn('index'));
         $this->assertTrue($column->isActiveIn('update'));
+    }
+
+    public function testControlSettingsSugarWritesBesideTheOptions(): void
+    {
+        $this->assertSame(['display' => 'switch'], BooleanColumn::new('active')->asSwitch()->toArray()['control']);
+        $this->assertSame(['display' => 'segmented'], SelectColumn::new('size')->choiceDisplay(ChoiceDisplay::Segmented)->toArray()['control']);
+        $this->assertSame(['maxLength' => 40], TextColumn::new('title')->maxLength(40)->toArray()['control']);
+        $this->assertSame(
+            ['min' => 0, 'max' => 10, 'scale' => 2],
+            NumberColumn::new('price')->bounds(0, 10)->inputDecimals(2)->toArray()['control'],
+        );
     }
 }
 

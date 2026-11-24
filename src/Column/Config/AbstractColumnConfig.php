@@ -399,6 +399,20 @@ abstract class AbstractColumnConfig implements ColumnConfigInterface
         return $this;
     }
 
+    /**
+     * Set one of the bundle's control settings (`display`, `maxLength`, `min`,
+     * `max`, `scale`), beside `options` rather than in it: those go to the FormType
+     * untouched. Creates the control when none was declared yet.
+     */
+    protected function controlSetting(string $key, mixed $value): static
+    {
+        $control = $this->controlArray();
+        $control[$key] = $value instanceof \BackedEnum ? $value->value : $value;
+        $this->spec['control'] = $control;
+
+        return $this;
+    }
+
     /** Force the control to a given type, preserving already-set control keys. */
     protected function controlType(ControlType|string $type): static
     {

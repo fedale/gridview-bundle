@@ -10,4 +10,10 @@ class TextColumn extends AbstractColumnConfig
     {
         return ColumnType::Text;
     }
+
+    /** The most characters the write-side control accepts (its `maxlength`). */
+    public function maxLength(int $maxLength): static
+    {
+        return $this->controlSetting('maxLength', $maxLength);
+    }
 }

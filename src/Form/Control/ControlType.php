@@ -13,6 +13,8 @@ namespace Fedale\GridviewBundle\Form\Control;
 enum ControlType: string
 {
     case Text = 'text';
+    case Textarea = 'textarea';
+    /** Today the same plain textarea as Textarea, kept for a rich text editor. */
     case Html = 'html';
     case Email = 'email';
     case Url = 'url';

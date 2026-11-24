@@ -4,6 +4,7 @@ namespace Fedale\GridviewBundle\Column\Config;
 
 use Fedale\GridviewBundle\Column\Type\ColumnType;
 use Fedale\GridviewBundle\Filter\FilterType;
+use Fedale\GridviewBundle\Form\Control\ChoiceDisplay;
 use Fedale\GridviewBundle\Form\Control\ControlType;
 
 class SelectColumn extends AbstractColumnConfig
@@ -32,6 +33,15 @@ class SelectColumn extends AbstractColumnConfig
         }
 
         return $this->choiceFilter(self::enumChoices($class));
+    }
+
+    /**
+     * How the write-side control draws its options: a dropdown (the default), radio
+     * buttons, buttons side by side, or checkboxes (several options chosen).
+     */
+    public function choiceDisplay(ChoiceDisplay $display): static
+    {
+        return $this->controlSetting('display', $display);
     }
 
     /**

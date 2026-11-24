@@ -34,7 +34,8 @@ entity, a normalised URL…) with no custom code.
 | Control type | Symfony FormType | Notes |
 |---|---|---|
 | `text` | `TextType` | |
-| `html` | `TextareaType` | |
+| `textarea` | `TextareaType` | plain multiline text |
+| `html` | `TextareaType` | reserved for a rich text editor; today the same plain textarea as `textarea` |
 | `email` | `EmailType` | `<input type="email">` + validation |
 | `url` | `UrlType` | normalises the URL on submit |
 | `tel` | `TelType` | `<input type="tel">` |
@@ -88,6 +89,66 @@ type if that name doubles as a control type (`text`, `number`, `date`, `boolean`
 > **`media` control = file upload.** It is *unmapped*: the bundle receives the upload, your
 > app stores it and populates the entity through an `upload` callable in the control spec.
 > See [The `media` type — file uploads](02_columns.md#the-media-type--file-uploads).
+
+### Control settings: display, length, bounds
+
+Besides `options`, which go to the FormType untouched, a control takes a few settings of the
+bundle's own. They sit **next to** `options`, not inside it: NumberType already has a `scale` option,
+and it would silently round extra decimals instead of letting the user correct them.
+
+| Setting | Controls | Becomes |
+|---|---|---|
+| `display` | `boolean`: `checkbox` (default), `switch` | `switch` draws an on/off switch (`gv-switch`, `role="switch"`) |
+| `display` | `choice`: `dropdown` (default), `radio`, `segmented`, `checkboxes` | `radio`: one option per line; `segmented`: buttons side by side (`gv-segmented`); `checkboxes`: several options chosen (`expanded` + `multiple`) |
+| `maxLength` | `text`, `textarea`, `html`, `email`, `url`, `tel`, `password` | the `maxlength` attribute |
+| `min`, `max` | `number`, `integer` | the `min` and `max` attributes |
+| `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
+| `validate` | any | `false`: the form adds no `NotBlank`; `required` stays an HTML hint (see below) |
+
+```php
+use Fedale\GridviewBundle\Form\Control\BooleanDisplay;
+use Fedale\GridviewBundle\Form\Control\ChoiceDisplay;
+
+$columns = [
+    ['attribute' => 'active', 'type' => 'boolean', 'control' => ['display' => BooleanDisplay::Switch]],
+    ['attribute' => 'size',   'type' => 'select',  'control' => ['type' => 'choice', 'display' => ChoiceDisplay::Segmented,
+                                                                 'options' => ['choices' => ['Small' => 's', 'Large' => 'l']]]],
+    ['attribute' => 'title',  'control' => ['maxLength' => 80]],
+    ['attribute' => 'weight', 'type' => 'number', 'control' => ['min' => 0, 'max' => 500, 'scale' => 2]],
+];
+```
+
+The fluent builders have the same settings: `BooleanColumn::asSwitch()`,
+`SelectColumn::choiceDisplay(ChoiceDisplay::Segmented)`, `TextColumn::maxLength(80)`,
+`NumberColumn::bounds(0, 500)` and `NumberColumn::inputDecimals(2)`. An attribute or option the spec
+sets itself (`options.attr.maxlength`, `options.placeholder`…) wins over the setting. A setting
+given to a control that doesn't take it is refused with an exception, not ignored.
+
+### A control in a form without a grid
+
+The controls aren't tied to a grid. `ControlBuilder` (service
+`Fedale\GridviewBundle\Form\Control\ControlBuilder`) adds one to any Symfony form, from the same
+spec a column takes. A column's CRUD form goes through it too, so a field looks and behaves the same
+wherever it's drawn.
+
+```php
+use Fedale\GridviewBundle\Form\Control\ControlBuilder;
+use Fedale\GridviewBundle\Form\Control\ControlType;
+
+public function __construct(private ControlBuilder $controls) {}
+
+$builder = $formFactory->createNamedBuilder('booking', FormType::class, $data);
+$this->controls->add($builder, 'notes', ['type' => ControlType::Textarea, 'maxLength' => 500], 'Notes');
+$this->controls->add($builder, 'guests', ['type' => 'integer', 'required' => true, 'min' => 1, 'max' => 12], 'Guests');
+```
+
+- `add($form, $name, $control, $label)` resolves the spec and adds the field.
+- `formField($resolvedControl, $label)` returns the FormType and its options without adding them,
+  for a field you place yourself (inside a collection entry, under another name). Resolve the spec
+  first with `ControlResolver::resolve()`.
+- If your application validates the submitted data elsewhere (a domain service that maps its errors
+  back onto the form), pass `'validate' => false`: `required` then only marks the field, and the form
+  adds no `NotBlank` of its own. Constraints you list in `constraints` still apply.
 
 ### Validation: required & unique
 

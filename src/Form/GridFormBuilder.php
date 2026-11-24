@@ -5,6 +5,7 @@ namespace Fedale\GridviewBundle\Form;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Contract\GridCrudHandlerInterface;
 use Fedale\GridviewBundle\Contract\GridFormBuilderInterface;
+use Fedale\GridviewBundle\Form\Control\ControlBuilder;
 use Fedale\GridviewBundle\Form\Control\ControlTypeRegistry;
 use Fedale\GridviewBundle\I18n\GridviewI18nCatalog;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -139,10 +140,15 @@ class GridFormBuilder implements GridFormBuilderInterface
                 'label'    => $column->getLabel() ?? $attribute,
             ]);
 
-            $fieldOptions = $control['options'] ?? [];
+            // The same control as in the CRUD form, made optional: a value is only
+            // applied when its enable checkbox is checked.
+            [$formType, $fieldOptions] = (new ControlBuilder($this->controlTypeRegistry))->formField(
+                ['required' => false, 'constraints' => [], 'validate' => false] + $control
+            );
             $fieldOptions['required'] = false;
             $fieldOptions['label'] = false;
-            $builder->add($attribute, $this->controlTypeRegistry->get($control['type']), $fieldOptions);
+            unset($fieldOptions['mapped']);
+            $builder->add($attribute, $formType, $fieldOptions);
         }
 
         if ($options['submit'] ?? true) {

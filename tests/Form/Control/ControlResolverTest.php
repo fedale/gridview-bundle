@@ -2,7 +2,9 @@
 
 namespace Fedale\GridviewBundle\Tests\Form\Control;
 
+use Fedale\GridviewBundle\Form\Control\ChoiceDisplay;
 use Fedale\GridviewBundle\Form\Control\ControlResolver;
+use Fedale\GridviewBundle\Form\Control\ControlType;
 use PHPUnit\Framework\TestCase;
 
 class ControlResolverTest extends TestCase
@@ -59,5 +61,50 @@ class ControlResolverTest extends TestCase
 
         $this->assertSame('enum', $resolved['type']);
         $this->assertSame(Priority::class, $resolved['options']['class']);
+    }
+
+    public function testTheTypeAndTheDisplayMayBeEnums(): void
+    {
+        $resolved = $this->resolver->resolve(['type' => ControlType::Choice, 'display' => ChoiceDisplay::Segmented], 'text');
+
+        $this->assertSame('choice', $resolved['type']);
+        $this->assertSame('segmented', $resolved['display']);
+        $this->assertSame('textarea', $this->resolver->resolve(ControlType::Textarea, 'text')['type']);
+    }
+
+    public function testTheSettingsDefaultToNoneAndValidation(): void
+    {
+        $resolved = $this->resolver->resolve(['type' => 'text'], 'text');
+
+        $this->assertNull($resolved['display']);
+        $this->assertNull($resolved['maxLength']);
+        $this->assertNull($resolved['scale']);
+        $this->assertTrue($resolved['validate']);
+    }
+
+    /**
+     * @dataProvider invalidSettings
+     *
+     * @param array<string, mixed> $control
+     */
+    public function testAnInvalidSettingIsRefused(array $control, string $message): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage($message);
+
+        $this->resolver->resolve($control, 'text');
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, string}>
+     */
+    public static function invalidSettings(): iterable
+    {
+        yield 'a display on a text' => [['type' => 'text', 'display' => 'switch'], 'A "text" control takes no display; only boolean and choice do.'];
+        yield 'a display of another control' => [['type' => 'boolean', 'display' => 'segmented'], 'The display of a "boolean" control must be one of: checkbox, switch.'];
+        yield 'a maxLength on a number' => [['type' => 'number', 'maxLength' => 3], 'A "number" control takes no "maxLength"'];
+        yield 'a scale on an integer' => [['type' => 'integer', 'scale' => 2], 'A "integer" control takes no "scale"'];
+        yield 'a negative scale' => [['type' => 'number', 'scale' => -1], 'The "scale" of a "number" control has an invalid value: int.'];
+        yield 'a text bound' => [['type' => 'integer', 'min' => '1'], 'The "min" of a "integer" control has an invalid value: string.'];
     }
 }

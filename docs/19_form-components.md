@@ -71,6 +71,9 @@ $builder->add('active', CheckboxType::class, [
 ]);
 ```
 
+With a [`ControlBuilder`](08_crud.md#a-control-in-a-form-without-a-grid) the control setting does it
+for you: `['type' => 'boolean', 'display' => 'switch']`.
+
 ## Buttons side by side (segmented choice)
 
 An expanded `ChoiceType` (radio buttons) with the `gv-segmented` class is drawn as a row of
@@ -84,6 +87,9 @@ $builder->add('gender', ChoiceType::class, [
     'attr' => ['class' => 'gv-segmented'],
 ]);
 ```
+
+With a [`ControlBuilder`](08_crud.md#a-control-in-a-form-without-a-grid):
+`['type' => 'choice', 'display' => 'segmented', 'options' => ['choices' => […]]]`.
 
 ## Password: strength meter and show/hide eye
 

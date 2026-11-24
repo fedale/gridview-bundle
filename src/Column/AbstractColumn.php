@@ -3,14 +3,12 @@
 namespace Fedale\GridviewBundle\Column;
 
 use Fedale\GridviewBundle\Contract\ColumnInterface;
+use Fedale\GridviewBundle\Form\Control\ControlBuilder;
 use Fedale\GridviewBundle\Form\Control\ControlTypeRegistry;
 use Fedale\GridviewBundle\Grid\Gridview;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 abstract class AbstractColumn implements ColumnInterface
 {
@@ -499,7 +497,9 @@ abstract class AbstractColumn implements ColumnInterface
      * Adds this column's editable field to the given form builder. Mirrors
      * {@see renderFilter()} for the write side. Columns with no control are
      * skipped silently; structural columns (action/checkbox/serial) keep the
-     * default no-op by leaving $control null.
+     * default no-op by leaving $control null. The field itself is built by
+     * {@see ControlBuilder}, the one implementation of every control, which a form
+     * without a grid uses too.
      */
     public function buildControl(FormBuilderInterface $form, ControlTypeRegistry $registry): void
     {
@@ -512,62 +512,6 @@ abstract class AbstractColumn implements ColumnInterface
             return;
         }
 
-        $options = $this->control['options'] ?? [];
-        $options['required'] ??= $this->control['required'] ?? false;
-        if ($this->label !== null && !\array_key_exists('label', $options)) {
-            $options['label'] = $this->label;
-        }
-
-        // An empty required text/textarea field submits as null and would break a
-        // non-nullable typed setter (e.g. setCode(string)) during binding, before
-        // validation runs. Coerce to '' so NotBlank can report it gracefully.
-        if (($this->control['required'] ?? false) === true
-            && \in_array($this->control['type'], ['text', 'html'], true)
-            && !\array_key_exists('empty_data', $options)
-        ) {
-            $options['empty_data'] = '';
-        }
-
-        // Server-side validation: NotBlank for required fields (the `required`
-        // option alone is only an HTML hint) plus any explicit constraints.
-        $constraints = $options['constraints'] ?? [];
-        if (($this->control['required'] ?? false) === true) {
-            $message = $this->control['requiredMessage'] ?? null;
-            $constraints[] = $message !== null ? new NotBlank(message: $message) : new NotBlank();
-        }
-        foreach ($this->control['constraints'] ?? [] as $constraint) {
-            $constraints[] = $constraint;
-        }
-        if ($constraints !== []) {
-            $options['constraints'] = $constraints;
-        }
-
-        // `media` controls (FileType) are virtual: the attribute is not a property
-        // of the entity. The bundle owns phase 1 (receiving and validating the
-        // upload); the host app's `upload` callable owns phase 2 (storing the bytes
-        // and populating the real entity fields), invoked once the form is bound.
-        if ($this->control['type'] === 'media') {
-            $options['mapped'] = false;
-            $form->add($attribute, $registry->get('media'), $options);
-
-            $upload = $this->control['upload'] ?? null;
-            if (\is_callable($upload)) {
-                $form->addEventListener(FormEvents::POST_SUBMIT, static function (FormEvent $event) use ($attribute, $upload): void {
-                    $form = $event->getForm();
-                    if (!$form->has($attribute)) {
-                        return;
-                    }
-                    $file = $form->get($attribute)->getData();
-                    if ($file === null) {
-                        return;
-                    }
-                    $upload($file, $event->getData(), $form);
-                });
-            }
-
-            return;
-        }
-
-        $form->add($attribute, $registry->get($this->control['type']), $options);
+        (new ControlBuilder($registry))->addResolved($form, $attribute, $this->control, $this->label);
     }
 }

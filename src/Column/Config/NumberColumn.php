@@ -15,4 +15,19 @@ class NumberColumn extends AbstractColumnConfig
     {
         return $this->format(['decimals' => $decimals]);
     }
+
+    /** The lowest and the highest value the write-side control accepts; null for none. */
+    public function bounds(int|float|null $min, int|float|null $max): static
+    {
+        return $this->controlSetting('min', $min)->controlSetting('max', $max);
+    }
+
+    /**
+     * The decimals the write-side control accepts: its step (2 → 0.01). Unlike
+     * NumberType's own `scale`, extra decimals are not rounded away silently.
+     */
+    public function inputDecimals(int $decimals): static
+    {
+        return $this->controlSetting('scale', $decimals);
+    }
 }

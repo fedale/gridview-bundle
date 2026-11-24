@@ -47,6 +47,8 @@ class ControlTypeRegistry
     private array $types = [
         // Text-family
         'text'     => TextType::class,
+        'textarea' => TextareaType::class,
+        // Reserved for a rich text editor; until there is one, the plain textarea.
         'html'     => TextareaType::class,
         'email'    => EmailType::class,
         'url'      => UrlType::class,
