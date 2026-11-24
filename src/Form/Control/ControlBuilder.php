@@ -2,6 +2,7 @@
 
 namespace Fedale\GridviewBundle\Form\Control;
 
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -11,6 +12,7 @@ use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\UX\Autocomplete\Form\AutocompleteChoiceTypeExtension;
 
 /**
  * Adds a control (a write-side field) to any Symfony form, from the same `control`
@@ -151,8 +153,62 @@ class ControlBuilder
         if ($type === 'password') {
             return $this->password($control, $options);
         }
+        if ($type === 'relation' && \is_string($control['url'] ?? null)) {
+            return $this->remoteRelation($control, $options);
+        }
 
         return [$this->registry->get($type), $options];
+    }
+
+    /**
+     * A relation to records the form doesn't hold: scalar ids in and out, no Doctrine.
+     * The browser searches the records at the control's URL (Symfony UX Autocomplete);
+     * the form knows the current ids and the submitted ones only, labelled by the host's
+     * `labels` callable (see {@see RemoteChoiceLoader}).
+     *
+     * A cascade (`dependsOn`) puts the gridview-dependent-select controller on the row:
+     * when the field it depends on changes, the choice is emptied and the search URL
+     * takes the new value in `dependsParam`. That the chosen record belongs to the
+     * deciding one is for the host to check on the server.
+     *
+     * @param array<string, mixed> $control
+     * @param array<string, mixed> $options
+     *
+     * @return array{0: class-string<FormTypeInterface>, 1: array<string, mixed>}
+     */
+    private function remoteRelation(array $control, array $options): array
+    {
+        if (!class_exists(AutocompleteChoiceTypeExtension::class)) {
+            throw new \LogicException('A remote "relation" control needs Symfony UX Autocomplete. Try running "composer require symfony/ux-autocomplete".');
+        }
+        /** @var callable(list<string>): array<array-key, string> $labels checked by ControlResolver */
+        $labels = $control['labels'];
+        $loader = new RemoteChoiceLoader($labels(...));
+        $url = (string) $control['url'];
+
+        $dependsOn = \is_string($control['dependsOn'] ?? null) ? $control['dependsOn'] : null;
+        if ($dependsOn !== null) {
+            $param = (string) $control['dependsParam'];
+            $rowAttr = (\is_array($options['row_attr'] ?? null) ? $options['row_attr'] : []) + [
+                'data-gridview-dependent-select-field-value' => $dependsOn,
+                'data-gridview-dependent-select-url-value'   => $url,
+                'data-gridview-dependent-select-param-value' => $param,
+            ];
+            $options['row_attr'] = self::withToken($rowAttr, 'data-controller', 'gridview-dependent-select');
+            // Filtered by the current value from the start; an empty one lists nothing
+            // until the deciding field is chosen.
+            $value = $control['dependsValue'] ?? null;
+            $url .= (str_contains($url, '?') ? '&' : '?') . rawurlencode($param) . '=' . rawurlencode(\is_scalar($value) ? (string) $value : '');
+        }
+
+        return [ChoiceType::class, $options + [
+            'choice_loader'    => $loader,
+            'choice_label'     => static fn(string $id): string => $loader->label($id),
+            'autocomplete'     => true,
+            'autocomplete_url' => $url,
+            // A cascade lists the few records of the chosen parent as soon as it opens.
+            'min_characters'   => $dependsOn !== null ? 0 : 1,
+        ]];
     }
 
     /**

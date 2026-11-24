@@ -40,9 +40,11 @@
         "symfony/http-client": "^6.4 || ^7.0 || ^8.0",
         "friendsofphp/php-cs-fixer": "^3.0",
         "fedale/setting-bundle": "^1.1",
-        "symfony/validator": "^6.4 || ^7.0 || ^8.0"
+        "symfony/validator": "^6.4 || ^7.0 || ^8.0",
+        "symfony/ux-autocomplete": "^2.13 || ^3.0"
     },
     "suggest": {
+        "symfony/ux-autocomplete": "Enables the remote relation control: a select that searches the records it offers at a URL",
         "symfony/validator": "Validates the controls server-side: required controls add NotBlank, unique ones UniqueEntity",
         "symfony/http-client": "Enables the built-in JsonDataProvider for grids backed by a JSON-over-HTTP endpoint instead of Doctrine",
         "symfony/mercure-bundle": "Enables real-time grid updates (signal + auto-refresh) over Mercure",

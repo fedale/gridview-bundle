@@ -38,7 +38,9 @@ use Symfony\Component\Form\FormTypeInterface;
  *
  * Note the intentional divergence from the filter side: a `relation` control
  * uses EntityType (binding managed entities) whereas a `relation` filter uses a
- * scalar ChoiceType. They are kept as separate entries on purpose.
+ * scalar ChoiceType. They are kept as separate entries on purpose. A remote
+ * relation (one with a `url`) is a ChoiceType too, chosen by ControlBuilder rather
+ * than here: the name stays one concept with two sources.
  */
 class ControlTypeRegistry
 {

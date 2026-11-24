@@ -48,7 +48,7 @@ class ControlResolver
     private const NUMBER_CONTROLS = ['number', 'integer'];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, validate: bool}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, validate: bool}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -77,11 +77,21 @@ class ControlResolver
         $required = (bool) ($control['required'] ?? false);
         $options  = $control['options'] ?? [];
 
-        if ($type === 'relation' && !isset($options['class'])) {
+        $url = $this->setting($type, $control, 'url', ['relation'], 'is_string');
+        if ($type === 'relation' && $url === null && !isset($options['class'])) {
             throw new \InvalidArgumentException(
-                'A "relation" control requires options.class (the related entity FQCN). '
+                'A "relation" control requires options.class (the related entity FQCN) or a url (a remote lookup). '
                 . 'Optionally provide options.choice_label and options.multiple.'
             );
+        }
+        $labels = $this->setting($type, $control, 'labels', ['relation'], 'is_callable');
+        if ($url !== null && $labels === null) {
+            throw new \InvalidArgumentException('A remote "relation" control requires labels, a callable giving the labels of the ids it is given.');
+        }
+        $dependsOn = $this->setting($type, $control, 'dependsOn', ['relation'], 'is_string');
+        $dependsParam = $this->setting($type, $control, 'dependsParam', ['relation'], 'is_string');
+        if ($dependsOn !== null && ($url === null || $dependsParam === null)) {
+            throw new \InvalidArgumentException(sprintf('The "relation" control depending on "%s" requires a url and a dependsParam, the query parameter its value goes in.', $dependsOn));
         }
 
         if ($type === 'enum' && !isset($options['class'])) {
@@ -122,6 +132,14 @@ class ControlResolver
             'strengthMeter'   => $this->setting($type, $control, 'strengthMeter', ['password'], 'is_bool') ?? false,
             'revealToggle'    => $this->setting($type, $control, 'revealToggle', ['password'], 'is_bool') ?? false,
             'minLength'       => $this->setting($type, $control, 'minLength', ['password'], static fn(mixed $v): bool => \is_int($v) && $v >= 0),
+            // A remote relation: the URL searching its records, the host's callable
+            // labelling the ids, and the field a cascade depends on, with the query
+            // parameter its value goes in and its current value.
+            'url'             => $url,
+            'labels'          => $labels,
+            'dependsOn'       => $dependsOn,
+            'dependsParam'    => $dependsParam,
+            'dependsValue'    => $this->setting($type, $control, 'dependsValue', ['relation'], static fn(mixed $v): bool => \is_string($v) || \is_int($v)),
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.

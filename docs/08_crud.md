@@ -52,7 +52,7 @@ entity, a normalised URL…) with no custom code.
 | `boolean` | `CheckboxType` | |
 | `choice` | `ChoiceType` | inline values via `options.choices` |
 | `enum` | `EnumType` | **requires** `options.class` (the PHP enum FQCN); binds the enum case |
-| `relation` | `EntityType` | **requires** `options.class`; binds managed entities |
+| `relation` | `EntityType`, or `ChoiceType` + UX Autocomplete when remote | **requires** `options.class` (binds managed entities) or a `url` and `labels` (scalar ids, see [A relation searched at a URL](#a-relation-searched-at-a-url)) |
 | `country` / `language` / `locale` / `timezone` | `CountryType` / `LanguageType` / `LocaleType` / `TimezoneType` | localised ISO lists, bind the code |
 | `currency` | `CurrencyType` | the ISO currency-**code** picker (≠ `money`) |
 | `hidden` | `HiddenType` | |
@@ -162,6 +162,45 @@ $this->controls->add($builder, 'guests', ['type' => 'integer', 'required' => tru
   back onto the form), pass `'validate' => false`: `required`, `maxLength`, `min` and `max` then only
   mark the input, and the form adds no `NotBlank`, `Length` or `Range` of its own. Constraints you
   list in `constraints` still apply.
+
+### A relation searched at a URL
+
+A `relation` control binds Doctrine entities through `options.class`. When the records aren't
+entities (rows of another database, an API, a form with no grid), give it a `url` instead: the
+select searches the records there with [Symfony UX Autocomplete], and binds their ids as strings.
+
+```php
+$this->controls->add($builder, 'province', [
+    'type'   => 'relation',
+    'url'    => $urls->generate('province_lookup'),
+    // The labels of the ids the form meets: the current ones, and the submitted ones.
+    'labels' => fn(array $ids): array => $provinces->labelsById($ids),
+    'options' => ['placeholder' => 'Choose a province'],
+], 'Province');
+```
+
+- `url` must answer UX Autocomplete's search: `?query=…` in, `{"results": [{"value": id, "text":
+  label}]}` out.
+- `labels` gets a list of ids and returns `[id => label]` for those that exist. The form looks up
+  only the current ids when it's drawn and the submitted ones when it's bound, each once. A
+  submitted id with no label isn't a choice, so the field is invalid.
+- `options.multiple` makes it a many-to-many: an array of ids, listed in the order of the data.
+- For a **cascade** (the municipalities of the chosen province), add `dependsOn` (the field it
+  depends on), `dependsParam` (the query parameter its value goes in) and `dependsValue` (its
+  current value). The search starts filtered, and the `gridview-dependent-select` controller
+  empties the choice and changes the filter when the other field changes
+  ([Form components](19_form-components.md)). Checking on the server that the chosen record
+  belongs to the other one is your job.
+
+```php
+['type' => 'relation', 'url' => '/municipalities', 'labels' => $labels,
+ 'dependsOn' => 'province', 'dependsParam' => 'filter[province]', 'dependsValue' => $data['province'] ?? null]
+```
+
+UX Autocomplete is optional for the bundle: without it, a relation with a `url` throws an exception
+telling you to install it (`composer require symfony/ux-autocomplete`).
+
+[Symfony UX Autocomplete]: https://symfony.com/bundles/ux-autocomplete/current/index.html
 
 ### Validation: required & unique
 

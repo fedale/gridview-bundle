@@ -173,6 +173,10 @@ When the deciding field changes, the choice is emptied, with the options of the 
 (nearest first, same collection row first). Make the endpoint return nothing for an empty value, and check on the server
 that the record chosen belongs to the deciding one.
 
+A gridview `relation` control with a `url` sets all of this from `dependsOn`, `dependsParam` and
+`dependsValue` ([CRUD](08_crud.md#a-relation-searched-at-a-url)); only `data-gv-field` on the
+rows is yours to add.
+
 Inside `[data-gridview]` or `[data-gv-scope]`, an autocomplete (Tom Select) takes the look of
 the other inputs from the `--gv-*` tokens, dark mode included: control, caret, dropdown, active
 option, highlighted term, chips of a multiple select. Its wrapper draws no second frame.
