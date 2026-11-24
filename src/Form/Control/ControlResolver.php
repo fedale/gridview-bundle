@@ -48,7 +48,7 @@ class ControlResolver
     private const NUMBER_CONTROLS = ['number', 'integer'];
 
     /**
-     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, validate: bool}
+     * @return array{type: string, required: bool, requiredMessage: ?string, options: array, modes: ?array, unique: ?array, constraints: array, upload: ?callable, display: ?string, maxLength: ?int, min: int|float|null, max: int|float|null, scale: ?int, confirm: bool, strengthMeter: bool, revealToggle: bool, minLength: ?int, url: ?string, labels: ?callable, dependsOn: ?string, dependsParam: ?string, dependsValue: string|int|null, multiple: bool, current: MediaFile|list<MediaFile>|null, accept: ?string, showsFiles: bool, validate: bool}
      */
     public function resolve(mixed $control, string $dataType): array
     {
@@ -140,6 +140,14 @@ class ControlResolver
             'dependsOn'       => $dependsOn,
             'dependsParam'    => $dependsParam,
             'dependsValue'    => $this->setting($type, $control, 'dependsValue', ['relation'], static fn(mixed $v): bool => \is_string($v) || \is_int($v)),
+            // A media control showing its files: the current one (a MediaFile, or a
+            // list of them with `multiple`), the files it accepts. Given `current`
+            // (even null, nothing yet) or `multiple`, it draws them and binds their ids;
+            // without either it stays the bare, unmapped upload input.
+            'multiple'        => $multiple = $this->setting($type, $control, 'multiple', ['media'], 'is_bool') ?? false,
+            'current'         => $this->current($type, $control, $multiple),
+            'accept'          => $this->setting($type, $control, 'accept', ['media'], 'is_string'),
+            'showsFiles'      => $type === 'media' && ($multiple || \array_key_exists('current', $control)),
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.
@@ -165,6 +173,31 @@ class ControlResolver
         }
 
         return $display;
+    }
+
+    /**
+     * The current file of a media control, or its current files with `multiple`.
+     *
+     * @param array<string, mixed> $control
+     *
+     * @return MediaFile|list<MediaFile>|null
+     */
+    private function current(string $type, array $control, bool $multiple): MediaFile|array|null
+    {
+        $current = $this->setting($type, $control, 'current', ['media'], static fn(mixed $v): bool => true);
+        if ($multiple) {
+            $current ??= [];
+            if (!\is_array($current) || !array_is_list($current) || array_filter($current, static fn(mixed $file): bool => !$file instanceof MediaFile) !== []) {
+                throw new \InvalidArgumentException(sprintf('The "current" of a multiple "media" control must be a list of %s.', MediaFile::class));
+            }
+
+            return $current;
+        }
+        if ($current !== null && !$current instanceof MediaFile) {
+            throw new \InvalidArgumentException(sprintf('The "current" of a "media" control must be a %s or null, %s given.', MediaFile::class, get_debug_type($current)));
+        }
+
+        return $current;
     }
 
     /**

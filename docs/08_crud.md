@@ -106,6 +106,9 @@ and it would silently round extra decimals instead of letting the user correct t
 | `confirm` | `password` | `true`: asked twice, a `RepeatedType` whose two inputs must match (see below) |
 | `strengthMeter`, `revealToggle` | `password` | `true`: the strength meter and the show/hide eye, on the input typed first ([Form components](19_form-components.md#password-strength-meter-and-showhide-eye)) |
 | `minLength` | `password` | the meter's threshold (8 without it), and a `Length` constraint |
+| `current` | `media` | the stored file(s), as `MediaFile`: drawn with a link, size, preview and "Remove"; the control then binds ids ([details](02_columns.md#showing-the-current-file)) |
+| `multiple` | `media` | `true`: several files, reordered and removed in the page |
+| `accept` | `media` | the `accept` attribute of the file input (`image/*`, `application/pdf`) |
 | `validate` | any | `false`: the form adds no constraint of its own (`NotBlank`, `Length`, `Range`); the attributes stay as hints for the browser (see below) |
 
 ```php

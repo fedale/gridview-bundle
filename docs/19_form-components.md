@@ -4,7 +4,8 @@ The bundle's form theme and stylesheet are not limited to the grid's CRUD forms.
 form of the host application can use them, and get the same look as the grid: rows, labels,
 controls, errors, required markers, and a few components forms often need: an on/off
 **switch**, a choice drawn as **buttons side by side**, a **password strength meter** and
-**show/hide eye**, and **repeatable rows** added and removed in the page.
+**show/hide eye**, **repeatable rows** added and removed in the page, and the **current files**
+of an upload, reordered in the page.
 
 Everything is styled through the `--gv-*` design tokens, so it follows the theme, the dark mode
 and the framework presets of the grid ([Theming](06_theming.md)).
@@ -118,6 +119,22 @@ A gridview control sets all of this from its settings: `['type' => 'password', '
 
 The labels are values, so translate them where the form is built
 (`'data-gridview-password-strength-labels-value' => json_encode([...])`).
+
+## Files: the current ones, reordered
+
+A `media` control with `current` ([Columns](02_columns.md#showing-the-current-file)) is drawn by
+the form theme as `.gv-media` (one file: preview, name, size, "Remove", the input) or
+`.gv-media-list` (several files, one row each). In a list, the `gridview-media-list` controller
+shows the ↑, ↓ and Remove buttons of each file and writes the ids left, in order, into a hidden
+input; without JavaScript the buttons stay hidden and every file is kept.
+
+| Class | What it is |
+|---|---|
+| `gv-media__preview` | The preview of an image (its `thumbnailUrl`) |
+| `gv-media__name`, `gv-media__size` | The link to the file and its size |
+| `gv-media-list__item` | A file of the list (target `item`, `data-id`) |
+| `gv-media-list__thumbnail`, `gv-media-list__icon` | A thumbnail for an image, an icon for any other file |
+| `gv-media-list__actions` | Its buttons (target `actions`), hidden until the controller runs |
 
 ## Conditional rows
 

@@ -4,7 +4,8 @@
   form gets proper spacing/typography without depending on Bootstrap/Tailwind.
   Host forms may use it too (twig.form_themes), inside [data-gridview] or
   [data-gv-scope]: a checkbox with class gv-switch is drawn as a switch, an
-  expanded choice with class gv-segmented as buttons side by side (_forms.scss).
+  expanded choice with class gv-segmented as buttons side by side (_forms.scss),
+  and a media control showing its files draws them (gv_media, gv_media_list).
   Applied automatically unless a host overrides `form.theme` in its grid
   controller's viewConfig() (see AbstractCrudGridController::defaultConfig()).
 #}
@@ -70,3 +71,77 @@
     </div>
     {%- endif -%}
 {%- endblock form_errors %}
+
+{#- A media control with its current file (MediaType): the file (a link to it when it has a
+    URL, and a preview of an image), "Remove" when the field may be empty, and the input to
+    upload another one. -#}
+{%- block gv_media_widget -%}
+    <div {{ block('widget_container_attributes') }}>
+        {%- if current_file -%}
+            {%- if current_file.thumbnailUrl -%}
+                {#- Decorative: the name next to it says what the file is. -#}
+                <img class="gv-media__preview" src="{{ current_file.thumbnailUrl }}" alt="" loading="lazy">
+            {%- endif -%}
+            <p class="gv-media__current">
+                {%- if current_file.url -%}
+                    <a class="gv-media__name" href="{{ current_file.url }}">{{ current_file.name }}</a>
+                {%- else -%}
+                    <span class="gv-media__name">{{ current_file.name }}</span>
+                {%- endif -%}
+                {%- if current_file.formattedSize -%}
+                    <span class="gv-media__size">{{ current_file.formattedSize }}</span>
+                {%- endif -%}
+            </p>
+            {%- if form.remove is defined -%}{{ form_row(form.remove) }}{%- endif -%}
+        {%- endif -%}
+        {{- form_widget(form.upload) -}}
+        {{- form_errors(form.upload) -}}
+    </div>
+{%- endblock gv_media_widget %}
+
+{#- A media control holding several files (MediaListType): the current files in their order,
+    each with buttons to move it and to remove it, then the input adding files at the end. The
+    buttons are hidden until the gridview-media-list controller runs: without it the list is
+    kept as is. Disabled, only the list. -#}
+{%- block gv_media_list_widget -%}
+    <div {{ block('widget_container_attributes') }}>
+        {%- if current_files is not empty -%}
+            <ol class="gv-media-list__items">
+                {%- for file in current_files -%}
+                    {%- set name = file.name -%}
+                    <li class="gv-media-list__item" data-gridview-media-list-target="item" data-id="{{ file.id }}">
+                        {%- if file.thumbnailUrl -%}
+                            {#- Decorative: the name next to it says what the file is. -#}
+                            <img class="gv-media-list__thumbnail" src="{{ file.thumbnailUrl }}" alt="" loading="lazy">
+                        {%- else -%}
+                            <svg class="gv-media-list__icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 1.5h5L12.5 5v9.5h-8.5z M9 1.5V5h3.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                        {%- endif -%}
+                        {%- if file.url -%}
+                            <a class="gv-media-list__name" href="{{ file.url }}" data-turbo="false">{{ name }}</a>
+                        {%- else -%}
+                            <span class="gv-media-list__name">{{ name }}</span>
+                        {%- endif -%}
+                        {%- if file.formattedSize -%}
+                            <span class="gv-media-list__size">{{ file.formattedSize }}</span>
+                        {%- endif -%}
+                        {%- if not disabled -%}
+                            <span class="gv-media-list__actions" data-gridview-media-list-target="actions" hidden>
+                                <button type="button" class="gv-btn gv-btn-icon" data-action="gridview-media-list#up" aria-label="{{ 'media.move_up'|trans({'%name%': name}, 'GridviewBundle') }}" title="{{ 'media.move_up'|trans({'%name%': name}, 'GridviewBundle') }}">↑</button>
+                                <button type="button" class="gv-btn gv-btn-icon" data-action="gridview-media-list#down" aria-label="{{ 'media.move_down'|trans({'%name%': name}, 'GridviewBundle') }}" title="{{ 'media.move_down'|trans({'%name%': name}, 'GridviewBundle') }}">↓</button>
+                                <button type="button" class="gv-btn" data-action="gridview-media-list#remove" aria-label="{{ 'media.remove_named'|trans({'%name%': name}, 'GridviewBundle') }}">{{ 'media.remove'|trans({}, 'GridviewBundle') }}</button>
+                            </span>
+                        {%- endif -%}
+                    </li>
+                {%- endfor -%}
+            </ol>
+        {%- endif -%}
+        {%- if disabled -%}
+            {%- do form.kept.setRendered -%}
+            {%- do form.upload.setRendered -%}
+        {%- else -%}
+            {{- form_widget(form.kept, {attr: {'data-gridview-media-list-target': 'kept'}}) -}}
+            {{- form_widget(form.upload) -}}
+            {{- form_errors(form.upload) -}}
+        {%- endif -%}
+    </div>
+{%- endblock gv_media_list_widget %}

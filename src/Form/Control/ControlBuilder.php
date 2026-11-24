@@ -9,6 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormTypeInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -59,6 +60,8 @@ class ControlBuilder
         // of the entity. The bundle owns phase 1 (receiving and validating the
         // upload); the host app's `upload` callable owns phase 2 (storing the bytes
         // and populating the real entity fields), invoked once the form is bound.
+        // A media control showing its files hands over each new upload the same way;
+        // the ids it keeps are no upload.
         $upload = $control['upload'] ?? null;
         if ($control['type'] === 'media' && \is_callable($upload)) {
             $form->addEventListener(FormEvents::POST_SUBMIT, static function (FormEvent $event) use ($name, $upload): void {
@@ -66,11 +69,12 @@ class ControlBuilder
                 if (!$form->has($name)) {
                     return;
                 }
-                $file = $form->get($name)->getData();
-                if ($file === null) {
-                    return;
+                $data = $form->get($name)->getData();
+                foreach (\is_array($data) ? $data : [$data] as $file) {
+                    if ($file instanceof UploadedFile) {
+                        $upload($file, $event->getData(), $form);
+                    }
                 }
-                $upload($file, $event->getData(), $form);
             });
         }
     }
@@ -147,8 +151,21 @@ class ControlBuilder
 
         $options = $this->settings($type, $control, $options);
 
+        if ($type === 'media' && ($control['showsFiles'] ?? false) === true) {
+            // The files and their ids are the data: mapped, unless the spec says otherwise.
+            $multiple = ($control['multiple'] ?? false) === true;
+            $options += ['current' => $control['current'] ?? ($multiple ? [] : null)];
+            if (\is_string($control['accept'] ?? null)) {
+                $options += ['accept' => $control['accept']];
+            }
+
+            return [$multiple ? MediaListType::class : MediaType::class, $options];
+        }
         if ($type === 'media') {
             $options['mapped'] = false;
+            if (\is_string($control['accept'] ?? null)) {
+                $options['attr'] = (\is_array($options['attr'] ?? null) ? $options['attr'] : []) + ['accept' => $control['accept']];
+            }
         }
         if ($type === 'password') {
             return $this->password($control, $options);

@@ -52,6 +52,12 @@ field.name: "Nome"
 field.value_in_use: "Valore già in uso."
 field.password_repeat: "Ripeti la password"
 
+media.remove: "Rimuovi"
+media.remove_file: "Rimuovi il file"
+media.remove_named: "Rimuovi %name%"
+media.move_up: "Sposta su %name%"
+media.move_down: "Sposta giù %name%"
+
 crud.cancel: "Annulla"
 crud.confirm: "Conferma"
 crud.create: "Crea"

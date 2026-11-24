@@ -559,6 +559,41 @@ and runs on `POST_SUBMIT` only when a file was actually uploaded (so editing oth
 without re-uploading leaves the file untouched). Add a `File`/`Image` constraint via
 `control.constraints` to validate size/mime in phase 1.
 
+### Showing the current file
+
+The bare `media` control is only an upload input: on an edit form it doesn't show what's stored.
+Give it `current` and it draws the file the record holds, with a link, its size, a preview for an
+image, "Remove" when the field isn't required, and the input replacing it. Gridview doesn't store
+files, so you describe the stored one with a `MediaFile` (id, name, size in bytes, download URL,
+thumbnail URL):
+
+```php
+use Fedale\GridviewBundle\Form\Control\MediaFile;
+
+'control' => [
+    'type'    => 'media',
+    'accept'  => 'application/pdf',
+    'current' => $asset->hasFile()
+        ? new MediaFile((string) $asset->getId(), $asset->getFilename(), $asset->getSize(), '/uploads/'.$asset->getFilename())
+        : null,   // null: nothing stored yet, the control still binds as below
+],
+```
+
+With `current` (even `null`), the control is **mapped** and binds:
+
+| The user… | Data |
+|---|---|
+| leaves it alone | the current file's id |
+| uploads a file | the `UploadedFile` |
+| ticks "Remove" | `null` |
+
+With `'multiple' => true` and `current` a list of `MediaFile`, it draws the files in their order,
+each with buttons to move it up or down and to remove it (the `gridview-media-list` controller),
+and an input adding files at the end. It binds a list: the ids kept, in the order the user left
+them, then an `UploadedFile` per new file. Only ids from `current` are taken back from the browser,
+so a form can't attach somebody else's file. The `upload` callable, when given, receives each new
+`UploadedFile` as before.
+
 **Display options** (passed via the column's `format`):
 
 | Option | Default | Description |

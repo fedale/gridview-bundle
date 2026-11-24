@@ -152,6 +152,12 @@
         "name": "gridview-dependent-select",
         "fetch": "lazy",
         "enabled": true
+      },
+      "media-list": {
+        "main": "controllers/gridview-media-list_controller.js",
+        "name": "gridview-media-list",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {
