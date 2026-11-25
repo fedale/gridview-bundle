@@ -67,6 +67,18 @@ class FilterDefaultNormalizerTest extends TestCase
         FilterDefaultNormalizer::normalize('date', ['from' => '01/02/2026']);
     }
 
+    public function testATimeRangeTakesTimesOfDay(): void
+    {
+        $this->assertSame(
+            ['from' => '09:00', 'to' => '12:30:15'],
+            FilterDefaultNormalizer::normalize('date', ['from' => '09:00', 'to' => '12:30:15'], ['input' => 'time'])
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('times of day');
+        FilterDefaultNormalizer::normalize('date', ['from' => '2026-01-01'], ['input' => 'time']);
+    }
+
     public function testDateRejectsUnknownKeys(): void
     {
         $this->expectException(\InvalidArgumentException::class);

@@ -69,6 +69,15 @@ class ColumnTypeEnumTest extends TestCase
         $this->assertSame('choice', $nested->getFilter()['type']);
     }
 
+    /** A time column's filter is the date filter taking times, unless the column says otherwise. */
+    public function testATimeColumnFiltersARangeOfTimes(): void
+    {
+        $this->assertSame(['type' => 'date', 'options' => ['input' => 'time']], $this->firstColumn(['attribute' => 'x', 'type' => 'time', 'filter' => true])->getFilter());
+        $this->assertSame(['input' => 'date'], $this->firstColumn(['attribute' => 'x', 'type' => 'time', 'filter' => ['options' => ['input' => 'date']]])->getFilter()['options']);
+        $this->assertSame(['type' => 'text'], $this->firstColumn(['attribute' => 'x', 'type' => 'time', 'filter' => 'text'])->getFilter());
+        $this->assertSame(['type' => 'date'], $this->firstColumn(['attribute' => 'x', 'type' => 'date', 'filter' => true])->getFilter());
+    }
+
     /**
      * End-to-end guard through the real ColumnFactory pipeline (not just the
      * isolated ControlResolver unit): `control: true` on these display types

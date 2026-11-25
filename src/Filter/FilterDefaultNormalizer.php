@@ -11,13 +11,15 @@ namespace Fedale\GridviewBundle\Filter;
 final class FilterDefaultNormalizer
 {
     private const ISO_DATE = '/^\d{4}-\d{2}-\d{2}$/';
+    private const TIME = '/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/';
 
     public static function normalize(string $type, mixed $default, array $options = []): mixed
     {
         return match ($type) {
             'text' => self::normalizeText($default),
             'boolean' => self::normalizeBoolean($default),
-            'date' => self::normalizeRange($type, $default),
+            // A date filter with `input: time` takes times of day as its bounds.
+            'date' => self::normalizeRange(($options['input'] ?? 'date') === 'time' ? 'time' : 'date', $default),
             // The single-input number widget holds one scalar (a value or an
             // inline expression like ">10"); the from/to range widget keeps the
             // {from, to} shape.
@@ -119,6 +121,14 @@ final class FilterDefaultNormalizer
     {
         if ($bound === null || $bound === '') {
             return null;
+        }
+
+        if ($type === 'time') {
+            if (!is_string($bound) || !preg_match(self::TIME, $bound)) {
+                throw new \InvalidArgumentException('Time filter default bounds must be times of day (HH:MM or HH:MM:SS).');
+            }
+
+            return $bound;
         }
 
         if ($type === 'date') {

@@ -205,12 +205,6 @@ parameters:
 			path: src/Column/ColumnFactory.php
 
 		-
-			message: '#^Method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:normalizeFilter\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Column/ColumnFactory.php
-
-		-
 			message: '#^Parameter \$authChecker of method Fedale\\GridviewBundle\\Column\\ColumnFactory\:\:__construct\(\) has invalid type Symfony\\Component\\Security\\Core\\Authorization\\AuthorizationCheckerInterface\.$#'
 			identifier: class.notFound
 			count: 1

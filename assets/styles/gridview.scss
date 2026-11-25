@@ -471,6 +471,12 @@
     }
 }
 
+// A range of times (`input: time`): no picker, the two native time inputs side by side.
+[data-gridview] .gv-date-filter--time {
+    display: flex;
+    gap: .3rem;
+}
+
 // ── Header ───────────────────────────────────────────────────────
 // The header region is the chrome band (border/padding); the controls live in
 // its child toolbar region (flex row, see below).

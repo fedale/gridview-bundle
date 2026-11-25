@@ -48,6 +48,18 @@ abstract class AbstractColumnType implements ColumnTypeInterface
         return 'text';
     }
 
+    /**
+     * The options of the filter inferFilterType() names, when the column's filter keeps that
+     * type: a time column's date filter takes times (`input: time`). Not on
+     * ColumnTypeInterface, so a type implementing it directly needs nothing new.
+     *
+     * @return array<string, mixed>
+     */
+    public function inferFilterOptions(): array
+    {
+        return [];
+    }
+
     public function inferControlType(): ?string
     {
         return 'text';

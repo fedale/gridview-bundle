@@ -319,6 +319,14 @@ abstract class AbstractColumnConfig implements ColumnConfigInterface
         return $this->filter(FilterType::Date);
     }
 
+    /**
+     * A range of times of day: the date filter with two time inputs (a time column's default).
+     */
+    public function filterTime(): static
+    {
+        return $this->filter(['type' => FilterType::Date->value, 'options' => ['input' => 'time']]);
+    }
+
     public function filterChoice(): static
     {
         return $this->filter(FilterType::Choice);

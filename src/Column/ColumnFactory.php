@@ -3,6 +3,7 @@
 namespace Fedale\GridviewBundle\Column;
 
 use Fedale\GridviewBundle\Column\Config\ColumnConfigInterface;
+use Fedale\GridviewBundle\Column\Type\AbstractColumnType;
 use Fedale\GridviewBundle\Column\Type\ColumnTypeRegistry;
 use Fedale\GridviewBundle\Contract\ColumnInterface;
 use Fedale\GridviewBundle\Form\Control\ControlResolver;
@@ -166,7 +167,11 @@ class ColumnFactory
             // The per-column filter inherits the type's default filter unless it
             // names its own type, which always wins.
             if (\array_key_exists('filter', $spec)) {
-                $spec['filter'] = $this->normalizeFilter($spec['filter'], $columnType->inferFilterType());
+                $spec['filter'] = $this->normalizeFilter(
+                    $spec['filter'],
+                    $columnType->inferFilterType(),
+                    $columnType instanceof AbstractColumnType ? $columnType->inferFilterOptions() : [],
+                );
             }
 
             // The per-column control (write-side field) inherits the type's
@@ -205,11 +210,28 @@ class ColumnFactory
      * Normalizes a column's `filter` spec into an array with a resolved `type`.
      * A `filter.type` set explicitly always wins; otherwise the type's default
      * filter is inherited (falling back to "text" when the type is not filterable).
+     *
+     * @param array<string, mixed> $inheritedOptions the type's own filter options, applied while
+     *                                               the filter keeps the inherited type (a
+     *                                               filter's own options win)
+     *
+     * @return array<string, mixed>
      */
-    private function normalizeFilter(mixed $filter, ?string $inheritedType): array
+    private function normalizeFilter(mixed $filter, ?string $inheritedType, array $inheritedOptions = []): array
     {
-        $inherited = $inheritedType ?? 'text';
+        $filter = $this->normalizeFilterType($filter, $inheritedType ?? 'text');
+        if ($inheritedOptions !== [] && $filter['type'] === ($inheritedType ?? 'text')) {
+            $filter['options'] = (\is_array($filter['options'] ?? null) ? $filter['options'] : []) + $inheritedOptions;
+        }
 
+        return $filter;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizeFilterType(mixed $filter, string $inherited): array
+    {
         if ($filter instanceof \BackedEnum) {
             $filter = $filter->value;
         }

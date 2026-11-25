@@ -25,6 +25,11 @@ class TimeType extends DateType
         return 'H:i';
     }
 
+    public function inferFilterOptions(): array
+    {
+        return ['input' => 'time'];
+    }
+
     public function inferControlType(): ?string
     {
         return 'time';

@@ -66,7 +66,7 @@ its form control, its export behaviour, its per-context visibility. One declarat
 | Required / unique validation | `control.required`, `control.unique` (emits `UniqueEntity`) | [08_crud.md](08_crud.md#validation-required--unique) |
 | To move the search box, add button, export menu… | layout tokens — `'toolbar' => '{addButton} {globalSearch} {spacer} {export}'` | [05_layout.md](05_layout.md#available-tokens) |
 | Edit / delete / custom row buttons | `ActionColumn` with `layout => '{edit} {clone} {delete}'` + `CrudButton` | [02_columns.md](02_columns.md#actioncolumn--token-based-actions) |
-| A per-column filter input | the column's `filter` key (`->filterText()`, `->filterDate()`, …) | [04_filtering.md](04_filtering.md#declaring-filter-inputs-in-columns) |
+| A per-column filter input | the column's `filter` key (`->filterText()`, `->filterDate()`, `->filterTime()` for times of day, …) | [04_filtering.md](04_filtering.md#declaring-filter-inputs-in-columns) |
 | Filters outside the table (a sidebar, a modal) | `filterBar: true` + the `{filterBar}` token, placeable anywhere on the page | [04_filtering.md](04_filtering.md#the-filterbar--placing-filters-anywhere) |
 | A filter with no column behind it | `search.fields` | [04_filtering.md](04_filtering.md#column-less-filters--searchfields) |
 | One search box across several fields | `behavior.globalSearch` | [04_filtering.md](04_filtering.md#global-search) |

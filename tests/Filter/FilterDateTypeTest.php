@@ -45,6 +45,16 @@ class FilterDateTypeTest extends TestCase
         $this->assertSame('Born after', $view['from']->vars['attr']['placeholder']);
     }
 
+    public function testATimeRangeIsTwoTimeInputsWithoutThePicker(): void
+    {
+        $view = $this->field(['input' => 'time'])->createView();
+
+        $this->assertSame('time', $view['from']->vars['attr']['type']);
+        $this->assertSame('time', $view['to']->vars['attr']['type']);
+        $this->assertSame('gv-date-filter gv-date-filter--time', $view->vars['attr']['class']);
+        $this->assertArrayNotHasKey('data-controller', $view->vars['attr']);
+    }
+
     public function testAnyDateIsSelectableUnlessTheColumnBoundsIt(): void
     {
         $options = fn (array $field): array => json_decode($this->field($field)->createView()->vars['attr']['data-gridview-date-filter-options-value'], true);

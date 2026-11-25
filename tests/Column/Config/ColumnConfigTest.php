@@ -94,6 +94,7 @@ class ColumnConfigTest extends TestCase
     public function testFilterRelationWithoutArgumentsDeclaresTheBareType(): void
     {
         $this->assertSame('relation', TextColumn::new('author')->filterRelation()->toArray()['filter']);
+        $this->assertSame(['type' => 'date', 'options' => ['input' => 'time']], TextColumn::new('opens')->filterTime()->toArray()['filter']);
     }
 
     public function testFilterRelationWritesOnlyTheGivenOptions(): void

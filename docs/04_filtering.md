@@ -594,6 +594,7 @@ as `fedaleForm[field][from]` and `fedaleForm[field][to]`.
 |--------|------|---------|-------------|
 | `from_placeholder` | `string` | `'filter.date_from'` | Placeholder of the from input, a key of the `GridviewBundle` domain ("From", "Da"); a plain text the catalog lacks is shown as it is |
 | `to_placeholder` | `string` | `'filter.date_to'` | Placeholder of the to input ("To", "A") |
+| `input` | `string` | `'date'` | `'time'` for a range of times of day: see [A range of times](#a-range-of-times) |
 
 The picker's own input shows both, "From – To" (just "From" with `mode: 'single'`).
 
@@ -692,6 +693,23 @@ $this->searchForm->andFilterWhere($qb, ['lte', 'c.createdAt', $toDate]);
 > ```php
 > 'twigFilter' => "date('d/m/Y')",
 > ```
+
+#### A range of times
+
+With `'input' => 'time'` the filter takes times of day: two native `<input type="time">` side
+by side ("from 09:00 to 12:30"), no calendar and no Flatpickr. It's the default filter of a
+`TimeColumn`, and `->filterTime()` sets it on any column:
+
+```php
+TimeColumn::new('opensAt')->filter(true);              // inherits the time range
+TextColumn::new('slot')->filterTime();                 // the same, on any column
+'filter' => ['type' => 'date', 'options' => ['input' => 'time']],  // as an array
+```
+
+The bounds travel as `HH:MM` (or `HH:MM:SS`). Each becomes a `DateTimeImmutable` dated
+1970-01-01, which a `time` column compares on its time: `from` is the time itself, `to` reaches
+the end of its minute (`12:30` → `12:30:59`) unless `end_of_day` is `false`. A `default` takes
+times too: `'default' => ['from' => '09:00']`.
 
 ## Applying filters in the repository — `applyFilters()`
 

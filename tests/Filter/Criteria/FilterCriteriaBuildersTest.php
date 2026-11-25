@@ -75,6 +75,14 @@ class FilterCriteriaBuildersTest extends TestCase
                 [$op('Lte'), new \DateTimeImmutable('2026-02-01 00:00:00')],
             ]],
             'date non iso' => ['date', ['from' => '01/02/2026'], [], []],
+            // A time of day (the date filter's `input: time`): on 1970-01-01, "to" to the end of its minute.
+            'time range' => ['date', ['from' => '09:00', 'to' => '12:30'], [], [
+                [$op('Gte'), new \DateTimeImmutable('1970-01-01 09:00:00')],
+                [$op('Lte'), new \DateTimeImmutable('1970-01-01 12:30:59')],
+            ]],
+            'time with seconds' => ['date', ['to' => '12:30:15'], [], [[$op('Lte'), new \DateTimeImmutable('1970-01-01 12:30:15')]]],
+            'time without end of day' => ['date', ['to' => '12:30'], ['end_of_day' => false], [[$op('Lte'), new \DateTimeImmutable('1970-01-01 12:30:00')]]],
+            'time out of range' => ['date', ['from' => '24:00', 'to' => '9:5'], [], []],
             // Boolean
             'boolean true' => ['boolean', '1', [], [[$op('Eq'), true]]],
             'boolean false' => ['boolean', '0', [], [[$op('Eq'), false]]],

@@ -58,7 +58,7 @@ Every builder inherits these from `AbstractColumnConfig`:
 | `value` / `valueGetter` / `formatter` / `renderer` | the pipeline overrides |
 | `format(array)` | `format` (merged) |
 | `filter(bool\|string\|array\|FilterType)` | `filter` |
-| `filterText(bool $trim = true)`, `filterNumber()`, `filterBoolean()`, `filterDate()`, `filterChoice()` | `filter` shortcuts |
+| `filterText(bool $trim = true)`, `filterNumber()`, `filterBoolean()`, `filterDate()`, `filterTime()`, `filterChoice()` | `filter` shortcuts (`filterTime()`: the date filter over times of day) |
 | `filterRelation(?array $choices, ?string $ajaxUrl, ?bool $multiple, ?bool $searchable, ?string $optionLabel, ?string $optionValue, ?int $controlsThreshold, array $options = [])` | `filter` (type `relation` plus its `options`; every argument is optional) |
 | `control(bool\|string\|array\|ControlType)` | `control` |
 | `required(bool = true)` | `control.required` (creates the control if absent) |
