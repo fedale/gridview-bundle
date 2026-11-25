@@ -164,6 +164,12 @@
         "name": "gridview-tags",
         "fetch": "lazy",
         "enabled": true
+      },
+      "color": {
+        "main": "controllers/gridview-color_controller.js",
+        "name": "gridview-color",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

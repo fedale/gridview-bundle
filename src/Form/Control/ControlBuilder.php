@@ -205,6 +205,9 @@ class ControlBuilder
                 'suggestions_url' => \is_string($control['url'] ?? null) ? $control['url'] : null,
             ], static fn(mixed $value): bool => $value !== null)];
         }
+        if ($type === 'color' && ($control['nullable'] ?? false) === true) {
+            return [NullableColorType::class, $options];
+        }
         if ($type === 'relation' && \is_string($control['url'] ?? null)) {
             return $this->remoteRelation($control, $options);
         }

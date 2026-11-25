@@ -169,6 +169,9 @@ class ControlResolver
             // accepted. Its `url` suggests more, its `max` counts the labels.
             'suggestions'     => $suggestions ?? [],
             'restrict'        => $restrict,
+            // A colour that may be none: "No color" beside the colour input, which always
+            // holds one (NullableColorType).
+            'nullable'        => $this->setting($type, $control, 'nullable', ['color'], 'is_bool') ?? false,
             // false: the form adds no NotBlank of its own, `required` stays an HTML
             // hint. For a host that validates the submitted data elsewhere and maps
             // its errors back onto the form.

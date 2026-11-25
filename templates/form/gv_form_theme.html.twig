@@ -101,6 +101,14 @@
     </div>
 {%- endblock gv_media_widget %}
 
+{#- A colour that may be none (NullableColorType): the colour input, then "No color". -#}
+{%- block gv_color_widget -%}
+    <div {{ block('widget_container_attributes') }}>
+        {{- form_widget(form.color) -}}
+        {{- form_widget(form.none) -}}{{- form_label(form.none) -}}
+    </div>
+{%- endblock gv_color_widget %}
+
 {#- A media control holding several files (MediaListType): the current files in their order,
     each with buttons to move it and to remove it, then the input adding files at the end. The
     buttons are hidden until the gridview-media-list controller runs: without it the list is

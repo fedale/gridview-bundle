@@ -487,6 +487,17 @@ form:has(.gv-form-label.required) .gv-required-note {
     }
 }
 
+// ── Color: a colour that may be none ──────────────────────────────
+//
+// The colour input, then "No color" and its label on the same line (NullableColorType).
+
+.gv-color {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+}
+
 // ── Media: the current file(s) of a media control ──────────────────
 //
 // One file: its preview (an image), its name and size, "Remove", then the input replacing

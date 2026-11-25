@@ -52,6 +52,7 @@ field.name: "Name"
 field.value_in_use: "Value already in use."
 field.password_repeat: "Repeat the password"
 
+color.none: "No color"
 media.remove: "Remove"
 media.remove_file: "Remove the file"
 media.remove_named: "Remove %name%"

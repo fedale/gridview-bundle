@@ -165,6 +165,17 @@ $builder->add('keywords', TextType::class, ['attr' => [
 | `gv-tags__chip`, `gv-tags__remove` | A label and its remove button |
 | `gv-tags__entry` | The input adding labels; `aria-invalid` while it holds a refused one |
 
+## A colour that may be none
+
+The browser's colour input always holds a colour: once set, a field couldn't be emptied. A
+`color` control with `nullable` ([CRUD](08_crud.md#control-settings-display-length-bounds))
+draws a "No color" checkbox beside it, and the `gridview-color` controller unchecks it as soon
+as a colour is picked. Without the controller the user unchecks it by hand.
+
+| Class | Element |
+|---|---|
+| `gv-color` | The colour input and the checkbox, on one line |
+
 ## Conditional rows
 
 The `gridview-conditional` controller shows a form row only while another field of the form

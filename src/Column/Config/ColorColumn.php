@@ -10,4 +10,13 @@ class ColorColumn extends AbstractColumnConfig
     {
         return ColumnType::Color;
     }
+
+    /**
+     * Edit it with a "No color" checkbox beside the colour input, which always holds one: the
+     * field can be emptied.
+     */
+    public function nullable(bool $nullable = true): static
+    {
+        return $this->controlSetting('nullable', $nullable);
+    }
 }

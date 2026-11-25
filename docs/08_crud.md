@@ -40,7 +40,7 @@ entity, a normalised URL…) with no custom code.
 | `url` | `UrlType` | normalises the URL on submit |
 | `tel` | `TelType` | `<input type="tel">` |
 | `password` | `PasswordType` | |
-| `color` | `ColorType` | native colour picker |
+| `color` | `ColorType` | native colour picker; with `nullable`, `NullableColorType` and a "No color" checkbox |
 | `number` | `NumberType` | |
 | `integer` | `IntegerType` | |
 | `money` | `MoneyType` | an **amount**; pass `options.currency` (defaults to `EUR`) |
@@ -113,6 +113,7 @@ and it would silently round extra decimals instead of letting the user correct t
 | `maxLength` | `tags` | the longest label (an `All` of `Length`), not the whole input |
 | `url` | `tags` | suggests more labels: `?query=<typed text>` in, a JSON list of strings out |
 | `scale` | `number` | the `step` attribute (`2` → `0.01`, `0` → `1`) |
+| `nullable` | `color` | `true`: a "No color" checkbox beside the colour input, which always holds a colour, so the field can be emptied; the data is `#rrggbb` in lower case or null (`ColorColumn::nullable()`) |
 | `confirm` | `password` | `true`: asked twice, a `RepeatedType` whose two inputs must match (see below) |
 | `strengthMeter`, `revealToggle` | `password` | `true`: the strength meter and the show/hide eye, on the input typed first ([Form components](19_form-components.md#password-strength-meter-and-showhide-eye)) |
 | `minLength` | `password` | the meter's threshold (8 without it), and a `Length` constraint |
