@@ -49,8 +49,9 @@ class FilterDateTypeTest extends TestCase
     {
         $view = $this->field(['input' => 'time'])->createView();
 
-        $this->assertSame('time', $view['from']->vars['attr']['type']);
-        $this->assertSame('time', $view['to']->vars['attr']['type']);
+        // The variable the form theme writes, not only the attribute.
+        $this->assertSame('time', $view['from']->vars['type']);
+        $this->assertSame('time', $view['to']->vars['type']);
         $this->assertSame('gv-date-filter gv-date-filter--time', $view->vars['attr']['class']);
         $this->assertArrayNotHasKey('data-controller', $view->vars['attr']);
     }

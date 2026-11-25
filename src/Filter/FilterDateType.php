@@ -5,6 +5,8 @@ namespace Fedale\GridviewBundle\Filter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -44,6 +46,17 @@ class FilterDateType extends AbstractType
                 'attr'     => ['type' => $input, 'placeholder' => $options['to_placeholder']],
                 'translation_domain' => 'GridviewBundle',
             ]);
+    }
+
+    public function finishView(FormView $view, FormInterface $form, array $options): void
+    {
+        // The form theme writes the `type` variable of a text widget, not its `type`
+        // attribute: a time range needs the variable to be drawn as two time inputs.
+        if ($options['input'] === 'time') {
+            foreach (['from', 'to'] as $bound) {
+                $view[$bound]->vars['type'] = 'time';
+            }
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
