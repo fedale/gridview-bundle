@@ -47,6 +47,15 @@ $gv-scopes: '[data-gridview], [data-gv-scope]';
         background: var(--gv-color-bg-subtle);
         color: var(--gv-color-text-muted);
     }
+
+    // A colour input is a swatch: stretched to the row's width, the browser draws it as a
+    // thin bar. It keeps the height of the text inputs beside it.
+    &[type="color"] {
+        inline-size: 4rem;
+        block-size: 2.5rem;
+        padding: .2rem;
+        cursor: pointer;
+    }
 }
 
 :is(#{$gv-scopes}) :is(input[type="checkbox"], input[type="radio"]) {
@@ -496,6 +505,16 @@ form:has(.gv-form-label.required) .gv-required-note {
     flex-wrap: wrap;
     align-items: center;
     gap: .5rem;
+
+    // While "No color" is ticked, the swatch shows a colour that isn't saved: dim it.
+    &:has(> input[type="checkbox"]:checked) > input[type="color"] {
+        opacity: .4;
+    }
+
+    > .gv-form-label {
+        margin: 0;
+        font-weight: normal;
+    }
 }
 
 // ── Media: the current file(s) of a media control ──────────────────
