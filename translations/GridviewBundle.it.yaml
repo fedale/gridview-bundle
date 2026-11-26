@@ -16,7 +16,9 @@ bulk.update: "Modifica in blocco"
 bulk.delete: "Elimina selezionati"
 bulk.batch_intro: "Modifica in blocco di %count% record. Spunta i campi da applicare."
 
-export.label: "Export"
+export.label: "Esporta"
+
+columns.button: "Colonne"
 
 saved.title: "Ricerche salvate"
 saved.button: "Ricerche"
@@ -102,6 +104,7 @@ realtime.updated: "I dati sono stati aggiornati da un altro utente."
 
 responsive.show_details: "Mostra dettagli"
 grouping.toggle: "Mostra/nascondi record correlati"
+grouping.empty: "Nessun record correlato"
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.

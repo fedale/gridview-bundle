@@ -18,6 +18,8 @@ bulk.batch_intro: "Bulk edit of %count% records. Tick the fields to apply."
 
 export.label: "Export"
 
+columns.button: "Columns"
+
 saved.title: "Saved searches"
 saved.button: "Searches"
 saved.save: "Save current search"
@@ -102,6 +104,7 @@ realtime.updated: "The data was updated by another user."
 
 responsive.show_details: "Show details"
 grouping.toggle: "Toggle related records"
+grouping.empty: "No related records"
 
 # Config-default strings (source-as-key): localize the bundle defaults while
 # letting a custom emptyText/addLabel value pass through untranslated.

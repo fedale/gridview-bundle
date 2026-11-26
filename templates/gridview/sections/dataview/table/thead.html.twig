@@ -30,7 +30,7 @@
                     {% if sortState is not null %}
                     <a href="{{ column.sortUrl }}"
                        class="gv-sort-ind gv-sort-ind--{{ sortState }}"{% if gridview.options.behavior.useTurbo %} data-turbo-action="advance"{% endif %}
-                       aria-label="Ordina"></a>
+                       aria-label="{{ 'sort.title'|trans({}, 'GridviewBundle') }}"></a>
                     {% endif %}
                 </span>
                 {% endif %}
